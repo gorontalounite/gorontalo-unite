@@ -75,6 +75,8 @@ export async function POST(req: NextRequest) {
 
 6. **Bahasa**: Bahasa Indonesia yang baku dan mudah dipahami.
 
+7. **Dilarang keras**: Jangan gunakan emoji, emoticon, atau simbol dekoratif apapun dalam jawaban.
+
 ${!hasRelevantContext ? "⚠️ PERINGATAN: Tidak ada hasil pencarian yang tersedia. Gunakan aturan no. 2 — jawab bahwa data tidak tersedia, JANGAN mengarang." : ""}
 
 ## HASIL PENCARIAN INTERNET (SATU-SATUNYA SUMBER YANG BOLEH DIGUNAKAN):
