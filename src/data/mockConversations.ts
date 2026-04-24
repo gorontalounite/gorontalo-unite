@@ -297,12 +297,9 @@ export const featuredNews = [
 ];
 
 export const suggestedQuestions = [
-  "Apa yang terkenal dari Gorontalo?",
-  "Tempat wisata terbaik di Gorontalo?",
-  "Kuliner khas Gorontalo apa saja?",
-  "Bagaimana cara ke Taman Laut Olele?",
-  "Apa itu kain Karawo?",
-  "Ceritakan sejarah Gorontalo",
-  "Event budaya Gorontalo bulan ini?",
-  "Potensi ekonomi Gorontalo?",
+  "Spot diving dan snorkeling terbaik di Gorontalo?",
+  "Apa makanan khas Gorontalo yang wajib dicoba?",
+  "Ceritakan sejarah dan asal-usul Provinsi Gorontalo",
+  "Peluang investasi dan bisnis apa yang ada di Gorontalo?",
+  "Apa itu kain Karawo dan bagaimana cara membelinya?",
 ];

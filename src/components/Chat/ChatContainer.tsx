@@ -5,7 +5,6 @@ import { suggestedQuestions } from "@/data/mockConversations";
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import InputBar from "./InputBar";
-import ChatHeader from "./ChatHeader";
 import { createClient } from "@/lib/supabase/client";
 import type { User } from "@supabase/supabase-js";
 import Link from "next/link";
@@ -38,6 +37,18 @@ export default function ChatContainer() {
       setUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();
+  }, []);
+
+  // Listen to "new-chat" event from LeftDrawer
+  useEffect(() => {
+    const handler = () => {
+      setConversations([]);
+      setConversationHistory([]);
+      setPendingMessage(null);
+      setNewMessageId(null);
+    };
+    window.addEventListener("new-chat", handler);
+    return () => window.removeEventListener("new-chat", handler);
   }, []);
 
   // Load conversation history from Supabase (if logged in)
@@ -79,8 +90,6 @@ export default function ChatContainer() {
   const handleSend = useCallback(
     async (message: string) => {
       const tempId = Date.now();
-
-      // Show user message immediately, show typing indicator
       setPendingMessage(message);
       setIsTyping(true);
 
@@ -105,7 +114,6 @@ export default function ChatContainer() {
           timestamp: new Date().toISOString(),
         };
 
-        // Clear pending, add full conversation
         setPendingMessage(null);
         setConversations((prev) => [...prev, newConv]);
         setNewMessageId(tempId);
@@ -131,13 +139,6 @@ export default function ChatContainer() {
     [conversationHistory]
   );
 
-  const handleClearHistory = () => {
-    setConversations([]);
-    setConversationHistory([]);
-    setNewMessageId(null);
-    setPendingMessage(null);
-  };
-
   if (!historyLoaded) {
     return (
       <div className="flex-1 flex items-center justify-center">
@@ -150,67 +151,64 @@ export default function ChatContainer() {
 
   return (
     <div className="flex flex-col h-full">
-      <ChatHeader onClearHistory={handleClearHistory} messageCount={conversations.length} />
-
       {/* Messages area */}
       <div className="flex-1 overflow-y-auto py-4 chat-scroll">
         <div className="max-w-3xl mx-auto px-3 sm:px-6 space-y-5">
 
           {/* Welcome state */}
           {isEmpty && (
-            <div className="flex flex-col items-center justify-center py-8 text-center animate-fade-in">
-              <div className="w-14 h-14 bg-gradient-to-br from-[#2D7D46] to-[#1a5c33] rounded-2xl flex items-center justify-center shadow-lg mb-4">
-                <span className="text-white text-xl font-bold">GU</span>
-              </div>
-              <h3 className="text-base font-semibold text-gray-900 mb-1">
+            <div className="flex flex-col items-center justify-center py-10 text-center animate-fade-in">
+              <h3 className="text-base font-semibold text-gray-800 mb-1">
                 Selamat datang di Gorontalo AI
               </h3>
-              <p className="text-xs text-gray-500 max-w-xs mb-4">
-                Didukung oleh Groq LLaMA 3.3 70B dan pencarian web real-time.
+              <p className="text-xs text-gray-400 max-w-xs mb-5">
+                Tanyakan apapun tentang Provinsi Gorontalo — wisata, budaya, kuliner, sejarah, dan lainnya.
               </p>
 
-              {/* Login prompt */}
               {!user && (
-                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 mb-5 text-xs text-amber-700 flex items-center gap-2">
-                  <span>
-                    <Link href="/sign-in" className="font-semibold hover:underline">Masuk</Link> untuk menyimpan riwayat percakapan
-                  </span>
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-2.5 mb-5 text-xs text-amber-700">
+                  <Link href="/sign-in" className="font-semibold hover:underline">Masuk</Link>
+                  {" "}untuk menyimpan riwayat percakapan
                 </div>
               )}
 
-              {/* Suggested questions */}
-              <div className="w-full max-w-md">
-                <p className="text-[11px] text-gray-400 mb-2.5 font-medium uppercase tracking-wide">Pertanyaan populer</p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  {suggestedQuestions.map((q) => (
-                    <button key={q} onClick={() => handleSend(q)}
-                      className="text-left text-xs text-gray-600 bg-white border border-gray-200 hover:border-[#2D7D46] hover:text-[#2D7D46] hover:bg-emerald-50 px-3 py-2.5 rounded-xl transition-all leading-snug">
-                      {q}
-                    </button>
-                  ))}
-                </div>
+              {/* 5 Suggested questions */}
+              <div className="w-full max-w-md space-y-2">
+                {suggestedQuestions.map((q) => (
+                  <button
+                    key={q}
+                    onClick={() => handleSend(q)}
+                    className="w-full text-left text-sm text-gray-600 bg-white border border-gray-200 hover:border-[#2D7D46] hover:text-[#2D7D46] hover:bg-emerald-50 px-4 py-3 rounded-xl transition-all leading-snug"
+                  >
+                    {q}
+                  </button>
+                ))}
               </div>
             </div>
           )}
 
           {/* Conversation list */}
           {conversations.map((conv) => (
-            <MessageBubble key={conv.id} conversation={{
-              id: conv.id,
-              userMessage: conv.userMessage,
-              aiResponse: conv.aiResponse,
-              sources: conv.sources.map((s, i) => ({
-                id: `src-${i}`,
-                title: s.title,
-                url: s.url ?? "#",
-                category: s.category,
-                publishedAt: "",
-              })),
-              timestamp: conv.timestamp,
-            }} isNew={conv.id === newMessageId} />
+            <MessageBubble
+              key={conv.id}
+              conversation={{
+                id: conv.id,
+                userMessage: conv.userMessage,
+                aiResponse: conv.aiResponse,
+                sources: conv.sources.map((s, i) => ({
+                  id: `src-${i}`,
+                  title: s.title,
+                  url: s.url ?? "#",
+                  category: s.category,
+                  publishedAt: "",
+                })),
+                timestamp: conv.timestamp,
+              }}
+              isNew={conv.id === newMessageId}
+            />
           ))}
 
-          {/* Pending user message shown immediately while AI is typing */}
+          {/* Pending user message */}
           {pendingMessage && (
             <div className="flex justify-end px-2 sm:px-0 animate-fade-in">
               <div className="max-w-[80%] sm:max-w-[65%]">
