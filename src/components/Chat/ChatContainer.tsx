@@ -51,6 +51,22 @@ export default function ChatContainer() {
     return () => window.removeEventListener("new-chat", handler);
   }, []);
 
+  // Listen to "load-chat" event — load a specific past conversation
+  useEffect(() => {
+    const handler = (e: Event) => {
+      const conv = (e as CustomEvent<LiveConversation>).detail;
+      setConversations([conv]);
+      setConversationHistory([
+        { role: "user" as const, content: conv.userMessage },
+        { role: "assistant" as const, content: conv.aiResponse },
+      ]);
+      setPendingMessage(null);
+      setNewMessageId(null);
+    };
+    window.addEventListener("load-chat", handler);
+    return () => window.removeEventListener("load-chat", handler);
+  }, []);
+
   // Load conversation history from Supabase (if logged in)
   useEffect(() => {
     if (!user) { setHistoryLoaded(true); return; }

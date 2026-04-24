@@ -68,14 +68,11 @@ export async function POST(req: NextRequest) {
 3. **Jika pertanyaan di luar topik Gorontalo**, tolak dengan sopan:
    "Saya hanya dapat membantu pertanyaan seputar Provinsi Gorontalo. Ada yang ingin Anda ketahui tentang Gorontalo?"
 
-4. **Kutip sumber**: Sebutkan judul dan URL sumber di akhir jawaban dalam format:
-   *Sumber: [judul sumber](URL)*
+4. **Format**: Gunakan bullet points untuk list, bold untuk istilah penting. Jawaban ringkas dan padat, maksimal 300 kata.
 
-5. **Format**: Gunakan bullet points untuk list, bold untuk istilah penting. Jawaban ringkas dan padat, maksimal 300 kata.
+5. **Bahasa**: Bahasa Indonesia yang baku dan mudah dipahami.
 
-6. **Bahasa**: Bahasa Indonesia yang baku dan mudah dipahami.
-
-7. **Dilarang keras**: Jangan gunakan emoji, emoticon, atau simbol dekoratif apapun dalam jawaban.
+6. **Dilarang keras**: Jangan gunakan emoji, emoticon, simbol dekoratif, atau baris "Sumber:" apapun dalam jawaban. Sumber ditampilkan secara terpisah oleh sistem.
 
 ${!hasRelevantContext ? "⚠️ PERINGATAN: Tidak ada hasil pencarian yang tersedia. Gunakan aturan no. 2 — jawab bahwa data tidak tersedia, JANGAN mengarang." : ""}
 

@@ -9,8 +9,17 @@ interface MessageBubbleProps {
   isNew?: boolean;
 }
 
-function parseMarkdown(text: string): string {
+/** Strip "Sumber: ..." lines the model sometimes appends */
+function cleanResponse(text: string): string {
   return text
+    .split("\n")
+    .filter((line) => !line.trim().match(/^\*?Sumber:/i))
+    .join("\n")
+    .trimEnd();
+}
+
+function parseMarkdown(text: string): string {
+  return cleanResponse(text)
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
     .replace(/^• (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
@@ -22,21 +31,43 @@ function parseMarkdown(text: string): string {
 
 export default function MessageBubble({ conversation, isNew = false }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false);
+  const [shared, setShared] = useState(false);
   const [feedback, setFeedback] = useState<"up" | "down" | null>(null);
   const [sourcesOpen, setSourcesOpen] = useState(false);
 
   const handleCopy = () => {
-    navigator.clipboard.writeText(conversation.aiResponse).then(() => {
+    navigator.clipboard.writeText(cleanResponse(conversation.aiResponse)).then(() => {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleShare = async () => {
+    const text = `${conversation.userMessage}\n\n${cleanResponse(conversation.aiResponse)}`;
+    const shareData = {
+      title: "Gorontalo AI",
+      text,
+      url: "https://gorontalounite.com",
+    };
+    try {
+      if (navigator.share && navigator.canShare?.(shareData)) {
+        await navigator.share(shareData);
+      } else {
+        // Fallback: copy full text + link
+        await navigator.clipboard.writeText(`${text}\n\nhttps://gorontalounite.com`);
+        setShared(true);
+        setTimeout(() => setShared(false), 2000);
+      }
+    } catch {
+      // user cancelled share — do nothing
+    }
   };
 
   const hasSources = conversation.sources.length > 0;
 
   return (
     <div className={`space-y-2 ${isNew ? "animate-fade-in" : ""}`}>
-      {/* User Message — right-aligned bubble */}
+      {/* User message */}
       <div className="flex justify-end px-2 sm:px-0">
         <div className="max-w-[80%] sm:max-w-[65%]">
           <div className="bg-[#2D7D46] text-white px-4 py-3 rounded-2xl rounded-tr-sm text-sm leading-relaxed shadow-sm">
@@ -51,13 +82,11 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
         </div>
       </div>
 
-      {/* AI Response — left-aligned bubble, no avatar */}
+      {/* AI response */}
       <div className="flex justify-start px-2 sm:px-0">
         <div className="max-w-[88%] sm:max-w-[78%] space-y-1.5">
-          {/* Label */}
           <p className="text-[11px] text-gray-400 font-medium pl-1">Gorontalo AI</p>
 
-          {/* Bubble */}
           <div className="bg-white border border-gray-100 px-4 py-3 rounded-2xl rounded-tl-sm shadow-sm">
             <div
               className="text-sm text-gray-800 leading-relaxed"
@@ -68,24 +97,22 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
           </div>
 
           {/* Action row */}
-          <div className="flex items-center gap-3 pl-1 flex-wrap">
-            {/* Feedback */}
+          <div className="flex items-center gap-2 pl-1 flex-wrap">
+            {/* Thumbs up */}
             <button
               onClick={() => setFeedback(feedback === "up" ? null : "up")}
-              className={`text-sm transition-all ${
-                feedback === "up" ? "text-[#2D7D46] scale-110" : "text-gray-300 hover:text-gray-500"
-              }`}
+              className={`transition-all ${feedback === "up" ? "text-[#2D7D46] scale-110" : "text-gray-300 hover:text-gray-500"}`}
               title="Jawaban membantu"
             >
               <svg className="w-4 h-4" fill={feedback === "up" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
               </svg>
             </button>
+
+            {/* Thumbs down */}
             <button
               onClick={() => setFeedback(feedback === "down" ? null : "down")}
-              className={`text-sm transition-all ${
-                feedback === "down" ? "text-red-400 scale-110" : "text-gray-300 hover:text-gray-500"
-              }`}
+              className={`transition-all ${feedback === "down" ? "text-red-400 scale-110" : "text-gray-300 hover:text-gray-500"}`}
               title="Jawaban kurang membantu"
             >
               <svg className="w-4 h-4" fill={feedback === "down" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
@@ -96,7 +123,7 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
             {/* Copy */}
             <button
               onClick={handleCopy}
-              className="text-xs text-gray-300 hover:text-gray-500 transition-colors flex items-center gap-1"
+              className="flex items-center gap-1 text-xs text-gray-300 hover:text-gray-500 transition-colors"
               title="Salin jawaban"
             >
               {copied ? (
@@ -116,7 +143,30 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
               )}
             </button>
 
-            {/* Sources toggle — only if sources exist */}
+            {/* Share */}
+            <button
+              onClick={handleShare}
+              className="flex items-center gap-1 text-xs text-gray-300 hover:text-gray-500 transition-colors"
+              title="Bagikan jawaban"
+            >
+              {shared ? (
+                <>
+                  <svg className="w-3.5 h-3.5 text-[#2D7D46]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  <span className="text-[#2D7D46]">Disalin</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                  </svg>
+                  Bagikan
+                </>
+              )}
+            </button>
+
+            {/* Sources toggle */}
             {hasSources && (
               <button
                 onClick={() => setSourcesOpen((v) => !v)}
@@ -125,7 +175,7 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
                 </svg>
-                {sourcesOpen ? "Sembunyikan sumber" : `${conversation.sources.length} sumber`}
+                {sourcesOpen ? "Sembunyikan" : `${conversation.sources.length} sumber`}
                 <svg
                   className={`w-3 h-3 transition-transform ${sourcesOpen ? "rotate-180" : ""}`}
                   fill="none" stroke="currentColor" viewBox="0 0 24 24"
@@ -150,7 +200,7 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
                   <span className="flex-shrink-0 w-4 h-4 bg-gray-200 group-hover:bg-[#2D7D46]/10 rounded-full flex items-center justify-center text-[10px] font-bold text-gray-500 group-hover:text-[#2D7D46] mt-0.5">
                     {i + 1}
                   </span>
-                  <span className="leading-snug line-clamp-2">{source.title}</span>
+                  <span className="leading-snug line-clamp-2 flex-1">{source.title}</span>
                   <svg className="w-3 h-3 flex-shrink-0 ml-auto mt-0.5 opacity-40 group-hover:opacity-100" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                   </svg>
