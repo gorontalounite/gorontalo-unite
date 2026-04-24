@@ -8,16 +8,43 @@ const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY! });
 
 // Keywords that indicate a Gorontalo-specific question
 const GORONTALO_KEYWORDS = [
-  "gorontalo", "limboto", "olele", "karawo", "binte biluhuta",
-  "pohuwato", "bone bolango", "boalemo", "gorut", "hulontalo",
-  "nani wartabone", "djalaluddin", "aloei saboe", "otanaha",
-  "bogani", "tilongkabila", "bolihutuo", "lombongo", "saronde",
-  "polopalo", "moodutu", "ilabulo", "iloni", "curuti",
+  // Province & cities
+  "gorontalo", "hulontalo", "gorut", "limboto", "pohuwato",
+  "bone bolango", "boalemo", "gorontalo utara", "paguyaman",
+  "marisa", "tilamuta", "kwandang", "isimu", "telaga",
+  // Nature & tourism
+  "olele", "bogani", "tilongkabila", "bolihutuo", "lombongo",
+  "otanaha", "torosiaje", "molosipat", "pentadio", "bongo",
+  "danau limboto", "teluk tomini",
+  // Culture & people
+  "karawo", "saronde", "polopalo", "moodutu", "tidi", "pohutu",
+  "nani wartabone", "djalaluddin", "eyato", "hulawa",
+  // Food
+  "binte biluhuta", "ilabulo", "iloni", "curuti", "sate tuna",
+  "binthe", "sagela", "acar, gohu",
+  // Institutions
+  "aloei saboe", "toto kabila", "ung ", "iain sultan amai",
+  "universitas negeri gorontalo",
 ];
 
-function isGorontaloQuery(message: string): boolean {
-  const lower = message.toLowerCase();
-  return GORONTALO_KEYWORDS.some((kw) => lower.includes(kw));
+/**
+ * Detects Gorontalo context from the current message OR recent history.
+ * This handles follow-up questions like "Berapa penduduknya?" after a
+ * Gorontalo conversation — no keyword needed in the current message.
+ */
+function isGorontaloContext(
+  message: string,
+  history: { role: "user" | "assistant"; content: string }[]
+): boolean {
+  const hasKeyword = (text: string) =>
+    GORONTALO_KEYWORDS.some((kw) => text.toLowerCase().includes(kw));
+
+  // 1. Check current message
+  if (hasKeyword(message)) return true;
+
+  // 2. Check recent history (last 6 messages = last 3 exchanges)
+  const recent = history.slice(-6);
+  return recent.some((msg) => hasKeyword(msg.content));
 }
 
 const SHARED_RULES = `
@@ -37,7 +64,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
-    const gorontalo = isGorontaloQuery(message);
+    const gorontalo = isGorontaloContext(message, conversationHistory);
     let contextBlock = "";
     let sources: { title: string; url: string | null; category: string }[] = [];
     let hasContext = false;
