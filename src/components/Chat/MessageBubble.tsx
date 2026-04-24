@@ -18,15 +18,67 @@ function cleanResponse(text: string): string {
     .trimEnd();
 }
 
-function parseMarkdown(text: string): string {
-  return cleanResponse(text)
+/** Inline formatting: bold, italic, inline code */
+function formatInline(text: string): string {
+  return text
     .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
     .replace(/\*(.*?)\*/g, "<em>$1</em>")
-    .replace(/^• (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
-    .replace(/^- (.+)$/gm, '<li class="ml-4 list-disc">$1</li>')
-    .replace(/^(\d+)\. (.+)$/gm, '<li class="ml-4 list-decimal">$2</li>')
-    .replace(/\n\n/g, "</p><p class='mt-2'>")
-    .replace(/\n/g, "<br/>");
+    .replace(/`([^`]+)`/g, '<code class="bg-gray-100 px-1 py-0.5 rounded text-xs font-mono">$1</code>');
+}
+
+/** Full markdown → HTML with proper list wrapping */
+function parseMarkdown(raw: string): string {
+  const lines = cleanResponse(raw).split("\n");
+  const out: string[] = [];
+  let inUl = false;
+  let inOl = false;
+
+  const closeList = () => {
+    if (inUl) { out.push("</ul>"); inUl = false; }
+    if (inOl) { out.push("</ol>"); inOl = false; }
+  };
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+
+    // Empty line → close any open list, add spacing
+    if (!trimmed) {
+      closeList();
+      out.push("<div class='h-2'></div>");
+      continue;
+    }
+
+    // Heading ## / ###
+    const h3 = trimmed.match(/^###\s+(.+)$/);
+    if (h3) { closeList(); out.push(`<p class="font-bold text-gray-900 mt-3 mb-1">${formatInline(h3[1])}</p>`); continue; }
+    const h2 = trimmed.match(/^##\s+(.+)$/);
+    if (h2) { closeList(); out.push(`<p class="font-bold text-gray-900 text-base mt-4 mb-1">${formatInline(h2[1])}</p>`); continue; }
+
+    // Ordered list  1. / 2.
+    const ol = trimmed.match(/^(\d+)\.\s+(.+)$/);
+    if (ol) {
+      if (inUl) { out.push("</ul>"); inUl = false; }
+      if (!inOl) { out.push('<ol class="list-decimal ml-5 mt-1 space-y-1">'); inOl = true; }
+      out.push(`<li class="leading-relaxed">${formatInline(ol[2])}</li>`);
+      continue;
+    }
+
+    // Unordered list  - / • / *
+    const ul = trimmed.match(/^[-•\*]\s+(.+)$/);
+    if (ul) {
+      if (inOl) { out.push("</ol>"); inOl = false; }
+      if (!inUl) { out.push('<ul class="list-disc ml-5 mt-1 space-y-1">'); inUl = true; }
+      out.push(`<li class="leading-relaxed">${formatInline(ul[1])}</li>`);
+      continue;
+    }
+
+    // Regular paragraph
+    closeList();
+    out.push(`<p class="leading-relaxed">${formatInline(trimmed)}</p>`);
+  }
+
+  closeList();
+  return out.join("");
 }
 
 export default function MessageBubble({ conversation, isNew = false }: MessageBubbleProps) {
@@ -91,7 +143,7 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
             <div
               className="text-sm text-gray-800 leading-relaxed"
               dangerouslySetInnerHTML={{
-                __html: `<p class='mt-0'>${parseMarkdown(conversation.aiResponse)}</p>`,
+                __html: parseMarkdown(conversation.aiResponse),
               }}
             />
           </div>

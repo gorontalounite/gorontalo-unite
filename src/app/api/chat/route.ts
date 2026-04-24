@@ -6,6 +6,26 @@ import { createClient } from "@/lib/supabase/server";
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY! });
 
+// Keywords that indicate a Gorontalo-specific question
+const GORONTALO_KEYWORDS = [
+  "gorontalo", "limboto", "olele", "karawo", "binte biluhuta",
+  "pohuwato", "bone bolango", "boalemo", "gorut", "hulontalo",
+  "nani wartabone", "djalaluddin", "aloei saboe", "otanaha",
+  "bogani", "tilongkabila", "bolihutuo", "lombongo", "saronde",
+  "polopalo", "moodutu", "ilabulo", "iloni", "curuti",
+];
+
+function isGorontaloQuery(message: string): boolean {
+  const lower = message.toLowerCase();
+  return GORONTALO_KEYWORDS.some((kw) => lower.includes(kw));
+}
+
+const SHARED_RULES = `
+- Jangan gunakan emoji, emoticon, atau simbol dekoratif apapun.
+- Jangan tulis baris "Sumber:" — sumber ditampilkan terpisah oleh sistem.
+- Format jawaban dengan rapi: gunakan penomoran (1. 2. 3.) untuk langkah/urutan, bullet (-) untuk daftar non-urutan, **teks tebal** untuk istilah penting, *teks miring* untuk penekanan. Pastikan setiap item list berada di baris baru.
+- Bahasa Indonesia yang baku, ringkas, dan mudah dipahami. Maksimal 400 kata.`;
+
 export async function POST(req: NextRequest) {
   try {
     const { message, conversationHistory = [] } = await req.json() as {
@@ -17,70 +37,78 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Message is required" }, { status: 400 });
     }
 
-    // 1. Search web via Tavily — append "Gorontalo" to keep results relevant
-    const searchQuery = message.toLowerCase().includes("gorontalo")
-      ? message
-      : `${message} Gorontalo`;
-
+    const gorontalo = isGorontaloQuery(message);
     let contextBlock = "";
     let sources: { title: string; url: string | null; category: string }[] = [];
-    let hasRelevantContext = false;
+    let hasContext = false;
 
-    try {
-      const tavilyRes = await tavilyClient.search(searchQuery, {
-        searchDepth: "basic",
-        maxResults: 5,
-        includeAnswer: false,
-        includeDomains: [],        // allow all domains
-        excludeDomains: [],
-      });
+    // Only search Tavily for Gorontalo-related queries
+    if (gorontalo) {
+      try {
+        const searchQuery = message.toLowerCase().includes("gorontalo")
+          ? message
+          : `${message} Gorontalo`;
 
-      const results = tavilyRes.results ?? [];
-      hasRelevantContext = results.length > 0;
+        const tavilyRes = await tavilyClient.search(searchQuery, {
+          searchDepth: "basic",
+          maxResults: 5,
+          includeAnswer: false,
+          includeDomains: [],
+          excludeDomains: [],
+        });
 
-      // Build context block from scraped snippets
-      contextBlock = results
-        .map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.content}`)
-        .join("\n\n---\n\n");
+        const results = tavilyRes.results ?? [];
+        hasContext = results.length > 0;
 
-      // Build sources list
-      sources = results.map((r) => ({
-        title: r.title,
-        url: r.url,
-        category: "Web",
-      }));
-    } catch (tavilyErr) {
-      console.error("[/api/chat] Tavily error:", tavilyErr);
-      // Proceed without context — AI will say data unavailable
+        contextBlock = results
+          .map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.content}`)
+          .join("\n\n---\n\n");
+
+        sources = results.map((r) => ({
+          title: r.title,
+          url: r.url,
+          category: "Web",
+        }));
+      } catch (err) {
+        console.error("[/api/chat] Tavily error:", err);
+      }
     }
 
-    // 2. Build system prompt
-    const systemPrompt = `Kamu adalah Gorontalo AI — asisten informasi resmi tentang Provinsi Gorontalo, Indonesia.
+    // Build system prompt based on query type
+    let systemPrompt: string;
 
-## ATURAN KETAT (WAJIB DIIKUTI):
+    if (gorontalo) {
+      // Strict RAG mode — only use search results
+      systemPrompt = `Kamu adalah Gorontalo AI — asisten informasi resmi tentang Provinsi Gorontalo, Indonesia.
 
-1. **HANYA gunakan informasi dari HASIL PENCARIAN di bawah ini.** Jangan pernah mengarang, menebak, atau menggunakan pengetahuan umum yang tidak ada di hasil pencarian.
+## ATURAN KETAT:
 
-2. **Jika informasi TIDAK ADA di hasil pencarian**, jawab dengan jujur:
-   "Maaf, saya tidak menemukan informasi yang akurat tentang hal tersebut. Silakan hubungi Dinas terkait di Gorontalo untuk informasi lebih lanjut."
-   Jangan pernah mengarang jawaban.
+1. **HANYA gunakan informasi dari HASIL PENCARIAN di bawah.** Jangan mengarang atau menebak.
 
-3. **Jika pertanyaan di luar topik Gorontalo**, tolak dengan sopan:
-   "Saya hanya dapat membantu pertanyaan seputar Provinsi Gorontalo. Ada yang ingin Anda ketahui tentang Gorontalo?"
+2. **Jika informasi tidak ada di hasil pencarian**, jawab:
+   "Maaf, saya tidak menemukan informasi yang akurat tentang hal tersebut. Silakan hubungi Dinas terkait di Gorontalo."
 
-4. **Format**: Gunakan bullet points untuk list, bold untuk istilah penting. Jawaban ringkas dan padat, maksimal 300 kata.
+3. ${SHARED_RULES}
 
-5. **Bahasa**: Bahasa Indonesia yang baku dan mudah dipahami.
+${!hasContext ? "⚠️ Tidak ada hasil pencarian. Gunakan aturan no. 2 — jangan mengarang." : ""}
 
-6. **Dilarang keras**: Jangan gunakan emoji, emoticon, simbol dekoratif, atau baris "Sumber:" apapun dalam jawaban. Sumber ditampilkan secara terpisah oleh sistem.
-
-${!hasRelevantContext ? "⚠️ PERINGATAN: Tidak ada hasil pencarian yang tersedia. Gunakan aturan no. 2 — jawab bahwa data tidak tersedia, JANGAN mengarang." : ""}
-
-## HASIL PENCARIAN INTERNET (SATU-SATUNYA SUMBER YANG BOLEH DIGUNAKAN):
+## HASIL PENCARIAN:
 
 ${contextBlock || "Tidak ada hasil pencarian."}`;
+    } else {
+      // General knowledge mode — use LLM freely
+      systemPrompt = `Kamu adalah Gorontalo AI — asisten AI yang membantu menjawab berbagai pertanyaan.
 
-    // 3. Build messages
+Kamu ahli tentang Provinsi Gorontalo, tetapi juga mampu menjawab pertanyaan umum seperti teknologi, sains, bisnis, pendidikan, kesehatan, dan topik lainnya berdasarkan pengetahuanmu.
+
+## ATURAN:
+
+1. Jawab pertanyaan dengan jelas, akurat, dan berdasarkan pengetahuanmu.
+2. Jika ada keterkaitan dengan Gorontalo, sebutkan.
+3. ${SHARED_RULES}`;
+    }
+
+    // Build messages
     const messages: Groq.Chat.ChatCompletionMessageParam[] = [
       { role: "system", content: systemPrompt },
       ...conversationHistory.slice(-6).map((m) => ({
@@ -90,22 +118,20 @@ ${contextBlock || "Tidak ada hasil pencarian."}`;
       { role: "user", content: message },
     ];
 
-    // 4. Call Groq
+    // Call Groq
     const completion = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       messages,
       max_tokens: 800,
-      temperature: 0.1,
+      temperature: gorontalo ? 0.1 : 0.4,
     });
 
     const aiResponse =
       completion.choices[0]?.message?.content ?? "Maaf, terjadi kesalahan. Coba lagi.";
 
-    // 5. Save conversation (if user is logged in)
+    // Save conversation (if logged in)
     const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const { data: { user } } = await supabase.auth.getUser();
     if (user) {
       await supabase.from("conversations").insert({
         user_id: user.id,
