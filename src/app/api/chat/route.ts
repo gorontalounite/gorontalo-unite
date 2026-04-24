@@ -42,36 +42,36 @@ export async function POST(req: NextRequest) {
     let sources: { title: string; url: string | null; category: string }[] = [];
     let hasContext = false;
 
-    // Only search Tavily for Gorontalo-related queries
-    if (gorontalo) {
-      try {
-        const searchQuery = message.toLowerCase().includes("gorontalo")
-          ? message
-          : `${message} Gorontalo`;
+    // Always search Tavily — every factual question needs real sources.
+    // Gorontalo queries: append "Gorontalo" so results stay local-focused.
+    // General queries: search as-is so the AI has cited evidence, not just training memory.
+    try {
+      const searchQuery = gorontalo && !message.toLowerCase().includes("gorontalo")
+        ? `${message} Gorontalo`
+        : message;
 
-        const tavilyRes = await tavilyClient.search(searchQuery, {
-          searchDepth: "basic",
-          maxResults: 5,
-          includeAnswer: false,
-          includeDomains: [],
-          excludeDomains: [],
-        });
+      const tavilyRes = await tavilyClient.search(searchQuery, {
+        searchDepth: "basic",
+        maxResults: 5,
+        includeAnswer: false,
+        includeDomains: [],
+        excludeDomains: [],
+      });
 
-        const results = tavilyRes.results ?? [];
-        hasContext = results.length > 0;
+      const results = tavilyRes.results ?? [];
+      hasContext = results.length > 0;
 
-        contextBlock = results
-          .map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.content}`)
-          .join("\n\n---\n\n");
+      contextBlock = results
+        .map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.content}`)
+        .join("\n\n---\n\n");
 
-        sources = results.map((r) => ({
-          title: r.title,
-          url: r.url,
-          category: "Web",
-        }));
-      } catch (err) {
-        console.error("[/api/chat] Tavily error:", err);
-      }
+      sources = results.map((r) => ({
+        title: r.title,
+        url: r.url,
+        category: "Web",
+      }));
+    } catch (err) {
+      console.error("[/api/chat] Tavily error:", err);
     }
 
     // Build system prompt based on query type
@@ -93,16 +93,19 @@ export async function POST(req: NextRequest) {
 
 ${hasContext ? "## HASIL PENCARIAN (gunakan jika relevan):\n\n" + contextBlock : "## CATATAN: Tidak ada hasil pencarian. Jawab berdasarkan pengetahuanmu."}`;
     } else {
-      // General knowledge mode — use LLM freely
+      // General knowledge mode — search results available, supplement with LLM
       systemPrompt = `Kamu adalah Gorontalo AI — asisten AI yang membantu menjawab berbagai pertanyaan.
 
-Kamu ahli tentang Provinsi Gorontalo, tetapi juga mampu menjawab pertanyaan umum seperti teknologi, sains, bisnis, pendidikan, kesehatan, dan topik lainnya berdasarkan pengetahuanmu.
+Kamu ahli tentang Provinsi Gorontalo, tetapi juga mampu menjawab pertanyaan umum berdasarkan hasil pencarian web di bawah ini.
 
 ## ATURAN:
 
-1. Jawab pertanyaan dengan jelas, akurat, dan berdasarkan pengetahuanmu.
-2. Jika ada keterkaitan dengan Gorontalo, sebutkan.
-3. ${SHARED_RULES}`;
+1. **Utamakan informasi dari HASIL PENCARIAN** di bawah jika tersedia dan relevan.
+2. Jika hasil pencarian tidak relevan atau kosong, jawab berdasarkan pengetahuanmu.
+3. Jika kamu benar-benar tidak tahu, katakan jujur: "Saya tidak memiliki informasi yang cukup tentang ini."
+4. ${SHARED_RULES}
+
+${hasContext ? "## HASIL PENCARIAN:\n\n" + contextBlock : "## CATATAN: Tidak ada hasil pencarian. Jawab berdasarkan pengetahuanmu."}`;
     }
 
     // Build messages
