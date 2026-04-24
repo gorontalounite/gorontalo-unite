@@ -75,30 +75,23 @@ export default function ChatContainer() {
     return () => window.removeEventListener("load-chat", handler);
   }, []);
 
-  // Load conversation history from Supabase (if logged in)
+  // Load recent history for AI context ONLY — do not display old messages.
+  // UI always starts fresh; past chats are accessible via the left drawer.
   useEffect(() => {
     if (!user) { setHistoryLoaded(true); return; }
     const supabase = createClient();
     supabase
       .from("conversations")
-      .select("id, user_message, ai_response, sources, created_at")
+      .select("user_message, ai_response")
       .eq("user_id", user.id)
       .order("created_at", { ascending: false })
-      .limit(20)
+      .limit(10)
       .then(({ data }) => {
         if (data) {
-          const reversed = [...data].reverse().map((c, i) => ({
-            id: i,
-            userMessage: c.user_message,
-            aiResponse: c.ai_response,
-            sources: (c.sources as unknown as { title: string; url: string | null; category: string }[]) ?? [],
-            timestamp: c.created_at,
-          }));
-          setConversations(reversed);
           setConversationHistory(
-            reversed.flatMap((c) => [
-              { role: "user" as const, content: c.userMessage },
-              { role: "assistant" as const, content: c.aiResponse },
+            [...data].reverse().flatMap((c) => [
+              { role: "user" as const, content: c.user_message },
+              { role: "assistant" as const, content: c.ai_response },
             ]).slice(-12)
           );
         }

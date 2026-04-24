@@ -76,6 +76,7 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
 
   const handleNewChat = () => {
     window.dispatchEvent(new Event("new-chat"));
+    router.push("/");
     onClose();
   };
 

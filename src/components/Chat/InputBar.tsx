@@ -65,7 +65,7 @@ export default function InputBar({ onSend, isLoading = false }: InputBarProps) {
             placeholder="Tanyakan apapun tentang Gorontalo..."
             rows={1}
             disabled={isLoading}
-            className="flex-1 bg-transparent text-sm text-gray-800 placeholder-gray-400 resize-none outline-none leading-relaxed py-1 min-h-[28px] max-h-[120px] disabled:opacity-50"
+            className="flex-1 bg-transparent text-[16px] sm:text-sm text-gray-800 placeholder-gray-400 resize-none outline-none leading-relaxed py-1 min-h-[28px] max-h-[120px] disabled:opacity-50"
           />
 
           {/* Send button */}
