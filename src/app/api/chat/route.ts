@@ -49,9 +49,11 @@ function isGorontaloContext(
 
 const SHARED_RULES = `
 - Jangan gunakan emoji, emoticon, atau simbol dekoratif apapun.
-- Jangan tulis baris "Sumber:" — sumber ditampilkan terpisah oleh sistem.
-- Format jawaban dengan rapi: gunakan penomoran (1. 2. 3.) untuk langkah/urutan, bullet (-) untuk daftar non-urutan, **teks tebal** untuk istilah penting, *teks miring* untuk penekanan. Pastikan setiap item list berada di baris baru.
-- Bahasa Indonesia yang baku, ringkas, dan mudah dipahami. Maksimal 400 kata.`;
+- Jangan tulis baris "Sumber:" dalam jawaban — sistem menampilkannya secara terpisah.
+- Jangan menyebut "berdasarkan hasil pencarian saya" atau frase sejenisnya.
+- Format jawaban dengan rapi: penomoran (1. 2. 3.) untuk langkah/urutan, bullet (-) untuk daftar, **teks tebal** untuk istilah penting, *teks miring* untuk penekanan. Setiap item list di baris baru.
+- Bahasa Indonesia baku, ringkas, maksimal 400 kata.
+- Jika tidak memiliki informasi yang cukup, cukup katakan "Saya tidak memiliki informasi yang cukup tentang hal ini." — jangan mengarang dan jangan minta hubungi Dinas kecuali pertanyaan memang tentang prosedur pemerintahan.`;
 
 export async function POST(req: NextRequest) {
   try {
@@ -79,19 +81,26 @@ export async function POST(req: NextRequest) {
 
       const tavilyRes = await tavilyClient.search(searchQuery, {
         searchDepth: "basic",
-        maxResults: 5,
+        maxResults: 7,          // fetch more, then filter down
         includeAnswer: false,
         includeDomains: [],
         excludeDomains: [],
       });
 
-      const results = tavilyRes.results ?? [];
+      // Only keep results with relevance score >= 0.45
+      // Low-score results are usually generic/unrelated pages
+      const MIN_SCORE = 0.45;
+      const results = (tavilyRes.results ?? [])
+        .filter((r) => (r.score ?? 0) >= MIN_SCORE)
+        .slice(0, 5);
+
       hasContext = results.length > 0;
 
       contextBlock = results
         .map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.content}`)
         .join("\n\n---\n\n");
 
+      // Only expose sources to the UI if they passed the relevance filter
       sources = results.map((r) => ({
         title: r.title,
         url: r.url,
