@@ -1,8 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
 
 const navLinks = [
   { href: "/", label: "Home" },
@@ -14,7 +16,40 @@ const navLinks = [
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
+
+  useEffect(() => {
+    const supabase = createClient();
+    supabase.auth.getUser().then(async ({ data: { user } }) => {
+      setUser(user);
+      if (user) {
+        const { data } = await supabase
+          .from("user_profiles")
+          .select("role")
+          .eq("id", user.id)
+          .single();
+        setIsAdmin(data?.role === "admin" || data?.role === "editor");
+      }
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (!session?.user) setIsAdmin(false);
+    });
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleLogout = async () => {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    setUser(null);
+    setIsAdmin(false);
+    router.push("/");
+    router.refresh();
+  };
 
   return (
     <nav className="bg-white border-b border-gray-100 sticky top-0 z-50 shadow-sm">
@@ -45,20 +80,69 @@ export default function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {isAdmin && (
+              <Link
+                href="/admin/articles"
+                className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                  pathname.startsWith("/admin")
+                    ? "bg-amber-100 text-amber-700"
+                    : "text-amber-600 hover:bg-amber-50"
+                }`}
+              >
+                Admin
+              </Link>
+            )}
           </div>
 
-          {/* Right actions */}
+          {/* Right: Auth */}
           <div className="flex items-center gap-2">
-            {/* Search */}
-            <button
-              className="hidden sm:flex items-center gap-2 text-sm text-gray-400 bg-gray-50 border border-gray-200 rounded-lg px-3 py-1.5 hover:border-gray-300 transition-colors"
-              aria-label="Cari berita"
-            >
-              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-              <span className="text-xs">Cari...</span>
-            </button>
+            {user ? (
+              <div className="relative">
+                <button
+                  onClick={() => setUserMenuOpen((v) => !v)}
+                  className="flex items-center gap-2 text-sm text-gray-700 hover:text-gray-900 bg-gray-50 border border-gray-200 rounded-xl px-3 py-1.5 transition-colors"
+                >
+                  <div className="w-5 h-5 bg-[#2D7D46] rounded-full flex items-center justify-center">
+                    <span className="text-white text-xs font-bold">
+                      {(user.email ?? "U")[0].toUpperCase()}
+                    </span>
+                  </div>
+                  <span className="hidden sm:inline max-w-24 truncate text-xs">
+                    {user.email}
+                  </span>
+                  <svg className="w-3 h-3 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                {userMenuOpen && (
+                  <div className="absolute right-0 mt-1 w-44 bg-white border border-gray-100 rounded-xl shadow-lg py-1 z-50">
+                    {isAdmin && (
+                      <Link
+                        href="/admin/articles"
+                        onClick={() => setUserMenuOpen(false)}
+                        className="block px-4 py-2 text-xs text-amber-700 hover:bg-amber-50 font-medium"
+                      >
+                        🛠 Admin Dashboard
+                      </Link>
+                    )}
+                    <button
+                      onClick={() => { setUserMenuOpen(false); handleLogout(); }}
+                      className="w-full text-left px-4 py-2 text-xs text-red-500 hover:bg-red-50"
+                    >
+                      Keluar
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <Link
+                href="/sign-in"
+                className="text-sm font-medium text-white bg-[#2D7D46] px-3 py-1.5 rounded-xl hover:bg-[#236137] transition-colors"
+              >
+                Masuk
+              </Link>
+            )}
 
             {/* Mobile menu toggle */}
             <button
@@ -97,6 +181,18 @@ export default function Navbar() {
               {link.label}
             </Link>
           ))}
+          {isAdmin && (
+            <Link href="/admin/articles" onClick={() => setMenuOpen(false)}
+              className="block px-3 py-2.5 rounded-lg text-sm font-medium text-amber-600 hover:bg-amber-50">
+              🛠 Admin Dashboard
+            </Link>
+          )}
+          {user && (
+            <button onClick={handleLogout}
+              className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50">
+              Keluar
+            </button>
+          )}
         </div>
       )}
     </nav>

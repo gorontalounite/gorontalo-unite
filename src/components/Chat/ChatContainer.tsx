@@ -1,148 +1,181 @@
 "use client";
 
 import { useState, useEffect, useRef, useCallback } from "react";
-import { mockConversations, suggestedQuestions, Conversation } from "@/data/mockConversations";
+import { suggestedQuestions } from "@/data/mockConversations";
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import InputBar from "./InputBar";
 import ChatHeader from "./ChatHeader";
+import { createClient } from "@/lib/supabase/client";
+import type { User } from "@supabase/supabase-js";
+import Link from "next/link";
 
-const STORAGE_KEY = "gorontalo-chat-history";
+export interface LiveConversation {
+  id: number;
+  userMessage: string;
+  aiResponse: string;
+  sources: { title: string; url: string | null; category: string }[];
+  timestamp: string;
+}
 
 export default function ChatContainer() {
-  const [conversations, setConversations] = useState<Conversation[]>([]);
+  const [conversations, setConversations] = useState<LiveConversation[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [newMessageId, setNewMessageId] = useState<number | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [user, setUser] = useState<User | null>(null);
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+  const [conversationHistory, setConversationHistory] = useState<
+    { role: "user" | "assistant"; content: string }[]
+  >([]);
   const bottomRef = useRef<HTMLDivElement>(null);
 
-  // Load from localStorage on mount
+  // Auth state
   useEffect(() => {
-    try {
-      const saved = localStorage.getItem(STORAGE_KEY);
-      if (saved) {
-        const parsed = JSON.parse(saved) as Conversation[];
-        setConversations(parsed);
-      }
-    } catch {
-      // ignore parse errors
-    }
-    setIsLoaded(true);
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data: { user } }) => setUser(user));
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_e, session) => {
+      setUser(session?.user ?? null);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
-  // Save to localStorage whenever conversations change
+  // Load conversation history from Supabase (if logged in)
   useEffect(() => {
-    if (!isLoaded) return;
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(conversations));
-    } catch {
-      // ignore storage errors
-    }
-  }, [conversations, isLoaded]);
+    if (!user) { setHistoryLoaded(true); return; }
+    const supabase = createClient();
+    supabase
+      .from("conversations")
+      .select("id, user_message, ai_response, sources, created_at")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+      .limit(20)
+      .then(({ data }) => {
+        if (data) {
+          const reversed = [...data].reverse().map((c, i) => ({
+            id: i,
+            userMessage: c.user_message,
+            aiResponse: c.ai_response,
+            sources: (c.sources as unknown as { title: string; url: string | null; category: string }[]) ?? [],
+            timestamp: c.created_at,
+          }));
+          setConversations(reversed);
+          // Build conversation history for context
+          setConversationHistory(
+            reversed.flatMap((c) => [
+              { role: "user" as const, content: c.userMessage },
+              { role: "assistant" as const, content: c.aiResponse },
+            ]).slice(-12)
+          );
+        }
+        setHistoryLoaded(true);
+      });
+  }, [user]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [conversations, isTyping]);
 
-  const findResponse = useCallback((query: string): Conversation | null => {
-    const q = query.toLowerCase();
-    return (
-      mockConversations.find((c) =>
-        c.userMessage.toLowerCase().includes(q.split(" ")[0]) ||
-        q.includes(c.userMessage.toLowerCase().split(" ")[0])
-      ) ?? null
-    );
-  }, []);
-
   const handleSend = useCallback(
-    (message: string) => {
+    async (message: string) => {
       const tempId = Date.now();
-      const userOnly: Conversation = {
-        id: tempId,
-        userMessage: message,
-        aiResponse: "",
-        sources: [],
-        timestamp: new Date().toISOString(),
-      };
-
       setIsTyping(true);
 
-      setTimeout(() => {
-        const match = findResponse(message);
-        const response: Conversation = match
-          ? {
-              ...match,
-              id: tempId,
-              userMessage: message,
-              timestamp: new Date().toISOString(),
-            }
-          : {
-              id: tempId,
-              userMessage: message,
-              aiResponse:
-                "Terima kasih atas pertanyaan Anda tentang Gorontalo! Saat ini saya sedang belajar lebih banyak tentang topik ini. Coba tanyakan tentang wisata, kuliner, budaya, sejarah, atau ekonomi Gorontalo — saya siap membantu! 🌟",
-              sources: [],
-              timestamp: new Date().toISOString(),
-            };
+      try {
+        const res = await fetch("/api/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message, conversationHistory }),
+        });
 
-        setConversations((prev) => [...prev, response]);
+        const data = await res.json() as {
+          response?: string;
+          sources?: { title: string; url: string | null; category: string }[];
+          error?: string;
+        };
+
+        const newConv: LiveConversation = {
+          id: tempId,
+          userMessage: message,
+          aiResponse: data.response ?? "Maaf, terjadi kesalahan. Coba lagi.",
+          sources: data.sources ?? [],
+          timestamp: new Date().toISOString(),
+        };
+
+        setConversations((prev) => [...prev, newConv]);
         setNewMessageId(tempId);
+        setConversationHistory((prev) => [
+          ...prev,
+          { role: "user" as const, content: message },
+          { role: "assistant" as const, content: newConv.aiResponse },
+        ].slice(-12));
+      } catch {
+        const errorConv: LiveConversation = {
+          id: tempId,
+          userMessage: message,
+          aiResponse: "Koneksi gagal. Pastikan internet Anda aktif dan coba lagi.",
+          sources: [],
+          timestamp: new Date().toISOString(),
+        };
+        setConversations((prev) => [...prev, errorConv]);
+      } finally {
         setIsTyping(false);
-      }, 1200 + Math.random() * 800);
-
-      // Show user message immediately (without AI response yet — typing indicator covers this)
-      void userOnly;
+      }
     },
-    [findResponse]
+    [conversationHistory]
   );
-
-  const handleSuggestedQuestion = (question: string) => {
-    handleSend(question);
-  };
 
   const handleClearHistory = () => {
     setConversations([]);
+    setConversationHistory([]);
     setNewMessageId(null);
-    try {
-      localStorage.removeItem(STORAGE_KEY);
-    } catch {
-      // ignore
-    }
   };
+
+  if (!historyLoaded) {
+    return (
+      <div className="flex-1 flex items-center justify-center">
+        <div className="w-6 h-6 border-2 border-[#2D7D46] border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-full">
       <ChatHeader onClearHistory={handleClearHistory} messageCount={conversations.length} />
 
       {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 space-y-6">
+      <div className="flex-1 overflow-y-auto px-4 py-4 sm:px-6 space-y-6 chat-scroll">
         <div className="max-w-4xl mx-auto space-y-6">
           {/* Welcome state */}
           {conversations.length === 0 && !isTyping && (
-            <div className="flex flex-col items-center justify-center py-12 text-center animate-fade-in">
+            <div className="flex flex-col items-center justify-center py-10 text-center animate-fade-in">
               <div className="w-16 h-16 bg-gradient-to-br from-[#2D7D46] to-[#1a5c33] rounded-2xl flex items-center justify-center shadow-lg mb-4">
                 <span className="text-white text-2xl font-bold">GU</span>
               </div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">
                 Selamat datang di Gorontalo AI
               </h3>
-              <p className="text-sm text-gray-500 max-w-md mb-8">
-                Tanyakan apapun tentang Gorontalo — wisata, kuliner, budaya, sejarah, layanan publik, dan banyak lagi.
+              <p className="text-sm text-gray-500 max-w-md mb-2">
+                Didukung oleh Groq LLaMA 3.3 70B dan knowledge base lokal Gorontalo.
               </p>
+
+              {/* Login prompt */}
+              {!user && (
+                <div className="bg-amber-50 border border-amber-100 rounded-xl px-4 py-3 mb-6 text-sm text-amber-700 flex items-center gap-2">
+                  <span>💡</span>
+                  <span>
+                    <Link href="/sign-in" className="font-semibold hover:underline">Masuk</Link> untuk menyimpan riwayat percakapan
+                  </span>
+                </div>
+              )}
 
               {/* Suggested questions */}
               <div className="w-full max-w-lg">
-                <p className="text-xs text-gray-400 mb-3 font-medium uppercase tracking-wide">
-                  Pertanyaan populer
-                </p>
+                <p className="text-xs text-gray-400 mb-3 font-medium uppercase tracking-wide">Pertanyaan populer</p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   {suggestedQuestions.map((q) => (
-                    <button
-                      key={q}
-                      onClick={() => handleSuggestedQuestion(q)}
-                      className="text-left text-sm text-gray-600 bg-white border border-gray-200 hover:border-[#2D7D46] hover:text-[#2D7D46] hover:bg-emerald-50 px-3 py-2.5 rounded-xl transition-all text-sm leading-snug"
-                    >
+                    <button key={q} onClick={() => handleSend(q)}
+                      className="text-left text-sm text-gray-600 bg-white border border-gray-200 hover:border-[#2D7D46] hover:text-[#2D7D46] hover:bg-emerald-50 px-3 py-2.5 rounded-xl transition-all leading-snug">
                       {q}
                     </button>
                   ))}
@@ -151,23 +184,22 @@ export default function ChatContainer() {
             </div>
           )}
 
-          {/* Conversation history */}
+          {/* Conversation list */}
           {conversations.map((conv) => (
-            <MessageBubble
-              key={conv.id}
-              conversation={conv}
-              isNew={conv.id === newMessageId}
-            />
+            <MessageBubble key={conv.id} conversation={{
+              id: conv.id, userMessage: conv.userMessage, aiResponse: conv.aiResponse,
+              sources: conv.sources.map((s, i) => ({
+                id: `src-${i}`, title: s.title, url: s.url ?? "#", category: s.category, publishedAt: ""
+              })),
+              timestamp: conv.timestamp,
+            }} isNew={conv.id === newMessageId} />
           ))}
 
-          {/* Typing indicator */}
           {isTyping && <TypingIndicator />}
-
           <div ref={bottomRef} />
         </div>
       </div>
 
-      {/* Input bar */}
       <InputBar onSend={handleSend} isLoading={isTyping} />
     </div>
   );
