@@ -296,10 +296,30 @@ export const featuredNews = [
   },
 ];
 
+/** Full pool — 5 random picks are shown each session */
 export const suggestedQuestions = [
+  // Wisata
   "Spot diving dan snorkeling terbaik di Gorontalo?",
+  "Apa saja destinasi wisata alam yang wajib dikunjungi di Gorontalo?",
+  "Bagaimana cara menuju Taman Laut Olele dari pusat kota?",
+  "Ada air terjun atau pantai tersembunyi di Gorontalo?",
+  // Kuliner
   "Apa makanan khas Gorontalo yang wajib dicoba?",
-  "Ceritakan sejarah dan asal-usul Provinsi Gorontalo",
-  "Peluang investasi dan bisnis apa yang ada di Gorontalo?",
+  "Di mana tempat makan terbaik di Kota Gorontalo?",
+  "Apa itu Binte Biluhuta dan bagaimana cara membuatnya?",
+  // Budaya & Sejarah
   "Apa itu kain Karawo dan bagaimana cara membelinya?",
+  "Ceritakan sejarah dan asal-usul Provinsi Gorontalo",
+  "Apa tradisi dan upacara adat khas masyarakat Gorontalo?",
+  "Mengapa Gorontalo disebut Serambi Madinah?",
+  // Ekonomi & Investasi
+  "Peluang investasi dan bisnis apa yang ada di Gorontalo?",
+  "Apa komoditas unggulan ekspor Gorontalo?",
+  // Pendidikan & Infrastruktur
+  "Universitas terbaik apa yang ada di Gorontalo?",
+  "Bagaimana perkembangan infrastruktur di Gorontalo saat ini?",
+  // Umum
+  "Bagaimana cuaca dan iklim di Gorontalo sepanjang tahun?",
+  "Apa event budaya dan festival tahunan di Gorontalo?",
+  "Bagaimana kondisi layanan kesehatan di Gorontalo?",
 ];

@@ -1,7 +1,12 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef, useCallback, useMemo } from "react";
 import { suggestedQuestions } from "@/data/mockConversations";
+
+function pickRandom<T>(arr: T[], n: number): T[] {
+  const shuffled = [...arr].sort(() => Math.random() - 0.5);
+  return shuffled.slice(0, n);
+}
 import MessageBubble from "./MessageBubble";
 import TypingIndicator from "./TypingIndicator";
 import InputBar from "./InputBar";
@@ -28,6 +33,9 @@ export default function ChatContainer() {
     { role: "user" | "assistant"; content: string }[]
   >([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Pick 5 random questions once per mount — different every session/refresh
+  const randomQuestions = useMemo(() => pickRandom(suggestedQuestions, 5), []);
 
   // Auth state
   useEffect(() => {
@@ -188,9 +196,9 @@ export default function ChatContainer() {
                 </div>
               )}
 
-              {/* 5 Suggested questions */}
+              {/* 5 random suggested questions */}
               <div className="w-full max-w-md space-y-2">
-                {suggestedQuestions.map((q) => (
+                {randomQuestions.map((q) => (
                   <button
                     key={q}
                     onClick={() => handleSend(q)}
