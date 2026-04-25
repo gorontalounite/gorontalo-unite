@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -13,22 +14,19 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in?redirect=/admin/articles");
 
-  // Use SECURITY DEFINER function — bypasses RLS, always returns correct role
-  const { data: roleData } = await supabase.rpc("get_my_role");
-  const role = roleData as string | null;
-
-  if (!role || !["admin", "editor"].includes(role)) {
-    redirect("/?error=unauthorized");
-  }
-
-  // Fetch display name separately (best-effort, no redirect if it fails)
-  const { data: profileRaw } = await supabase
+  // Use service role (admin) client — bypasses RLS entirely, always reliable
+  const adminClient = createAdminClient();
+  const { data: profileRaw } = await adminClient
     .from("user_profiles")
-    .select("full_name")
+    .select("role, full_name")
     .eq("id", user.id)
     .single();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const profile = { role, full_name: (profileRaw as any)?.full_name ?? null };
+  const profile = profileRaw as any as { role: string; full_name: string | null } | null;
+
+  if (!profile || !["admin", "editor"].includes(profile.role)) {
+    redirect("/?error=unauthorized");
+  }
 
   return (
     <div className="flex flex-1 min-h-0">

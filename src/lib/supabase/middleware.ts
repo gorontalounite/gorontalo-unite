@@ -25,26 +25,9 @@ export async function updateSession(request: NextRequest) {
     }
   );
 
-  const { data: { user } } = await supabase.auth.getUser();
-
-  // Protect /admin and /myrag routes (admin/editor only)
-  const isProtected =
-    request.nextUrl.pathname.startsWith("/admin") ||
-    request.nextUrl.pathname.startsWith("/myrag");
-
-  if (isProtected) {
-    if (!user) {
-      const redirectPath = request.nextUrl.pathname;
-      return NextResponse.redirect(new URL(`/sign-in?redirect=${redirectPath}`, request.url));
-    }
-    // Use SECURITY DEFINER function — bypasses RLS, reliable in edge context
-    const { data: roleData } = await supabase.rpc("get_my_role");
-    const role = roleData as string | null;
-
-    if (!role || !["admin", "editor"].includes(role)) {
-      return NextResponse.redirect(new URL("/?error=unauthorized", request.url));
-    }
-  }
+  // Refresh session — this keeps the auth token alive and sets cookies
+  // Role-based access control is handled in each layout, not here
+  await supabase.auth.getUser();
 
   return supabaseResponse;
 }
