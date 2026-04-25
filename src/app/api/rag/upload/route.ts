@@ -112,6 +112,8 @@ export async function POST(req: NextRequest) {
     const chunks = buildChunks(elements, file.name);
 
     let chunksCreated = 0;
+    let savedChunks: { id: string; title: string; content: string }[] = [];
+
     if (chunks.length > 0) {
       const rows = chunks.map((c) => ({
         title: c.title,
@@ -120,12 +122,16 @@ export async function POST(req: NextRequest) {
         source_url: null,
         is_active: true,
       }));
-      const { error: kbError } = await adminClient.from("knowledge_base").insert(rows);
+      const { data: inserted, error: kbError } = await adminClient
+        .from("knowledge_base")
+        .insert(rows)
+        .select("id, title, content");
       if (kbError) {
         console.error("[rag/upload] knowledge_base insert error:", kbError);
         return NextResponse.json({ error: kbError.message }, { status: 500 });
       }
       chunksCreated = rows.length;
+      savedChunks = (inserted ?? []) as { id: string; title: string; content: string }[];
     }
 
     // 5. Record the upload in rag_uploads
@@ -144,6 +150,7 @@ export async function POST(req: NextRequest) {
       filename: file.name,
       elements_processed: elements.length,
       chunks_created: chunksCreated,
+      chunks: savedChunks,
     });
   } catch (err) {
     console.error("[rag/upload] Unexpected error:", err);

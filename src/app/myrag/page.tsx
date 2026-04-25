@@ -15,6 +15,12 @@ interface RagUpload {
   created_at: string;
 }
 
+interface Chunk {
+  id: string;
+  title: string;
+  content: string;
+}
+
 const ACCEPTED_TYPES = [
   "application/pdf",
   "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
@@ -45,11 +51,147 @@ function FileIcon({ type }: { type: string | null }) {
   return <span className="text-gray-400 font-bold text-xs">TXT</span>;
 }
 
+/** Inline chunk editor row */
+function ChunkRow({
+  chunk,
+  index,
+  onSave,
+  onDelete,
+}: {
+  chunk: Chunk;
+  index: number;
+  onSave: (id: string, title: string, content: string) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState(chunk.title);
+  const [content, setContent] = useState(chunk.content);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+
+  const handleSave = async () => {
+    setSaving(true);
+    await onSave(chunk.id, title, content);
+    setSaving(false);
+    setEditing(false);
+  };
+
+  const handleDelete = async () => {
+    setDeleting(true);
+    await onDelete(chunk.id);
+    setDeleting(false);
+  };
+
+  return (
+    <div className="border border-gray-100 rounded-xl bg-white overflow-hidden">
+      {/* Header row */}
+      <div className="flex items-start gap-3 px-4 py-3">
+        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center mt-0.5">
+          {index + 1}
+        </span>
+
+        {editing ? (
+          <input
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="flex-1 text-sm font-medium border border-[#2D7D46] rounded-lg px-2 py-1 outline-none"
+          />
+        ) : (
+          <button
+            onClick={() => setExpanded((v) => !v)}
+            className="flex-1 text-sm font-medium text-gray-800 text-left hover:text-[#2D7D46] transition-colors"
+          >
+            {title || <span className="text-gray-400 italic">Tanpa judul</span>}
+          </button>
+        )}
+
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {!editing && !confirmDelete && (
+            <>
+              <button
+                onClick={() => { setEditing(true); setExpanded(true); }}
+                className="text-xs text-[#2D7D46] hover:underline"
+              >
+                Edit
+              </button>
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="text-xs text-red-400 hover:underline"
+              >
+                Hapus
+              </button>
+            </>
+          )}
+          {confirmDelete && (
+            <span className="flex items-center gap-1 text-xs">
+              <span className="text-gray-500">Hapus?</span>
+              <button
+                onClick={handleDelete}
+                disabled={deleting}
+                className="text-red-500 font-semibold hover:underline disabled:opacity-50"
+              >
+                {deleting ? "..." : "Ya"}
+              </button>
+              <button onClick={() => setConfirmDelete(false)} className="text-gray-400 hover:underline">
+                Batal
+              </button>
+            </span>
+          )}
+          {editing && (
+            <>
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="text-xs text-white bg-[#2D7D46] px-2 py-0.5 rounded-md hover:bg-[#236137] disabled:opacity-50"
+              >
+                {saving ? "Menyimpan..." : "Simpan"}
+              </button>
+              <button
+                onClick={() => { setEditing(false); setTitle(chunk.title); setContent(chunk.content); }}
+                className="text-xs text-gray-400 hover:underline"
+              >
+                Batal
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+
+      {/* Content area */}
+      {(expanded || editing) && (
+        <div className="px-4 pb-4 pl-13 border-t border-gray-50">
+          {editing ? (
+            <textarea
+              value={content}
+              onChange={(e) => setContent(e.target.value)}
+              rows={8}
+              className="w-full mt-3 text-xs font-mono border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#2D7D46] resize-y bg-gray-50"
+            />
+          ) : (
+            <p className="text-xs text-gray-500 mt-2 leading-relaxed whitespace-pre-wrap line-clamp-6">
+              {content}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function MyRagPage() {
   const [dragOver, setDragOver] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState<string>("");
-  const [result, setResult] = useState<{ success?: boolean; error?: string; chunks?: number; elements?: number } | null>(null);
+  const [result, setResult] = useState<{
+    success?: boolean;
+    error?: string;
+    chunks?: number;
+    elements?: number;
+    filename?: string;
+  } | null>(null);
+  const [uploadedChunks, setUploadedChunks] = useState<Chunk[]>([]);
   const [uploads, setUploads] = useState<RagUpload[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(true);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -79,6 +221,7 @@ export default function MyRagPage() {
 
     setUploading(true);
     setResult(null);
+    setUploadedChunks([]);
     setUploadProgress(`Mengunggah ${file.name}...`);
 
     const formData = new FormData();
@@ -86,16 +229,19 @@ export default function MyRagPage() {
 
     try {
       setUploadProgress("Memproses dokumen via Unstructured API...");
-      const res = await fetch("/api/rag/upload", {
-        method: "POST",
-        body: formData,
-      });
+      const res = await fetch("/api/rag/upload", { method: "POST", body: formData });
       const json = await res.json();
 
       if (!res.ok) {
         setResult({ error: json.error ?? `Error ${res.status}` });
       } else {
-        setResult({ success: true, chunks: json.chunks_created, elements: json.elements_processed });
+        setResult({
+          success: true,
+          chunks: json.chunks_created,
+          elements: json.elements_processed,
+          filename: json.filename,
+        });
+        setUploadedChunks(json.chunks ?? []);
         await loadHistory();
       }
     } catch {
@@ -105,6 +251,27 @@ export default function MyRagPage() {
       setUploadProgress("");
       if (fileInputRef.current) fileInputRef.current.value = "";
     }
+  };
+
+  const handleChunkSave = async (id: string, title: string, content: string) => {
+    await fetch("/api/rag/chunk", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id, title, content }),
+    });
+    setUploadedChunks((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, title, content } : c))
+    );
+  };
+
+  const handleChunkDelete = async (id: string) => {
+    await fetch("/api/rag/chunk", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id }),
+    });
+    setUploadedChunks((prev) => prev.filter((c) => c.id !== id));
+    setResult((prev) => prev ? { ...prev, chunks: (prev.chunks ?? 1) - 1 } : prev);
   };
 
   const onDrop = useCallback((e: React.DragEvent) => {
@@ -117,7 +284,6 @@ export default function MyRagPage() {
 
   const onDragOver = (e: React.DragEvent) => { e.preventDefault(); setDragOver(true); };
   const onDragLeave = () => setDragOver(false);
-
   const onInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) handleFile(file);
@@ -180,7 +346,9 @@ export default function MyRagPage() {
       {/* Result banner */}
       {result && (
         <div className={`mt-4 px-4 py-3 rounded-xl text-sm flex items-start gap-3 ${
-          result.success ? "bg-emerald-50 border border-emerald-200 text-emerald-800" : "bg-red-50 border border-red-200 text-red-700"
+          result.success
+            ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+            : "bg-red-50 border border-red-200 text-red-700"
         }`}>
           {result.success ? (
             <>
@@ -188,9 +356,12 @@ export default function MyRagPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
               <div>
-                <p className="font-semibold">Upload berhasil!</p>
+                <p className="font-semibold">Upload berhasil — {result.filename}</p>
                 <p className="text-xs mt-0.5">
-                  {result.elements} elemen diproses &rarr; {result.chunks} chunk tersimpan ke Knowledge Base.
+                  {result.elements} elemen diproses &rarr; <strong>{result.chunks}</strong> chunk tersimpan ke Knowledge Base.
+                  {result.chunks !== result.elements && (
+                    <span className="text-emerald-600"> (elemen pendek/duplikat difilter otomatis)</span>
+                  )}
                 </p>
               </div>
             </>
@@ -205,7 +376,40 @@ export default function MyRagPage() {
               </div>
             </>
           )}
-          <button onClick={() => setResult(null)} className="ml-auto flex-shrink-0 text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+          <button onClick={() => { setResult(null); setUploadedChunks([]); }} className="ml-auto flex-shrink-0 text-gray-400 hover:text-gray-600 text-lg leading-none">&times;</button>
+        </div>
+      )}
+
+      {/* Chunk review panel — shown after successful upload */}
+      {uploadedChunks.length > 0 && (
+        <div className="mt-6">
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-800">Review & Edit Chunks</h2>
+              <p className="text-xs text-gray-400 mt-0.5">
+                {uploadedChunks.length} chunk tersimpan. Klik judul untuk lihat isi, atau Edit untuk ubah konten.
+              </p>
+            </div>
+            <span className="text-xs bg-emerald-100 text-emerald-700 font-medium px-2 py-0.5 rounded-full">
+              {uploadedChunks.length} chunk
+            </span>
+          </div>
+
+          <div className="space-y-2">
+            {uploadedChunks.map((chunk, i) => (
+              <ChunkRow
+                key={chunk.id}
+                chunk={chunk}
+                index={i}
+                onSave={handleChunkSave}
+                onDelete={handleChunkDelete}
+              />
+            ))}
+          </div>
+
+          <p className="text-xs text-gray-400 mt-3 text-center">
+            Perubahan langsung tersimpan ke Knowledge Base dan langsung digunakan AI.
+          </p>
         </div>
       )}
 
