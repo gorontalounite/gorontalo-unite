@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 export const maxDuration = 60; // allow up to 60s for large files
 
@@ -54,11 +55,13 @@ function buildChunks(
 export async function POST(req: NextRequest) {
   try {
     // 1. Auth — admin / editor only
+    // Use server client only to read the session cookie; use admin client for DB (bypasses RLS)
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-    const { data: profileRaw } = await supabase
+    const adminClient = createAdminClient();
+    const { data: profileRaw } = await adminClient
       .from("user_profiles")
       .select("role")
       .eq("id", user.id)
@@ -117,7 +120,7 @@ export async function POST(req: NextRequest) {
         source_url: null,
         is_active: true,
       }));
-      const { error: kbError } = await supabase.from("knowledge_base").insert(rows);
+      const { error: kbError } = await adminClient.from("knowledge_base").insert(rows);
       if (kbError) {
         console.error("[rag/upload] knowledge_base insert error:", kbError);
         return NextResponse.json({ error: kbError.message }, { status: 500 });
@@ -126,7 +129,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Record the upload in rag_uploads
-    await supabase.from("rag_uploads").insert({
+    await adminClient.from("rag_uploads").insert({
       filename: file.name,
       file_type: file.type || file.name.split(".").pop(),
       file_size: file.size,
