@@ -27,12 +27,17 @@ export async function updateSession(request: NextRequest) {
 
   const { data: { user } } = await supabase.auth.getUser();
 
-  // Protect /admin routes
-  if (request.nextUrl.pathname.startsWith("/admin")) {
+  // Protect /admin and /myrag routes (admin/editor only)
+  const isProtected =
+    request.nextUrl.pathname.startsWith("/admin") ||
+    request.nextUrl.pathname.startsWith("/myrag");
+
+  if (isProtected) {
     if (!user) {
-      return NextResponse.redirect(new URL("/sign-in?redirect=/admin", request.url));
+      const redirectPath = request.nextUrl.pathname;
+      return NextResponse.redirect(new URL(`/sign-in?redirect=${redirectPath}`, request.url));
     }
-    // Check admin role
+    // Check admin/editor role
     const { data: profileRaw } = await supabase
       .from("user_profiles")
       .select("role")
