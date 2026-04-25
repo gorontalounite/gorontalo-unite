@@ -13,18 +13,22 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in?redirect=/admin/articles");
 
-  const { data: profileRaw } = await supabase
-    .from("user_profiles")
-    .select("role, full_name")
-    .eq("id", user.id)
-    .single();
+  // Use SECURITY DEFINER function — bypasses RLS, always returns correct role
+  const { data: roleData } = await supabase.rpc("get_my_role");
+  const role = roleData as string | null;
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const profile = profileRaw as any as { role: string; full_name: string | null } | null;
-
-  if (!profile || !["admin", "editor"].includes(profile.role)) {
+  if (!role || !["admin", "editor"].includes(role)) {
     redirect("/?error=unauthorized");
   }
+
+  // Fetch display name separately (best-effort, no redirect if it fails)
+  const { data: profileRaw } = await supabase
+    .from("user_profiles")
+    .select("full_name")
+    .eq("id", user.id)
+    .single();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const profile = { role, full_name: (profileRaw as any)?.full_name ?? null };
 
   return (
     <div className="flex flex-1 min-h-0">
@@ -50,6 +54,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin/knowledge-base"
             className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
             <span>🧠</span> Knowledge Base
+          </Link>
+          <Link href="/admin/users"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
+            <span>👥</span> Pengguna
+          </Link>
+          <Link href="/myrag"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
+            <span>📄</span> Upload RAG
           </Link>
         </nav>
 

@@ -37,16 +37,11 @@ export async function updateSession(request: NextRequest) {
       const redirectPath = request.nextUrl.pathname;
       return NextResponse.redirect(new URL(`/sign-in?redirect=${redirectPath}`, request.url));
     }
-    // Check admin/editor role
-    const { data: profileRaw } = await supabase
-      .from("user_profiles")
-      .select("role")
-      .eq("id", user.id)
-      .single();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const profile = profileRaw as any as { role: string } | null;
+    // Use SECURITY DEFINER function — bypasses RLS, reliable in edge context
+    const { data: roleData } = await supabase.rpc("get_my_role");
+    const role = roleData as string | null;
 
-    if (!profile || !["admin", "editor"].includes(profile.role)) {
+    if (!role || !["admin", "editor"].includes(role)) {
       return NextResponse.redirect(new URL("/?error=unauthorized", request.url));
     }
   }
