@@ -16,100 +16,17 @@ interface PortfolioItem {
   created_at: string;
 }
 
-interface WeatherData {
-  temp: number;
-  code: number;
-}
-
-interface PrayerData {
-  Imsak: string;
-  Fajr: string;
-  Maghrib: string;
-  Isha: string;
-}
-
 interface LandingPageProps {
   portfolioItems: PortfolioItem[];
-  weather?: WeatherData | null;
-  prayer?: PrayerData | null;
 }
 
 /* ─── Helpers ─────────────────────────────────────────────────── */
-function weatherIcon(code: number): string {
-  if (code === 0) return "☀️";
-  if (code <= 3) return "⛅";
-  if (code <= 48) return "🌫️";
-  if (code <= 67) return "🌧️";
-  if (code <= 77) return "❄️";
-  if (code <= 82) return "🌦️";
-  return "⛈️";
-}
-
 function formatDate(dateStr: string | null): string {
   if (!dateStr) return "";
   const d = new Date(dateStr);
   return d.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 }
 
-/* ─── Info chips inside the hero square ──────────────────────── */
-function InfoChips({ weather, prayer }: { weather?: WeatherData | null; prayer?: PrayerData | null }) {
-  const chips: { icon: string; label: string; value: string; href?: string }[] = [];
-
-  if (weather) {
-    chips.push({
-      icon: weatherIcon(weather.code),
-      label: "Cuaca",
-      value: `${weather.temp}°C`,
-    });
-  }
-
-  if (prayer) {
-    chips.push({
-      icon: "🌙",
-      label: "Maghrib",
-      value: prayer.Maghrib,
-    });
-    chips.push({
-      icon: "🕌",
-      label: "Imsak",
-      value: prayer.Imsak,
-    });
-  }
-
-  chips.push({
-    icon: "✈️",
-    label: "Penerbangan",
-    value: "Cek jadwal",
-    href: "https://www.citilink.co.id",
-  });
-
-  chips.push({
-    icon: "📊",
-    label: "Harga Pasar",
-    value: "Komoditas",
-    href: "https://hargapangan.id",
-  });
-
-  return (
-    <div className="no-scrollbar flex gap-2 overflow-x-auto py-0.5">
-      {chips.map((chip) => {
-        const cls = `flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full px-3 py-1.5 whitespace-nowrap flex-shrink-0${chip.href ? " hover:bg-emerald-50 hover:border-[#2D7D46]/20 transition-colors" : ""}`;
-        const inner = (
-          <>
-            <span className="text-sm leading-none">{chip.icon}</span>
-            <span className="text-[11px] text-gray-400">{chip.label}</span>
-            <span className="text-[11px] font-semibold text-gray-700">{chip.value}</span>
-          </>
-        );
-        return chip.href ? (
-          <a key={chip.label} href={chip.href} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>
-        ) : (
-          <div key={chip.label} className={cls}>{inner}</div>
-        );
-      })}
-    </div>
-  );
-}
 
 /* ─── Portfolio card (thumbnail only) ────────────────────────── */
 function PortfolioCard({ item }: { item: PortfolioItem }) {
@@ -211,7 +128,7 @@ function Footer() {
 }
 
 /* ─── Main landing page ───────────────────────────────────────── */
-export default function LandingPage({ portfolioItems, weather, prayer }: LandingPageProps) {
+export default function LandingPage({ portfolioItems }: LandingPageProps) {
   const [chatActive, setChatActive] = useState(false);
   const [initialMessage, setInitialMessage] = useState<string | undefined>();
   const [chatToLoad, setChatToLoad] = useState<LiveConversation | null>(null);
@@ -260,18 +177,13 @@ export default function LandingPage({ portfolioItems, weather, prayer }: Landing
         <div className="max-w-5xl mx-auto">
 
           {/* Heading — above the box */}
-          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-3">
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-4">
             Tanyakan Apapun<br className="hidden sm:block" />{" "}
             <span className="text-[#2D7D46]">tentang Gorontalo</span>
           </h1>
 
-          {/* Info chips — below heading, above box */}
-          <div className="mb-4">
-            <InfoChips weather={weather} prayer={prayer} />
-          </div>
-
-          {/* 5:4 chat box */}
-          <div className="w-full aspect-[5/4] bg-white rounded-3xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
+          {/* 5:4 chat box — max height capped so it never fills full screen */}
+          <div className="w-full aspect-[5/4] max-h-[460px] bg-white rounded-3xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
 
             {/* Empty space — clean interior */}
             <div className="flex-1 flex items-center justify-center select-none pointer-events-none">
