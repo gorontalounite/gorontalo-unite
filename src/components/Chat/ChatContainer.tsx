@@ -22,7 +22,14 @@ export interface LiveConversation {
   timestamp: string;
 }
 
-export default function ChatContainer() {
+interface ChatContainerProps {
+  /** Message to auto-send once history loads (from landing page hero) */
+  initialMessage?: string;
+  /** Pre-load a past chat (from drawer, when page was in landing mode) */
+  chatToLoad?: LiveConversation | null;
+}
+
+export default function ChatContainer({ initialMessage, chatToLoad }: ChatContainerProps) {
   const [conversations, setConversations] = useState<LiveConversation[]>([]);
   const [isTyping, setIsTyping] = useState(false);
   const [pendingMessage, setPendingMessage] = useState<string | null>(null);
@@ -33,6 +40,7 @@ export default function ChatContainer() {
     { role: "user" | "assistant"; content: string }[]
   >([]);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const autoSentRef = useRef(false);
 
   // Pick 5 random questions once per mount — different every session/refresh
   const randomQuestions = useMemo(() => pickRandom(suggestedQuestions, 5), []);
@@ -98,6 +106,26 @@ export default function ChatContainer() {
         setHistoryLoaded(true);
       });
   }, [user]);
+
+  // Auto-send initialMessage once history is loaded (from landing hero)
+  useEffect(() => {
+    if (!initialMessage || !historyLoaded || autoSentRef.current) return;
+    autoSentRef.current = true;
+    handleSend(initialMessage);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [historyLoaded]);
+
+  // Pre-load chatToLoad (from drawer while landing page was active)
+  useEffect(() => {
+    if (!chatToLoad) return;
+    setConversations([chatToLoad]);
+    setConversationHistory([
+      { role: "user" as const, content: chatToLoad.userMessage },
+      { role: "assistant" as const, content: chatToLoad.aiResponse },
+    ]);
+    setPendingMessage(null);
+    setNewMessageId(null);
+  }, [chatToLoad]);
 
   // Auto-scroll
   useEffect(() => {

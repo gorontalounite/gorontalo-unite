@@ -49,6 +49,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
             <span>✨</span> Good News
           </Link>
+          <Link href="/admin/portfolio"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
+            <span>🌿</span> Portofolio
+          </Link>
+          <Link href="/admin/affiliate"
+            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
+            <span>🛍️</span> Affiliate
+          </Link>
           <Link href="/admin/knowledge-base"
             className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
             <span>🧠</span> Knowledge Base
@@ -56,10 +64,6 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           <Link href="/admin/users"
             className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
             <span>👥</span> Pengguna
-          </Link>
-          <Link href="/myrag"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
-            <span>📄</span> Upload RAG
           </Link>
         </nav>
 
