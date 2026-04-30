@@ -12,7 +12,7 @@ export default function Navbar() {
   return (
     <>
       <nav className="bg-white border-b border-gray-100 sticky top-0 z-30 shadow-sm">
-        <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between">
+        <div className="max-w-5xl mx-auto px-4 h-14 flex items-center justify-between">
 
           {/* Left: Chat icon */}
           <button

@@ -255,17 +255,23 @@ export default function LandingPage({ portfolioItems, weather, prayer }: Landing
   return (
     <div className="flex-1 overflow-y-auto bg-gray-50">
 
-      {/* ── Hero: square chat widget ── */}
-      <section className="flex justify-center items-start px-4 pt-6 pb-8">
+      {/* ── Hero: chips + square chat widget ── */}
+      <section className="flex flex-col items-center px-4 pt-6 pb-8 gap-3">
+
+        {/* Info chips — OUTSIDE square, directly below navbar */}
+        <div className="w-full max-w-[560px]">
+          <InfoChips weather={weather} prayer={prayer} />
+        </div>
+
+        {/* Square chat box */}
         <div className="w-full max-w-[560px] aspect-square bg-white rounded-3xl shadow-lg border border-gray-100 flex flex-col overflow-hidden">
 
-          {/* Heading + info chips */}
-          <div className="px-6 pt-6 pb-4 flex-shrink-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight mb-3">
+          {/* Heading inside square */}
+          <div className="px-6 pt-6 pb-0 flex-shrink-0">
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
               Tanyakan apapun<br />
               <span className="text-[#2D7D46]">tentang Gorontalo</span>
             </h1>
-            <InfoChips weather={weather} prayer={prayer} />
           </div>
 
           {/* Empty middle — clean space */}

@@ -28,11 +28,16 @@ function formatPrice(price: number) {
 
 function AffiliateCard({ item }: { item: AffiliateItem }) {
   return (
-    <div className="bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-md hover:border-[#2D7D46]/20 transition-all flex flex-col">
+    <a
+      href={item.marketplace_url}
+      target="_blank"
+      rel="noopener noreferrer sponsored"
+      className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-md hover:border-[#2D7D46]/20 transition-all flex flex-col"
+    >
       {/* Image */}
       <div className="aspect-square relative bg-gray-50 overflow-hidden">
         {item.image_url ? (
-          <Image src={item.image_url} alt={item.title} fill className="object-cover" />
+          <Image src={item.image_url} alt={item.title} fill className="object-cover group-hover:scale-105 transition-transform duration-300" />
         ) : (
           <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100">
             <span className="text-4xl">🛍️</span>
@@ -65,20 +70,15 @@ function AffiliateCard({ item }: { item: AffiliateItem }) {
               {item.price_label ?? formatPrice(item.price!)}
             </p>
           )}
-          <a
-            href={item.marketplace_url}
-            target="_blank"
-            rel="noopener noreferrer sponsored"
-            className="w-full flex items-center justify-center gap-2 bg-[#2D7D46] text-white text-sm font-medium px-4 py-2.5 rounded-xl hover:bg-[#236137] active:scale-95 transition-all"
-          >
+          <div className="w-full flex items-center justify-center gap-2 bg-[#2D7D46] text-white text-sm font-medium px-4 py-2.5 rounded-xl group-hover:bg-[#236137] transition-colors">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
             Beli Sekarang
-          </a>
+          </div>
         </div>
       </div>
-    </div>
+    </a>
   );
 }
 
