@@ -3,6 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Metadata } from "next";
 
+export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
   title: "Affiliate | Gorontalo Unite",
   description: "Produk dan layanan lokal Gorontalo pilihan.",
@@ -99,8 +101,8 @@ export default async function AffiliatePage() {
           Beranda
         </Link>
         <p className="text-xs font-semibold text-[#2D7D46] uppercase tracking-widest mb-1">Affiliate</p>
-        <h1 className="text-3xl font-bold text-gray-900">Produk & Layanan Lokal</h1>
-        <p className="text-sm text-gray-500 mt-2">Produk pilihan dari mitra lokal Gorontalo. Beli langsung dari marketplace.</p>
+        <h1 className="text-3xl font-bold text-gray-900">Produk Pilihan</h1>
+        <p className="text-sm text-gray-500 mt-2">Produk-produk pilihan terbaik. Beli langsung di Shopee &amp; marketplace lainnya.</p>
       </div>
 
       {items && items.length > 0 ? (

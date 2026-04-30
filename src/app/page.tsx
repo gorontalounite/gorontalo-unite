@@ -1,6 +1,8 @@
 import LandingPage from "@/components/Landing/LandingPage";
 import { createAdminClient } from "@/lib/supabase/admin";
 
+export const dynamic = "force-dynamic";
+
 /* ─── Weather (Open-Meteo, free, no key) ──────────────────────── */
 async function fetchWeather() {
   try {

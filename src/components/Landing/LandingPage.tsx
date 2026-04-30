@@ -91,23 +91,20 @@ function InfoChips({ weather, prayer }: { weather?: WeatherData | null; prayer?:
   });
 
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none -mx-1 px-1">
+    <div className="no-scrollbar flex gap-2 overflow-x-auto py-0.5">
       {chips.map((chip) => {
+        const cls = `flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full px-3 py-1.5 whitespace-nowrap flex-shrink-0${chip.href ? " hover:bg-emerald-50 hover:border-[#2D7D46]/20 transition-colors" : ""}`;
         const inner = (
-          <div
-            className={`flex items-center gap-1.5 bg-gray-50 border border-gray-100 rounded-full px-3 py-1.5 whitespace-nowrap flex-shrink-0 ${chip.href ? "hover:bg-emerald-50 hover:border-[#2D7D46]/20 transition-colors cursor-pointer" : ""}`}
-          >
-            <span className="text-sm">{chip.icon}</span>
-            <span className="text-xs text-gray-400">{chip.label}</span>
-            <span className="text-xs font-semibold text-gray-700">{chip.value}</span>
-          </div>
+          <>
+            <span className="text-sm leading-none">{chip.icon}</span>
+            <span className="text-[11px] text-gray-400">{chip.label}</span>
+            <span className="text-[11px] font-semibold text-gray-700">{chip.value}</span>
+          </>
         );
         return chip.href ? (
-          <a key={chip.label} href={chip.href} target="_blank" rel="noopener noreferrer">
-            {inner}
-          </a>
+          <a key={chip.label} href={chip.href} target="_blank" rel="noopener noreferrer" className={cls}>{inner}</a>
         ) : (
-          <div key={chip.label}>{inner}</div>
+          <div key={chip.label} className={cls}>{inner}</div>
         );
       })}
     </div>

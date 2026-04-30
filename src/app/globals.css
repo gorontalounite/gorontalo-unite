@@ -58,6 +58,10 @@ body {
   overflow: hidden;
 }
 
+/* Hide scrollbar (chips row, etc.) */
+.no-scrollbar::-webkit-scrollbar { display: none; }
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
 /* Prose-like styles for AI responses */
 .prose-sm strong {
   font-weight: 600;
