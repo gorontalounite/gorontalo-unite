@@ -255,32 +255,37 @@ export default function LandingPage({ portfolioItems, weather, prayer }: Landing
   return (
     <div className="flex-1 overflow-y-auto bg-gray-50">
 
-      {/* ── Hero: chips + square chat widget ── */}
-      <section className="flex flex-col items-center px-4 pt-6 pb-8 gap-3">
+      {/* ── Hero ── */}
+      <section className="px-4 pt-8 pb-8">
+        <div className="max-w-5xl mx-auto">
 
-        {/* Info chips — OUTSIDE square, directly below navbar */}
-        <div className="w-full max-w-[560px]">
-          <InfoChips weather={weather} prayer={prayer} />
-        </div>
+          {/* Heading — above the box */}
+          <h1 className="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-3">
+            Tanyakan Apapun<br className="hidden sm:block" />{" "}
+            <span className="text-[#2D7D46]">tentang Gorontalo</span>
+          </h1>
 
-        {/* Square chat box */}
-        <div className="w-full max-w-[560px] aspect-square bg-white rounded-3xl shadow-lg border border-gray-100 flex flex-col overflow-hidden">
-
-          {/* Heading inside square */}
-          <div className="px-6 pt-6 pb-0 flex-shrink-0">
-            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 leading-tight">
-              Tanyakan apapun<br />
-              <span className="text-[#2D7D46]">tentang Gorontalo</span>
-            </h1>
+          {/* Info chips — below heading, above box */}
+          <div className="mb-4">
+            <InfoChips weather={weather} prayer={prayer} />
           </div>
 
-          {/* Empty middle — clean space */}
-          <div className="flex-1" />
+          {/* 5:4 chat box */}
+          <div className="w-full aspect-[5/4] bg-white rounded-3xl border border-gray-200 shadow-sm flex flex-col overflow-hidden">
 
-          {/* Bottom: InputBar */}
-          <div className="px-5 pb-5 flex-shrink-0">
-            <InputBar onSend={handleHeroSend} />
+            {/* Empty space — clean interior */}
+            <div className="flex-1 flex items-center justify-center select-none pointer-events-none">
+              <svg className="w-16 h-16 text-gray-100" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z" />
+              </svg>
+            </div>
+
+            {/* Bottom bar: InputBar */}
+            <div className="px-6 pb-6 flex-shrink-0">
+              <InputBar onSend={handleHeroSend} />
+            </div>
           </div>
+
         </div>
       </section>
 

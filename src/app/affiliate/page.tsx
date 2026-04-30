@@ -5,6 +5,8 @@ import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
 
+
+
 export const metadata: Metadata = {
   title: "Affiliate | Gorontalo Unite",
   description: "Produk dan layanan lokal Gorontalo pilihan.",
@@ -28,10 +30,8 @@ function formatPrice(price: number) {
 
 function AffiliateCard({ item }: { item: AffiliateItem }) {
   return (
-    <a
-      href={item.marketplace_url}
-      target="_blank"
-      rel="noopener noreferrer sponsored"
+    <Link
+      href={`/affiliate/${item.id}`}
       className="group bg-white rounded-2xl overflow-hidden border border-gray-100 hover:shadow-md hover:border-[#2D7D46]/20 transition-all flex flex-col"
     >
       {/* Image */}
@@ -70,15 +70,15 @@ function AffiliateCard({ item }: { item: AffiliateItem }) {
               {item.price_label ?? formatPrice(item.price!)}
             </p>
           )}
-          <div className="w-full flex items-center justify-center gap-2 bg-[#2D7D46] text-white text-sm font-medium px-4 py-2.5 rounded-xl group-hover:bg-[#236137] transition-colors">
+          <div className="w-full flex items-center justify-center gap-2 bg-gray-900 text-white text-sm font-medium px-4 py-2.5 rounded-xl group-hover:bg-[#2D7D46] transition-colors">
+            Lihat Detail
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
             </svg>
-            Beli Sekarang
           </div>
         </div>
       </div>
-    </a>
+    </Link>
   );
 }
 
