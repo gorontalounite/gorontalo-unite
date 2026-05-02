@@ -1,92 +1,152 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { featuredNews } from "@/data/mockConversations";
+import Image from "next/image";
 import { notFound } from "next/navigation";
+import { createAdminClient } from "@/lib/supabase/admin";
+import MarkdownContent from "@/components/ui/MarkdownContent";
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { id } = await params;
-  const article = featuredNews.find((n) => n.url === `/news/${id}`);
-  if (!article) {
-    return { title: "Artikel tidak ditemukan | Gorontalo Unite" };
-  }
+  const { id: slug } = await params;
+  const admin = createAdminClient();
+  const { data } = await admin
+    .from("articles")
+    .select("title, excerpt")
+    .eq("slug", slug)
+    .eq("published", true)
+    .neq("category", "Portfolio")
+    .single();
+  if (!data) return { title: "Artikel | Gorontalo Unite" };
   return {
-    title: `${article.title} | Gorontalo Unite`,
-    description: article.excerpt,
+    title: `${data.title} | Gorontalo Unite`,
+    description: data.excerpt ?? undefined,
   };
 }
 
-export default async function NewsDetailPage({ params }: Props) {
-  const { id } = await params;
-  const article = featuredNews.find((n) => n.url === `/news/${id}`);
+const CATEGORY_COLORS: Record<string, string> = {
+  Wisata:       "bg-emerald-100 text-emerald-700",
+  Budaya:       "bg-purple-100 text-purple-700",
+  Kuliner:      "bg-orange-100 text-orange-700",
+  Pendidikan:   "bg-blue-100 text-blue-700",
+  Ekonomi:      "bg-amber-100 text-amber-700",
+  Kesehatan:    "bg-red-100 text-red-700",
+  Infrastruktur:"bg-gray-100 text-gray-700",
+  "Good News":  "bg-emerald-100 text-emerald-700",
+};
 
-  if (!article) {
-    notFound();
-  }
+export default async function NewsDetailPage({ params }: Props) {
+  const { id: slug } = await params;
+  const admin = createAdminClient();
+
+  const { data: article } = await admin
+    .from("articles")
+    .select("*")
+    .eq("slug", slug)
+    .eq("published", true)
+    .neq("category", "Portfolio")
+    .single();
+
+  if (!article) notFound();
+
+  const colorClass = CATEGORY_COLORS[article.category] ?? "bg-gray-100 text-gray-700";
+  const publishedDate = article.published_at
+    ? new Date(article.published_at).toLocaleDateString("id-ID", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      })
+    : null;
 
   return (
-    <div className="max-w-3xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
+    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       {/* Breadcrumb */}
-      <div className="flex items-center gap-2 text-sm text-gray-400 mb-6">
-        <Link href="/" className="hover:text-[#2D7D46]">Home</Link>
+      <nav className="flex items-center gap-2 text-xs text-gray-400 mb-6">
+        <Link href="/" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">
+          Beranda
+        </Link>
         <span>/</span>
-        <Link href="/good-news" className="hover:text-[#2D7D46]">Good News</Link>
+        <Link href="/good-news" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">
+          Berita
+        </Link>
         <span>/</span>
-        <span className="text-gray-600 truncate">{article.category}</span>
-      </div>
+        <span className="text-gray-500 dark:text-gray-400 truncate max-w-[200px]">
+          {article.title}
+        </span>
+      </nav>
 
-      <article className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-        {/* Hero image placeholder */}
-        <div className="h-48 sm:h-64 bg-gradient-to-br from-emerald-50 to-emerald-100 flex items-center justify-center">
-          <svg className="w-16 h-16 text-[#2D7D46]/20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-        </div>
-
-        <div className="p-6">
-          <span className="inline-block text-xs px-2 py-1 bg-emerald-100 text-emerald-700 rounded-full font-medium mb-3">
+      <article>
+        {/* Category + Date */}
+        <div className="flex items-center gap-3 mb-4">
+          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${colorClass}`}>
             {article.category}
           </span>
-          <h1 className="text-xl font-bold text-gray-900 mb-3 leading-snug">{article.title}</h1>
-          <p className="text-sm text-gray-400 mb-6">
-            {new Date(article.publishedAt).toLocaleDateString("id-ID", {
-              weekday: "long",
-              day: "numeric",
-              month: "long",
-              year: "numeric",
-            })}
-          </p>
-
-          <div className="prose prose-sm max-w-none">
-            <p className="text-gray-600 leading-relaxed mb-4">{article.excerpt}</p>
-            <p className="text-gray-600 leading-relaxed mb-4">
-              Gorontalo terus menunjukkan perkembangan yang menggembirakan di berbagai sektor.
-              Capaian ini merupakan hasil kerja keras seluruh elemen masyarakat dan pemerintah
-              yang berkomitmen untuk memajukan daerah.
-            </p>
-            <p className="text-gray-600 leading-relaxed">
-              Dengan dukungan semua pihak, Gorontalo optimis dapat mencapai target pembangunan
-              yang telah ditetapkan dan menjadi provinsi yang semakin maju dan sejahtera.
-            </p>
-          </div>
+          {publishedDate && (
+            <span className="text-xs text-gray-400 dark:text-gray-500">{publishedDate}</span>
+          )}
         </div>
+
+        {/* Title */}
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
+          {article.title}
+        </h1>
+
+        {/* Excerpt */}
+        {article.excerpt && (
+          <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed mb-6 border-l-4 border-[#2D7D46] dark:border-emerald-500 pl-4 italic">
+            {article.excerpt}
+          </p>
+        )}
+
+        {/* Hero image */}
+        {article.image_url && (
+          <div className="aspect-video relative rounded-2xl overflow-hidden mb-8">
+            <Image
+              src={article.image_url}
+              alt={article.title}
+              fill
+              className="object-cover"
+              priority
+            />
+          </div>
+        )}
+
+        {/* Content */}
+        {article.content && (
+          <MarkdownContent content={article.content} />
+        )}
+
+        {/* Extra images */}
+        {Array.isArray(article.extra_images) && article.extra_images.length > 0 && (
+          <div className="mt-8">
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-widest">
+              Galeri
+            </h2>
+            <div className="grid grid-cols-2 gap-3">
+              {article.extra_images.map((url: string, i: number) => (
+                <div key={i} className="aspect-video relative rounded-xl overflow-hidden">
+                  <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" />
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </article>
 
       {/* Back */}
-      <div className="mt-6 flex gap-3">
+      <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 flex gap-4">
         <Link
           href="/good-news"
-          className="text-sm text-[#2D7D46] font-medium hover:underline"
+          className="text-sm text-[#2D7D46] dark:text-emerald-400 font-medium hover:underline"
         >
-          ← Kembali ke Good News
+          ← Semua berita
         </Link>
-        <Link
-          href="/"
-          className="text-sm text-gray-400 hover:text-gray-600 font-medium"
-        >
+        <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium">
           Tanya Gorontalo AI →
         </Link>
       </div>

@@ -7,7 +7,7 @@ export default async function AdminPortfolioPage() {
   const admin = createAdminClient();
   const { data: items } = await admin
     .from("articles")
-    .select("id, title, slug, excerpt, image_url, tags, published, created_at")
+    .select("id, title, slug, excerpt, image_url, tags, published, published_at, created_at")
     .eq("category", "Portfolio")
     .order("created_at", { ascending: false });
 
