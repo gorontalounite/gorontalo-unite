@@ -2,10 +2,12 @@
 
 :root {
   --brand-green: #2D7D46;
-  --brand-green-dark: #1a5c33;
+  --brand-green-dark: #1f5a33;
   --brand-green-light: #e8f5ee;
-  --background: #f9fafb;
+  --background: #ffffff;
   --foreground: #111827;
+  --text-secondary: #6b7280;
+  --border-light: #e5e7eb;
 }
 
 @theme inline {
