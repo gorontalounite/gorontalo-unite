@@ -1,15 +1,16 @@
 import { createAdminClient } from "@/lib/supabase/admin";
-import PortfolioAdminClient from "./PortfolioAdminClient";
+import PortfolioAdminList from "./PortfolioAdminList";
 
-export const metadata = { title: "Portofolio | Admin Gorontalo Unite" };
+export const dynamic   = "force-dynamic";
+export const metadata  = { title: "Portofolio | Admin Gorontalo Unite" };
 
 export default async function AdminPortfolioPage() {
   const admin = createAdminClient();
   const { data: items } = await admin
     .from("articles")
-    .select("id, title, slug, excerpt, image_url, tags, published, published_at, created_at")
+    .select("id, title, slug, tags, published, published_at, created_at, image_url")
     .eq("category", "Portfolio")
     .order("created_at", { ascending: false });
 
-  return <PortfolioAdminClient initialItems={items ?? []} />;
+  return <PortfolioAdminList initialItems={items ?? []} />;
 }

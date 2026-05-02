@@ -4,6 +4,8 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import MarkdownContent from "@/components/ui/MarkdownContent";
+import BlockRenderer from "@/components/ui/BlockRenderer";
+import type { Block } from "@/components/editor/types";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -13,17 +15,17 @@ export const dynamic = "force-dynamic";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { slug } = await params;
-  const admin = createAdminClient();
+  const admin    = createAdminClient();
   const { data } = await admin
     .from("articles")
-    .select("title, excerpt")
+    .select("title, excerpt, seo_title, seo_description")
     .eq("slug", slug)
     .eq("category", "Portfolio")
     .single();
   if (!data) return { title: "Portofolio | Gorontalo Unite" };
   return {
-    title: `${data.title} | Gorontalo Unite`,
-    description: data.excerpt ?? undefined,
+    title:       `${data.seo_title || data.title} | Gorontalo Unite`,
+    description: data.seo_description || data.excerpt || undefined,
   };
 }
 
@@ -38,7 +40,7 @@ const STACK_LABELS: Record<string, string> = {
 
 export default async function PortfolioDetailPage({ params }: Props) {
   const { slug } = await params;
-  const admin = createAdminClient();
+  const admin    = createAdminClient();
 
   const { data: item } = await admin
     .from("articles")
@@ -50,14 +52,16 @@ export default async function PortfolioDetailPage({ params }: Props) {
 
   if (!item) notFound();
 
-  const stackTag = (item.tags as string[] | null)?.find((t: string) => t.startsWith("stack:"));
+  const blocks: Block[] = Array.isArray(item.blocks) && item.blocks.length > 0
+    ? (item.blocks as Block[])
+    : [];
+
+  const stackTag   = (item.tags as string[] | null)?.find((t: string) => t.startsWith("stack:"));
   const stackLabel = stackTag ? (STACK_LABELS[stackTag] ?? stackTag.replace("stack:", "")) : null;
 
   const publishedDate = item.published_at
     ? new Date(item.published_at).toLocaleDateString("id-ID", {
-        day: "numeric",
-        month: "long",
-        year: "numeric",
+        day: "numeric", month: "long", year: "numeric",
       })
     : null;
 
@@ -65,21 +69,17 @@ export default async function PortfolioDetailPage({ params }: Props) {
   type FaqItem = { q: string; a: string };
   const faqs: FaqItem[] = Array.isArray(item.faq) ? item.faq : [];
 
+  const techStack: string[] = Array.isArray(item.tech_stack) ? item.tech_stack : [];
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
-        <Link href="/" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">
-          Beranda
-        </Link>
+        <Link href="/" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">Beranda</Link>
         <span>/</span>
-        <Link href="/portfolio" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">
-          Portofolio
-        </Link>
+        <Link href="/portfolio" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">Portofolio</Link>
         <span>/</span>
-        <span className="text-gray-500 dark:text-gray-400 truncate max-w-[180px]">
-          {item.title}
-        </span>
+        <span className="text-gray-500 dark:text-gray-400 truncate max-w-[180px]">{item.title}</span>
       </nav>
 
       <article>
@@ -110,20 +110,61 @@ export default async function PortfolioDetailPage({ params }: Props) {
         {/* Hero image */}
         {item.image_url && (
           <div className="aspect-video relative rounded-2xl overflow-hidden mb-8 border border-gray-100 dark:border-zinc-800">
-            <Image
-              src={item.image_url}
-              alt={item.title}
-              fill
-              className="object-cover"
-              priority
-            />
+            <Image src={item.image_url} alt={item.title} fill className="object-cover" priority />
           </div>
         )}
 
-        {/* Main content — rendered Markdown */}
-        {item.content && <MarkdownContent content={item.content} />}
+        {/* Project meta bar */}
+        {(item.client_name || item.role || item.duration || item.project_date || techStack.length > 0) && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-8 p-4 bg-gray-50 dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 text-sm">
+            {item.client_name && (
+              <div>
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider font-medium">Klien</p>
+                <p className="text-gray-800 dark:text-gray-200 font-medium mt-0.5">{item.client_name}</p>
+              </div>
+            )}
+            {item.role && (
+              <div>
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider font-medium">Peran</p>
+                <p className="text-gray-800 dark:text-gray-200 font-medium mt-0.5">{item.role}</p>
+              </div>
+            )}
+            {item.duration && (
+              <div>
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider font-medium">Durasi</p>
+                <p className="text-gray-800 dark:text-gray-200 font-medium mt-0.5">{item.duration}</p>
+              </div>
+            )}
+            {item.project_date && (
+              <div>
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider font-medium">Tanggal</p>
+                <p className="text-gray-800 dark:text-gray-200 font-medium mt-0.5">
+                  {new Date(item.project_date).toLocaleDateString("id-ID", { month: "long", year: "numeric" })}
+                </p>
+              </div>
+            )}
+            {techStack.length > 0 && (
+              <div className="col-span-2 sm:col-span-3">
+                <p className="text-[11px] text-gray-400 uppercase tracking-wider font-medium mb-1.5">Tech Stack</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {techStack.map((tech) => (
+                    <span key={tech} className="text-xs bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-gray-300 px-2.5 py-0.5 rounded-full">
+                      {tech}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
-        {/* Extra images gallery */}
+        {/* Content: blocks (new) OR markdown (legacy) */}
+        {blocks.length > 0
+          ? <BlockRenderer blocks={blocks} />
+          : item.content && <MarkdownContent content={item.content} />
+        }
+
+        {/* Extra images gallery (legacy) */}
         {extraImages.length > 0 && (
           <section className="mt-10">
             <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">
@@ -131,16 +172,8 @@ export default async function PortfolioDetailPage({ params }: Props) {
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {extraImages.map((url, i) => (
-                <div
-                  key={i}
-                  className="aspect-video relative rounded-xl overflow-hidden border border-gray-100 dark:border-zinc-800"
-                >
-                  <Image
-                    src={url}
-                    alt={`Foto proyek ${i + 1}`}
-                    fill
-                    className="object-cover"
-                  />
+                <div key={i} className="aspect-video relative rounded-xl overflow-hidden border border-gray-100 dark:border-zinc-800">
+                  <Image src={url} alt={`Foto proyek ${i + 1}`} fill className="object-cover" />
                 </div>
               ))}
             </div>
@@ -150,23 +183,13 @@ export default async function PortfolioDetailPage({ params }: Props) {
         {/* FAQ */}
         {faqs.length > 0 && (
           <section className="mt-10">
-            <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">
-              FAQ
-            </h2>
+            <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-4">FAQ</h2>
             <div className="space-y-3">
               {faqs.map((faq, i) => (
-                <details
-                  key={i}
-                  className="group bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 overflow-hidden"
-                >
+                <details key={i} className="group bg-white dark:bg-zinc-900 rounded-xl border border-gray-200 dark:border-zinc-800 overflow-hidden">
                   <summary className="flex items-center justify-between p-4 cursor-pointer list-none font-semibold text-sm text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
                     {faq.q}
-                    <svg
-                      className="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform group-open:rotate-180"
-                      fill="none"
-                      stroke="currentColor"
-                      viewBox="0 0 24 24"
-                    >
+                    <svg className="w-4 h-4 text-gray-400 flex-shrink-0 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </summary>
@@ -179,31 +202,39 @@ export default async function PortfolioDetailPage({ params }: Props) {
           </section>
         )}
 
-        {/* CTA */}
-        {item.source_url && (
-          <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800">
-            <a
-              href={item.source_url}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#2D7D46] dark:bg-emerald-500 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-[#1f5a33] dark:hover:bg-emerald-400 transition-colors shadow-sm"
-            >
-              Lihat Proyek
+        {/* CTA buttons */}
+        <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 flex flex-wrap gap-3">
+          {item.project_url && (
+            <a href={item.project_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#2D7D46] dark:bg-emerald-500 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-[#1f5a33] dark:hover:bg-emerald-400 transition-colors shadow-sm">
+              Lihat Live Demo
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
-                  d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
               </svg>
             </a>
-          </div>
-        )}
+          )}
+          {item.repo_url && (
+            <a href={item.repo_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 border border-gray-200 dark:border-zinc-700 text-gray-700 dark:text-gray-300 text-sm font-medium px-5 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors">
+              Repository
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+              </svg>
+            </a>
+          )}
+          {/* Legacy source_url fallback */}
+          {!item.project_url && item.source_url && (
+            <a href={item.source_url} target="_blank" rel="noopener noreferrer"
+              className="inline-flex items-center gap-2 bg-[#2D7D46] dark:bg-emerald-500 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-[#1f5a33] dark:hover:bg-emerald-400 transition-colors shadow-sm">
+              Lihat Proyek →
+            </a>
+          )}
+        </div>
       </article>
 
       {/* Back */}
       <div className="mt-8 flex gap-4">
-        <Link
-          href="/portfolio"
-          className="text-sm text-[#2D7D46] dark:text-emerald-400 font-medium hover:underline"
-        >
+        <Link href="/portfolio" className="text-sm text-[#2D7D46] dark:text-emerald-400 font-medium hover:underline">
           ← Semua portofolio
         </Link>
         <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">

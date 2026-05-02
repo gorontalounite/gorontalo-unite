@@ -12,9 +12,8 @@ export const metadata: Metadata = {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/sign-in?redirect=/admin/articles");
+  if (!user) redirect("/sign-in?redirect=/admin/news");
 
-  // Use service role (admin) client — bypasses RLS entirely, always reliable
   const adminClient = createAdminClient();
   const { data: profileRaw } = await adminClient
     .from("user_profiles")
@@ -28,6 +27,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/?error=unauthorized");
   }
 
+  const navItems = [
+    { href: "/admin/news",           icon: "📰", label: "Berita" },
+    { href: "/admin/portfolio",      icon: "🌿", label: "Portofolio" },
+    { href: "/admin/affiliate",      icon: "🛍️", label: "Affiliate" },
+    { href: "/admin/knowledge-base", icon: "🧠", label: "Knowledge Base" },
+    { href: "/admin/users",          icon: "👥", label: "Pengguna" },
+  ];
+
   return (
     <div className="force-light flex flex-1 min-h-0">
       {/* Sidebar */}
@@ -40,43 +47,31 @@ export default async function AdminLayout({ children }: { children: React.ReactN
           </span>
         </div>
 
-        <nav className="flex-1 p-3 space-y-1">
-          <Link href="/admin/articles"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
-            <span>📰</span> Artikel
-          </Link>
-          <Link href="/admin/good-news"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
-            <span>✨</span> Good News
-          </Link>
-          <Link href="/admin/portfolio"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
-            <span>🌿</span> Portofolio
-          </Link>
-          <Link href="/admin/affiliate"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
-            <span>🛍️</span> Affiliate
-          </Link>
-          <Link href="/admin/knowledge-base"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
-            <span>🧠</span> Knowledge Base
-          </Link>
-          <Link href="/admin/users"
-            className="flex items-center gap-2 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors">
-            <span>👥</span> Pengguna
-          </Link>
+        <nav className="flex-1 p-3 space-y-0.5">
+          {navItems.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
+            >
+              <span className="text-base leading-none">{item.icon}</span>
+              {item.label}
+            </Link>
+          ))}
         </nav>
 
         <div className="p-3 border-t border-gray-100">
-          <Link href="/"
-            className="flex items-center gap-2 px-3 py-2 text-xs text-gray-400 hover:text-gray-600 rounded-lg transition-colors">
+          <Link
+            href="/"
+            className="flex items-center gap-2 px-3 py-2 text-xs text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
+          >
             ← Kembali ke situs
           </Link>
         </div>
       </aside>
 
       {/* Main content */}
-      <main className="flex-1 overflow-auto bg-gray-50 p-6">{children}</main>
+      <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
     </div>
   );
 }
