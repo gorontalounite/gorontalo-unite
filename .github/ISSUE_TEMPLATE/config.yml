@@ -1,0 +1,12 @@
+blank_issues_enabled: false
+
+contact_links:
+  - name: 💬 Diskusi Komunitas
+    url: https://github.com/gorontalounite/gorontalo-unite/discussions
+    about: Punya pertanyaan umum atau ingin berdiskusi tentang ide? Gunakan Discussions!
+  - name: 🌐 Website
+    url: https://gorontalounite.id
+    about: Coba langsung Gorontalo Unite
+  - name: 📖 Panduan Kontribusi
+    url: https://github.com/gorontalounite/gorontalo-unite/blob/main/CONTRIBUTING.md
+    about: Baca dulu sebelum berkontribusi

@@ -1,0 +1,92 @@
+name: 💡 Usulan Fitur
+description: Punya ide untuk fitur baru atau perbaikan? Sampaikan di sini!
+title: "[Fitur] "
+labels: ["enhancement", "needs-discussion"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Ide kamu bisa membuat Gorontalo Unite lebih baik untuk semua orang! 🌿
+        Ceritakan idenya — tidak perlu jago coding.
+
+  - type: textarea
+    id: summary
+    attributes:
+      label: Ringkasan Ide
+      description: Jelaskan ide fiturmu dalam 1–2 kalimat.
+      placeholder: "Saya ingin ada fitur X supaya bisa Y..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Masalah yang Diselesaikan
+      description: |
+        Fitur ini menjawab masalah apa? Atau kebutuhan apa yang belum terpenuhi?
+      placeholder: "Saat ini susah untuk... / Saya selalu terpaksa... / Tidak ada cara untuk..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Solusi yang Diusulkan
+      description: Bayangkan fitur ini sudah ada — seperti apa tampilan dan cara kerjanya?
+      placeholder: "Akan ada tombol/halaman... yang bisa... sehingga pengguna bisa..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatif yang Sudah Dicoba
+      description: Apakah ada cara lain yang sudah kamu coba untuk mengatasi masalah ini?
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Kategori Fitur
+      options:
+        - AI Chatbot
+        - Portal Berita
+        - Portofolio
+        - Affiliate / UMKM
+        - Admin Dashboard
+        - Editor Konten
+        - Tampilan / UI
+        - Performa
+        - Aksesibilitas
+        - Bahasa / Dialek Gorontalo
+        - Lainnya
+    validations:
+      required: true
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: Seberapa penting fitur ini bagimu?
+      options:
+        - Sangat penting — tidak bisa pakai tanpa ini
+        - Penting — akan sangat membantu
+        - Bagus jika ada — nice to have
+    validations:
+      required: true
+
+  - type: textarea
+    id: mockup
+    attributes:
+      label: Mockup / Referensi (opsional)
+      description: Ada sketsa, screenshot referensi, atau link contoh dari website lain?
+      placeholder: Drag & drop gambar atau tempel link...
+
+  - type: checkboxes
+    id: contribute
+    attributes:
+      label: Bersedia Membantu?
+      options:
+        - label: Saya bersedia membantu mengerjakan fitur ini (coding)
+        - label: Saya bisa membantu testing fitur ini
+        - label: Saya bisa memberikan konten/data untuk fitur ini

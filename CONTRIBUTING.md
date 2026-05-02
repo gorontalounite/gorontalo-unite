@@ -1,88 +1,53 @@
-# Kontribusi ke Gorontalo Unite
+# Berkontribusi ke Gorontalo Unite
 
-Terima kasih sudah tertarik berkontribusi! Dokumen ini menjelaskan cara kerja proyek, konvensi kode, dan alur kerja pengembangan.
+Selamat datang, dan terima kasih sudah tertarik berkontribusi! 🌿
 
----
-
-## Alur Kerja Pengembangan
-
-```
-feature branch  →  pull request  →  review  →  merge ke main  →  auto-deploy Vercel
-```
-
-1. **Fork** repo atau buat branch baru dari `main`
-2. Nama branch: `feat/nama-fitur` atau `fix/nama-bug`
-3. Commit menggunakan format [Conventional Commits](https://www.conventionalcommits.org/)
-4. Buka PR ke `main` — describe perubahan dengan jelas
-5. Pastikan `npx tsc --noEmit` dan `npm run lint` lolos sebelum PR
+**Gorontalo Unite adalah proyek komunitas** — kamu tidak harus bisa coding untuk berkontribusi. Ada banyak cara untuk membantu, dari menambahkan fakta lokal tentang Gorontalo hingga menulis kode fitur baru.
 
 ---
 
-## Setup Lokal
+## Pilih Jalurmu
 
-Lihat [README.md → Setup Lokal](./README.md#setup-lokal) untuk instruksi lengkap.
-
----
-
-## Konvensi Kode
-
-### TypeScript
-- Selalu gunakan tipe yang eksplisit, hindari `any` sebisa mungkin
-- Interface untuk props komponen, type untuk unions/aliases
-- Gunakan `as const` untuk lookup objects
-
-### Komponen
-- Server Component by default — gunakan `"use client"` hanya jika perlu interaktivitas atau browser API
-- Props interface di atas komponen, bukan inline
-- Komponen besar pecah menjadi sub-komponen di file yang sama atau folder tersendiri
-
-### Supabase
-- Query dari server (page/layout) → gunakan `createAdminClient()` (service role, bypass RLS)
-- Query dari client component → gunakan `createClient()` (anon key, ikut RLS)
-- Selalu handle error (`if (error) ...`) dan kembalikan 500 yang informatif dari API routes
-
-### Tailwind
-- Dark mode: gunakan prefix `dark:` (class-based, diatur oleh `ThemeProvider`)
-- Admin dashboard: semua elemen admin dibungkus `force-light` class — tidak perlu dark mode di sini
-- Urutan class: layout → spacing → typography → color → border → shadow → hover/focus → responsive
-
-### Naming
-- File komponen: `PascalCase.tsx`
-- File utils/helpers: `camelCase.ts`
-- API routes: `route.ts` (konvensi Next.js)
-- Variabel/fungsi: `camelCase`
+| Saya adalah... | Panduan yang Tepat |
+|---|---|
+| Warga Gorontalo yang ingin berbagi pengetahuan | [📖 Kontribusi Data RAG](./docs/CONTRIBUTE_RAG.md) |
+| Penutur bahasa Gorontalo | [🗣️ Kontribusi Bahasa & Dialek](./docs/CONTRIBUTE_DIALECT.md) |
+| Web developer | [💻 Panduan Developer](./docs/CONTRIBUTE_DEV.md) |
+| Ingin kenal komunitas lebih jauh | [🌿 Komunitas Gorontalo Unite](./docs/COMMUNITY.md) |
 
 ---
 
-## Struktur Commit
+## Cara Tercepat Berkontribusi
 
-```
-feat: menambahkan fitur komentar di artikel
-fix: perbaiki slug tidak ter-update saat judul berubah
-chore: update dependency Supabase ke v2.104
-docs: update README dengan struktur terbaru
-refactor: pisahkan BlockCanvas menjadi sub-komponen
-```
+### Punya Pengetahuan Lokal Gorontalo?
+1. Buka [tab Issues](https://github.com/gorontalounite/gorontalo-unite/issues/new/choose)
+2. Pilih template **"🧠 Kontribusi Data Pengetahuan (RAG)"** atau **"🗣️ Kontribusi Bahasa & Dialek"**
+3. Isi form — tidak perlu coding!
+
+### Menemukan Bug?
+1. Buka [tab Issues](https://github.com/gorontalounite/gorontalo-unite/issues/new/choose)
+2. Pilih template **"🐛 Laporan Bug"**
+
+### Punya Ide Fitur?
+1. Cek dulu apakah sudah ada di [Discussions](https://github.com/gorontalounite/gorontalo-unite/discussions)
+2. Kalau belum ada, buka Issue dengan template **"💡 Usulan Fitur"**
+
+### Ingin Menulis Kode?
+1. Cari Issue berlabel `good first issue` atau `help wanted`
+2. Comment di Issue yang ingin dikerjakan
+3. Fork → Branch → Kode → PR
 
 ---
 
-## Menambah Tipe Blok Baru di Editor
+## Standar Komunitas
 
-1. Tambahkan tipe di `src/components/editor/types.ts` → `BlockType` union dan `BLOCK_REGISTRY`
-2. Buat komponen di `src/components/editor/blocks/NamaBlock.tsx`
-3. Daftarkan di `BlockCanvas.tsx` → switch-case render
-4. Tambahkan renderer di `src/components/ui/BlockRenderer.tsx` → switch-case frontend
-
----
-
-## Database Migration
-
-Semua perubahan schema harus dilakukan via Supabase Dashboard → SQL Editor, lalu didokumentasikan di [CHANGELOG.md](./CHANGELOG.md).
-
-Jangan pernah mengubah schema produksi secara langsung tanpa backup.
+Semua kontributor wajib mengikuti [Kode Etik](./CODE_OF_CONDUCT.md) kami.  
+Singkatnya: **bersikap baik, hormati semua orang, fokus pada kualitas.**
 
 ---
 
 ## Pertanyaan?
 
-Buka [GitHub Issue](https://github.com/gorontalounite/gorontalo-unite/issues) atau hubungi maintainer.
+- **Diskusi umum:** [GitHub Discussions](https://github.com/gorontalounite/gorontalo-unite/discussions)
+- **Bug / Fitur:** [GitHub Issues](https://github.com/gorontalounite/gorontalo-unite/issues)
+- **Keamanan:** Baca [SECURITY.md](./SECURITY.md) — jangan buat issue publik untuk celah keamanan

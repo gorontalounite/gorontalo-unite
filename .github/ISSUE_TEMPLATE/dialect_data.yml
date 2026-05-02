@@ -1,0 +1,113 @@
+name: 🗣️ Kontribusi Bahasa & Dialek Gorontalo
+description: Bantu AI memahami dan berbicara dalam gaya khas Gorontalo — kosakata, logat, ungkapan, dan percakapan sehari-hari.
+title: "[Dialek] "
+labels: ["dialect", "language-data", "community-content"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Lestarikan Bahasa Gorontalo bersama AI! 🌿🗣️
+
+        AI Gorontalo Unite ingin bisa memahami **cara bicara khas Gorontalo** —
+        mulai dari kosakata bahasa daerah, ungkapan sehari-hari, sampai logat
+        campur Indonesia-Gorontalo yang khas.
+
+        **Kamu tidak perlu bisa coding** — cukup isi form ini!
+
+        ### Yang kami butuhkan:
+        - **Kosakata** — kata dalam bahasa Hulontalo/Gorontalo beserta artinya
+        - **Ungkapan** — peribahasa, pepatah, atau idiom khas Gorontalo
+        - **Percakapan** — contoh obrolan sehari-hari dalam dialek Gorontalo
+        - **Koreksi AI** — saat AI salah paham ekspresi khas Gorontalo
+        - **Terjemahan** — nama tempat/makanan/tradisi dalam bahasa daerah
+
+  - type: dropdown
+    id: type
+    attributes:
+      label: Jenis Kontribusi
+      options:
+        - Kosakata Bahasa Gorontalo (kata & arti)
+        - Ungkapan / Peribahasa / Pepatah
+        - Contoh Percakapan Sehari-hari
+        - Koreksi — AI salah pahami ekspresi ini
+        - Nama Tempat dalam Bahasa Daerah
+        - Makanan / Benda / Nama Adat
+        - Lainnya
+    validations:
+      required: true
+
+  - type: textarea
+    id: content
+    attributes:
+      label: Isi Kontribusi
+      description: |
+        Gunakan format yang sesuai:
+
+        **Untuk kosakata:** `kata_gorontalo = arti Indonesia`
+        **Untuk percakapan:** tulis dialog lengkap dengan konteks
+        **Untuk koreksi:** jelaskan apa yang salah dan apa yang benar
+      placeholder: |
+        Contoh kosakata:
+        - "Wawu" = dan / juga
+        - "Otahuta" = pergi ke mana
+        - "Mohutu" = memasak
+
+        Contoh percakapan:
+        A: "Wonu bo'o lo ito?" (Mau ke mana kamu?)
+        B: "Mowali mopiyohu mao." (Mau pergi jalan-jalan.)
+
+        Konteks: percakapan santai antar teman muda Gorontalo
+    validations:
+      required: true
+
+  - type: dropdown
+    id: dialect_region
+    attributes:
+      label: Dialek / Daerah Asal
+      description: Dari daerah mana dialek atau bahasa ini berasal?
+      options:
+        - Kota Gorontalo
+        - Kabupaten Gorontalo
+        - Gorontalo Utara
+        - Bone Bolango
+        - Boalemo
+        - Pohuwato
+        - Gorontalo Umum (tidak spesifik daerah)
+        - Campuran / Tidak Tahu
+    validations:
+      required: true
+
+  - type: dropdown
+    id: confidence
+    attributes:
+      label: Seberapa yakin kamu dengan informasi ini?
+      options:
+        - Sangat yakin — penutur asli / sumber terpercaya
+        - Cukup yakin — digunakan sehari-hari di daerah saya
+        - Perlu diverifikasi — tolong cek dengan penutur asli
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Konteks Penggunaan
+      description: Kapan/di mana ekspresi ini biasa digunakan? (formal, santai, upacara adat, dll)
+      placeholder: "Digunakan dalam obrolan santai / hanya dipakai saat upacara adat / ekspresi anak muda Gorontalo..."
+
+  - type: input
+    id: contributor_name
+    attributes:
+      label: Nama (opsional)
+      description: Ingin namamu dicantumkan sebagai kontributor?
+      placeholder: "Nama / username / anonim"
+
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Persetujuan
+      options:
+        - label: Saya menyetujui data bahasa ini digunakan untuk melatih AI Gorontalo Unite
+          required: true

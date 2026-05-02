@@ -1,0 +1,97 @@
+name: 🐛 Laporan Bug
+description: Temukan sesuatu yang tidak berfungsi? Laporkan di sini.
+title: "[Bug] "
+labels: ["bug", "needs-triage"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Terima kasih sudah meluangkan waktu untuk melaporkan bug ini! 🙏
+        Tolong isi detail di bawah agar kami bisa memperbaikinya dengan cepat.
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Deskripsi Bug
+      description: Jelaskan bug yang kamu temukan secara singkat dan jelas.
+      placeholder: "Saat saya klik tombol X, terjadi Y, padahal seharusnya Z..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Langkah untuk Mereproduksi
+      description: Bagaimana kami bisa mengulangi bug ini?
+      value: |
+        1. Buka halaman '...'
+        2. Klik '...'
+        3. Scroll ke '...'
+        4. Lihat error
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Hasil yang Diharapkan
+      description: Apa yang seharusnya terjadi?
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: Hasil yang Sebenarnya
+      description: Apa yang sebenarnya terjadi?
+    validations:
+      required: true
+
+  - type: textarea
+    id: screenshots
+    attributes:
+      label: Screenshot / Video (opsional)
+      description: Kalau bisa, sertakan screenshot atau rekaman layar.
+      placeholder: Drag & drop gambar di sini...
+
+  - type: dropdown
+    id: device
+    attributes:
+      label: Perangkat
+      options:
+        - HP Android
+        - iPhone / iPad
+        - Laptop / PC (Windows)
+        - Laptop / PC (Mac)
+        - Tablet
+    validations:
+      required: true
+
+  - type: dropdown
+    id: browser
+    attributes:
+      label: Browser
+      options:
+        - Chrome
+        - Firefox
+        - Safari
+        - Edge
+        - Opera / UC Browser
+        - Lainnya
+    validations:
+      required: true
+
+  - type: input
+    id: url
+    attributes:
+      label: URL Halaman
+      description: Alamat halaman di mana bug ditemukan
+      placeholder: "https://gorontalounite.id/..."
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Informasi Tambahan
+      description: Ada hal lain yang perlu kami ketahui?

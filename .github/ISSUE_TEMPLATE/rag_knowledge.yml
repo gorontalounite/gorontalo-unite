@@ -1,0 +1,109 @@
+name: 🧠 Kontribusi Data Pengetahuan (RAG)
+description: Bantu AI Gorontalo Unite jadi lebih pintar dengan menambahkan fakta, sejarah, atau info lokal tentang Gorontalo. Tidak perlu bisa coding!
+title: "[RAG] "
+labels: ["rag-data", "knowledge-base", "community-content"]
+assignees: []
+
+body:
+  - type: markdown
+    attributes:
+      value: |
+        ## Terima kasih ingin membantu AI kami! 🤖🌿
+
+        **AI Gorontalo Unite** belajar dari data pengetahuan yang kita kumpulkan bersama.
+        Semakin banyak fakta tentang Gorontalo yang dimasukkan, semakin cerdas AI-nya.
+
+        **Kamu tidak perlu bisa coding!** Cukup isi form di bawah ini.
+
+        ### Contoh data yang dibutuhkan:
+        - Sejarah dan asal-usul Gorontalo
+        - Tempat wisata beserta deskripsi, lokasi, dan tips
+        - Kuliner khas (nama, bahan, cara makan, asal daerah)
+        - Budaya dan tradisi (upacara adat, kesenian, pakaian adat)
+        - Tokoh-tokoh penting dari Gorontalo
+        - Info layanan publik (rumah sakit, SKPD, nomor darurat)
+        - Bahasa/kosakata Gorontalo dan artinya
+        - Berita/fakta terkini tentang pembangunan Gorontalo
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: Kategori Pengetahuan
+      options:
+        - Wisata & Alam
+        - Kuliner Khas
+        - Budaya & Adat
+        - Sejarah
+        - Tokoh Gorontalo
+        - Bahasa Gorontalo / Hulontalo
+        - Layanan Publik & Pemerintahan
+        - Ekonomi & UMKM
+        - Pendidikan
+        - Kesehatan
+        - Infrastruktur & Pembangunan
+        - Olahraga & Komunitas
+        - Informasi Umum
+    validations:
+      required: true
+
+  - type: input
+    id: title
+    attributes:
+      label: Judul / Topik
+      description: Judul singkat untuk pengetahuan ini
+      placeholder: "Pantai Bolihutuo — Wisata Bahari Boalemo"
+    validations:
+      required: true
+
+  - type: textarea
+    id: content
+    attributes:
+      label: Isi Pengetahuan
+      description: |
+        Tuliskan informasinya dengan lengkap dan jelas. Minimal 3 kalimat.
+        Gunakan fakta yang bisa diverifikasi, bukan opini pribadi.
+      placeholder: |
+        Pantai Bolihutuo terletak di Kabupaten Boalemo, Provinsi Gorontalo,
+        sekitar 120 km dari Kota Gorontalo. Pantai ini terkenal dengan pasir
+        putihnya dan air laut yang jernih berwarna biru kehijauan. Tempat ini
+        cocok untuk snorkeling karena memiliki terumbu karang yang masih terjaga.
+        Akses menuju pantai menggunakan kendaraan pribadi atau angkutan desa...
+    validations:
+      required: true
+
+  - type: input
+    id: source
+    attributes:
+      label: Sumber Informasi
+      description: Dari mana info ini berasal? (URL, buku, pengalaman pribadi, dll)
+      placeholder: "https://... / Buku 'Sejarah Gorontalo' oleh... / Pengalaman pribadi"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: accuracy
+    attributes:
+      label: Seberapa yakin kamu dengan akurasi info ini?
+      options:
+        - Sangat yakin — berdasarkan sumber resmi/terverifikasi
+        - Cukup yakin — info umum yang diketahui masyarakat
+        - Perlu diverifikasi — tolong cek ulang sebelum dipakai
+    validations:
+      required: true
+
+  - type: textarea
+    id: tags
+    attributes:
+      label: Kata Kunci (Tags)
+      description: Kata-kata yang relevan untuk menemukan info ini (pisah dengan koma)
+      placeholder: "pantai, wisata, boalemo, bahari, snorkeling, pasir putih"
+
+  - type: checkboxes
+    id: consent
+    attributes:
+      label: Persetujuan
+      options:
+        - label: Saya menyetujui data ini digunakan untuk melatih AI Gorontalo Unite secara gratis
+          required: true
+        - label: Informasi ini bukan konten yang melanggar hak cipta pihak lain
+          required: true
