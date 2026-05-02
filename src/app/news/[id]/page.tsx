@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import MarkdownContent from "@/components/ui/MarkdownContent";
 import BlockRenderer from "@/components/ui/BlockRenderer";
+import ShareButtons from "@/components/ui/ShareButtons";
+import RelatedPosts, { type RelatedItem } from "@/components/ui/RelatedPosts";
+import ViewTracker from "@/components/ui/ViewTracker";
 import type { Block } from "@/components/editor/types";
 
 interface Props {
@@ -18,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const admin = createAdminClient();
   const { data } = await admin
     .from("articles")
-    .select("title, excerpt, seo_title, seo_description")
+    .select("title, excerpt, seo_title, seo_description, image_url")
     .eq("slug", slug)
     .eq("published", true)
     .neq("category", "Portfolio")
@@ -27,6 +30,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title:       `${data.seo_title || data.title} | Gorontalo Unite`,
     description: data.seo_description || data.excerpt || undefined,
+    openGraph: data.image_url
+      ? { images: [{ url: data.image_url }] }
+      : undefined,
   };
 }
 
@@ -55,6 +61,19 @@ export default async function NewsDetailPage({ params }: Props) {
 
   if (!article) notFound();
 
+  // Related posts — same category, exclude self, limit 3
+  const { data: relatedRaw } = await admin
+    .from("articles")
+    .select("id, title, slug, category, image_url, published_at, excerpt")
+    .eq("published", true)
+    .eq("category", article.category)
+    .neq("slug", slug)
+    .neq("category", "Portfolio")
+    .order("published_at", { ascending: false })
+    .limit(3);
+
+  const related: RelatedItem[] = relatedRaw ?? [];
+
   const colorClass  = CATEGORY_COLORS[article.category] ?? "bg-gray-100 text-gray-700";
   const blocks: Block[] = Array.isArray(article.blocks) && article.blocks.length > 0
     ? (article.blocks as Block[])
@@ -66,8 +85,17 @@ export default async function NewsDetailPage({ params }: Props) {
       })
     : null;
 
+  const viewCount:   number  = (article.view_count  as number  | null) ?? 0;
+  const isTrending:  boolean = (article.is_trending as boolean | null) ?? false;
+
+  // Canonical URL for sharing
+  const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.id"}/news/${slug}`;
+
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      {/* Silent view tracker */}
+      <ViewTracker slug={slug} />
+
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
         <Link href="/" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">Beranda</Link>
@@ -78,13 +106,23 @@ export default async function NewsDetailPage({ params }: Props) {
       </nav>
 
       <article>
-        {/* Category + Date */}
-        <div className="flex items-center gap-3 mb-4">
+        {/* Category + Date + Trending */}
+        <div className="flex flex-wrap items-center gap-3 mb-4">
           <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${colorClass}`}>
             {article.category}
           </span>
+          {isTrending && (
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300 flex items-center gap-1">
+              🔥 Trending
+            </span>
+          )}
           {publishedDate && (
             <span className="text-xs text-gray-400 dark:text-gray-500">{publishedDate}</span>
+          )}
+          {viewCount > 0 && (
+            <span className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
+              👁 {viewCount.toLocaleString("id-ID")} kali dilihat
+            </span>
           )}
         </div>
 
@@ -128,9 +166,17 @@ export default async function NewsDetailPage({ params }: Props) {
             </div>
           </div>
         )}
+
+        {/* Share buttons */}
+        <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800">
+          <ShareButtons url={canonicalUrl} title={article.title} />
+        </div>
       </article>
 
-      {/* Back */}
+      {/* Related posts */}
+      <RelatedPosts items={related} basePath="/news" />
+
+      {/* Back navigation */}
       <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 flex gap-4">
         <Link href="/good-news" className="text-sm text-[#2D7D46] dark:text-emerald-400 font-medium hover:underline">
           ← Semua berita

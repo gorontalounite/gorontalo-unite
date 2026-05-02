@@ -17,12 +17,18 @@ function RenderBlock({ block }: { block: Block }) {
   switch (block.type) {
     /* ── Paragraph ────────────────────────────────── */
     case "paragraph": {
-      const align = block.attrs?.align as string | undefined;
-      const cls =
-        align === "center" ? "text-center" :
-        align === "right"  ? "text-right"  : "";
+      const isHtml = /<[a-z][\s\S]*>/i.test(block.content ?? "");
+      if (isHtml) {
+        return (
+          <div
+            className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4 prose-links"
+            // eslint-disable-next-line react/no-danger
+            dangerouslySetInnerHTML={{ __html: block.content ?? "" }}
+          />
+        );
+      }
       return (
-        <p className={`text-gray-700 dark:text-gray-300 leading-relaxed mb-4 ${cls}`}>
+        <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
           {block.content}
         </p>
       );

@@ -5,25 +5,28 @@ import { Block, BLOCK_REGISTRY, BlockType } from "./types";
 
 /* ─── Types ─────────────────────────────────────────────────── */
 export interface PostMeta {
-  title:         string;
-  slug:          string;
-  excerpt:       string;
-  category:      string;
-  tags:          string[];
-  image_url:     string;
-  published:     boolean;
-  published_at:  string;
-  seo_title:     string;
+  title:           string;
+  slug:            string;
+  excerpt:         string;
+  category:        string;
+  tags:            string[];
+  image_url:       string;
+  published:       boolean;
+  published_at:    string;
+  seo_title:       string;
   seo_description: string;
+  focus_keyword?:  string;
+  schema_type?:    string;
+  allow_comments?: boolean;
   // Portfolio CPT
-  project_url?:  string;
-  client_name?:  string;
-  project_date?: string;
-  role?:         string;
-  repo_url?:     string;
-  duration?:     string;
-  tech_stack?:   string[];
-  source_url?:   string;
+  project_url?:    string;
+  client_name?:    string;
+  project_date?:   string;
+  role?:           string;
+  repo_url?:       string;
+  duration?:       string;
+  tech_stack?:     string[];
+  source_url?:     string;
 }
 
 export const EMPTY_META: PostMeta = {
@@ -125,6 +128,63 @@ function ImageUploadField({ value, onChange, label }: {
       />
       <input ref={fileRef} type="file" accept="image/*" className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
+    </div>
+  );
+}
+
+/* ─── Category selector with custom option ─────────────────── */
+function CategorySelector({ value, onChange }: { value: string; onChange: (c: string) => void }) {
+  const [custom, setCustom] = useState("");
+  const [adding, setAdding] = useState(false);
+  const isPreset = NEWS_CATEGORIES.includes(value);
+
+  return (
+    <div className="space-y-1.5">
+      <div className="grid grid-cols-2 gap-1">
+        {NEWS_CATEGORIES.map((c) => (
+          <label key={c} className="flex items-center gap-1.5 cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5">
+            <input type="radio" name="category" value={c}
+              checked={value === c}
+              onChange={() => onChange(c)}
+              className="accent-[#2D7D46]" />
+            <span className="text-[11px] text-gray-600">{c}</span>
+          </label>
+        ))}
+        {/* Custom category if set */}
+        {!isPreset && value && (
+          <label className="flex items-center gap-1.5 cursor-pointer bg-emerald-50 rounded px-1 py-0.5 col-span-2">
+            <input type="radio" name="category" value={value}
+              checked={true} onChange={() => {}}
+              className="accent-[#2D7D46]" />
+            <span className="text-[11px] text-emerald-700 font-medium">{value}</span>
+          </label>
+        )}
+      </div>
+      {!adding ? (
+        <button type="button" onClick={() => setAdding(true)}
+          className="text-[11px] text-[#2D7D46] hover:underline flex items-center gap-1">
+          + Tambah kategori baru
+        </button>
+      ) : (
+        <div className="flex gap-1 mt-1">
+          <input
+            autoFocus
+            value={custom}
+            onChange={(e) => setCustom(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" && custom.trim()) { onChange(custom.trim()); setAdding(false); setCustom(""); }
+              if (e.key === "Escape") { setAdding(false); setCustom(""); }
+            }}
+            placeholder="Nama kategori baru…"
+            className="flex-1 text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+          />
+          <button type="button"
+            onClick={() => { if (custom.trim()) { onChange(custom.trim()); setAdding(false); setCustom(""); } }}
+            className="text-[11px] bg-[#2D7D46] text-white px-2.5 py-1.5 rounded-lg hover:bg-[#236137]">OK</button>
+          <button type="button" onClick={() => { setAdding(false); setCustom(""); }}
+            className="text-[11px] border border-gray-200 text-gray-500 px-2 py-1.5 rounded-lg hover:bg-gray-50">✕</button>
+        </div>
+      )}
     </div>
   );
 }
@@ -281,8 +341,8 @@ function BlockSettingsPanel({ block, onChange }: { block: Block | null; onChange
 
 /* ─── Main sidebar ──────────────────────────────────────────── */
 export default function EditorSidebar({
-  postType, meta, onMeta, selectedBlock, onBlockChange,
-}: Props) {
+  postType, meta, onMeta, selectedBlock, onBlockChange, onSlugManualEdit,
+}: Props & { onSlugManualEdit?: () => void }) {
   const [tab, setTab] = useState<"post" | "block">("post");
 
   const setField = <K extends keyof PostMeta>(k: K, v: PostMeta[K]) =>
@@ -359,13 +419,16 @@ export default function EditorSidebar({
                   <input
                     type="text"
                     value={meta.slug}
-                    onChange={(e) => setField("slug", e.target.value)}
+                    onChange={(e) => {
+                      onSlugManualEdit?.();
+                      setField("slug", e.target.value);
+                    }}
                     className="flex-1 font-mono text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
                   />
                   <button type="button"
-                    onClick={() => setField("slug", slugify(meta.title))}
+                    onClick={() => { setField("slug", slugify(meta.title)); }}
                     className="text-[11px] bg-gray-100 text-gray-600 px-2 py-1.5 rounded-lg hover:bg-gray-200"
-                    title="Buat dari judul"
+                    title="Reset dari judul"
                   >↺</button>
                 </div>
                 <p className="text-[10px] text-gray-400 mt-1">
@@ -376,22 +439,11 @@ export default function EditorSidebar({
 
             {/* Category — news only */}
             {postType === "news" && (
-              <Panel title="Kategori">
-                <div className="grid grid-cols-2 gap-1">
-                  {NEWS_CATEGORIES.map((c) => (
-                    <label key={c} className="flex items-center gap-1.5 cursor-pointer">
-                      <input
-                        type="radio"
-                        name="category"
-                        value={c}
-                        checked={meta.category === c}
-                        onChange={() => setField("category", c)}
-                        className="accent-[#2D7D46]"
-                      />
-                      <span className="text-[11px] text-gray-600">{c}</span>
-                    </label>
-                  ))}
-                </div>
+              <Panel title="Kategori" defaultOpen>
+                <CategorySelector
+                  value={meta.category}
+                  onChange={(c) => setField("category", c)}
+                />
               </Panel>
             )}
 
@@ -496,15 +548,28 @@ export default function EditorSidebar({
               </Panel>
             )}
 
-            {/* SEO */}
-            <Panel title="SEO">
+            {/* Discussion */}
+            <Panel title="Diskusi">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={meta.allow_comments ?? false}
+                  onChange={(e) => setField("allow_comments", e.target.checked)}
+                  className="accent-[#2D7D46]"
+                />
+                <span className="text-[11px] text-gray-600">Izinkan komentar</span>
+              </label>
+            </Panel>
+
+            {/* SEO & Distribusi */}
+            <Panel title="SEO & Distribusi">
               <div>
                 <label className="text-[11px] font-medium text-gray-500 block mb-1">Meta Title</label>
                 <input
                   type="text"
                   value={meta.seo_title}
                   onChange={(e) => setField("seo_title", e.target.value)}
-                  placeholder="Judul SEO (default: judul post)…"
+                  placeholder={meta.title || "Judul SEO…"}
                   className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
                 />
               </div>
@@ -514,11 +579,55 @@ export default function EditorSidebar({
                   rows={2}
                   value={meta.seo_description}
                   onChange={(e) => setField("seo_description", e.target.value)}
-                  placeholder="Deskripsi SEO (max 160 karakter)…"
+                  placeholder={meta.excerpt || "Deskripsi SEO (max 160 karakter)…"}
                   maxLength={160}
                   className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-2 outline-none focus:border-[#2D7D46] resize-none"
                 />
                 <p className="text-[10px] text-gray-300 text-right">{meta.seo_description.length}/160</p>
+              </div>
+              <div>
+                <label className="text-[11px] font-medium text-gray-500 block mb-1">
+                  Focus Keyword
+                  <span className="ml-1 text-gray-300 font-normal">(utama SEO)</span>
+                </label>
+                <input
+                  type="text"
+                  value={meta.focus_keyword ?? ""}
+                  onChange={(e) => setField("focus_keyword", e.target.value)}
+                  placeholder="wisata gorontalo, kuliner khas…"
+                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+                />
+                {meta.focus_keyword && meta.title && (
+                  <p className={`text-[10px] mt-1 ${
+                    meta.title.toLowerCase().includes(meta.focus_keyword.toLowerCase())
+                      ? "text-emerald-500" : "text-amber-500"
+                  }`}>
+                    {meta.title.toLowerCase().includes(meta.focus_keyword.toLowerCase())
+                      ? "✓ Keyword ada di judul"
+                      : "⚠ Keyword belum ada di judul"}
+                  </p>
+                )}
+              </div>
+              <div>
+                <label className="text-[11px] font-medium text-gray-500 block mb-1">
+                  Schema Markup
+                </label>
+                <select
+                  value={meta.schema_type ?? "Article"}
+                  onChange={(e) => setField("schema_type", e.target.value)}
+                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+                >
+                  <option value="Article">Article</option>
+                  <option value="NewsArticle">NewsArticle</option>
+                  <option value="BlogPosting">BlogPosting</option>
+                  <option value="TechArticle">TechArticle</option>
+                  {postType === "portfolio" && (
+                    <option value="CreativeWork">CreativeWork</option>
+                  )}
+                </select>
+                <p className="text-[10px] text-gray-400 mt-1">
+                  Digunakan untuk structured data (Google Rich Results)
+                </p>
               </div>
             </Panel>
           </>

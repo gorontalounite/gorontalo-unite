@@ -46,6 +46,13 @@ export default async function EditPortfolioPage({ params }: Props) {
     tech_stack:    (item.tech_stack as string[]) ?? [],
   };
 
+  const initialSections = {
+    problem:  Array.isArray(item.section_problem)  ? item.section_problem  : undefined,
+    solution: Array.isArray(item.section_solution) ? item.section_solution : undefined,
+    process:  Array.isArray(item.section_process)  ? item.section_process  : undefined,
+    result:   Array.isArray(item.section_result)   ? item.section_result   : undefined,
+  };
+
   return (
     <div className="flex flex-col" style={{ height: "calc(100vh - 3.5rem)" }}>
       <PostEditor
@@ -53,6 +60,7 @@ export default async function EditPortfolioPage({ params }: Props) {
         editId={id}
         initialMeta={initialMeta}
         initialBlocks={initialBlocks}
+        initialSections={initialSections}
       />
     </div>
   );

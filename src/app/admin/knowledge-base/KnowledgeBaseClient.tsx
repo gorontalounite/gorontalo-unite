@@ -99,7 +99,7 @@ export default function KnowledgeBaseClient({ initialEntries }: { initialEntries
   };
 
   return (
-    <div>
+    <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Knowledge Base</h1>

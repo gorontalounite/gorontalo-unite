@@ -5,6 +5,9 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import MarkdownContent from "@/components/ui/MarkdownContent";
 import BlockRenderer from "@/components/ui/BlockRenderer";
+import ShareButtons from "@/components/ui/ShareButtons";
+import RelatedPosts, { type RelatedItem } from "@/components/ui/RelatedPosts";
+import ViewTracker from "@/components/ui/ViewTracker";
 import type { Block } from "@/components/editor/types";
 
 interface Props {
@@ -18,7 +21,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const admin    = createAdminClient();
   const { data } = await admin
     .from("articles")
-    .select("title, excerpt, seo_title, seo_description")
+    .select("title, excerpt, seo_title, seo_description, image_url")
     .eq("slug", slug)
     .eq("category", "Portfolio")
     .single();
@@ -26,6 +29,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title:       `${data.seo_title || data.title} | Gorontalo Unite`,
     description: data.seo_description || data.excerpt || undefined,
+    openGraph: data.image_url
+      ? { images: [{ url: data.image_url }] }
+      : undefined,
   };
 }
 
@@ -52,11 +58,31 @@ export default async function PortfolioDetailPage({ params }: Props) {
 
   if (!item) notFound();
 
+  // Related portfolio items — by stack tag, exclude self, limit 3
+  const itemTags: string[] = Array.isArray(item.tags) ? (item.tags as string[]) : [];
+  const stackTag = itemTags.find((t: string) => t.startsWith("stack:"));
+
+  let relatedQuery = admin
+    .from("articles")
+    .select("id, title, slug, category, image_url, published_at, excerpt")
+    .eq("published", true)
+    .eq("category", "Portfolio")
+    .neq("slug", slug)
+    .order("published_at", { ascending: false })
+    .limit(3);
+
+  // Filter by same stack tag if one exists
+  if (stackTag) {
+    relatedQuery = relatedQuery.contains("tags", [stackTag]);
+  }
+
+  const { data: relatedRaw } = await relatedQuery;
+  const related: RelatedItem[] = relatedRaw ?? [];
+
   const blocks: Block[] = Array.isArray(item.blocks) && item.blocks.length > 0
     ? (item.blocks as Block[])
     : [];
 
-  const stackTag   = (item.tags as string[] | null)?.find((t: string) => t.startsWith("stack:"));
   const stackLabel = stackTag ? (STACK_LABELS[stackTag] ?? stackTag.replace("stack:", "")) : null;
 
   const publishedDate = item.published_at
@@ -69,10 +95,17 @@ export default async function PortfolioDetailPage({ params }: Props) {
   type FaqItem = { q: string; a: string };
   const faqs: FaqItem[] = Array.isArray(item.faq) ? item.faq : [];
 
-  const techStack: string[] = Array.isArray(item.tech_stack) ? item.tech_stack : [];
+  const techStack:  string[] = Array.isArray(item.tech_stack)  ? item.tech_stack  : [];
+  const viewCount:  number   = (item.view_count  as number  | null) ?? 0;
+  const isTrending: boolean  = (item.is_trending as boolean | null) ?? false;
+
+  const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.id"}/portfolio/${slug}`;
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      {/* Silent view tracker */}
+      <ViewTracker slug={slug} />
+
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
         <Link href="/" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">Beranda</Link>
@@ -83,15 +116,25 @@ export default async function PortfolioDetailPage({ params }: Props) {
       </nav>
 
       <article>
-        {/* Stack badge + date */}
+        {/* Stack badge + trending + date + views */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
           {stackLabel && (
             <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 px-2.5 py-1 rounded-full">
               {stackLabel}
             </span>
           )}
+          {isTrending && (
+            <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300 flex items-center gap-1">
+              🔥 Trending
+            </span>
+          )}
           {publishedDate && (
             <span className="text-xs text-gray-400 dark:text-gray-500">{publishedDate}</span>
+          )}
+          {viewCount > 0 && (
+            <span className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
+              👁 {viewCount.toLocaleString("id-ID")}
+            </span>
           )}
         </div>
 
@@ -230,7 +273,15 @@ export default async function PortfolioDetailPage({ params }: Props) {
             </a>
           )}
         </div>
+
+        {/* Share buttons */}
+        <div className="mt-6">
+          <ShareButtons url={canonicalUrl} title={item.title} />
+        </div>
       </article>
+
+      {/* Related posts */}
+      <RelatedPosts items={related} basePath="/portfolio" />
 
       {/* Back */}
       <div className="mt-8 flex gap-4">

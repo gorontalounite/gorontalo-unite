@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 import BlockCanvas from "./BlockCanvas";
 import EditorSidebar, { PostMeta, EMPTY_META } from "./EditorSidebar";
@@ -8,11 +8,27 @@ import { Block, createBlock, blocksToText } from "./types";
 
 /* ─── Types ───────────────────────────────────────────────── */
 export interface PostEditorProps {
-  postType:    "news" | "portfolio";
-  editId?:     string;          // undefined = new post
-  initialMeta?:  Partial<PostMeta>;
-  initialBlocks?: Block[];
+  postType:         "news" | "portfolio";
+  editId?:          string;
+  initialMeta?:     Partial<PostMeta>;
+  initialBlocks?:   Block[];
+  initialSections?: {
+    problem?:  Block[];
+    solution?: Block[];
+    process?:  Block[];
+    result?:   Block[];
+  };
 }
+
+type SectionKey = "overview" | "problem" | "solution" | "process" | "result";
+
+const PORTFOLIO_SECTIONS: { key: SectionKey; label: string; emoji: string }[] = [
+  { key: "overview",  label: "Overview",           emoji: "📋" },
+  { key: "problem",   label: "Problem Statement",  emoji: "🎯" },
+  { key: "solution",  label: "Solution",           emoji: "💡" },
+  { key: "process",   label: "Process",            emoji: "⚙️" },
+  { key: "result",    label: "Result / Outcome",   emoji: "🏆" },
+];
 
 /* ─── Top bar ─────────────────────────────────────────────── */
 function TopBar({
@@ -207,12 +223,21 @@ function PreviewBlock({ block }: { block: Block }) {
 }
 
 /* ─── Main PostEditor ────────────────────────────────────── */
-export default function PostEditor({ postType, editId, initialMeta, initialBlocks }: PostEditorProps) {
+export default function PostEditor({ postType, editId, initialMeta, initialBlocks, initialSections }: PostEditorProps) {
   const router = useRouter();
 
   const [blocks, setBlocks]   = useState<Block[]>(
     initialBlocks?.length ? initialBlocks : [createBlock("paragraph")]
   );
+
+  // Portfolio sections (separate block arrays per section)
+  const [activeSection, setActiveSection] = useState<SectionKey>("overview");
+  const [sectionBlocks, setSectionBlocks] = useState<Record<string, Block[]>>({
+    problem:  initialSections?.problem  ?? [createBlock("paragraph")],
+    solution: initialSections?.solution ?? [createBlock("paragraph")],
+    process:  initialSections?.process  ?? [createBlock("paragraph")],
+    result:   initialSections?.result   ?? [createBlock("paragraph")],
+  });
   const [meta, setMeta]       = useState<PostMeta>({
     ...EMPTY_META,
     published_at: new Date().toISOString().slice(0, 16),
@@ -223,6 +248,8 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
   const [saving, setSaving]   = useState(false);
   const [saved, setSaved]     = useState(!!editId);
   const [error, setError]     = useState<string | null>(null);
+  // Track whether user manually edited slug so we stop auto-syncing
+  const slugManualRef = useRef(false);
 
   const selectedBlock = blocks.find((b) => b.id === selectedId) ?? null;
 
@@ -252,16 +279,24 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
         : null,
       seo_title:       meta.seo_title || null,
       seo_description: meta.seo_description || null,
+      // SEO
+      focus_keyword:    meta.focus_keyword    || null,
+      schema_type:      meta.schema_type      || "Article",
+      allow_comments:   meta.allow_comments   ?? false,
       // Portfolio CPT
       ...(postType === "portfolio" ? {
-        project_url:  meta.project_url || null,
-        client_name:  meta.client_name || null,
-        project_date: meta.project_date || null,
-        role:          meta.role || null,
-        repo_url:      meta.repo_url || null,
-        duration:      meta.duration || null,
-        tech_stack:    meta.tech_stack?.length ? meta.tech_stack : null,
-        source_url:    meta.project_url || null,
+        project_url:      meta.project_url  || null,
+        client_name:      meta.client_name  || null,
+        project_date:     meta.project_date || null,
+        role:             meta.role         || null,
+        repo_url:         meta.repo_url     || null,
+        duration:         meta.duration     || null,
+        tech_stack:       meta.tech_stack?.length ? meta.tech_stack : null,
+        source_url:       meta.project_url  || null,
+        section_problem:  sectionBlocks.problem,
+        section_solution: sectionBlocks.solution,
+        section_process:  sectionBlocks.process,
+        section_result:   sectionBlocks.result,
       } : {}),
     };
   };
@@ -338,7 +373,8 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
                   setMeta((m) => ({
                     ...m,
                     title,
-                    slug: m.slug || slugify(title),
+                    // Auto-sync slug unless user manually edited it
+                    slug: slugManualRef.current ? m.slug : slugify(title),
                   }));
                   setSaved(false);
                 }}
@@ -346,14 +382,48 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
                 className="w-full text-4xl font-bold text-gray-900 outline-none bg-transparent placeholder:text-gray-200 mb-6 leading-tight"
               />
 
+              {/* Portfolio section tabs */}
+              {postType === "portfolio" && (
+                <div className="flex gap-1 mb-6 border-b border-gray-100 pb-2 flex-wrap">
+                  {PORTFOLIO_SECTIONS.map((s) => (
+                    <button
+                      key={s.key}
+                      type="button"
+                      onClick={(e) => { e.stopPropagation(); setActiveSection(s.key); setSelectedId(null); }}
+                      className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
+                        activeSection === s.key
+                          ? "bg-gray-900 text-white"
+                          : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                      }`}
+                    >
+                      <span>{s.emoji}</span> {s.label}
+                    </button>
+                  ))}
+                </div>
+              )}
+
               {/* Block canvas */}
               <div onClick={(e) => e.stopPropagation()}>
-                <BlockCanvas
-                  blocks={blocks}
-                  selectedId={selectedId}
-                  onChange={(newBlocks) => { setBlocks(newBlocks); setSaved(false); }}
-                  onSelect={setSelectedId}
-                />
+                {(postType !== "portfolio" || activeSection === "overview") && (
+                  <BlockCanvas
+                    blocks={blocks}
+                    selectedId={selectedId}
+                    onChange={(newBlocks) => { setBlocks(newBlocks); setSaved(false); }}
+                    onSelect={setSelectedId}
+                  />
+                )}
+                {postType === "portfolio" && activeSection !== "overview" && (
+                  <BlockCanvas
+                    key={activeSection}
+                    blocks={sectionBlocks[activeSection] ?? [createBlock("paragraph")]}
+                    selectedId={selectedId}
+                    onChange={(newBlocks) => {
+                      setSectionBlocks((prev) => ({ ...prev, [activeSection]: newBlocks }));
+                      setSaved(false);
+                    }}
+                    onSelect={setSelectedId}
+                  />
+                )}
               </div>
             </div>
           </div>
@@ -366,6 +436,7 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
           onMeta={(m) => { setMeta(m); setSaved(false); }}
           selectedBlock={selectedBlock}
           onBlockChange={handleBlockChange}
+          onSlugManualEdit={() => { slugManualRef.current = true; }}
         />
       </div>
     </div>
