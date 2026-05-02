@@ -7,7 +7,7 @@ import ChatContainer, { type LiveConversation } from "@/components/Chat/ChatCont
 import InputBar from "@/components/Chat/InputBar";
 
 /* ─── Types ───────────────────────────────────────────────────── */
-interface PortfolioItem {
+export interface PortfolioItem {
   id: string;
   title: string;
   slug: string;
