@@ -36,9 +36,9 @@ export default function InputBar({ onSend, isLoading = false }: InputBarProps) {
   };
 
   return (
-    <div className="border-t border-gray-100 bg-white px-4 py-3 sm:px-6">
+    <div className="border-t border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 px-4 py-3 sm:px-6">
       <div className="max-w-3xl mx-auto">
-        <div className="flex items-end gap-2 bg-gray-50 border border-gray-200 rounded-2xl px-4 py-2 focus-within:border-[#2D7D46] focus-within:ring-2 focus-within:ring-[#2D7D46]/20 transition-all">
+        <div className="flex items-end gap-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl px-4 py-2 focus-within:border-[#2D7D46] dark:focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-[#2D7D46]/20 dark:focus-within:ring-emerald-500/20 transition-all">
           {/* Text input */}
           <textarea
             ref={textareaRef}
@@ -49,14 +49,14 @@ export default function InputBar({ onSend, isLoading = false }: InputBarProps) {
             placeholder="Tanyakan apapun..."
             rows={1}
             disabled={isLoading}
-            className="flex-1 bg-transparent text-[16px] sm:text-sm text-gray-800 placeholder-gray-300 resize-none outline-none leading-relaxed py-1 min-h-[28px] max-h-[120px] disabled:opacity-50"
+            className="flex-1 bg-transparent text-[16px] sm:text-sm text-gray-800 dark:text-gray-100 placeholder-gray-300 dark:placeholder-gray-600 resize-none outline-none leading-relaxed py-1 min-h-[28px] max-h-[120px] disabled:opacity-50"
           />
 
           {/* Send button */}
           <button
             onClick={handleSend}
             disabled={!value.trim() || isLoading}
-            className="flex-shrink-0 mb-1 w-8 h-8 bg-[#2D7D46] text-white rounded-xl flex items-center justify-center transition-all hover:bg-[#236137] disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+            className="flex-shrink-0 mb-1 w-8 h-8 bg-[#2D7D46] dark:bg-emerald-500 text-white rounded-xl flex items-center justify-center transition-all hover:bg-[#236137] dark:hover:bg-emerald-400 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
             aria-label="Kirim pesan"
           >
             {isLoading ? (
@@ -72,7 +72,7 @@ export default function InputBar({ onSend, isLoading = false }: InputBarProps) {
           </button>
         </div>
 
-        <p className="text-center text-[11px] text-gray-300 mt-2">
+        <p className="text-center text-[11px] text-gray-300 dark:text-gray-600 mt-2">
           Gorontalo AI bisa saja salah memberikan jawaban
         </p>
       </div>
