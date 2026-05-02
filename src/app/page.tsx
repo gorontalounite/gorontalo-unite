@@ -1,10 +1,10 @@
-import LandingPage from "@/components/Landing/LandingPage";
+import LandingPage, { type PortfolioItem } from "@/components/Landing/LandingPage";
 import { createAdminClient } from "@/lib/supabase/admin";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  let portfolioItems = [];
+  let portfolioItems: PortfolioItem[] = [];
 
   try {
     const { data } = await createAdminClient()
