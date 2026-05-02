@@ -87,26 +87,26 @@ const SUGGESTED_PROMPTS = [
 /* ─── Hero with chat-first ──────────────────────────────────────────── */
 function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
   return (
-    <section className="relative px-4 sm:px-6 pt-12 sm:pt-20 pb-16 sm:pb-24 overflow-hidden">
+    <section className="relative px-4 sm:px-6 pt-10 sm:pt-14 pb-10 sm:pb-16 overflow-hidden">
       {/* Soft gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/50 via-transparent to-transparent dark:from-emerald-950/20 pointer-events-none" />
 
-      <div className="relative max-w-4xl mx-auto text-center">
-        <span className="inline-block text-xs font-semibold text-[#2D7D46] dark:text-emerald-400 uppercase tracking-widest mb-4">
+      <div className="relative max-w-3xl mx-auto text-center">
+        <span className="inline-block text-xs font-semibold text-[#2D7D46] dark:text-emerald-400 uppercase tracking-widest mb-3">
           AI Lokal Gorontalo
         </span>
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight mb-5">
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight mb-3">
           Tanyakan apapun{" "}
           <span className="text-[#2D7D46] dark:text-emerald-400">tentang Gorontalo</span>
         </h1>
-        <p className="text-base sm:text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8 sm:mb-10">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto mb-5">
           Chatbot AI lokal yang memahami wisata, budaya, kuliner, dan layanan publik Gorontalo.
         </p>
 
         {/* Live chat box */}
-        <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-gray-200 dark:border-zinc-800 shadow-xl shadow-emerald-900/5 dark:shadow-black/30 overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-3 border-b border-gray-100 dark:border-zinc-800">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500" />
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-lg shadow-emerald-900/5 dark:shadow-black/30 overflow-hidden">
+          <div className="flex items-center gap-2 px-5 py-2.5 border-b border-gray-100 dark:border-zinc-800">
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
             <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
               Gorontalo AI · online
             </span>
@@ -115,12 +115,12 @@ function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
         </div>
 
         {/* Suggested chips */}
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <div className="mt-4 flex flex-wrap justify-center gap-2">
           {SUGGESTED_PROMPTS.map((q) => (
             <button
               key={q}
               onClick={() => onSend(q)}
-              className="text-xs sm:text-sm px-3.5 py-2 rounded-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-700 dark:text-gray-300 hover:border-[#2D7D46] dark:hover:border-emerald-500 hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors"
+              className="text-xs sm:text-sm px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-gray-300 hover:border-[#2D7D46] dark:hover:border-emerald-500 hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors"
             >
               {q}
             </button>
@@ -205,15 +205,29 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   );
 }
 
+type StackFilter = "all" | StackKey;
+
+const STACK_TABS: { key: StackFilter; label: string }[] = [
+  { key: "all", label: "Semua" },
+  { key: "web-design", label: "Web Design" },
+  { key: "programming", label: "Programming" },
+  { key: "data-analytics", label: "Data Analytics" },
+  { key: "editing", label: "Video Editing" },
+  { key: "carousel-design", label: "Carousel" },
+  { key: "videography", label: "Videography" },
+];
+
 /* ─── Portfolio Section ─────────────────────────────────────────────── */
 function PortfolioSection({ items }: { items: PortfolioItem[] }) {
-  const [activeTab, setActiveTab] = useState<"All" | "Programming" | "Multimedia">("All");
+  const [activeTab, setActiveTab] = useState<StackFilter>("all");
+
+  // Only show tabs that actually have items (plus "all")
+  const tabsWithItems = new Set(items.map((i) => getStack(i)).filter(Boolean));
+  const visibleTabs = STACK_TABS.filter((t) => t.key === "all" || tabsWithItems.has(t.key));
 
   const filtered = items.filter((item) => {
-    if (activeTab === "All") return true;
-    const stack = getStack(item);
-    if (!stack) return false;
-    return STACK_META[stack].group === activeTab;
+    if (activeTab === "all") return true;
+    return getStack(item) === activeTab;
   });
 
   return (
@@ -222,7 +236,7 @@ function PortfolioSection({ items }: { items: PortfolioItem[] }) {
         <SectionHeading
           eyebrow="Portofolio"
           title="Karya digital & multimedia kami"
-          description="Stack programming (web, mobile, data) dan multimedia (editing, carousel, videografi) untuk klien Gorontalo dan sekitarnya."
+          description="Web design, programming, data analytics, video editing, carousel desain, dan videografi untuk klien Gorontalo dan sekitarnya."
           action={
             <Link
               href="/portfolio"
@@ -236,22 +250,24 @@ function PortfolioSection({ items }: { items: PortfolioItem[] }) {
           }
         />
 
-        {/* Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          {(["All", "Programming", "Multimedia"] as const).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                activeTab === tab
-                  ? "bg-[#2D7D46] dark:bg-emerald-500 text-white shadow-sm"
-                  : "bg-white dark:bg-zinc-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-800 hover:border-[#2D7D46]/40 dark:hover:border-emerald-500/40"
-              }`}
-            >
-              {tab === "All" ? "Semua" : tab}
-            </button>
-          ))}
-        </div>
+        {/* Tabs — only rendered when we have items */}
+        {visibleTabs.length > 1 && (
+          <div className="flex flex-wrap gap-2 mb-8">
+            {visibleTabs.map((tab) => (
+              <button
+                key={tab.key}
+                onClick={() => setActiveTab(tab.key)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
+                  activeTab === tab.key
+                    ? "bg-[#2D7D46] dark:bg-emerald-500 text-white shadow-sm"
+                    : "bg-white dark:bg-zinc-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-800 hover:border-[#2D7D46]/40 dark:hover:border-emerald-500/40"
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        )}
 
         {filtered.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
@@ -263,9 +279,9 @@ function PortfolioSection({ items }: { items: PortfolioItem[] }) {
           <div className="text-center py-16 bg-white dark:bg-zinc-900 rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800">
             <span className="text-4xl">🌿</span>
             <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
-              {activeTab === "All"
+              {activeTab === "all"
                 ? "Belum ada karya yang dipublikasikan."
-                : `Belum ada karya ${activeTab.toLowerCase()} dipublikasikan.`}
+                : `Belum ada karya ${STACK_META[activeTab as StackKey]?.label ?? activeTab} dipublikasikan.`}
             </p>
           </div>
         )}
@@ -354,17 +370,29 @@ function NewsSection({ items }: { items: NewsItem[] }) {
   );
 }
 
+/* ─── Tech stack icons ───────────────────────────────────────────────── */
+const TECH_STACK = [
+  { name: "Next.js",     icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
+  { name: "React",       icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
+  { name: "TypeScript",  icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
+  { name: "Python",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
+  { name: "TailwindCSS", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" },
+  { name: "Supabase",    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/supabase/supabase-original.svg" },
+  { name: "PostgreSQL",  icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
+  { name: "Figma",       icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg" },
+  { name: "Premiere Pro",icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/premierepro/premierepro-original.svg" },
+  { name: "After Effects",icon:"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/aftereffects/aftereffects-original.svg" },
+  { name: "Photoshop",   icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/photoshop/photoshop-original.svg" },
+  { name: "Vercel",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vercel/vercel-original.svg" },
+];
+
 /* ─── About Section ─────────────────────────────────────────────────── */
 function AboutSection() {
-  const stats = [
-    { label: "Konten media lokal", value: "100+" },
-    { label: "Stack & multimedia", value: "6" },
-    { label: "Pertanyaan dijawab AI", value: "24/7" },
-  ];
   return (
     <section id="tentang" className="px-4 sm:px-6 py-16 sm:py-24 bg-gray-50/60 dark:bg-zinc-950/60 border-y border-gray-100 dark:border-zinc-800">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
+          {/* Left: text */}
           <div>
             <span className="text-xs font-semibold text-[#2D7D46] dark:text-emerald-400 uppercase tracking-widest">
               Tentang Kami
@@ -400,28 +428,33 @@ function AboutSection() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            {stats.map((s) => (
-              <div
-                key={s.label}
-                className="bg-white dark:bg-zinc-900 rounded-2xl p-6 border border-gray-200 dark:border-zinc-800"
-              >
-                <p className="text-3xl sm:text-4xl font-bold text-[#2D7D46] dark:text-emerald-400">
-                  {s.value}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mt-2 leading-snug">
-                  {s.label}
-                </p>
-              </div>
-            ))}
-            <div className="sm:col-span-3 bg-gradient-to-br from-[#2D7D46] to-[#1f5a33] dark:from-emerald-600 dark:to-emerald-800 rounded-2xl p-6 text-white">
-              <p className="text-sm font-semibold uppercase tracking-widest opacity-80">
-                Stack kami
-              </p>
-              <p className="text-base mt-2 leading-relaxed">
-                Web Design · Programming · Data Analytics · Video Editing · Carousel Design ·
-                Videography
-              </p>
+          {/* Right: tech stack grid */}
+          <div>
+            <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">
+              Tech & Tools
+            </p>
+            <div className="grid grid-cols-4 gap-3">
+              {TECH_STACK.map((tech) => (
+                <div
+                  key={tech.name}
+                  title={tech.name}
+                  className="flex flex-col items-center gap-2 bg-white dark:bg-zinc-900 rounded-2xl p-3 border border-gray-200 dark:border-zinc-800 hover:border-[#2D7D46]/40 dark:hover:border-emerald-500/40 hover:shadow-sm transition-all group"
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={tech.icon}
+                    alt={tech.name}
+                    className="w-8 h-8 object-contain"
+                    loading="lazy"
+                    onError={(e) => {
+                      e.currentTarget.style.display = "none";
+                    }}
+                  />
+                  <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 text-center leading-tight group-hover:text-[#2D7D46] dark:group-hover:text-emerald-400 transition-colors">
+                    {tech.name}
+                  </span>
+                </div>
+              ))}
             </div>
           </div>
         </div>

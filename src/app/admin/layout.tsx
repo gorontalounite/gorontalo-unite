@@ -29,9 +29,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   return (
-    <div className="flex flex-1 min-h-0">
+    <div className="force-light flex flex-1 min-h-0">
       {/* Sidebar */}
-      <aside className="w-56 flex-shrink-0 bg-white border-r border-gray-100 flex flex-col">
+      <aside className="w-56 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col">
         <div className="p-4 border-b border-gray-100">
           <p className="text-xs text-gray-400 font-medium">Admin Dashboard</p>
           <p className="text-sm font-semibold text-gray-900 truncate">{profile.full_name}</p>
