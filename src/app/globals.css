@@ -35,6 +35,10 @@
   --color-foreground: var(--foreground);
   --color-surface: var(--surface);
   --color-surface-muted: var(--surface-muted);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-border-light: var(--border-light);
+  --color-border-strong: var(--border-strong);
   --font-sans: var(--font-geist-sans);
 }
 

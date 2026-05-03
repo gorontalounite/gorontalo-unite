@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import ReloadButton from "./ReloadButton";
 
 export const metadata: Metadata = {
   title: "Offline | Gorontalo Unite",
@@ -19,12 +20,7 @@ export default function OfflinePage() {
           mungkin masih bisa diakses dari cache.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
-          <button
-            onClick={() => window.location.reload()}
-            className="bg-[#2D7D46] text-white text-sm font-medium px-6 py-2.5 rounded-xl hover:bg-[#236137] transition-colors"
-          >
-            Coba lagi
-          </button>
+          <ReloadButton />
           <Link
             href="/"
             className="border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-400 text-sm font-medium px-6 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"

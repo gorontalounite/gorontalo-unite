@@ -85,7 +85,7 @@ export default async function AffiliateDetailPage({
       {/* Back link */}
       <Link
         href="/affiliate"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors mb-8"
+        className="inline-flex items-center gap-1.5 text-sm text-text-secondary hover:text-foreground transition-colors mb-8"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -112,7 +112,7 @@ export default async function AffiliateDetailPage({
               </div>
             )}
             {product.marketplace_name && (
-              <span className="absolute top-3 left-3 text-xs bg-white dark:bg-zinc-900 text-gray-700 dark:text-white font-semibold px-3 py-1 rounded-full shadow-md">
+              <span className="absolute top-3 left-3 text-xs bg-white dark:bg-zinc-900 text-foreground font-semibold px-3 py-1 rounded-full shadow-md">
                 {product.marketplace_name}
               </span>
             )}
@@ -152,7 +152,7 @@ export default async function AffiliateDetailPage({
           )}
 
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-foreground leading-tight mb-4">
             {product.title}
           </h1>
 
@@ -162,7 +162,7 @@ export default async function AffiliateDetailPage({
               <p className="text-3xl font-bold text-[#2D7D46] dark:text-emerald-400">
                 {product.price_label ?? formatPrice(product.price!)}
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-400 mt-1">
+              <p className="text-xs text-text-tertiary mt-1">
                 Harga bisa berbeda di marketplace
               </p>
             </div>
@@ -171,10 +171,10 @@ export default async function AffiliateDetailPage({
           {/* Description */}
           {product.description && (
             <div className="mb-8">
-              <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-200 uppercase tracking-widest mb-2">
+              <h2 className="text-sm font-semibold text-text-secondary uppercase tracking-widest mb-2">
                 Deskripsi Produk
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-text-secondary leading-relaxed whitespace-pre-line">
                 {product.description}
               </p>
             </div>
@@ -187,7 +187,7 @@ export default async function AffiliateDetailPage({
               marketplaceUrl={product.marketplace_url}
               marketplaceName={product.marketplace_name ?? "Marketplace"}
             />
-            <p className="text-center text-xs text-gray-400 dark:text-gray-400">
+            <p className="text-center text-xs text-text-tertiary">
               Anda akan diarahkan ke {product.marketplace_name ?? "marketplace"} eksternal
             </p>
           </div>
@@ -197,7 +197,7 @@ export default async function AffiliateDetailPage({
       {/* Related products */}
       {related && related.length > 0 && (
         <div className="mt-14 pt-10 border-t border-gray-100 dark:border-zinc-700">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-5">
+          <h2 className="text-lg font-bold text-foreground mb-5">
             Produk Serupa
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -223,7 +223,7 @@ export default async function AffiliateDetailPage({
                   )}
                 </div>
                 <div className="p-3">
-                  <p className="text-xs font-semibold text-gray-900 dark:text-white line-clamp-2 mb-1">
+                  <p className="text-xs font-semibold text-foreground line-clamp-2 mb-1">
                     {rel.title}
                   </p>
                   {(rel.price || rel.price_label) && (

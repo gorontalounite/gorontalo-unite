@@ -63,7 +63,7 @@ function AffiliateCard({ item }: { item: AffiliateItem }) {
           </div>
         )}
         {item.marketplace_name && (
-          <span className="absolute top-2 left-2 text-xs bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-200 font-semibold px-2 py-0.5 rounded-full shadow-sm">
+          <span className="absolute top-2 left-2 text-xs bg-white dark:bg-zinc-900 text-foreground font-semibold px-2 py-0.5 rounded-full shadow-sm">
             {item.marketplace_name}
           </span>
         )}
@@ -76,12 +76,12 @@ function AffiliateCard({ item }: { item: AffiliateItem }) {
 
       {/* Content */}
       <div className="p-4 flex flex-col flex-1">
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 leading-snug mb-1.5">
+        <h3 className="text-sm font-semibold text-foreground line-clamp-2 leading-snug mb-1.5">
           {item.title}
         </h3>
 
         {item.description && (
-          <p className="text-xs text-gray-500 dark:text-gray-300 line-clamp-2 leading-relaxed mb-3">
+          <p className="text-xs text-text-secondary line-clamp-2 leading-relaxed mb-3">
             {item.description}
           </p>
         )}
@@ -91,7 +91,7 @@ function AffiliateCard({ item }: { item: AffiliateItem }) {
             {item.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="text-xs bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-300 px-2 py-0.5 rounded-full"
+                className="text-xs bg-gray-100 dark:bg-zinc-700 text-text-secondary px-2 py-0.5 rounded-full"
               >
                 {tag}
               </span>
@@ -228,8 +228,8 @@ export default function AffiliateListClient({ items }: { items: AffiliateItem[] 
 
       {/* Results count */}
       {filtered.length > 0 && (
-        <p className="text-xs text-gray-400 dark:text-gray-400 mb-4">
-          Menampilkan <span className="font-semibold text-gray-700 dark:text-gray-200">{filtered.length}</span> produk
+        <p className="text-xs text-text-tertiary mb-4">
+          Menampilkan <span className="font-semibold text-foreground">{filtered.length}</span> produk
         </p>
       )}
 
@@ -243,8 +243,8 @@ export default function AffiliateListClient({ items }: { items: AffiliateItem[] 
       ) : (
         <div className="text-center py-24 bg-white dark:bg-zinc-800 rounded-2xl border border-dashed border-gray-200 dark:border-zinc-700">
           <span className="text-5xl">🔍</span>
-          <p className="text-gray-700 dark:text-white mt-4 font-semibold">Produk tidak ditemukan</p>
-          <p className="text-sm text-gray-500 dark:text-gray-300 mt-1">
+          <p className="text-foreground mt-4 font-semibold">Produk tidak ditemukan</p>
+          <p className="text-sm text-text-secondary mt-1">
             Coba ubah kata kunci atau filter kategori.
           </p>
           <button
