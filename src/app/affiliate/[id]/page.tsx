@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
+import AffiliateCTAButton from "./AffiliateCTAButton";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +17,7 @@ interface AffiliateItem {
   marketplace_url: string;
   marketplace_name: string | null;
   tags: string[];
+  category: string | null;
   created_at: string;
 }
 
@@ -53,6 +55,7 @@ export default async function AffiliateDetailPage({
 }) {
   const { id } = await params;
   const admin = createAdminClient();
+
   const { data: item } = await admin
     .from("affiliate_items")
     .select("*")
@@ -64,13 +67,25 @@ export default async function AffiliateDetailPage({
 
   const product = item as AffiliateItem;
 
+  // Fetch related products: same category, exclude current, limit 3
+  const { data: related } = await admin
+    .from("affiliate_items")
+    .select("id, title, image_url, price, price_label, marketplace_name, category")
+    .eq("published", true)
+    .eq("category", product.category ?? "")
+    .neq("id", product.id)
+    .limit(3);
+
+  // Derive commission from tags — check if any tag matches a percentage pattern
+  // We store commission in the seed via tags; here we look for a pattern like "10%" in tags
+  const commissionTag = product.tags?.find((t) => /^\d+(\.\d+)?%$/.test(t));
+
   return (
     <div className="max-w-5xl mx-auto px-4 py-8">
-
       {/* Back link */}
       <Link
         href="/affiliate"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 transition-colors mb-8"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors mb-8"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -79,47 +94,65 @@ export default async function AffiliateDetailPage({
       </Link>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12">
-
-        {/* ── Left: Image ── */}
+        {/* Left: Image */}
         <div className="space-y-3">
-          <div className="aspect-square w-full bg-gray-50 rounded-2xl overflow-hidden border border-gray-100 relative">
+          <div className="aspect-square w-full bg-gray-50 dark:bg-zinc-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-700 relative shadow-sm">
             {product.image_url ? (
               <Image
                 src={product.image_url}
                 alt={product.title}
                 fill
+                unoptimized
                 className="object-cover"
                 priority
               />
             ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100">
+              <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-amber-50 to-orange-100 dark:from-zinc-700 dark:to-zinc-600">
                 <span className="text-6xl">🛍️</span>
               </div>
             )}
             {product.marketplace_name && (
-              <span className="absolute top-3 left-3 text-xs bg-white/90 backdrop-blur-sm text-gray-600 font-medium px-3 py-1 rounded-full shadow-sm">
+              <span className="absolute top-3 left-3 text-xs bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm text-gray-600 dark:text-gray-300 font-medium px-3 py-1 rounded-full shadow-sm">
                 {product.marketplace_name}
               </span>
             )}
+            {commissionTag && (
+              <span className="absolute top-3 right-3 text-xs bg-amber-400 text-amber-900 font-bold px-3 py-1 rounded-full shadow-sm">
+                Komisi {commissionTag}
+              </span>
+            )}
           </div>
+
+          {/* Category badge */}
+          {product.category && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-[#2D7D46]/10 dark:bg-[#2D7D46]/20 text-[#2D7D46] px-3 py-1 rounded-full font-medium">
+                {product.category}
+              </span>
+            </div>
+          )}
         </div>
 
-        {/* ── Right: Detail ── */}
+        {/* Right: Detail */}
         <div className="flex flex-col">
-
           {/* Tags */}
           {product.tags && product.tags.length > 0 && (
             <div className="flex flex-wrap gap-1.5 mb-4">
-              {product.tags.map((tag) => (
-                <span key={tag} className="text-xs bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full font-medium">
-                  {tag}
-                </span>
-              ))}
+              {product.tags
+                .filter((t) => !/^\d+(\.\d+)?%$/.test(t))
+                .map((tag) => (
+                  <span
+                    key={tag}
+                    className="text-xs bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full font-medium"
+                  >
+                    {tag}
+                  </span>
+                ))}
             </div>
           )}
 
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 leading-tight mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight mb-4">
             {product.title}
           </h1>
 
@@ -129,41 +162,81 @@ export default async function AffiliateDetailPage({
               <p className="text-3xl font-bold text-[#2D7D46]">
                 {product.price_label ?? formatPrice(product.price!)}
               </p>
-              <p className="text-xs text-gray-400 mt-1">Harga bisa berbeda di marketplace</p>
+              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+                Harga bisa berbeda di marketplace
+              </p>
             </div>
           )}
 
           {/* Description */}
           {product.description && (
             <div className="mb-8">
-              <h2 className="text-sm font-semibold text-gray-700 uppercase tracking-wide mb-2">
+              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-2">
                 Deskripsi Produk
               </h2>
-              <p className="text-sm text-gray-600 leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
                 {product.description}
               </p>
             </div>
           )}
 
-          {/* CTA */}
+          {/* CTA — client component for click tracking */}
           <div className="mt-auto space-y-3">
-            <a
-              href={product.marketplace_url}
-              target="_blank"
-              rel="noopener noreferrer sponsored"
-              className="w-full flex items-center justify-center gap-2 bg-[#2D7D46] text-white font-semibold px-6 py-4 rounded-2xl hover:bg-[#236137] active:scale-[0.98] transition-all text-sm"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-              </svg>
-              Beli Sekarang di {product.marketplace_name ?? "Marketplace"}
-            </a>
-            <p className="text-center text-xs text-gray-400">
+            <AffiliateCTAButton
+              productId={product.id}
+              marketplaceUrl={product.marketplace_url}
+              marketplaceName={product.marketplace_name ?? "Marketplace"}
+            />
+            <p className="text-center text-xs text-gray-400 dark:text-gray-500">
               Anda akan diarahkan ke {product.marketplace_name ?? "marketplace"} eksternal
             </p>
           </div>
         </div>
       </div>
+
+      {/* Related products */}
+      {related && related.length > 0 && (
+        <div className="mt-14">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-5">
+            Produk Serupa
+          </h2>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+            {(related as AffiliateItem[]).map((rel) => (
+              <Link
+                key={rel.id}
+                href={`/affiliate/${rel.id}`}
+                className="group bg-white dark:bg-zinc-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-700 hover:shadow-md hover:border-[#2D7D46]/30 transition-all flex flex-col"
+              >
+                <div className="aspect-square relative bg-gray-50 dark:bg-zinc-700 overflow-hidden">
+                  {rel.image_url ? (
+                    <Image
+                      src={rel.image_url}
+                      alt={rel.title}
+                      fill
+                      unoptimized
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center">
+                      <span className="text-3xl">🛍️</span>
+                    </div>
+                  )}
+                </div>
+                <div className="p-3">
+                  <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 mb-1">
+                    {rel.title}
+                  </p>
+                  {(rel.price || rel.price_label) && (
+                    <p className="text-xs font-bold text-[#2D7D46]">
+                      {rel.price_label ?? formatPrice(rel.price!)}
+                    </p>
+                  )}
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 }

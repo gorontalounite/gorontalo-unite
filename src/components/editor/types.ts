@@ -7,7 +7,9 @@ export type BlockType =
   | "quote"
   | "code"
   | "divider"
-  | "embed";
+  | "embed"
+  | "table"
+  | "callout";
 
 export interface Block {
   id: string;
@@ -49,6 +51,15 @@ export interface CodeAttrs {
 export interface EmbedAttrs {
   url?: string;
   caption?: string;
+}
+export interface TableAttrs {
+  rows?: number;
+  cols?: number;
+  hasHeader?: boolean;
+}
+export interface CalloutAttrs {
+  type?: "info" | "warning" | "success" | "error";
+  icon?: string;
 }
 
 /* ─── Block meta (for the inserter panel) ────────────────────── */
@@ -134,6 +145,22 @@ export const BLOCK_REGISTRY: BlockMeta[] = [
     defaultContent: "",
     defaultAttrs: { url: "", caption: "" },
   },
+  {
+    type: "table",
+    label: "Tabel",
+    description: "Tabel HTML dengan baris dan kolom",
+    icon: "⊞",
+    defaultContent: JSON.stringify([["", "", ""], ["", "", ""], ["", "", ""]]),
+    defaultAttrs: { rows: 3, cols: 3, hasHeader: true },
+  },
+  {
+    type: "callout",
+    label: "Callout",
+    description: "Kotak info/peringatan/sukses/error",
+    icon: "💬",
+    defaultContent: "",
+    defaultAttrs: { type: "info", icon: "ℹ️" },
+  },
 ];
 
 /* ─── Helpers ─────────────────────────────────────────────────── */
@@ -166,6 +193,8 @@ export function blocksToText(blocks: Block[]): string {
         case "divider": return "---";
         case "image": return `![${(b.attrs as ImageAttrs).alt ?? ""}](${(b.attrs as ImageAttrs).url ?? ""})`;
         case "embed": return `[embed](${(b.attrs as EmbedAttrs).url ?? ""})`;
+        case "table": return "[table]";
+        case "callout": return `[${(b.attrs as CalloutAttrs).type ?? "info"}] ${b.content}`;
         default: return b.content;
       }
     })

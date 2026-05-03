@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import Groq from "groq-sdk";
 import { tavily } from "@tavily/core";
 import { createClient } from "@/lib/supabase/server";
@@ -29,8 +29,6 @@ const GORONTALO_KEYWORDS = [
 
 /**
  * Detects Gorontalo context from the current message OR recent history.
- * This handles follow-up questions like "Berapa penduduknya?" after a
- * Gorontalo conversation — no keyword needed in the current message.
  */
 function isGorontaloContext(
   message: string,
@@ -39,10 +37,7 @@ function isGorontaloContext(
   const hasKeyword = (text: string) =>
     GORONTALO_KEYWORDS.some((kw) => text.toLowerCase().includes(kw));
 
-  // 1. Check current message
   if (hasKeyword(message)) return true;
-
-  // 2. Check recent history (last 6 messages = last 3 exchanges)
   const recent = history.slice(-6);
   return recent.some((msg) => hasKeyword(msg.content));
 }
@@ -55,6 +50,9 @@ const SHARED_RULES = `
 - Bahasa Indonesia baku, ringkas, maksimal 400 kata.
 - Jika tidak memiliki informasi yang cukup, cukup katakan "Saya tidak memiliki informasi yang cukup tentang hal ini." — jangan mengarang dan jangan minta hubungi Dinas kecuali pertanyaan memang tentang prosedur pemerintahan.`;
 
+const PRIMARY_MODEL = "llama-3.3-70b-versatile";
+const FALLBACK_MODEL = "mixtral-8x7b-32768";
+
 export async function POST(req: NextRequest) {
   try {
     const { message, conversationHistory = [] } = await req.json() as {
@@ -63,7 +61,10 @@ export async function POST(req: NextRequest) {
     };
 
     if (!message?.trim()) {
-      return NextResponse.json({ error: "Message is required" }, { status: 400 });
+      return new Response(JSON.stringify({ error: "Message is required" }), {
+        status: 400,
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const gorontalo = isGorontaloContext(message, conversationHistory);
@@ -71,36 +72,31 @@ export async function POST(req: NextRequest) {
     let sources: { title: string; url: string | null; category: string }[] = [];
     let hasContext = false;
 
-    // Always search Tavily — every factual question needs real sources.
-    // Gorontalo queries: append "Gorontalo" so results stay local-focused.
-    // General queries: search as-is so the AI has cited evidence, not just training memory.
+    // Tavily search (non-streaming, awaited before Groq stream starts)
     try {
-      const searchQuery = gorontalo && !message.toLowerCase().includes("gorontalo")
-        ? `${message} Gorontalo`
-        : message;
+      const searchQuery =
+        gorontalo && !message.toLowerCase().includes("gorontalo")
+          ? `${message} Gorontalo`
+          : message;
 
       const tavilyRes = await tavilyClient.search(searchQuery, {
         searchDepth: "basic",
-        maxResults: 7,          // fetch more, then filter down
+        maxResults: 7,
         includeAnswer: false,
         includeDomains: [],
         excludeDomains: [],
       });
 
-      // Only keep results with relevance score >= 0.45
-      // Low-score results are usually generic/unrelated pages
       const MIN_SCORE = 0.45;
       const results = (tavilyRes.results ?? [])
         .filter((r) => (r.score ?? 0) >= MIN_SCORE)
         .slice(0, 5);
 
       hasContext = results.length > 0;
-
       contextBlock = results
         .map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.content}`)
         .join("\n\n---\n\n");
 
-      // Only expose sources to the UI if they passed the relevance filter
       sources = results.map((r) => ({
         title: r.title,
         url: r.url,
@@ -110,11 +106,10 @@ export async function POST(req: NextRequest) {
       console.error("[/api/chat] Tavily error:", err);
     }
 
-    // Build system prompt based on query type
+    // Build system prompt
     let systemPrompt: string;
 
     if (gorontalo) {
-      // Gorontalo mode: prioritize search results, fall back to LLM knowledge if needed
       systemPrompt = `Kamu adalah Gorontalo AI — asisten yang ahli tentang Provinsi Gorontalo, Indonesia, sekaligus mampu menjawab pertanyaan umum.
 
 ## CARA MENJAWAB:
@@ -129,7 +124,6 @@ export async function POST(req: NextRequest) {
 
 ${hasContext ? "## HASIL PENCARIAN (gunakan jika relevan):\n\n" + contextBlock : "## CATATAN: Tidak ada hasil pencarian. Jawab berdasarkan pengetahuanmu."}`;
     } else {
-      // General knowledge mode — search results available, supplement with LLM
       systemPrompt = `Kamu adalah Gorontalo AI — asisten AI yang membantu menjawab berbagai pertanyaan.
 
 Kamu ahli tentang Provinsi Gorontalo, tetapi juga mampu menjawab pertanyaan umum berdasarkan hasil pencarian web di bawah ini.
@@ -144,7 +138,6 @@ Kamu ahli tentang Provinsi Gorontalo, tetapi juga mampu menjawab pertanyaan umum
 ${hasContext ? "## HASIL PENCARIAN:\n\n" + contextBlock : "## CATATAN: Tidak ada hasil pencarian. Jawab berdasarkan pengetahuanmu."}`;
     }
 
-    // Build messages
     const messages: Groq.Chat.ChatCompletionMessageParam[] = [
       { role: "system", content: systemPrompt },
       ...conversationHistory.slice(-6).map((m) => ({
@@ -154,32 +147,108 @@ ${hasContext ? "## HASIL PENCARIAN:\n\n" + contextBlock : "## CATATAN: Tidak ada
       { role: "user", content: message },
     ];
 
-    // Call Groq
-    const completion = await groq.chat.completions.create({
-      model: "llama-3.3-70b-versatile",
+    const groqParams = {
       messages,
       max_tokens: 800,
       temperature: gorontalo ? 0.1 : 0.4,
-    });
+      stream: true as const,
+    };
 
-    const aiResponse =
-      completion.choices[0]?.message?.content ?? "Maaf, terjadi kesalahan. Coba lagi.";
-
-    // Save conversation (if logged in)
-    const supabase = await createClient();
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
-      await supabase.from("conversations").insert({
-        user_id: user.id,
-        user_message: message,
-        ai_response: aiResponse,
-        sources: sources as unknown as never,
+    // Try primary model, fall back to mixtral on error
+    let streamIterable: AsyncIterable<Groq.Chat.ChatCompletionChunk>;
+    try {
+      streamIterable = await groq.chat.completions.create({
+        model: PRIMARY_MODEL,
+        ...groqParams,
+      });
+    } catch (primaryErr) {
+      console.error("[/api/chat] Primary model error, retrying with fallback:", primaryErr);
+      streamIterable = await groq.chat.completions.create({
+        model: FALLBACK_MODEL,
+        ...groqParams,
       });
     }
 
-    return NextResponse.json({ response: aiResponse, sources });
+    const encoder = new TextEncoder();
+
+    const stream = new ReadableStream({
+      async start(controller) {
+        let fullResponse = "";
+
+        try {
+          for await (const chunk of streamIterable) {
+            const text = chunk.choices[0]?.delta?.content ?? "";
+            if (text) {
+              fullResponse += text;
+              controller.enqueue(
+                encoder.encode(
+                  JSON.stringify({ type: "chunk", text }) + "\n"
+                )
+              );
+            }
+          }
+
+          // Send sources after streaming completes
+          controller.enqueue(
+            encoder.encode(
+              JSON.stringify({ type: "sources", sources }) + "\n"
+            )
+          );
+
+          // Send done
+          controller.enqueue(
+            encoder.encode(JSON.stringify({ type: "done" }) + "\n")
+          );
+
+          // Persist to Supabase (fire-and-forget, don't block the stream)
+          try {
+            const supabase = await createClient();
+            const {
+              data: { user },
+            } = await supabase.auth.getUser();
+            if (user) {
+              await supabase.from("conversations").insert({
+                user_id: user.id,
+                user_message: message,
+                ai_response: fullResponse,
+                sources: sources as unknown as never,
+              });
+            }
+          } catch (dbErr) {
+            console.error("[/api/chat] Supabase insert error:", dbErr);
+          }
+        } catch (streamErr) {
+          console.error("[/api/chat] Stream error:", streamErr);
+          controller.enqueue(
+            encoder.encode(
+              JSON.stringify({
+                type: "chunk",
+                text: "Maaf, terjadi kesalahan saat memuat respons. Coba lagi.",
+              }) + "\n"
+            )
+          );
+          controller.enqueue(
+            encoder.encode(JSON.stringify({ type: "done" }) + "\n")
+          );
+        } finally {
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
+      headers: {
+        "Content-Type": "text/plain; charset=utf-8",
+        "Transfer-Encoding": "chunked",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "no-cache",
+      },
+    });
   } catch (err) {
     console.error("[/api/chat] Error:", err);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    return new Response(JSON.stringify({ error: "Internal server error" }), {
+      status: 500,
+      headers: { "Content-Type": "application/json" },
+    });
   }
 }

@@ -270,6 +270,50 @@ export default function ParagraphBlock({ block, onChange, selected }: Props) {
     sync();
   };
 
+  const cleanPastedHtml = (html: string): string => {
+    // Remove unwanted tags entirely (with contents)
+    let clean = html
+      .replace(/<style[\s\S]*?<\/style>/gi, "")
+      .replace(/<script[\s\S]*?<\/script>/gi, "")
+      .replace(/<!--[\s\S]*?-->/g, "")
+      .replace(/<meta[^>]*>/gi, "")
+      .replace(/<o:p[\s\S]*?<\/o:p>/gi, "")
+      .replace(/<w:[^>]*>[\s\S]*?<\/w:[^>]*>/gi, "")
+      .replace(/<w:[^>]*\/>/gi, "");
+
+    // Unwrap <span> tags — keep inner content
+    clean = clean.replace(/<span[^>]*>([\s\S]*?)<\/span>/gi, "$1");
+    // Remove <font> tags — keep inner content
+    clean = clean.replace(/<font[^>]*>([\s\S]*?)<\/font>/gi, "$1");
+
+    // Strip disallowed attributes (class, id, style, data-*)
+    clean = clean.replace(/\s(class|id|style|data-[a-z\-]+)="[^"]*"/gi, "");
+    clean = clean.replace(/\s(class|id|style|data-[a-z\-]+)='[^']*'/gi, "");
+
+    // Replace &nbsp; with regular space
+    clean = clean.replace(/&nbsp;/gi, " ");
+
+    // Strip tags not in the allowed list — keep their inner text
+    const allowed = new Set(["b", "strong", "i", "em", "u", "a", "br", "p", "ul", "ol", "li"]);
+    clean = clean.replace(/<\/?([a-z][a-z0-9]*)[^>]*>/gi, (match, tag: string) => {
+      if (allowed.has(tag.toLowerCase())) return match;
+      return "";
+    });
+
+    // Collapse whitespace
+    clean = clean.replace(/\s{2,}/g, " ").trim();
+    return clean;
+  };
+
+  const handlePaste = (e: React.ClipboardEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    const html = e.clipboardData.getData("text/html");
+    const text = e.clipboardData.getData("text/plain");
+    const content = html ? cleanPastedHtml(html) : text.replace(/\n/g, "<br>");
+    exec("insertHTML", content);
+    sync();
+  };
+
   return (
     <>
       {selected && (
@@ -287,6 +331,7 @@ export default function ParagraphBlock({ block, onChange, selected }: Props) {
         suppressContentEditableWarning
         onInput={sync}
         onBlur={sync}
+        onPaste={handlePaste}
         data-placeholder="Tulis paragraf di sini… (pilih teks lalu gunakan toolbar di atas)"
         className={`outline-none leading-relaxed text-gray-800 min-h-[56px] ${
           selected
