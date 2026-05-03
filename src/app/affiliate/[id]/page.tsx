@@ -85,7 +85,7 @@ export default async function AffiliateDetailPage({
       {/* Back link */}
       <Link
         href="/affiliate"
-        className="inline-flex items-center gap-1.5 text-sm text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors mb-8"
+        className="inline-flex items-center gap-1.5 text-sm text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-white transition-colors mb-8"
       >
         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -112,7 +112,7 @@ export default async function AffiliateDetailPage({
               </div>
             )}
             {product.marketplace_name && (
-              <span className="absolute top-3 left-3 text-xs bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm text-gray-600 dark:text-gray-300 font-medium px-3 py-1 rounded-full shadow-sm">
+              <span className="absolute top-3 left-3 text-xs bg-white dark:bg-zinc-900 text-gray-700 dark:text-white font-semibold px-3 py-1 rounded-full shadow-md">
                 {product.marketplace_name}
               </span>
             )}
@@ -126,7 +126,7 @@ export default async function AffiliateDetailPage({
           {/* Category badge */}
           {product.category && (
             <div className="flex items-center gap-2">
-              <span className="text-xs bg-[#2D7D46]/10 dark:bg-[#2D7D46]/20 text-[#2D7D46] px-3 py-1 rounded-full font-medium">
+              <span className="text-xs bg-[#2D7D46]/10 dark:bg-[#2D7D46]/30 text-[#2D7D46] dark:text-emerald-300 border border-[#2D7D46]/20 dark:border-[#2D7D46]/40 px-3 py-1 rounded-full font-medium">
                 {product.category}
               </span>
             </div>
@@ -143,7 +143,7 @@ export default async function AffiliateDetailPage({
                 .map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs bg-emerald-50 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 px-2.5 py-1 rounded-full font-medium"
+                    className="text-xs bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700 px-2.5 py-1 rounded-full font-medium"
                   >
                     {tag}
                   </span>
@@ -152,17 +152,17 @@ export default async function AffiliateDetailPage({
           )}
 
           {/* Title */}
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-gray-100 leading-tight mb-4">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
             {product.title}
           </h1>
 
           {/* Price */}
           {(product.price || product.price_label) && (
             <div className="mb-6">
-              <p className="text-3xl font-bold text-[#2D7D46]">
+              <p className="text-3xl font-bold text-[#2D7D46] dark:text-emerald-400">
                 {product.price_label ?? formatPrice(product.price!)}
               </p>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">
+              <p className="text-xs text-gray-400 dark:text-gray-400 mt-1">
                 Harga bisa berbeda di marketplace
               </p>
             </div>
@@ -171,10 +171,10 @@ export default async function AffiliateDetailPage({
           {/* Description */}
           {product.description && (
             <div className="mb-8">
-              <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 uppercase tracking-wide mb-2">
+              <h2 className="text-sm font-semibold text-gray-600 dark:text-gray-200 uppercase tracking-widest mb-2">
                 Deskripsi Produk
               </h2>
-              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-gray-600 dark:text-gray-300 leading-relaxed whitespace-pre-line">
                 {product.description}
               </p>
             </div>
@@ -187,7 +187,7 @@ export default async function AffiliateDetailPage({
               marketplaceUrl={product.marketplace_url}
               marketplaceName={product.marketplace_name ?? "Marketplace"}
             />
-            <p className="text-center text-xs text-gray-400 dark:text-gray-500">
+            <p className="text-center text-xs text-gray-400 dark:text-gray-400">
               Anda akan diarahkan ke {product.marketplace_name ?? "marketplace"} eksternal
             </p>
           </div>
@@ -196,8 +196,8 @@ export default async function AffiliateDetailPage({
 
       {/* Related products */}
       {related && related.length > 0 && (
-        <div className="mt-14">
-          <h2 className="text-lg font-bold text-gray-900 dark:text-gray-100 mb-5">
+        <div className="mt-14 pt-10 border-t border-gray-100 dark:border-zinc-700">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-5">
             Produk Serupa
           </h2>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
@@ -205,7 +205,7 @@ export default async function AffiliateDetailPage({
               <Link
                 key={rel.id}
                 href={`/affiliate/${rel.id}`}
-                className="group bg-white dark:bg-zinc-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-700 hover:shadow-md hover:border-[#2D7D46]/30 transition-all flex flex-col"
+                className="group bg-white dark:bg-zinc-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-700 hover:shadow-md hover:border-[#2D7D46]/40 dark:hover:border-[#2D7D46]/50 transition-all flex flex-col"
               >
                 <div className="aspect-square relative bg-gray-50 dark:bg-zinc-700 overflow-hidden">
                   {rel.image_url ? (
@@ -223,11 +223,11 @@ export default async function AffiliateDetailPage({
                   )}
                 </div>
                 <div className="p-3">
-                  <p className="text-xs font-semibold text-gray-800 dark:text-gray-200 line-clamp-2 mb-1">
+                  <p className="text-xs font-semibold text-gray-900 dark:text-white line-clamp-2 mb-1">
                     {rel.title}
                   </p>
                   {(rel.price || rel.price_label) && (
-                    <p className="text-xs font-bold text-[#2D7D46]">
+                    <p className="text-xs font-bold text-[#2D7D46] dark:text-emerald-400">
                       {rel.price_label ?? formatPrice(rel.price!)}
                     </p>
                   )}
