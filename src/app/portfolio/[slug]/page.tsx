@@ -3,12 +3,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient }      from "@/lib/supabase/server";
 import MarkdownContent from "@/components/ui/MarkdownContent";
-import BlockRenderer from "@/components/ui/BlockRenderer";
-import ShareButtons from "@/components/ui/ShareButtons";
+import BlockRenderer   from "@/components/ui/BlockRenderer";
+import ShareButtons    from "@/components/ui/ShareButtons";
 import RelatedPosts, { type RelatedItem } from "@/components/ui/RelatedPosts";
-import ViewTracker from "@/components/ui/ViewTracker";
+import ViewTracker    from "@/components/ui/ViewTracker";
+import CommentSection from "@/components/ui/CommentSection";
 import type { Block } from "@/components/editor/types";
+
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.id";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -48,13 +52,10 @@ export default async function PortfolioDetailPage({ params }: Props) {
   const { slug } = await params;
   const admin    = createAdminClient();
 
-  const { data: item } = await admin
-    .from("articles")
-    .select("*")
-    .eq("slug", slug)
-    .eq("category", "Portfolio")
-    .eq("published", true)
-    .single();
+  const [{ data: item }, { data: { user } }] = await Promise.all([
+    admin.from("articles").select("*").eq("slug", slug).eq("category", "Portfolio").eq("published", true).single(),
+    (await createClient()).auth.getUser(),
+  ]);
 
   if (!item) notFound();
 
@@ -99,10 +100,33 @@ export default async function PortfolioDetailPage({ params }: Props) {
   const viewCount:  number   = (item.view_count  as number  | null) ?? 0;
   const isTrending: boolean  = (item.is_trending as boolean | null) ?? false;
 
-  const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.id"}/portfolio/${slug}`;
+  const canonicalUrl    = `${BASE}/portfolio/${slug}`;
+  const allowComments:  boolean = (item.allow_comments as boolean | null) ?? false;
+  const authUser = user
+    ? { id: user.id, name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Pengguna" }
+    : null;
+
+  // Schema.org JSON-LD
+  const jsonLd = {
+    "@context":    "https://schema.org",
+    "@type":       "CreativeWork",
+    name:          item.title,
+    description:   item.seo_description || item.excerpt || undefined,
+    image:         item.image_url ? [item.image_url] : undefined,
+    datePublished: item.published_at ?? item.created_at,
+    author:        { "@type": "Organization", name: "Gorontalo Unite", url: BASE },
+    url:           canonicalUrl,
+    inLanguage:    "id-ID",
+  };
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      {/* Schema.org */}
+      <script type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Silent view tracker */}
       <ViewTracker slug={slug} />
 
@@ -279,6 +303,9 @@ export default async function PortfolioDetailPage({ params }: Props) {
           <ShareButtons url={canonicalUrl} title={item.title} />
         </div>
       </article>
+
+      {/* Comments */}
+      <CommentSection slug={slug} allowComments={allowComments} user={authUser} />
 
       {/* Related posts */}
       <RelatedPosts items={related} basePath="/portfolio" />

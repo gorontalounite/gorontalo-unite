@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Link  from "next/link";
 import LeftDrawer from "./LeftDrawer";
 import RightPanel from "./RightPanel";
 import ThemeToggle from "./ThemeToggle";
@@ -31,9 +31,18 @@ export default function Navbar() {
             <span className="text-base font-bold tracking-tight text-[#2D7D46] dark:text-emerald-400">&nbsp;Unite</span>
           </Link>
 
-          {/* Right: Theme + News */}
+          {/* Right: Theme + Profile + News */}
           <div className="flex items-center gap-1">
             <ThemeToggle />
+            <Link
+              href="/profile"
+              className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
+              aria-label="Profil saya"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+              </svg>
+            </Link>
             <button
               onClick={() => setRightOpen(true)}
               className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"

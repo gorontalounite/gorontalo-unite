@@ -3,12 +3,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient }      from "@/lib/supabase/server";
 import MarkdownContent from "@/components/ui/MarkdownContent";
-import BlockRenderer from "@/components/ui/BlockRenderer";
-import ShareButtons from "@/components/ui/ShareButtons";
+import BlockRenderer   from "@/components/ui/BlockRenderer";
+import ShareButtons    from "@/components/ui/ShareButtons";
 import RelatedPosts, { type RelatedItem } from "@/components/ui/RelatedPosts";
-import ViewTracker from "@/components/ui/ViewTracker";
-import type { Block } from "@/components/editor/types";
+import ViewTracker     from "@/components/ui/ViewTracker";
+import CommentSection  from "@/components/ui/CommentSection";
+import type { Block }  from "@/components/editor/types";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -16,23 +18,43 @@ interface Props {
 
 export const dynamic = "force-dynamic";
 
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.id";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id: slug } = await params;
   const admin = createAdminClient();
   const { data } = await admin
     .from("articles")
-    .select("title, excerpt, seo_title, seo_description, image_url")
+    .select("title, excerpt, seo_title, seo_description, image_url, published_at, category")
     .eq("slug", slug)
     .eq("published", true)
     .neq("category", "Portfolio")
     .single();
   if (!data) return { title: "Artikel | Gorontalo Unite" };
+
+  const title = data.seo_title || data.title;
+  const desc  = data.seo_description || data.excerpt;
+  const url   = `${BASE}/news/${slug}`;
+
   return {
-    title:       `${data.seo_title || data.title} | Gorontalo Unite`,
-    description: data.seo_description || data.excerpt || undefined,
-    openGraph: data.image_url
-      ? { images: [{ url: data.image_url }] }
-      : undefined,
+    title:       `${title} | Gorontalo Unite`,
+    description: desc || undefined,
+    alternates:  { canonical: url },
+    openGraph: {
+      title,
+      description: desc || undefined,
+      url,
+      type:        "article",
+      publishedTime: data.published_at ?? undefined,
+      section:     data.category,
+      images:      data.image_url ? [{ url: data.image_url, width: 1200, height: 630, alt: data.title }] : undefined,
+    },
+    twitter: {
+      card:        "summary_large_image",
+      title,
+      description: desc || undefined,
+      images:      data.image_url ? [data.image_url] : undefined,
+    },
   };
 }
 
@@ -51,33 +73,26 @@ export default async function NewsDetailPage({ params }: Props) {
   const { id: slug } = await params;
   const admin        = createAdminClient();
 
-  const { data: article } = await admin
-    .from("articles")
-    .select("*")
-    .eq("slug", slug)
-    .eq("published", true)
-    .neq("category", "Portfolio")
-    .single();
+  const [{ data: article }, { data: { user } }] = await Promise.all([
+    admin.from("articles").select("*").eq("slug", slug).eq("published", true).neq("category", "Portfolio").single(),
+    (await createClient()).auth.getUser(),
+  ]);
 
   if (!article) notFound();
 
-  // Related posts — same category, exclude self, limit 3
+  // Related posts
   const { data: relatedRaw } = await admin
     .from("articles")
     .select("id, title, slug, category, image_url, published_at, excerpt")
-    .eq("published", true)
-    .eq("category", article.category)
-    .neq("slug", slug)
-    .neq("category", "Portfolio")
-    .order("published_at", { ascending: false })
-    .limit(3);
+    .eq("published", true).eq("category", article.category)
+    .neq("slug", slug).neq("category", "Portfolio")
+    .order("published_at", { ascending: false }).limit(3);
 
   const related: RelatedItem[] = relatedRaw ?? [];
 
   const colorClass  = CATEGORY_COLORS[article.category] ?? "bg-gray-100 text-gray-700";
   const blocks: Block[] = Array.isArray(article.blocks) && article.blocks.length > 0
-    ? (article.blocks as Block[])
-    : [];
+    ? (article.blocks as Block[]) : [];
 
   const publishedDate = article.published_at
     ? new Date(article.published_at).toLocaleDateString("id-ID", {
@@ -85,14 +100,45 @@ export default async function NewsDetailPage({ params }: Props) {
       })
     : null;
 
-  const viewCount:   number  = (article.view_count  as number  | null) ?? 0;
-  const isTrending:  boolean = (article.is_trending as boolean | null) ?? false;
+  const viewCount:  number  = (article.view_count  as number  | null) ?? 0;
+  const isTrending: boolean = (article.is_trending as boolean | null) ?? false;
+  const allowComments: boolean = (article.allow_comments as boolean | null) ?? false;
 
-  // Canonical URL for sharing
-  const canonicalUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.id"}/news/${slug}`;
+  const canonicalUrl = `${BASE}/news/${slug}`;
+
+  // User info for CommentSection
+  const authUser = user
+    ? { id: user.id, name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Pengguna" }
+    : null;
+
+  // ── Schema.org JSON-LD ──────────────────────────────────────
+  const schemaType = (article.schema_type as string | null) ?? "NewsArticle";
+  const jsonLd = {
+    "@context":    "https://schema.org",
+    "@type":       schemaType,
+    headline:      article.title,
+    description:   article.seo_description || article.excerpt || undefined,
+    image:         article.image_url ? [article.image_url] : undefined,
+    datePublished: article.published_at ?? article.created_at,
+    dateModified:  article.updated_at  ?? article.published_at ?? article.created_at,
+    author:        { "@type": "Organization", name: "Gorontalo Unite", url: BASE },
+    publisher:     { "@type": "Organization", name: "Gorontalo Unite", url: BASE,
+                     logo: { "@type": "ImageObject", url: `${BASE}/icons/icon-192.png` } },
+    mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
+    keywords:      article.focus_keyword ?? article.category,
+    articleSection: article.category,
+    inLanguage:    "id-ID",
+  };
 
   return (
     <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+      {/* Schema.org */}
+      <script
+        type="application/ld+json"
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+
       {/* Silent view tracker */}
       <ViewTracker slug={slug} />
 
@@ -145,7 +191,7 @@ export default async function NewsDetailPage({ params }: Props) {
           </div>
         )}
 
-        {/* Content: blocks (new) OR markdown (legacy) */}
+        {/* Content */}
         {blocks.length > 0
           ? <BlockRenderer blocks={blocks} />
           : article.content && <MarkdownContent content={article.content} />
@@ -154,9 +200,7 @@ export default async function NewsDetailPage({ params }: Props) {
         {/* Extra images (legacy gallery) */}
         {Array.isArray(article.extra_images) && article.extra_images.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-widest">
-              Galeri
-            </h2>
+            <h2 className="text-sm font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-widest">Galeri</h2>
             <div className="grid grid-cols-2 gap-3">
               {article.extra_images.map((url: string, i: number) => (
                 <div key={i} className="aspect-video relative rounded-xl overflow-hidden">
@@ -172,6 +216,9 @@ export default async function NewsDetailPage({ params }: Props) {
           <ShareButtons url={canonicalUrl} title={article.title} />
         </div>
       </article>
+
+      {/* Comments */}
+      <CommentSection slug={slug} allowComments={allowComments} user={authUser} />
 
       {/* Related posts */}
       <RelatedPosts items={related} basePath="/news" />

@@ -1,0 +1,20 @@
+{
+  "name": "Gorontalo Unite",
+  "short_name": "GU",
+  "description": "Platform media hyperlokal AI untuk Gorontalo — berita, portofolio, dan chatbot AI.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2D7D46",
+  "orientation": "portrait-primary",
+  "icons": [
+    { "src": "/icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable" },
+    { "src": "/icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "screenshots": [
+    { "src": "/og-image.png", "sizes": "1200x630", "type": "image/png", "form_factor": "wide" }
+  ],
+  "categories": ["news", "education", "lifestyle"],
+  "lang": "id",
+  "dir": "ltr"
+}
