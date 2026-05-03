@@ -70,8 +70,12 @@ gorontalo-unite/
 │   │   ├── news/[id]/page.tsx        # Detail artikel: Schema.org, OG, komentar
 │   │   ├── portfolio/page.tsx        # Daftar portofolio
 │   │   ├── portfolio/[slug]/page.tsx # Detail karya: Schema.org, komentar
-│   │   ├── affiliate/page.tsx        # Produk UMKM/affiliate
-│   │   ├── affiliate/[id]/page.tsx   # Detail produk
+│   │   ├── affiliate/
+│   │   │   ├── page.tsx              # Server: fetch, pass ke AffiliateListClient
+│   │   │   ├── AffiliateListClient.tsx  # Client: search, filter, sort
+│   │   │   └── [id]/
+│   │   │       ├── page.tsx          # Detail: commission badge, related, dark mode
+│   │   │       └── AffiliateCTAButton.tsx  # Client: click tracking → redirect
 │   │   ├── profile/
 │   │   │   ├── page.tsx              # Server: auth check, fetch user_profiles
 │   │   │   └── ProfileClient.tsx     # Edit nama, role badge, sign out
@@ -99,7 +103,8 @@ gorontalo-unite/
 │   │   │   └── users/                # Manajemen role (user/editor/admin)
 │   │   │
 │   │   └── api/                      # API Routes
-│   │       ├── chat/route.ts         # POST /api/chat — Groq + RAG + Tavily
+│   │       ├── chat/route.ts         # POST /api/chat — streaming SSE, model fallback
+│   │       ├── affiliate/[id]/click/route.ts  # POST click tracking
 │   │       ├── admin/articles/route.ts   # CRUD artikel (admin)
 │   │       ├── admin/comments/route.ts   # Moderasi komentar (GET/PATCH/DELETE)
 │   │       ├── admin/upload/route.ts     # Upload gambar ke Supabase Storage
@@ -122,20 +127,22 @@ gorontalo-unite/
 │   │   │   └── LandingPage.tsx
 │   │   │
 │   │   ├── editor/                   # Gutenberg-style block editor
-│   │   │   ├── types.ts              # Block, BlockType, BLOCK_REGISTRY
-│   │   │   ├── PostEditor.tsx        # Full shell (TopBar + Canvas + Sidebar)
-│   │   │   ├── BlockCanvas.tsx       # Daftar blok + reorder
+│   │   │   ├── types.ts              # Block, BlockType, BLOCK_REGISTRY (incl. table, callout)
+│   │   │   ├── PostEditor.tsx        # Full shell + undo/redo + autosave + fullscreen
+│   │   │   ├── BlockCanvas.tsx       # Blok + drag&drop HTML5 + drop line indicator
 │   │   │   ├── BlockInserter.tsx     # Popover pilih tipe blok
 │   │   │   ├── EditorSidebar.tsx     # Meta, SEO, kategori, tag, gambar
 │   │   │   └── blocks/
-│   │   │       ├── ParagraphBlock.tsx  # Rich text (B/I/U/size/color/link/image)
+│   │   │       ├── ParagraphBlock.tsx  # Rich text + paste cleanup (Docs/Word)
 │   │   │       ├── HeadingBlock.tsx
 │   │   │       ├── ImageBlock.tsx
 │   │   │       ├── GalleryBlock.tsx
 │   │   │       ├── ListBlock.tsx
 │   │   │       ├── QuoteBlock.tsx
 │   │   │       ├── CodeBlock.tsx
-│   │   │       └── EmbedBlock.tsx    # YouTube + URL
+│   │   │       ├── EmbedBlock.tsx    # YouTube + URL
+│   │   │       ├── TableBlock.tsx    # NEW: editable table, +/- baris/kolom
+│   │   │       └── CalloutBlock.tsx  # NEW: info/warning/success/error box
 │   │   │
 │   │   ├── admin/
 │   │   │   └── CommentModerator.tsx  # Moderasi komentar per artikel
@@ -149,7 +156,7 @@ gorontalo-unite/
 │   │   │   └── ServiceWorkerRegister.tsx  # PWA SW registration
 │   │   │
 │   │   └── ui/
-│   │       ├── BlockRenderer.tsx     # Render blok JSON ke HTML
+│   │       ├── BlockRenderer.tsx     # Render blok JSON (incl. table, callout)
 │   │       ├── MarkdownContent.tsx   # Legacy markdown renderer
 │   │       ├── ShareButtons.tsx      # Twitter/FB/WA/copy/Web Share API
 │   │       ├── RelatedPosts.tsx      # Grid 3 artikel terkait
@@ -174,6 +181,11 @@ gorontalo-unite/
 │   ├── CONTRIBUTE_DEV.md
 │   └── COMMUNITY.md
 │
+├── supabase/
+│   └── migrations/                   # SQL migrations & seeds
+│       ├── 20260503_affiliate_clicks.sql  # CREATE affiliate_clicks + ALTER affiliate_items
+│       └── 20260503_affiliate_seed.sql    # INSERT 30 produk Shopee
+│
 ├── CODE_OF_CONDUCT.md
 ├── SECURITY.md
 ├── CONTRIBUTING.md
@@ -191,7 +203,12 @@ gorontalo-unite/
 - RAG dari tabel `knowledge_base` (vector-style keyword search)
 - Tavily web search untuk pertanyaan real-time
 - Copy jawaban, feedback 👍/👎, typing indicator
-- Chat history di `localStorage`
+- **Streaming response** — token dikirim real-time via `ReadableStream`, teks muncul bertahap dengan blinking cursor
+- **Voice input** — tombol mic Web Speech API (`lang: id-ID`), red pulse saat aktif
+- **Bagikan percakapan** — `navigator.share` / clipboard fallback + toast "Disalin"
+- **Post-response suggestions** — 3 pertanyaan acak muncul setelah AI menjawab
+- **Model fallback** — jika `llama-3.3-70b-versatile` gagal, retry otomatis dengan `mixtral-8x7b-32768`
+- Riwayat chat tersimpan di DB per user (tabel `conversations`)
 
 ### 📰 Portal Berita (`/good-news`)
 - **Featured hero** — artikel trending / artikel terbaru tampil sebagai hero card besar
@@ -210,6 +227,13 @@ gorontalo-unite/
 - **Share buttons** — Twitter/X, Facebook, WhatsApp, Web Share API, salin link
 - **Related posts** — 3 artikel dari kategori yang sama
 - **Sistem komentar** — load, submit, moderasi (lihat bawah)
+
+### 🛍️ Affiliate (`/affiliate`)
+- **30 produk Shopee** — kamera, gimbal, lighting, microphone, soundcard, drone, power bank
+- Search real-time + filter 10 kategori + sort harga/terbaru
+- Detail produk: commission badge, related products (3 sama kategori), dark mode penuh
+- **Click tracking** — POST `/api/affiliate/[id]/click` sebelum redirect ke marketplace
+- Admin: statistik klik per produk, grid/tabel toggle view
 
 ### 🌿 Portofolio (`/portfolio/:slug`)
 - Project meta bar: klien, peran, durasi, tanggal, tech stack
@@ -266,14 +290,21 @@ Role-gated — hanya `admin` dan `editor`
 | `/admin/portfolio` | Card grid portofolio |
 | `/admin/portfolio/new` | Block editor + CPT fields + 5 section tabs |
 | `/admin/portfolio/edit/:id` | Edit lengkap |
-| `/admin/affiliate` | CRUD produk affiliate (modal form) |
+| `/admin/affiliate` | CRUD produk affiliate + **statistik klik per produk** (grid/tabel toggle) |
 | `/admin/knowledge-base` | CRUD entri RAG (tabel + modal) |
 | `/admin/users` | Manajemen role pengguna |
 
 ### ✏️ Block Editor (Gutenberg-style)
-- **Blok:** Paragraph, Heading (H1–H6), Image, Gallery, List (ul/ol), Quote, Code, Divider, Embed
+- **Blok:** Paragraph, Heading (H1–H6), Image, Gallery, List (ul/ol), Quote, Code, Divider, Embed, **Table**, **Callout**
 - **ParagraphBlock rich text:** Bold, Italic, Underline, Strikethrough, font-size, warna, align, bullet/numbering, insert link, insert image
-- **Sidebar:** Status & Visibilitas, Permalink (auto-fill + override), Kategori (preset + custom), Tags, Gambar Unggulan, SEO panel (meta title/desc, focus keyword, schema type), Diskusi (toggle komentar)
+- **Paste cleanup** — paste dari Google Docs / Word: strip `class`, `style`, `<span>`, `<font>`, `&nbsp;`, comments; pertahankan `<b>/<i>/<u>/<a>/<ul>/<ol>/<li>`
+- **Drag & drop** reorder blok — HTML5 Drag API, handle `⠿` di kiri, drop line indicator biru
+- **Undo / Redo** — history stack 50 entries, Ctrl+Z / Ctrl+Y, tombol ↩/↪ di TopBar
+- **Autosave ke localStorage** — debounce 2s, banner "Muat draft?" saat buka editor dengan draft tersimpan
+- **Fullscreen mode** — tombol ⛶ di TopBar, `document.requestFullscreen()` + CSS overlay fallback
+- **Block Table** — editable cells (contentEditable), +/- baris/kolom, toggle header row
+- **Block Callout** — 4 varian: info (biru) / warning (amber) / success (hijau) / error (merah), icon selector
+- **Sidebar:** Status & Visibilitas, Permalink (auto-fill + override), Kategori (preset + custom), Tags, Gambar Unggulan, SEO panel, Diskusi
 - **Portfolio section tabs:** 5 section masing-masing punya BlockCanvas sendiri
 - Live preview, auto-save indikator
 
@@ -340,7 +371,28 @@ RLS: public SELECT hanya `approved = true`. INSERT hanya user terautentikasi.
 Entri RAG: `id`, `title`, `content`, `category`, `tags`, `source_url`, `is_active`, `created_at`
 
 ### `affiliate_items`
-`id`, `title`, `description`, `image_url`, `price`, `price_label`, `marketplace_url`, `marketplace_name`, `tags`, `published`, `created_at`
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | uuid PK | |
+| `title` | text | Nama produk |
+| `description` | text | Deskripsi panjang |
+| `image_url` | text | Gambar produk (CDN Shopee) |
+| `price` | numeric | Harga numerik |
+| `price_label` | text | Label harga tampil (e.g. "Rp 1.240.000") |
+| `marketplace_url` | text | Affiliate link Shopee |
+| `marketplace_name` | text | Default "Shopee" |
+| `category` | text | Lighting / Gimbal / Kamera / dll |
+| `tags` | text[] | Termasuk komisi (e.g. "10%") |
+| `published` | boolean | |
+| `created_at` | timestamptz | |
+
+### `affiliate_clicks`
+| Kolom | Tipe | Keterangan |
+|---|---|---|
+| `id` | uuid PK | |
+| `affiliate_item_id` | uuid FK → affiliate_items | |
+| `clicked_at` | timestamptz | |
+| `user_agent` | text | Browser UA |
 
 ### `user_profiles`
 `id` (FK → auth.users), `full_name`, `role` (user / editor / admin)
@@ -354,7 +406,7 @@ Entri RAG: `id`, `title`, `content`, `category`, `tags`, `source_url`, `is_activ
 
 | Method | Endpoint | Deskripsi |
 |---|---|---|
-| `POST` | `/api/chat` | AI chat (Groq + RAG + Tavily) |
+| `POST` | `/api/chat` | AI chat — streaming SSE, RAG + Tavily, model fallback |
 | `GET` | `/api/news/latest` | 5 berita terbaru (public) |
 | `POST` | `/api/articles/[slug]/view` | Increment `view_count` |
 | `GET` | `/api/articles/[slug]/comments` | List komentar approved (public) |
@@ -366,6 +418,7 @@ Entri RAG: `id`, `title`, `content`, `category`, `tags`, `source_url`, `is_activ
 | `POST` | `/api/admin/upload` | Upload gambar ke Supabase Storage |
 | `POST` | `/api/rag/chunk` | Chunk teks ke knowledge_base |
 | `POST` | `/api/rag/upload` | Upload dokumen RAG |
+| `POST` | `/api/affiliate/[id]/click` | Catat klik ke marketplace (affiliate_clicks) |
 
 ---
 
@@ -388,6 +441,23 @@ npm run dev
 Buka [http://localhost:3000](http://localhost:3000)
 
 > **Catatan:** Service Worker hanya aktif di production (`https://`). Di localhost dev mode, PWA features tidak akan terdaftar.
+
+### Setup Database (Supabase)
+
+Jalankan migration berikut di Supabase SQL Editor (Dashboard → SQL Editor):
+
+```sql
+-- 1. Buat tabel & kolom baru
+-- Salin isi dari: supabase/migrations/20260503_affiliate_clicks.sql
+
+-- 2. Seed 30 produk affiliate Shopee
+-- Salin isi dari: supabase/migrations/20260503_affiliate_seed.sql
+```
+
+Atau gunakan Supabase CLI:
+```bash
+supabase db push
+```
 
 ---
 
@@ -413,7 +483,7 @@ Lihat `.env.example` untuk detail lengkap.
 
 ## Roadmap & Backlog
 
-### ✅ Sudah Selesai (v0.1 – v0.5)
+### ✅ Sudah Selesai (v0.1 – v0.6)
 
 | Versi | Fitur |
 |---|---|
@@ -421,7 +491,8 @@ Lihat `.env.example` untuk detail lengkap.
 | v0.2 | Admin dashboard, block editor (Gutenberg-style), dark mode, CRUD artikel |
 | v0.3 | Share buttons, related posts, view tracker, admin table upgrade, CPT portfolio |
 | v0.4 | Rich text editor, slug auto-fill, custom category, SEO panel, portfolio sections |
-| v0.5 | Sistem komentar + moderasi, auth polish (magic link, profile), Schema.org JSON-LD, SEO (sitemap/robots/canonical), `/good-news` upgrade (search/filter/sort/pagination/hero), PWA penuh (SW + icons + offline), sign-up dark mode |
+| v0.5 | Sistem komentar + moderasi, auth polish (magic link, profile), Schema.org JSON-LD, SEO (sitemap/robots/canonical), `/good-news` upgrade, PWA penuh, sign-up dark mode |
+| v0.6 | **Affiliate upgrade** (30 produk, search/filter/sort, click tracking, admin stats) · **AI streaming** (SSE, voice input, share, model fallback) · **Block editor lanjutan** (drag&drop, undo/redo, autosave, table block, callout block, paste cleanup, fullscreen) |
 
 ---
 
@@ -454,31 +525,7 @@ Lihat `.env.example` untuk detail lengkap.
 
 ### 🟡 PRIORITAS MENENGAH
 
-#### 5. Halaman Affiliate Upgrade
-- Filter by kategori / marketplace
-- Search produk real-time
-- Detail `/affiliate/[id]` yang lebih kaya (deskripsi panjang, galeri)
-- Tracking klik ke marketplace (tabel `affiliate_clicks`)
-- Statistik klik per produk di admin
-
-#### 6. AI Chat Upgrade
-- **Streaming response** — Server-Sent Events (saat ini tunggu full response)
-- Suggest pertanyaan berdasarkan topik populer
-- "Bagikan percakapan" — generate shareable URL
-- Riwayat chat tersimpan di DB per user (bukan hanya `localStorage`)
-- Voice input (Web Speech API)
-- Model fallback: jika Groq down, switch ke provider lain
-
-#### 7. Block Editor Lanjutan
-- Drag & drop reorder blok (saat ini hanya ↑/↓ button)
-- Undo / redo (Ctrl+Z / Ctrl+Y)
-- Autosave ke `localStorage` (draft lokal, bisa dilanjutkan)
-- Block `table` — tabel HTML sederhana
-- Block `callout` — info / warning / success / error box
-- Paste dari Google Docs / Word (HTML cleanup)
-- Full-screen mode editor
-
-#### 8. Halaman `/shop` Fungsional
+#### 5. Halaman `/shop` Fungsional
 - Saat ini hanya placeholder
 - Integrasi dengan `affiliate_items` atau tabel produk terpisah
 - Checkout via WhatsApp / link marketplace
@@ -525,14 +572,16 @@ Lihat `.env.example` untuk detail lengkap.
 
 | Item | Detail |
 |---|---|
-| **Drag & drop editor** | Blok hanya bisa dipindah dengan tombol ↑/↓, belum drag & drop |
-| **Image optimization** | Beberapa `<img>` masih tag biasa, bukan `next/image` |
+| **Image optimization** | Beberapa `<img>` masih tag biasa, bukan `next/image`; affiliate CDN pakai `unoptimized` |
 | **Error boundaries** | Belum ada React Error Boundary untuk blok editor |
 | **API auth middleware** | `/api/admin/*` validasi role masih per-route, belum terpusat |
 | **Test coverage** | Belum ada unit test / integration test |
 | **Stale files** | `GoodNewsClient.tsx`, `PortfolioAdminClient.tsx` mungkin sudah tidak dipakai — perlu audit |
 | **SW update flow** | Service worker update (skipWaiting) belum ada UI "versi baru tersedia, reload?" |
-| **Comment pagination** | Komentar saat ini load semua sekaligus, belum ada pagination |
+| **Comment pagination** | Komentar load semua sekaligus, belum ada pagination |
+| **Affiliate seed** | 30 produk seed via SQL migration — perlu dijalankan manual di Supabase dashboard |
+| **Streaming error handling** | Jika stream terputus di tengah, UI perlu fallback yang lebih graceful |
+| **Table block a11y** | `contentEditable` pada `<td>` belum punya keyboard nav antar sel |
 
 ---
 
@@ -550,4 +599,4 @@ Lihat juga: [docs/COMMUNITY.md](./docs/COMMUNITY.md)
 
 ---
 
-*Diperbarui: Mei 2026 · v0.5*
+*Diperbarui: Mei 2026 · v0.6*
