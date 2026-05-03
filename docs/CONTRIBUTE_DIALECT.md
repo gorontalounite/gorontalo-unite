@@ -29,13 +29,11 @@ kata_gorontalo | arti_indonesia | catatan/konteks
 **Contoh:**
 ```
 wawu          | dan, juga            | digunakan di akhir kalimat untuk penekanan
-otahuta       | mau ke mana          | sering disingkat jadi "otahu"
 mopiyohu      | baik-baik saja       | jawaban umum untuk "apa kabar"
-bo'o          | kamu / kau           | informal, hanya digunakan kepada teman sebaya
+yi'o          | kamu / kau           | informal, hanya digunakan kepada teman sebaya
 tete          | kakek                | panggilan sayang untuk kakek
 nene          | nenek                | panggilan sayang untuk nenek
-mohutu        | memasak              | kata kerja
-pohutu        | acara / upacara      | bisa formal maupun informal
+motubu        | memasak              | kata kerja
 hulontalo     | Gorontalo            | nama asli dalam bahasa daerah
 ```
 
@@ -77,18 +75,18 @@ Dua teman lama bertemu di pasar, sapaan santai.
 
 ## Percakapan
 
-A: "Wonu bo'o lo ito, Paulo?"
-   (terjemahan: "Mau ke mana kamu, Paulo?")
+A: "Yi'o ohui lapata'o de'utonu?"
+   (terjemahan: "Kamu sebentar malam ada rencana kemana?")
 
-B: "Mao moli binte. Binte lo ami woluwo mao."
-   (terjemahan: "Mau beli jagung. Jagung kami sudah habis.")
+B: "Mo na'o de Limboto, mololohe Ilabulo motabo"
+   (terjemahan: "Mau ke Limboto, cari Ilabulo yang enak")
 
-A: "Eeeh, olo woluwo ami, mo'oto mao."
-   (terjemahan: "Eeeh, kalau ada, nanti saya kasih.")
+A: "Eeeh, tiyanga mayi olo ey"
+   (terjemahan: "Eeeh, Ajak juga dong")
 
 ## Catatan
-- "binte" = jagung (kata khas Gorontalo, jagung adalah makanan pokok)
-- "woluwo mao" = sudah tidak ada / sudah habis
+- "Ilabulo" = Makanan khas Gorontalo
+- "de'utonu" = Mau kemana
 - "olo" digunakan sebagai kata penghubung kondisional
 - Nada ramah dan santai, ekspresi "Eeeh" menunjukkan antusiasme/empati
 ```
@@ -108,11 +106,10 @@ Format khusus untuk melatih AI memahami dialek:
 
 | Input (Dialek Gorontalo) | Makna Sebenarnya |
 |---|---|
-| "AI, otahuta ito?" | "AI, mau ke mana kamu?" atau "AI, kamu bisa apa?" |
 | "Ceritakan tentang binte biluhuta dong" | Pertanyaan tentang kuliner khas Gorontalo (binte biluhuta = milu siram) |
 | "Di mana makan enak di Kota?" | "Di mana makan enak di Kota Gorontalo?" |
 | "Hulontalo tuh gimana sih?" | Pertanyaan umum tentang Gorontalo |
-| "Saya orang Bone" | Orang dari Kabupaten Bone Bolango, Gorontalo (bukan Bone Sulsel) |
+| "Saya orang Suwawa" | Orang dari Suwawa, Kabupaten Bone Bolango, Gorontalo |
 
 ---
 
@@ -205,9 +202,9 @@ Untuk membantu konsistensi penulisan:
 | Bunyi | Transliterasi | Contoh |
 |---|---|---|
 | Vokal panjang | ditulis dobel | `aa`, `ii`, `uu` |
-| Glottal stop | apostrof `'` | `bo'o` (kamu) |
+| Glottal stop | apostrof `'` | `bo'o` (baju) |
 | Ng velar | `ng` | `ngango` (mulut) |
-| Palatalisasi | `y` | `yilahe` (Allah) |
+| Palatalisasi | `y` | `yilahe` (rebus) |
 
 *Jika tidak yakin cara penulisan, tuliskan saja sesuai cara kamu biasa menulisnya — tim kami akan menstandarkan.*
 
