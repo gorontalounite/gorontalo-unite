@@ -46,8 +46,8 @@ Gorontalo Unite menyambut **semua jenis kontributor**, bukan hanya programmer:
 ## Apa yang Bisa Kamu Kontribusikan
 
 ### 📝 Tanpa Coding
-- [Fakta & pengetahuan tentang Gorontalo](./CONTRIBUTE_RAG.md) — tempat wisata, kuliner, budaya, sejarah
-- [Kosakata & dialek bahasa Gorontalo](./CONTRIBUTE_DIALECT.md) — kamus, percakapan, peribahasa
+- [Fakta & pengetahuan tentang Gorontalo](./CONTRIBUTE_RAG.md) — tempat wisata, kuliner, budaya, sejarah, dll
+- [Kosakata & dialek bahasa Gorontalo](./CONTRIBUTE_DIALECT.md) — kamus, percakapan, peribahasa, dll
 - Laporan bug — "ini tidak berfungsi di hp saya"
 - Usulan fitur — "enak kalau ada fitur X"
 - Testing — coba fitur baru dan beri feedback
@@ -75,7 +75,7 @@ Gorontalo Unite menyambut **semua jenis kontributor**, bukan hanya programmer:
 |---|---|---|
 | **Kontributor** | 1 kontribusi diterima | Nama di CONTRIBUTORS.md |
 | **Kontributor Aktif** | 10+ kontribusi | Nama di halaman /about website |
-| **Mitra Komunitas** | 50+ kontribusi atau kualitas luar biasa | Badge khusus + disebut di newsletter |
+| **Mitra Komunitas** | 50+ kontribusi atau kualitas luar biasa | Badge khusus |
 | **Core Contributor** | Kontribusi konsisten + trusted | Akses langsung ke main, diajak diskusi roadmap |
 
 ### 📊 Apa yang Dihitung sebagai "Kontribusi"?
