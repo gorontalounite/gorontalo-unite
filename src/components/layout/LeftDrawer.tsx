@@ -340,136 +340,154 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
     </div>
   );
 
+  // Group chats by date
+  const groupChatsByDate = (chats: RecentChat[]) => {
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    const groups: { label: string; chats: RecentChat[] }[] = [];
+    const map: Record<string, RecentChat[]> = {};
+    chats.forEach((chat) => {
+      const d = new Date(chat.created_at);
+      let label: string;
+      if (d.toDateString() === today.toDateString()) label = "Hari ini";
+      else if (d.toDateString() === yesterday.toDateString()) label = "Kemarin";
+      else label = d.toLocaleDateString("id-ID", { day: "numeric", month: "long" });
+      if (!map[label]) { map[label] = []; groups.push({ label, chats: map[label] }); }
+      map[label].push(chat);
+    });
+    return groups;
+  };
+
   // ─── MAIN VIEW ───────────────────────────────────────────────────────────────
   const MainView = () => (
     <div className="flex flex-col h-full">
-      {/* Header */}
-      <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100">
-        <span className="text-sm font-semibold text-gray-700">Menu</span>
-        <button
-          onClick={onClose}
-          className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors"
-        >
-          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+      {/* Profile section */}
+      <div className="border-b border-gray-100 dark:border-zinc-800">
+        {user ? (
+          <button
+            onClick={() => setView("profile")}
+            className="flex items-center gap-3 px-4 py-4 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors text-left w-full"
+          >
+            {avatarUrl ? (
+              <img src={avatarUrl} alt={displayName} className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
+            ) : (
+              <div className="w-11 h-11 rounded-full bg-[#b8d4c0] dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
+                <span className="text-[#2D7D46] dark:text-emerald-400 text-base font-bold">{avatarLetter}</span>
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{displayName}</p>
+              <p className="text-xs text-gray-400 dark:text-zinc-500 truncate">{user.email}</p>
+            </div>
+          </button>
+        ) : (
+          <div className="px-4 py-4 flex items-center gap-3">
+            <div className="w-11 h-11 rounded-full bg-[#b8d4c0] dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
+              <span className="text-[#2D7D46] dark:text-emerald-400 text-base font-bold">GU</span>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Nama User</p>
+              <p className="text-xs text-gray-400 dark:text-zinc-500">user@email.com</p>
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* Profile section */}
-      {user ? (
-        <button
-          onClick={() => setView("profile")}
-          className="flex items-center gap-3 px-4 py-4 hover:bg-gray-50 transition-colors text-left w-full"
-        >
-          {avatarUrl ? (
-            <img src={avatarUrl} alt={displayName} className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
-          ) : (
-            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#2D7D46] to-[#1a5c33] flex items-center justify-center flex-shrink-0">
-              <span className="text-white text-base font-bold">{avatarLetter}</span>
-            </div>
-          )}
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-gray-900 truncate">{displayName}</p>
-            <p className="text-xs text-gray-400 truncate">{user.email}</p>
-          </div>
-          <svg className="w-4 h-4 text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
-      ) : (
-        <div className="px-4 py-4 flex items-center gap-3">
-          <div className="w-11 h-11 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
-            <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-700">Tamu</p>
-            <p className="text-xs text-gray-400">Belum masuk</p>
+      {/* Scrollable area */}
+      <div className="flex-1 overflow-y-auto">
+        {/* CHAT section */}
+        <div className="px-4 pt-4 pb-2">
+          <p className="text-[11px] font-semibold tracking-widest text-gray-400 dark:text-zinc-500 uppercase mb-2">
+            Chat
+          </p>
+          <div className="space-y-0.5">
+            {/* New Chat */}
+            <button
+              onClick={handleNewChat}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
+            >
+              <svg className="w-4 h-4 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              New Chat
+            </button>
+            {/* Riwayat Chat */}
+            <button
+              onClick={() => {}}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
+            >
+              <svg className="w-4 h-4 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              Riwayat Chat
+            </button>
           </div>
         </div>
-      )}
 
-      <div className="mx-4 border-t border-gray-100" />
+        <div className="mx-4 border-t border-gray-100 dark:border-zinc-800" />
 
-      {/* Scrollable area */}
-      <div className="flex-1 overflow-y-auto px-3 py-3 space-y-1">
-        {/* New Chat */}
-        <button
-          onClick={handleNewChat}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-[#2D7D46] bg-emerald-50 hover:bg-emerald-100 transition-colors"
-        >
-          <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Chat Baru
-        </button>
-
-        {/* Recent Chats */}
+        {/* Recent Chats grouped by date */}
         {user && (
-          <div className="pt-2">
-            <p className="text-[11px] text-gray-400 font-medium uppercase tracking-wide px-3 mb-1.5">
-              Percakapan Terbaru
-            </p>
+          <div className="px-3 py-2">
             {loadingChats ? (
               <div className="flex justify-center py-4">
                 <div className="w-4 h-4 border-2 border-[#2D7D46] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : recentChats.length > 0 ? (
-              <div className="space-y-0.5">
-                {recentChats.map((chat) => (
-                  <div key={chat.id} className="group relative">
-                    {pendingDeleteId === chat.id ? (
-                      /* Inline delete confirmation */
-                      <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-red-50 border border-red-100">
-                        <svg className="w-3.5 h-3.5 flex-shrink-0 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        <span className="flex-1 text-xs text-red-600 font-medium">Hapus chat ini?</span>
-                        <button
-                          onClick={() => handleDeleteChat(chat.id)}
-                          disabled={deletingId === chat.id}
-                          className="text-[10px] font-semibold text-white bg-red-500 hover:bg-red-600 px-2 py-0.5 rounded-md transition-colors disabled:opacity-50"
-                        >
-                          {deletingId === chat.id ? "..." : "Ya"}
-                        </button>
-                        <button
-                          onClick={() => setPendingDeleteId(null)}
-                          className="text-[10px] font-semibold text-gray-500 hover:text-gray-700 px-2 py-0.5 rounded-md border border-gray-200 hover:bg-gray-100 transition-colors"
-                        >
-                          Batal
-                        </button>
+              groupChatsByDate(recentChats).map((group) => (
+                <div key={group.label} className="mb-3">
+                  <p className="text-[11px] text-gray-400 dark:text-zinc-500 px-3 mb-1">{group.label}</p>
+                  <div className="space-y-0.5">
+                    {group.chats.map((chat) => (
+                      <div key={chat.id} className="group relative">
+                        {pendingDeleteId === chat.id ? (
+                          <div className="flex items-center gap-2 px-3 py-2.5 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900">
+                            <span className="flex-1 text-xs text-red-600 font-medium">Hapus chat ini?</span>
+                            <button
+                              onClick={() => handleDeleteChat(chat.id)}
+                              disabled={deletingId === chat.id}
+                              className="text-[10px] font-semibold text-white bg-red-500 hover:bg-red-600 px-2 py-0.5 rounded-md transition-colors disabled:opacity-50"
+                            >
+                              {deletingId === chat.id ? "..." : "Ya"}
+                            </button>
+                            <button
+                              onClick={() => setPendingDeleteId(null)}
+                              className="text-[10px] font-semibold text-gray-500 px-2 py-0.5 rounded-md border border-gray-200 hover:bg-gray-100 transition-colors"
+                            >
+                              Batal
+                            </button>
+                          </div>
+                        ) : (
+                          <div className="flex items-start gap-1">
+                            <button
+                              onClick={() => handleLoadChat(chat)}
+                              className="flex-1 text-left px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors flex items-start gap-2"
+                            >
+                              <svg className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-gray-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                              </svg>
+                              <span className="leading-snug line-clamp-2">
+                                {chat.user_message.length > 50
+                                  ? chat.user_message.slice(0, 50) + "…"
+                                  : chat.user_message}
+                              </span>
+                            </button>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setPendingDeleteId(chat.id); }}
+                              className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-lg text-gray-200 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 mt-1.5"
+                            >
+                              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                              </svg>
+                            </button>
+                          </div>
+                        )}
                       </div>
-                    ) : (
-                      <div className="flex items-start gap-1">
-                        <button
-                          onClick={() => handleLoadChat(chat)}
-                          className="flex-1 text-left px-3 py-2.5 rounded-xl text-xs text-gray-600 hover:bg-gray-100 hover:text-[#2D7D46] transition-colors flex items-start gap-2"
-                        >
-                          <svg className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                          </svg>
-                          <span className="leading-snug line-clamp-2">
-                            {chat.user_message.length > 50
-                              ? chat.user_message.slice(0, 50) + "…"
-                              : chat.user_message}
-                          </span>
-                        </button>
-                        <button
-                          onClick={(e) => { e.stopPropagation(); setPendingDeleteId(chat.id); }}
-                          className="flex-shrink-0 w-6 h-6 flex items-center justify-center rounded-lg text-gray-200 hover:text-red-400 hover:bg-red-50 transition-colors opacity-0 group-hover:opacity-100 mt-1.5"
-                          title="Hapus chat"
-                        >
-                          <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                        </button>
-                      </div>
-                    )}
+                    ))}
                   </div>
-                ))}
-              </div>
+                </div>
+              ))
             ) : (
               <p className="text-xs text-gray-400 px-3 py-2">Belum ada percakapan</p>
             )}
@@ -477,28 +495,39 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
         )}
       </div>
 
-      {/* Bottom */}
-      <div className="px-3 py-3 border-t border-gray-100">
+      {/* Bottom: Setting + Login/Log Out */}
+      <div className="px-3 py-3 border-t border-gray-100 dark:border-zinc-800 space-y-0.5">
+        <button
+          onClick={() => setView("profile")}
+          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
+        >
+          <svg className="w-4 h-4 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+          </svg>
+          Setting
+        </button>
+
         {user ? (
           <button
             onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-red-500 hover:bg-red-50 transition-colors"
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
           >
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            Keluar
+            Login / Log Out
           </button>
         ) : (
           <Link
-            href="/sign-in"
+            href="/auth/login"
             onClick={onClose}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-white bg-[#2D7D46] hover:bg-[#236137] transition-colors"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
           >
-            <svg className="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-4 h-4 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
             </svg>
-            Masuk / Daftar
+            Login / Log Out
           </Link>
         )}
       </div>

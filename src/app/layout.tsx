@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist } from "next/font/google";
 import "./globals.css";
 import Navbar                 from "@/components/layout/Navbar";
+import BottomNav              from "@/components/layout/BottomNav";
 import ServiceWorkerRegister  from "@/components/layout/ServiceWorkerRegister";
 import { ThemeProvider, themeInitScript } from "@/components/layout/ThemeProvider";
 
@@ -86,7 +87,8 @@ export default function RootLayout({
       <body className="h-full flex flex-col bg-background text-foreground font-sans">
         <ThemeProvider>
           <Navbar />
-          <main className="flex-1 flex flex-col min-h-0">{children}</main>
+          <main className="flex-1 flex flex-col min-h-0 pb-16 md:pb-0">{children}</main>
+          <BottomNav />
         </ThemeProvider>
         {/* PWA service worker registration */}
         <ServiceWorkerRegister />
