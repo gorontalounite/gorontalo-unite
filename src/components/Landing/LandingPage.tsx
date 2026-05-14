@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, useRef, Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import ChatContainer, { type LiveConversation } from "@/components/Chat/ChatContainer";
-import InputBar from "@/components/Chat/InputBar";
 
 /* ─── Types ─────────────────────────────────────────────────────────── */
 export interface PortfolioItem {
@@ -77,18 +76,27 @@ function formatDate(dateStr: string | null): string {
   });
 }
 
-const SUGGESTED_PROMPTS = [
-  "Kuliner khas yang wajib dicoba di Gorontalo?",
-  "Spot wisata bahari terbaik di Gorontalo?",
-  "Cara membuat kain Karawo?",
-  "Bagaimana cara mengurus KTP di Gorontalo?",
-];
-
 /* ─── Hero with chat-first ──────────────────────────────────────────── */
 function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
+  const [value, setValue] = useState("");
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  const handleSend = () => {
+    const trimmed = value.trim();
+    if (!trimmed) return;
+    onSend(trimmed);
+    setValue("");
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   return (
     <section className="relative px-4 sm:px-6 overflow-hidden" style={{ minHeight: "60vh", display: "flex", alignItems: "center" }}>
-      {/* Soft gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/50 via-transparent to-transparent dark:from-emerald-950/20 pointer-events-none" />
 
       <div className="relative max-w-3xl mx-auto text-center w-full py-12 sm:py-16">
@@ -103,17 +111,37 @@ function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
           Chatbot AI lokal yang memahami wisata, budaya, kuliner, dan layanan publik Gorontalo.
         </p>
 
-        {/* Live chat box — dominant element */}
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-xl shadow-emerald-900/10 dark:shadow-black/40 overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-3 border-b border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
-              Gorontalo AI · online
-            </span>
-          </div>
-          {/* Spacious chat area */}
-          <div className="px-2 py-8 sm:px-4 sm:py-12">
-            <InputBar onSend={onSend} />
+        {/* Large chat box */}
+        <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl overflow-hidden shadow-lg shadow-emerald-900/10 dark:shadow-black/40">
+          <textarea
+            ref={textareaRef}
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder="Apa kabar terbaru dari Gorontalo hari ini?"
+            rows={4}
+            className="w-full bg-transparent text-base text-gray-800 dark:text-gray-100 placeholder-gray-400 dark:placeholder-zinc-500 resize-none outline-none px-5 pt-5 pb-3 leading-relaxed"
+          />
+          <div className="flex items-center justify-between px-4 pb-4">
+            <button
+              type="button"
+              className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-400 dark:text-zinc-500 hover:bg-gray-200 dark:hover:bg-zinc-700 transition-colors"
+              aria-label="Lampiran"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+              </svg>
+            </button>
+            <button
+              onClick={handleSend}
+              disabled={!value.trim()}
+              className="flex items-center gap-2 px-5 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-semibold rounded-xl hover:bg-gray-700 dark:hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+            >
+              Kirim
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
+            </button>
           </div>
         </div>
 
