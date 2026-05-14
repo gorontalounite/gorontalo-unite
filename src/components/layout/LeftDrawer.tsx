@@ -365,8 +365,9 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
       {/* Profile section */}
       <div className="border-b border-gray-100 dark:border-zinc-800">
         {user ? (
-          <button
-            onClick={() => setView("profile")}
+          <Link
+            href="/profile"
+            onClick={onClose}
             className="flex items-center gap-3 px-4 py-4 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors text-left w-full"
           >
             {avatarUrl ? (
@@ -380,7 +381,7 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
               <p className="text-sm font-semibold text-gray-900 dark:text-gray-100 truncate">{displayName}</p>
               <p className="text-xs text-gray-400 dark:text-zinc-500 truncate">{user.email}</p>
             </div>
-          </button>
+          </Link>
         ) : (
           <div className="px-4 py-4 flex items-center gap-3">
             <div className="w-11 h-11 rounded-full bg-[#b8d4c0] dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
@@ -497,16 +498,17 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
 
       {/* Bottom: Setting + Login/Log Out */}
       <div className="px-3 py-3 border-t border-gray-100 dark:border-zinc-800 space-y-0.5">
-        <button
-          onClick={() => setView("profile")}
-          className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
+        <Link
+          href="/profile"
+          onClick={onClose}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
         >
           <svg className="w-4 h-4 flex-shrink-0 text-gray-500 dark:text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
           </svg>
           Setting
-        </button>
+        </Link>
 
         {user ? (
           <button
@@ -540,7 +542,7 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
         <div className="fixed inset-0 z-40 bg-black/30 backdrop-blur-[2px]" onClick={onClose} />
       )}
       <div
-        className={`fixed top-0 left-0 h-full w-72 bg-white z-50 shadow-2xl transition-transform duration-300 ease-in-out ${
+        className={`fixed top-0 left-0 h-full w-72 bg-white dark:bg-zinc-950 z-50 shadow-2xl transition-transform duration-300 ease-in-out ${
           open ? "translate-x-0" : "-translate-x-full"
         }`}
       >
