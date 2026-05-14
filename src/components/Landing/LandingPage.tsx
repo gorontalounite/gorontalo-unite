@@ -112,23 +112,11 @@ function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
             </span>
           </div>
           {/* Spacious chat area */}
-          <div className="px-2 py-4 sm:px-4 sm:py-6">
+          <div className="px-2 py-8 sm:px-4 sm:py-12">
             <InputBar onSend={onSend} />
           </div>
         </div>
 
-        {/* Suggested chips */}
-        <div className="mt-5 flex flex-wrap justify-center gap-2">
-          {SUGGESTED_PROMPTS.map((q) => (
-            <button
-              key={q}
-              onClick={() => onSend(q)}
-              className="text-xs sm:text-sm px-3 py-1.5 rounded-full bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 text-gray-600 dark:text-gray-300 hover:border-[#2D7D46] dark:hover:border-emerald-500 hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors"
-            >
-              {q}
-            </button>
-          ))}
-        </div>
       </div>
     </section>
   );
