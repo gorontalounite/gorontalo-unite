@@ -27,19 +27,20 @@ const categoryGradients: Record<string, string> = {
   Infrastruktur: "from-gray-400 to-slate-500",
   Sejarah:       "from-amber-500 to-yellow-600",
   Kesehatan:     "from-red-400 to-pink-500",
-  "Good News":   "from-emerald-400 to-green-500",
+  "Update News":  "from-emerald-400 to-green-500",
 };
 
 const navLinks = [
-  {
-    href: "/affiliate",
-    label: "Affiliate",
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
-      </svg>
-    ),
-  },
+  // Affiliate hidden — sembunyikan sementara
+  // {
+  //   href: "/affiliate",
+  //   label: "Affiliate",
+  //   icon: (
+  //     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+  //       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+  //     </svg>
+  //   ),
+  // },
   {
     href: "/privacy-policy",
     label: "Kebijakan Privasi",
@@ -60,7 +61,7 @@ const navLinks = [
   },
   {
     href: "/about",
-    label: "Tentang Kami",
+    label: "About Project",
     icon: (
       <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />

@@ -87,11 +87,11 @@ const SUGGESTED_PROMPTS = [
 /* ─── Hero with chat-first ──────────────────────────────────────────── */
 function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
   return (
-    <section className="relative px-4 sm:px-6 pt-10 sm:pt-14 pb-10 sm:pb-16 overflow-hidden">
+    <section className="relative px-4 sm:px-6 overflow-hidden" style={{ minHeight: "60vh", display: "flex", alignItems: "center" }}>
       {/* Soft gradient background */}
       <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/50 via-transparent to-transparent dark:from-emerald-950/20 pointer-events-none" />
 
-      <div className="relative max-w-3xl mx-auto text-center">
+      <div className="relative max-w-3xl mx-auto text-center w-full py-12 sm:py-16">
         <span className="inline-block text-xs font-semibold text-[#2D7D46] dark:text-emerald-400 uppercase tracking-widest mb-3">
           AI Lokal Gorontalo
         </span>
@@ -99,23 +99,26 @@ function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
           Tanyakan apapun{" "}
           <span className="text-[#2D7D46] dark:text-emerald-400">tentang Gorontalo</span>
         </h1>
-        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto mb-5">
+        <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto mb-8">
           Chatbot AI lokal yang memahami wisata, budaya, kuliner, dan layanan publik Gorontalo.
         </p>
 
-        {/* Live chat box */}
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-lg shadow-emerald-900/5 dark:shadow-black/30 overflow-hidden">
-          <div className="flex items-center gap-2 px-5 py-2.5 border-b border-gray-100 dark:border-zinc-800">
-            <span className="w-2 h-2 rounded-full bg-emerald-500" />
-            <span className="text-xs font-medium text-gray-500 dark:text-gray-400">
+        {/* Live chat box — dominant element */}
+        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 shadow-xl shadow-emerald-900/10 dark:shadow-black/40 overflow-hidden">
+          <div className="flex items-center gap-2 px-5 py-3 border-b border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50">
+            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="text-xs font-semibold text-gray-500 dark:text-gray-400">
               Gorontalo AI · online
             </span>
           </div>
-          <InputBar onSend={onSend} />
+          {/* Spacious chat area */}
+          <div className="px-2 py-4 sm:px-4 sm:py-6">
+            <InputBar onSend={onSend} />
+          </div>
         </div>
 
         {/* Suggested chips */}
-        <div className="mt-4 flex flex-wrap justify-center gap-2">
+        <div className="mt-5 flex flex-wrap justify-center gap-2">
           {SUGGESTED_PROMPTS.map((q) => (
             <button
               key={q}
@@ -290,13 +293,65 @@ function PortfolioSection({ items }: { items: PortfolioItem[] }) {
   );
 }
 
-/* ─── News Section ──────────────────────────────────────────────────── */
-function NewsSection({ items }: { items: NewsItem[] }) {
+/* ─── Dummy news data (will be replaced by DB fetch) ────────────────── */
+const DUMMY_NEWS = [
+  {
+    id: "1", slug: "pantai-olele-surga-bawah-laut",
+    title: "Pantai Olele: Surga Bawah Laut yang Menakjubkan di Gorontalo",
+    excerpt: "Keindahan terumbu karang dan biota laut Pantai Olele menjadi daya tarik wisatawan mancanegara.",
+    category: "Wisata", published_at: "2026-04-28", image_seed: 10,
+  },
+  {
+    id: "2", slug: "festival-karawo-2026",
+    title: "Festival Karawo 2026 Resmi Dibuka, Ribuan Pengunjung Memadati Venue",
+    excerpt: "Kerajinan sulam khas Gorontalo tampil memukau dalam festival tahunan yang semakin berkelas.",
+    category: "Budaya", published_at: "2026-04-25", image_seed: 20,
+  },
+  {
+    id: "3", slug: "binte-biluhuta-kuliner-wajib",
+    title: "Binte Biluhuta: Kuliner Wajib yang Memikat Lidah Wisatawan",
+    excerpt: "Sup jagung khas Gorontalo ini kini hadir di berbagai restoran modern dengan cita rasa otentik.",
+    category: "Kuliner", published_at: "2026-04-22", image_seed: 30,
+  },
+  {
+    id: "4", slug: "beasiswa-daerah-gorontalo-2026",
+    title: "Pemprov Gorontalo Buka 500 Beasiswa Daerah untuk Mahasiswa Berprestasi",
+    excerpt: "Program beasiswa ini menyasar pelajar kurang mampu namun berprestasi tinggi di seluruh Gorontalo.",
+    category: "Pendidikan", published_at: "2026-04-20", image_seed: 40,
+  },
+  {
+    id: "5", slug: "ekspor-jagung-gorontalo-meningkat",
+    title: "Ekspor Jagung Gorontalo Meningkat 30% di Kuartal Pertama 2026",
+    excerpt: "Tren positif ekspor jagung didukung oleh modernisasi pertanian dan akses pasar yang lebih luas.",
+    category: "Ekonomi", published_at: "2026-04-18", image_seed: 50,
+  },
+  {
+    id: "6", slug: "danau-limboto-revitalisasi",
+    title: "Revitalisasi Danau Limboto Dimulai, Target Selesai Akhir 2026",
+    excerpt: "Proyek besar revitalisasi Danau Limboto diharapkan mengembalikan kejayaan ekosistem danau ikonik ini.",
+    category: "Wisata", published_at: "2026-04-15", image_seed: 60,
+  },
+  {
+    id: "7", slug: "seni-tari-dana-dana",
+    title: "Tari Dana-Dana Gorontalo Tampil di Pentas Seni Internasional Jakarta",
+    excerpt: "Delegasi Gorontalo membawa kebanggaan lewat penampilan Tari Dana-Dana yang memukau penonton internasional.",
+    category: "Budaya", published_at: "2026-04-12", image_seed: 70,
+  },
+  {
+    id: "8", slug: "startup-teknologi-gorontalo",
+    title: "Startup Teknologi Lokal Gorontalo Raih Pendanaan Seri A Rp 15 Miliar",
+    excerpt: "Inovasi digital dari Gorontalo kini mendapat kepercayaan investor nasional untuk berkembang lebih jauh.",
+    category: "Ekonomi", published_at: "2026-04-10", image_seed: 80,
+  },
+];
+
+/* ─── News Section (4×2 grid) ───────────────────────────────────────── */
+function NewsSection({ items: _items }: { items: NewsItem[] }) {
   return (
-    <section id="berita" className="px-4 sm:px-6 py-16 sm:py-24">
+    <section id="berita" className="px-4 sm:px-6 py-16 sm:py-24 bg-gray-50/60 dark:bg-zinc-950/60 border-y border-gray-100 dark:border-zinc-800">
       <div className="max-w-6xl mx-auto">
         <SectionHeading
-          eyebrow="Berita"
+          eyebrow="Update News"
           title="Kabar terbaru dari Gorontalo"
           description="Liputan harian seputar wisata, ekonomi, pendidikan, dan budaya Gorontalo."
           action={
@@ -312,59 +367,41 @@ function NewsSection({ items }: { items: NewsItem[] }) {
           }
         />
 
-        {items.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-5 sm:gap-6">
-            {items.slice(0, 3).map((item) => (
-              <Link
-                key={item.id}
-                href={`/news/${item.slug}`}
-                className="group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#2D7D46]/40 dark:hover:border-emerald-500/40 hover:shadow-lg dark:hover:shadow-black/40 transition-all flex flex-col"
-              >
-                <div className="aspect-[16/10] bg-gray-100 dark:bg-zinc-800 relative overflow-hidden">
-                  {item.image_url ? (
-                    <Image
-                      src={item.image_url}
-                      alt={item.title}
-                      fill
-                      sizes="(max-width: 768px) 100vw, 33vw"
-                      className="object-cover group-hover:scale-105 transition-transform duration-500"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-3xl">📰</div>
-                  )}
-                </div>
-                <div className="p-5 flex-1 flex flex-col">
-                  <span
-                    className={`self-start text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                      CATEGORY_BADGE[item.category] ??
-                      "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300"
-                    }`}
-                  >
-                    {item.category}
-                  </span>
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mt-3 line-clamp-2 group-hover:text-[#2D7D46] dark:group-hover:text-emerald-400 transition-colors">
-                    {item.title}
-                  </h3>
-                  {item.excerpt && (
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-2 line-clamp-2 flex-1">
-                      {item.excerpt}
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
-                    {formatDate(item.published_at ?? item.created_at)}
-                  </p>
-                </div>
-              </Link>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16 bg-gray-50 dark:bg-zinc-900 rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800">
-            <span className="text-4xl">📰</span>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
-              Berita akan segera tersedia.
-            </p>
-          </div>
-        )}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+          {DUMMY_NEWS.map((item) => (
+            <Link
+              key={item.id}
+              href={`/news/${item.slug}`}
+              className="group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#2D7D46]/40 dark:hover:border-emerald-500/40 hover:shadow-lg dark:hover:shadow-black/40 transition-all flex flex-col"
+            >
+              <div className="aspect-[16/10] bg-gray-100 dark:bg-zinc-800 relative overflow-hidden">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`https://picsum.photos/seed/${item.image_seed}/400/250`}
+                  alt={item.title}
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                  loading="lazy"
+                />
+              </div>
+              <div className="p-4 flex-1 flex flex-col">
+                <span
+                  className={`self-start text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                    CATEGORY_BADGE[item.category] ??
+                    "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300"
+                  }`}
+                >
+                  {item.category}
+                </span>
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mt-2.5 line-clamp-2 group-hover:text-[#2D7D46] dark:group-hover:text-emerald-400 transition-colors leading-snug flex-1">
+                  {item.title}
+                </h3>
+                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2.5">
+                  {formatDate(item.published_at)}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -581,9 +618,9 @@ export default function LandingPage({ portfolioItems, newsItems }: LandingPagePr
   return (
     <div className="flex-1 overflow-y-auto bg-white dark:bg-zinc-950">
       <ChatHero onSend={handleSend} />
-      <PortfolioSection items={portfolioItems} />
+      {false && <PortfolioSection items={portfolioItems} />}
       <NewsSection items={newsItems} />
-      <AboutSection />
+      {false && <AboutSection />}
       <Footer />
     </div>
   );
