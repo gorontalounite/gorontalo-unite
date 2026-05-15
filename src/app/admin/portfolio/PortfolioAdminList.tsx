@@ -58,7 +58,7 @@ export default function PortfolioAdminList({ initialItems }: { initialItems: Por
         </div>
         <Link
           href="/admin/portfolio/new"
-          className="bg-[#2D7D46] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#236137] transition-colors flex items-center gap-2"
+          className="bg-[#F5C400] text-black text-sm px-4 py-2 rounded-xl hover:bg-[#c9a000] transition-colors flex items-center gap-2"
         >
           <span>+</span> Karya Baru
         </Link>
@@ -93,7 +93,7 @@ export default function PortfolioAdminList({ initialItems }: { initialItems: Por
 
                 <div className="p-3">
                   {stack && (
-                    <span className="text-[11px] font-semibold bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full mb-1.5 inline-block">
+                    <span className="text-[11px] font-semibold bg-yellow-100 text-emerald-700 px-2 py-0.5 rounded-full mb-1.5 inline-block">
                       {stack}
                     </span>
                   )}
@@ -108,7 +108,7 @@ export default function PortfolioAdminList({ initialItems }: { initialItems: Por
                   <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100">
                     <Link
                       href={`/admin/portfolio/edit/${item.id}`}
-                      className="text-xs text-[#2D7D46] hover:underline font-medium"
+                      className="text-xs text-[#F5C400] hover:underline font-medium"
                     >
                       Edit
                     </Link>

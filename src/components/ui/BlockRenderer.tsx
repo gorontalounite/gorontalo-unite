@@ -123,7 +123,7 @@ function RenderBlock({ block }: { block: Block }) {
     case "quote": {
       const cite = block.attrs?.cite as string | undefined;
       return (
-        <blockquote className="border-l-4 border-[#2D7D46] dark:border-emerald-500 pl-4 italic text-gray-600 dark:text-gray-400 my-5">
+        <blockquote className="border-l-4 border-[#F5C400] dark:border-yellow-500 pl-4 italic text-gray-600 dark:text-gray-400 my-5">
           <p className="leading-relaxed">{block.content}</p>
           {cite && (
             <cite className="block mt-1 text-xs text-gray-400 dark:text-gray-500 not-italic">
@@ -177,7 +177,7 @@ function RenderBlock({ block }: { block: Block }) {
             <div className="border border-gray-200 dark:border-zinc-700 rounded-xl p-4 text-sm text-gray-500">
               🔗{" "}
               <a href={url} target="_blank" rel="noopener noreferrer"
-                className="text-[#2D7D46] dark:text-emerald-400 underline underline-offset-2">
+                className="text-[#F5C400] dark:text-yellow-400 underline underline-offset-2">
                 {url}
               </a>
             </div>

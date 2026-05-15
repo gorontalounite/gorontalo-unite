@@ -31,7 +31,7 @@ export default async function AffiliatePage() {
           </svg>
           Beranda
         </Link>
-        <p className="text-xs font-semibold text-[#2D7D46] uppercase tracking-widest mb-1">Affiliate</p>
+        <p className="text-xs font-semibold text-[#F5C400] uppercase tracking-widest mb-1">Affiliate</p>
         <h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">Produk Pilihan</h1>
         <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
           Produk-produk pilihan terbaik. Beli langsung di Shopee &amp; marketplace lainnya.

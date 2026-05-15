@@ -15,10 +15,10 @@ interface NewsItem {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Wisata: "bg-emerald-100 text-emerald-700", Budaya: "bg-purple-100 text-purple-700",
+  Wisata: "bg-yellow-100 text-emerald-700", Budaya: "bg-purple-100 text-purple-700",
   Kuliner: "bg-orange-100 text-orange-700",  Pendidikan: "bg-blue-100 text-blue-700",
   Ekonomi: "bg-amber-100 text-amber-700",    Kesehatan: "bg-red-100 text-red-700",
-  "Good News": "bg-emerald-100 text-emerald-700", Umum: "bg-gray-100 text-gray-600",
+  "Good News": "bg-yellow-100 text-emerald-700", Umum: "bg-gray-100 text-gray-600",
 };
 
 const PAGE_SIZES = [10, 25, 50];
@@ -120,7 +120,7 @@ export default function NewsAdminList({ initialItems }: { initialItems: NewsItem
         </div>
         <Link
           href="/admin/news/new"
-          className="bg-[#2D7D46] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#236137] transition-colors flex items-center gap-2"
+          className="bg-[#F5C400] text-black text-sm px-4 py-2 rounded-xl hover:bg-[#c9a000] transition-colors flex items-center gap-2"
         >
           <span>+</span> Berita Baru
         </Link>
@@ -136,7 +136,7 @@ export default function NewsAdminList({ initialItems }: { initialItems: NewsItem
             value={globalSearch}
             onChange={(e) => { setSearch(e.target.value); setPage(1); }}
             placeholder="Cari judul, kategori, atau slug…"
-            className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-[#2D7D46]"
+            className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-[#F5C400]"
           />
           {globalSearch && (
             <button onClick={() => { setSearch(""); setPage(1); }}
@@ -148,7 +148,7 @@ export default function NewsAdminList({ initialItems }: { initialItems: NewsItem
         <select
           value={catFilter}
           onChange={(e) => { setCat(e.target.value); setPage(1); }}
-          className="text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] bg-white"
+          className="text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] bg-white"
         >
           <option value="all">Semua kategori</option>
           {categories.filter((c) => c !== "all").map((c) => (
@@ -160,7 +160,7 @@ export default function NewsAdminList({ initialItems }: { initialItems: NewsItem
         <select
           value={statusFilter}
           onChange={(e) => { setStatus(e.target.value); setPage(1); }}
-          className="text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] bg-white"
+          className="text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] bg-white"
         >
           <option value="all">Semua status</option>
           <option value="published">Publik</option>
@@ -171,7 +171,7 @@ export default function NewsAdminList({ initialItems }: { initialItems: NewsItem
         <select
           value={pageSize}
           onChange={(e) => { setPageSize(Number(e.target.value)); setPage(1); }}
-          className="text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] bg-white"
+          className="text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] bg-white"
         >
           {PAGE_SIZES.map((s) => <option key={s} value={s}>{s} / halaman</option>)}
         </select>
@@ -232,7 +232,7 @@ export default function NewsAdminList({ initialItems }: { initialItems: NewsItem
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      a.published ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"
+                      a.published ? "bg-yellow-100 text-emerald-700" : "bg-gray-100 text-gray-500"
                     }`}>
                       {a.published ? "Publik" : "Draft"}
                     </span>
@@ -240,7 +240,7 @@ export default function NewsAdminList({ initialItems }: { initialItems: NewsItem
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">
                       <Link href={`/admin/news/edit/${a.id}`}
-                        className="text-xs text-[#2D7D46] hover:underline font-medium">Edit</Link>
+                        className="text-xs text-[#F5C400] hover:underline font-medium">Edit</Link>
                       <Link href={`/news/${a.slug}`} target="_blank"
                         className="text-xs text-gray-400 hover:underline hidden lg:inline">Lihat →</Link>
                       <button onClick={() => setDeleteId(a.id)}

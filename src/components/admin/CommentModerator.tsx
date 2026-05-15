@@ -66,7 +66,7 @@ export default function CommentModerator({ articleId }: { articleId: string }) {
   const Row = ({ c }: { c: Comment }) => (
     <div key={c.id} className={`rounded-xl border p-3 text-sm space-y-1.5 ${
       c.approved
-        ? "border-emerald-100 bg-emerald-50/50"
+        ? "border-yellow-100 bg-yellow-50/50"
         : "border-amber-100 bg-amber-50/50"
     }`}>
       <div className="flex items-center justify-between gap-2">
@@ -77,7 +77,7 @@ export default function CommentModerator({ articleId }: { articleId: string }) {
           )}
           <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium shrink-0 ${
             c.approved
-              ? "bg-emerald-100 text-emerald-700"
+              ? "bg-yellow-100 text-emerald-700"
               : "bg-amber-100 text-amber-700"
           }`}>
             {c.approved ? "Approved" : "Pending"}
@@ -95,7 +95,7 @@ export default function CommentModerator({ articleId }: { articleId: string }) {
           <button
             disabled={busy === c.id}
             onClick={() => approve(c.id, true)}
-            className="text-xs bg-emerald-500 text-white px-2.5 py-1 rounded-lg hover:bg-emerald-600 disabled:opacity-50"
+            className="text-xs bg-yellow-400 text-white px-2.5 py-1 rounded-lg hover:bg-yellow-500 disabled:opacity-50"
           >
             ✓ Setujui
           </button>
@@ -127,7 +127,7 @@ export default function CommentModerator({ articleId }: { articleId: string }) {
         <span className="bg-amber-100 text-amber-700 font-medium px-2 py-0.5 rounded-full">
           {pending.length} menunggu
         </span>
-        <span className="bg-emerald-100 text-emerald-700 font-medium px-2 py-0.5 rounded-full">
+        <span className="bg-yellow-100 text-emerald-700 font-medium px-2 py-0.5 rounded-full">
           {approved.length} disetujui
         </span>
       </div>

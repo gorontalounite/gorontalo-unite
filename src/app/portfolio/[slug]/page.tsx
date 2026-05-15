@@ -132,9 +132,9 @@ export default async function PortfolioDetailPage({ params }: Props) {
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
-        <Link href="/" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">Beranda</Link>
+        <Link href="/" className="hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Beranda</Link>
         <span>/</span>
-        <Link href="/portfolio" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">Portofolio</Link>
+        <Link href="/portfolio" className="hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Portofolio</Link>
         <span>/</span>
         <span className="text-gray-500 dark:text-gray-400 truncate max-w-[180px]">{item.title}</span>
       </nav>
@@ -143,7 +143,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
         {/* Stack badge + trending + date + views */}
         <div className="flex flex-wrap items-center gap-2 mb-4">
           {stackLabel && (
-            <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300 px-2.5 py-1 rounded-full">
+            <span className="text-xs font-semibold bg-yellow-100 text-emerald-700 dark:bg-yellow-900/40 dark:text-emerald-300 px-2.5 py-1 rounded-full">
               {stackLabel}
             </span>
           )}
@@ -169,7 +169,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
 
         {/* Excerpt */}
         {item.excerpt && (
-          <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed mb-6 border-l-4 border-[#2D7D46] dark:border-emerald-500 pl-4 italic">
+          <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed mb-6 border-l-4 border-[#F5C400] dark:border-yellow-500 pl-4 italic">
             {item.excerpt}
           </p>
         )}
@@ -273,7 +273,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
         <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 flex flex-wrap gap-3">
           {item.project_url && (
             <a href={item.project_url} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#2D7D46] dark:bg-emerald-500 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-[#1f5a33] dark:hover:bg-emerald-400 transition-colors shadow-sm">
+              className="inline-flex items-center gap-2 bg-[#F5C400] dark:bg-yellow-400 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-[#1f5a33] dark:hover:bg-yellow-400 transition-colors shadow-sm">
               Lihat Live Demo
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -292,7 +292,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
           {/* Legacy source_url fallback */}
           {!item.project_url && item.source_url && (
             <a href={item.source_url} target="_blank" rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 bg-[#2D7D46] dark:bg-emerald-500 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-[#1f5a33] dark:hover:bg-emerald-400 transition-colors shadow-sm">
+              className="inline-flex items-center gap-2 bg-[#F5C400] dark:bg-yellow-400 text-white text-sm font-semibold px-6 py-3 rounded-xl hover:bg-[#1f5a33] dark:hover:bg-yellow-400 transition-colors shadow-sm">
               Lihat Proyek →
             </a>
           )}
@@ -312,7 +312,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
 
       {/* Back */}
       <div className="mt-8 flex gap-4">
-        <Link href="/portfolio" className="text-sm text-[#2D7D46] dark:text-emerald-400 font-medium hover:underline">
+        <Link href="/portfolio" className="text-sm text-[#F5C400] dark:text-yellow-400 font-medium hover:underline">
           ← Semua portofolio
         </Link>
         <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">

@@ -23,14 +23,14 @@ interface Props {
 }
 
 const CAT_COLORS: Record<string, string> = {
-  Wisata:        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+  Wisata:        "bg-yellow-100 text-emerald-700 dark:bg-yellow-900/30 dark:text-emerald-300",
   Budaya:        "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
   Kuliner:       "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
   Pendidikan:    "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
   Ekonomi:       "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
   Kesehatan:     "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
   Infrastruktur: "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300",
-  "Good News":   "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
+  "Good News":   "bg-yellow-100 text-emerald-700 dark:bg-yellow-900/30 dark:text-emerald-300",
   Umum:          "bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-gray-400",
 };
 
@@ -83,7 +83,7 @@ export default function GoodNewsList({ items, featured }: Props) {
                 priority
               />
             ) : (
-              <div className="w-full h-full bg-gradient-to-br from-[#2D7D46] to-[#1a5c33]" />
+              <div className="w-full h-full bg-gradient-to-br from-[#F5C400] to-[#111111]" />
             )}
             {/* Overlay */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
@@ -130,7 +130,7 @@ export default function GoodNewsList({ items, featured }: Props) {
             value={search}
             onChange={(e) => { setSearch(e.target.value); resetPage(); }}
             placeholder="Cari berita…"
-            className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 outline-none focus:border-[#2D7D46] dark:focus:border-emerald-500 text-gray-900 dark:text-white"
+            className="w-full pl-8 pr-3 py-2 text-sm border border-gray-200 dark:border-zinc-700 rounded-xl bg-white dark:bg-zinc-900 outline-none focus:border-[#F5C400] dark:focus:border-yellow-500 text-gray-900 dark:text-white"
           />
           {search && (
             <button onClick={() => { setSearch(""); resetPage(); }}
@@ -142,7 +142,7 @@ export default function GoodNewsList({ items, featured }: Props) {
         <select
           value={sort}
           onChange={(e) => { setSort(e.target.value as "terbaru" | "terpopuler"); resetPage(); }}
-          className="text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2 bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-300 outline-none focus:border-[#2D7D46]"
+          className="text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2 bg-white dark:bg-zinc-900 text-gray-700 dark:text-gray-300 outline-none focus:border-[#F5C400]"
         >
           <option value="terbaru">Terbaru</option>
           <option value="terpopuler">Terpopuler</option>
@@ -157,7 +157,7 @@ export default function GoodNewsList({ items, featured }: Props) {
             onClick={() => { setCategory(cat); resetPage(); }}
             className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
               category === cat
-                ? "bg-[#2D7D46] text-white"
+                ? "bg-[#F5C400] text-black"
                 : "bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-zinc-700"
             }`}
           >
@@ -183,7 +183,7 @@ export default function GoodNewsList({ items, featured }: Props) {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {paginated.map((item) => (
             <Link key={item.id} href={`/news/${item.slug}`} className="group">
-              <article className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden hover:shadow-md hover:border-[#2D7D46]/30 dark:hover:border-emerald-700/40 transition-all h-full flex flex-col">
+              <article className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden hover:shadow-md hover:border-[#F5C400]/30 dark:hover:border-yellow-700/40 transition-all h-full flex flex-col">
                 {/* Thumbnail */}
                 <div className="aspect-video relative bg-gray-100 dark:bg-zinc-800 shrink-0">
                   {item.image_url ? (
@@ -221,7 +221,7 @@ export default function GoodNewsList({ items, featured }: Props) {
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2 group-hover:text-[#2D7D46] dark:group-hover:text-emerald-400 transition-colors leading-snug flex-1">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2 group-hover:text-[#F5C400] dark:group-hover:text-yellow-400 transition-colors leading-snug flex-1">
                     {item.title}
                   </h3>
 
@@ -267,7 +267,7 @@ export default function GoodNewsList({ items, featured }: Props) {
                 <button key={p} onClick={() => setPage(p as number)}
                   className={`w-9 h-9 text-xs rounded-xl border transition-colors ${
                     page === p
-                      ? "bg-[#2D7D46] text-white border-[#2D7D46]"
+                      ? "bg-[#F5C400] text-black border-[#F5C400]"
                       : "border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800"
                   }`}
                 >{p}</button>

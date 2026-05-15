@@ -139,7 +139,7 @@ function ImageField({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="https://... atau unggah file di bawah"
-          className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]"
+          className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]"
         />
         <button
           type="button"
@@ -284,7 +284,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
         </div>
         <button
           onClick={openCreate}
-          className="bg-[#2D7D46] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#236137] transition-colors flex items-center gap-2"
+          className="bg-[#F5C400] text-black text-sm px-4 py-2 rounded-xl hover:bg-[#c9a000] transition-colors flex items-center gap-2"
         >
           <span>+</span> Artikel Baru
         </button>
@@ -326,7 +326,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
                     <span
                       className={`text-xs px-2 py-0.5 rounded-full font-medium ${
                         a.published
-                          ? "bg-emerald-100 text-emerald-700"
+                          ? "bg-yellow-100 text-emerald-700"
                           : "bg-gray-100 text-gray-500"
                       }`}
                     >
@@ -337,7 +337,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => openEdit(a.id)}
-                        className="text-xs text-[#2D7D46] hover:underline"
+                        className="text-xs text-[#F5C400] hover:underline"
                       >
                         Edit
                       </button>
@@ -387,7 +387,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
                       slug: f.slug || slugify(e.target.value),
                     }))
                   }
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]"
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]"
                 />
               </div>
 
@@ -397,7 +397,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
                 <input
                   value={form.slug}
                   onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] font-mono"
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] font-mono"
                 />
               </div>
 
@@ -408,7 +408,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
                   <select
                     value={form.category}
                     onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]"
+                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]"
                   >
                     {PRESET_CATEGORIES.map((c) => (
                       <option key={c}>{c}</option>
@@ -419,7 +419,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
                       value={form.customCategory}
                       onChange={(e) => setForm((f) => ({ ...f, customCategory: e.target.value }))}
                       placeholder="Nama kategori baru..."
-                      className="mt-2 w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]"
+                      className="mt-2 w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]"
                     />
                   )}
                 </div>
@@ -431,7 +431,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
                     type="datetime-local"
                     value={form.published_at}
                     onChange={(e) => setForm((f) => ({ ...f, published_at: e.target.value }))}
-                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]"
+                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]"
                   />
                 </div>
               </div>
@@ -457,7 +457,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
                   value={form.excerpt}
                   onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
                   placeholder="Ringkasan singkat artikel..."
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] resize-none"
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] resize-none"
                 />
               </div>
 
@@ -473,7 +473,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
                   value={form.content}
                   onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
                   placeholder="Tulis konten artikel dalam format Markdown..."
-                  className="w-full text-sm border border-gray-200 rounded-b-xl border-t-0 px-3 py-2 outline-none focus:border-[#2D7D46] resize-y font-mono"
+                  className="w-full text-sm border border-gray-200 rounded-b-xl border-t-0 px-3 py-2 outline-none focus:border-[#F5C400] resize-y font-mono"
                 />
               </div>
 
@@ -494,7 +494,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
                 <button
                   type="submit"
                   disabled={loading}
-                  className="flex-1 text-sm bg-[#2D7D46] text-white py-2.5 rounded-xl hover:bg-[#236137] disabled:opacity-50"
+                  className="flex-1 text-sm bg-[#F5C400] text-black py-2.5 rounded-xl hover:bg-[#c9a000] disabled:opacity-50"
                 >
                   {loading ? "Menyimpan…" : "Simpan"}
                 </button>

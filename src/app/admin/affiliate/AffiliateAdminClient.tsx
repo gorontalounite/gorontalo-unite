@@ -15,6 +15,7 @@ interface AffiliateItem {
   marketplace_name: string | null;
   tags: string[];
   published: boolean;
+  category: string | null;
   created_at: string;
 }
 
@@ -27,28 +28,43 @@ interface AffiliateForm {
   marketplace_url: string;
   marketplace_name: string;
   tags: string;
+  category: string;
   published: boolean;
 }
 
 const emptyForm: AffiliateForm = {
   title: "", description: "", image_url: "", price: "",
-  price_label: "", marketplace_url: "", marketplace_name: "Tokopedia", tags: "", published: false,
+  price_label: "", marketplace_url: "", marketplace_name: "Shopee",
+  tags: "", category: "", published: false,
 };
 
 const MARKETPLACES = ["Tokopedia", "Shopee", "Lazada", "Bukalapak", "Blibli", "Website", "Lainnya"];
+
+const CATEGORIES = [
+  "", "Lighting", "Gimbal", "Kamera", "Tas Kamera",
+  "Microphone", "Soundcard", "Tongsis & Tripod", "Power Bank", "Aksesori",
+];
 
 function formatPrice(price: number) {
   return new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(price);
 }
 
-export default function AffiliateAdminClient({ initialItems }: { initialItems: AffiliateItem[] }) {
+export default function AffiliateAdminClient({
+  initialItems,
+  clickCounts,
+}: {
+  initialItems: AffiliateItem[];
+  clickCounts: Record<string, number>;
+}) {
   const [items, setItems] = useState(initialItems);
+  const [clicks, setClicks] = useState<Record<string, number>>(clickCounts);
   const [showForm, setShowForm] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [form, setForm] = useState<AffiliateForm>(emptyForm);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [view, setView] = useState<"grid" | "table">("grid");
 
   const openCreate = () => { setForm(emptyForm); setEditId(null); setShowForm(true); setError(null); };
 
@@ -57,8 +73,9 @@ export default function AffiliateAdminClient({ initialItems }: { initialItems: A
       title: item.title, description: item.description ?? "",
       image_url: item.image_url ?? "", price: item.price ? String(item.price) : "",
       price_label: item.price_label ?? "", marketplace_url: item.marketplace_url,
-      marketplace_name: item.marketplace_name ?? "Tokopedia",
-      tags: (item.tags ?? []).join(", "), published: item.published,
+      marketplace_name: item.marketplace_name ?? "Shopee",
+      tags: (item.tags ?? []).join(", "), category: item.category ?? "",
+      published: item.published,
     });
     setEditId(item.id); setShowForm(true); setError(null);
   };
@@ -76,6 +93,7 @@ export default function AffiliateAdminClient({ initialItems }: { initialItems: A
       marketplace_url: form.marketplace_url,
       marketplace_name: form.marketplace_name || null,
       tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+      category: form.category || null,
       published: form.published,
       updated_at: new Date().toISOString(),
     };
@@ -107,57 +125,160 @@ export default function AffiliateAdminClient({ initialItems }: { initialItems: A
     setItems((prev) => prev.map((i) => i.id === id ? { ...i, published: !cur } : i));
   };
 
+  const totalClicks = Object.values(clicks).reduce((a, b) => a + b, 0);
+
   return (
     <div className="p-6">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-xl font-bold text-gray-900">Affiliate</h1>
-          <p className="text-sm text-gray-500">{items.length} produk — tampil di halaman /affiliate</p>
+          <p className="text-sm text-gray-500">
+            {items.length} produk — {totalClicks} total klik
+          </p>
         </div>
-        <button onClick={openCreate}
-          className="bg-[#2D7D46] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#236137] transition-colors flex items-center gap-2">
-          <span>+</span> Produk Baru
-        </button>
+        <div className="flex items-center gap-2">
+          {/* View toggle */}
+          <div className="flex rounded-xl border border-gray-200 overflow-hidden">
+            <button
+              onClick={() => setView("grid")}
+              className={`text-xs px-3 py-1.5 ${view === "grid" ? "bg-gray-900 text-white" : "text-gray-500 hover:bg-gray-50"}`}
+            >
+              Grid
+            </button>
+            <button
+              onClick={() => setView("table")}
+              className={`text-xs px-3 py-1.5 ${view === "table" ? "bg-gray-900 text-white" : "text-gray-500 hover:bg-gray-50"}`}
+            >
+              Tabel
+            </button>
+          </div>
+          <button
+            onClick={openCreate}
+            className="bg-[#F5C400] text-black text-sm px-4 py-2 rounded-xl hover:bg-[#c9a000] transition-colors flex items-center gap-2"
+          >
+            <span>+</span> Produk Baru
+          </button>
+        </div>
       </div>
 
-      {/* Grid */}
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-        {items.map((item) => (
-          <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 flex flex-col">
-            <div className="aspect-square bg-gray-50 relative overflow-hidden">
-              {item.image_url ? (
-                <Image src={item.image_url} alt={item.title} fill className="object-cover" />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center"><span className="text-3xl">🛍️</span></div>
-              )}
+      {/* Table View */}
+      {view === "table" && (
+        <div className="overflow-x-auto rounded-2xl border border-gray-100">
+          <table className="w-full text-sm">
+            <thead className="bg-gray-50 text-xs text-gray-500 uppercase tracking-wide">
+              <tr>
+                <th className="px-4 py-3 text-left">Produk</th>
+                <th className="px-4 py-3 text-left">Kategori</th>
+                <th className="px-4 py-3 text-left">Harga</th>
+                <th className="px-4 py-3 text-center">Status</th>
+                <th className="px-4 py-3 text-center">Statistik Klik</th>
+                <th className="px-4 py-3 text-right">Aksi</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {items.map((item) => (
+                <tr key={item.id} className="bg-white hover:bg-gray-50/50 transition-colors">
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-lg bg-gray-100 overflow-hidden relative flex-shrink-0">
+                        {item.image_url ? (
+                          <Image src={item.image_url} alt={item.title} fill unoptimized className="object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-lg">🛍️</div>
+                        )}
+                      </div>
+                      <p className="text-xs font-semibold text-gray-800 max-w-[180px] line-clamp-2">{item.title}</p>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs text-gray-500">{item.category ?? "—"}</span>
+                  </td>
+                  <td className="px-4 py-3">
+                    <span className="text-xs font-bold text-[#F5C400]">
+                      {item.price_label ?? (item.price ? formatPrice(item.price) : "—")}
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <button
+                      onClick={() => togglePublished(item.id, item.published)}
+                      className={`text-xs px-2 py-0.5 rounded-full font-medium ${item.published ? "bg-yellow-100 text-emerald-700" : "bg-gray-100 text-gray-400"}`}
+                    >
+                      {item.published ? "Publik" : "Draft"}
+                    </button>
+                  </td>
+                  <td className="px-4 py-3 text-center">
+                    <div className="flex flex-col items-center">
+                      <span className="text-base font-bold text-gray-800">{clicks[item.id] ?? 0}</span>
+                      <span className="text-[10px] text-gray-400">klik</span>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <button onClick={() => openEdit(item)} className="text-xs text-[#F5C400] hover:underline">Edit</button>
+                      <button onClick={() => setDeleteId(item.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+          {items.length === 0 && (
+            <div className="py-16 text-center text-gray-400 text-sm">
+              Belum ada produk affiliate. Tambahkan produk pertama!
             </div>
-            <div className="p-3 flex flex-col gap-1 flex-1">
-              <p className="text-xs font-semibold text-gray-800 line-clamp-2">{item.title}</p>
-              {(item.price || item.price_label) && (
-                <p className="text-xs font-bold text-[#2D7D46]">
-                  {item.price_label ?? formatPrice(item.price!)}
-                </p>
-              )}
-              {item.marketplace_name && (
-                <span className="text-xs text-gray-400">{item.marketplace_name}</span>
-              )}
-              <div className="flex items-center gap-2 mt-auto pt-2">
-                <button onClick={() => togglePublished(item.id, item.published)}
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${item.published ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-400"}`}>
-                  {item.published ? "Publik" : "Draft"}
-                </button>
-                <button onClick={() => openEdit(item)} className="text-xs text-[#2D7D46] hover:underline">Edit</button>
-                <button onClick={() => setDeleteId(item.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
+          )}
+        </div>
+      )}
+
+      {/* Grid View */}
+      {view === "grid" && (
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {items.map((item) => (
+            <div key={item.id} className="bg-white rounded-2xl overflow-hidden border border-gray-100 flex flex-col">
+              <div className="aspect-square bg-gray-50 relative overflow-hidden">
+                {item.image_url ? (
+                  <Image src={item.image_url} alt={item.title} fill unoptimized className="object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center"><span className="text-3xl">🛍️</span></div>
+                )}
+                {/* Click badge */}
+                <span className="absolute bottom-2 right-2 text-[10px] bg-black/60 text-white px-1.5 py-0.5 rounded-full backdrop-blur-sm">
+                  {clicks[item.id] ?? 0} klik
+                </span>
+              </div>
+              <div className="p-3 flex flex-col gap-1 flex-1">
+                <p className="text-xs font-semibold text-gray-800 line-clamp-2">{item.title}</p>
+                {item.category && (
+                  <span className="text-[10px] text-gray-400">{item.category}</span>
+                )}
+                {(item.price || item.price_label) && (
+                  <p className="text-xs font-bold text-[#F5C400]">
+                    {item.price_label ?? formatPrice(item.price!)}
+                  </p>
+                )}
+                {item.marketplace_name && (
+                  <span className="text-xs text-gray-400">{item.marketplace_name}</span>
+                )}
+                <div className="flex items-center gap-2 mt-auto pt-2">
+                  <button
+                    onClick={() => togglePublished(item.id, item.published)}
+                    className={`text-xs px-2 py-0.5 rounded-full font-medium ${item.published ? "bg-yellow-100 text-emerald-700" : "bg-gray-100 text-gray-400"}`}
+                  >
+                    {item.published ? "Publik" : "Draft"}
+                  </button>
+                  <button onClick={() => openEdit(item)} className="text-xs text-[#F5C400] hover:underline">Edit</button>
+                  <button onClick={() => setDeleteId(item.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-        {items.length === 0 && (
-          <div className="col-span-4 py-16 text-center text-gray-400 text-sm">
-            Belum ada produk affiliate. Tambahkan produk pertama!
-          </div>
-        )}
-      </div>
+          ))}
+          {items.length === 0 && (
+            <div className="col-span-4 py-16 text-center text-gray-400 text-sm">
+              Belum ada produk affiliate. Tambahkan produk pertama!
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Form modal */}
       {showForm && (
@@ -173,20 +294,20 @@ export default function AffiliateAdminClient({ initialItems }: { initialItems: A
               <div>
                 <label className="text-xs font-medium text-gray-700 block mb-1">Nama Produk *</label>
                 <input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
               </div>
 
               <div>
                 <label className="text-xs font-medium text-gray-700 block mb-1">Deskripsi</label>
                 <textarea rows={3} value={form.description} onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] resize-none" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] resize-none" />
               </div>
 
               <div>
                 <label className="text-xs font-medium text-gray-700 block mb-1">URL Gambar Produk</label>
                 <input value={form.image_url} onChange={(e) => setForm((f) => ({ ...f, image_url: e.target.value }))}
                   placeholder="https://..."
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
                 {form.image_url && (
                   <div className="mt-2 w-24 h-24 relative rounded-xl overflow-hidden border border-gray-100">
                     <Image src={form.image_url} alt="preview" fill className="object-cover" unoptimized />
@@ -199,41 +320,50 @@ export default function AffiliateAdminClient({ initialItems }: { initialItems: A
                   <label className="text-xs font-medium text-gray-700 block mb-1">Harga (angka, Rp)</label>
                   <input value={form.price} onChange={(e) => setForm((f) => ({ ...f, price: e.target.value }))}
                     placeholder="250000"
-                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
                 </div>
                 <div>
                   <label className="text-xs font-medium text-gray-700 block mb-1">Label Harga (opsional)</label>
                   <input value={form.price_label} onChange={(e) => setForm((f) => ({ ...f, price_label: e.target.value }))}
                     placeholder="Mulai dari Rp 250.000"
-                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
                 </div>
               </div>
 
               <div>
                 <label className="text-xs font-medium text-gray-700 block mb-1">URL Marketplace *</label>
                 <input required value={form.marketplace_url} onChange={(e) => setForm((f) => ({ ...f, marketplace_url: e.target.value }))}
-                  placeholder="https://tokopedia.com/..."
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                  placeholder="https://shopee.co.id/..."
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
               </div>
 
-              <div>
-                <label className="text-xs font-medium text-gray-700 block mb-1">Platform</label>
-                <select value={form.marketplace_name} onChange={(e) => setForm((f) => ({ ...f, marketplace_name: e.target.value }))}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]">
-                  {MARKETPLACES.map((m) => <option key={m}>{m}</option>)}
-                </select>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-medium text-gray-700 block mb-1">Platform</label>
+                  <select value={form.marketplace_name} onChange={(e) => setForm((f) => ({ ...f, marketplace_name: e.target.value }))}
+                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]">
+                    {MARKETPLACES.map((m) => <option key={m}>{m}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className="text-xs font-medium text-gray-700 block mb-1">Kategori</label>
+                  <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
+                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]">
+                    {CATEGORIES.map((c) => <option key={c} value={c}>{c || "— Pilih Kategori —"}</option>)}
+                  </select>
+                </div>
               </div>
 
               <div>
                 <label className="text-xs font-medium text-gray-700 block mb-1">Tags (pisah koma)</label>
                 <input value={form.tags} onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
                   placeholder="karawo, fashion, lokal"
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
               </div>
 
               <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                 <input type="checkbox" checked={form.published} onChange={(e) => setForm((f) => ({ ...f, published: e.target.checked }))}
-                  className="w-4 h-4 text-[#2D7D46] rounded" />
+                  className="w-4 h-4 text-[#F5C400] rounded" />
                 Publikasikan (tampil di /affiliate)
               </label>
 
@@ -241,7 +371,7 @@ export default function AffiliateAdminClient({ initialItems }: { initialItems: A
                 <button type="button" onClick={() => setShowForm(false)}
                   className="flex-1 text-sm border border-gray-200 text-gray-600 py-2 rounded-xl hover:bg-gray-50">Batal</button>
                 <button type="submit" disabled={loading}
-                  className="flex-1 text-sm bg-[#2D7D46] text-white py-2 rounded-xl hover:bg-[#236137] disabled:opacity-50">
+                  className="flex-1 text-sm bg-[#F5C400] text-black py-2 rounded-xl hover:bg-[#c9a000] disabled:opacity-50">
                   {loading ? "Menyimpan..." : "Simpan"}
                 </button>
               </div>

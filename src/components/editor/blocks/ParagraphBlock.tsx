@@ -27,15 +27,15 @@ function LinkDialog({ onConfirm, onClose }: {
         <p className="font-semibold text-gray-900 text-sm">Sisipkan Link</p>
         <input value={label} onChange={(e) => setLabel(e.target.value)}
           placeholder="Teks link (kosongkan = pakai seleksi)"
-          className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+          className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
         <input value={url} onChange={(e) => setText(e.target.value)}
           placeholder="https://…"
-          className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] font-mono" />
+          className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] font-mono" />
         <div className="flex gap-2">
           <button type="button" onClick={onClose}
             className="flex-1 text-sm border border-gray-200 text-gray-600 py-2 rounded-xl hover:bg-gray-50">Batal</button>
           <button type="button" onClick={() => onConfirm(url, label)}
-            className="flex-1 text-sm bg-[#2D7D46] text-white py-2 rounded-xl hover:bg-[#236137]">Sisipkan</button>
+            className="flex-1 text-sm bg-[#F5C400] text-black py-2 rounded-xl hover:bg-[#c9a000]">Sisipkan</button>
         </div>
       </div>
     </div>
@@ -68,7 +68,7 @@ function ImageDialog({ onConfirm, onClose }: {
         {url && <img src={url} alt="" className="w-full h-28 object-cover rounded-xl border border-gray-100" />}
         <input value={url} onChange={(e) => setUrl(e.target.value)}
           placeholder="URL gambar…"
-          className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] font-mono" />
+          className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] font-mono" />
         <div className="flex gap-2">
           <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
             className="flex-1 text-sm bg-gray-100 text-gray-700 py-2 rounded-xl hover:bg-gray-200 disabled:opacity-50">
@@ -79,13 +79,13 @@ function ImageDialog({ onConfirm, onClose }: {
         </div>
         <input value={alt} onChange={(e) => setAlt(e.target.value)}
           placeholder="Alt text gambar (opsional)"
-          className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+          className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
         <div className="flex gap-2">
           <button type="button" onClick={onClose}
             className="flex-1 text-sm border border-gray-200 text-gray-600 py-2 rounded-xl hover:bg-gray-50">Batal</button>
           <button type="button" onClick={() => url && onConfirm(url, alt)}
             disabled={!url}
-            className="flex-1 text-sm bg-[#2D7D46] text-white py-2 rounded-xl hover:bg-[#236137] disabled:opacity-50">Sisipkan</button>
+            className="flex-1 text-sm bg-[#F5C400] text-black py-2 rounded-xl hover:bg-[#c9a000] disabled:opacity-50">Sisipkan</button>
         </div>
       </div>
     </div>
@@ -177,7 +177,7 @@ function RichToolbar({
         type="button"
         title="Sisipkan link"
         onMouseDown={(e) => { e.preventDefault(); onShowLink(); }}
-        className="px-2 py-1 text-xs font-semibold rounded-lg border border-gray-200 text-[#2D7D46] hover:bg-emerald-50 hover:border-emerald-200 transition-colors"
+        className="px-2 py-1 text-xs font-semibold rounded-lg border border-gray-200 text-[#F5C400] hover:bg-yellow-50 hover:border-yellow-200 transition-colors"
       >
         🔗 Link
       </button>

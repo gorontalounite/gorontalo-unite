@@ -57,7 +57,7 @@ export default function GalleryBlock({ block, onChange, selected }: Props) {
               type="button"
               onClick={() => fileRef.current?.click()}
               disabled={uploading}
-              className="aspect-video border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:border-[#2D7D46] hover:text-[#2D7D46] transition-colors"
+              className="aspect-video border-2 border-dashed border-gray-200 rounded-xl flex items-center justify-center text-gray-400 hover:border-[#F5C400] hover:text-[#F5C400] transition-colors"
             >
               {uploading ? "…" : "+"}
             </button>
@@ -65,7 +65,7 @@ export default function GalleryBlock({ block, onChange, selected }: Props) {
         </div>
       ) : (
         <div
-          className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-[#2D7D46] transition-colors"
+          className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-[#F5C400] transition-colors"
           onClick={() => fileRef.current?.click()}
         >
           <p className="text-3xl mb-2">⊞</p>

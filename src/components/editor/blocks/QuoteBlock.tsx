@@ -4,7 +4,7 @@ interface Props { block: Block; onChange: (b: Block) => void; selected: boolean 
 export default function QuoteBlock({ block, onChange, selected }: Props) {
   const attrs = block.attrs as QuoteAttrs;
   return (
-    <blockquote className="border-l-4 border-[#2D7D46] pl-4 py-1">
+    <blockquote className="border-l-4 border-[#F5C400] pl-4 py-1">
       <textarea
         value={block.content}
         onChange={(e) => onChange({ ...block, content: e.target.value })}

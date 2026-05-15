@@ -11,7 +11,7 @@ export default function ChatHeader({ onClearHistory, messageCount }: ChatHeaderP
       <div className="max-w-4xl mx-auto flex items-center justify-between">
         {/* Left: Identity */}
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 bg-gradient-to-br from-[#2D7D46] to-[#1a5c33] rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
+          <div className="w-9 h-9 bg-gradient-to-br from-[#F5C400] to-[#111111] rounded-xl flex items-center justify-center shadow-sm flex-shrink-0">
             <span className="text-white text-sm font-bold">GU</span>
           </div>
           <div>

@@ -14,7 +14,7 @@ export default function BlockInserter({ onInsert }: Props) {
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="w-7 h-7 rounded-full bg-white border-2 border-gray-200 text-gray-400 text-lg flex items-center justify-center hover:border-[#2D7D46] hover:text-[#2D7D46] transition-all shadow-sm"
+        className="w-7 h-7 rounded-full bg-white border-2 border-gray-200 text-gray-400 text-lg flex items-center justify-center hover:border-[#F5C400] hover:text-[#F5C400] transition-all shadow-sm"
         title="Tambah blok"
       >
         +

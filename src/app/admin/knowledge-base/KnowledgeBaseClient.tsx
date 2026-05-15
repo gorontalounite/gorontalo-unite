@@ -106,14 +106,14 @@ export default function KnowledgeBaseClient({ initialEntries }: { initialEntries
           <p className="text-sm text-gray-500">{entries.length} entri RAG — digunakan AI chatbot</p>
         </div>
         <button onClick={openCreate}
-          className="bg-[#2D7D46] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#236137] transition-colors flex items-center gap-2">
+          className="bg-[#F5C400] text-black text-sm px-4 py-2 rounded-xl hover:bg-[#c9a000] transition-colors flex items-center gap-2">
           <span>+</span> Entri Baru
         </button>
       </div>
 
       <div className="mb-4">
         <input value={search} onChange={(e) => setSearch(e.target.value)}
-          placeholder="Cari entri..." className="w-full sm:w-72 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+          placeholder="Cari entri..." className="w-full sm:w-72 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
       </div>
 
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
@@ -147,14 +147,14 @@ export default function KnowledgeBaseClient({ initialEntries }: { initialEntries
                   <td className="px-4 py-3">
                     <button onClick={() => toggleActive(e.id, e.is_active)}
                       className={`text-xs px-2 py-0.5 rounded-full font-medium transition-colors ${
-                        e.is_active ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-400"
+                        e.is_active ? "bg-yellow-100 text-emerald-700" : "bg-gray-100 text-gray-400"
                       }`}>
                       {e.is_active ? "Aktif" : "Nonaktif"}
                     </button>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => openEdit(e.id)} className="text-xs text-[#2D7D46] hover:underline">Edit</button>
+                      <button onClick={() => openEdit(e.id)} className="text-xs text-[#F5C400] hover:underline">Edit</button>
                       <button onClick={() => setDeleteId(e.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
                     </div>
                   </td>
@@ -179,28 +179,28 @@ export default function KnowledgeBaseClient({ initialEntries }: { initialEntries
               <div>
                 <label className="text-xs font-medium text-gray-700 block mb-1">Judul *</label>
                 <input required value={form.title} onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
               </div>
 
               <div>
                 <label className="text-xs font-medium text-gray-700 block mb-1">Konten RAG *</label>
                 <textarea required rows={6} value={form.content} onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
                   placeholder="Masukkan konten yang akan digunakan AI sebagai referensi..."
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] resize-none" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] resize-none" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="text-xs font-medium text-gray-700 block mb-1">Kategori</label>
                   <select value={form.category} onChange={(e) => setForm((f) => ({ ...f, category: e.target.value }))}
-                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]">
+                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]">
                     {CATEGORIES.map((c) => <option key={c}>{c}</option>)}
                   </select>
                 </div>
                 <div className="flex items-end">
                   <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                     <input type="checkbox" checked={form.is_active} onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
-                      className="w-4 h-4 text-[#2D7D46] rounded" />
+                      className="w-4 h-4 text-[#F5C400] rounded" />
                     Aktif (dipakai AI)
                   </label>
                 </div>
@@ -210,21 +210,21 @@ export default function KnowledgeBaseClient({ initialEntries }: { initialEntries
                 <label className="text-xs font-medium text-gray-700 block mb-1">Tags (pisah koma)</label>
                 <input value={form.tags} onChange={(e) => setForm((f) => ({ ...f, tags: e.target.value }))}
                   placeholder="wisata, bahari, gorontalo"
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
               </div>
 
               <div>
                 <label className="text-xs font-medium text-gray-700 block mb-1">URL Sumber</label>
                 <input value={form.source_url} onChange={(e) => setForm((f) => ({ ...f, source_url: e.target.value }))}
                   placeholder="https://..."
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
               </div>
 
               <div className="flex gap-3 pt-2">
                 <button type="button" onClick={() => setShowForm(false)}
                   className="flex-1 text-sm border border-gray-200 text-gray-600 py-2 rounded-xl hover:bg-gray-50">Batal</button>
                 <button type="submit" disabled={loading}
-                  className="flex-1 text-sm bg-[#2D7D46] text-white py-2 rounded-xl hover:bg-[#236137] disabled:opacity-50">
+                  className="flex-1 text-sm bg-[#F5C400] text-black py-2 rounded-xl hover:bg-[#c9a000] disabled:opacity-50">
                   {loading ? "Menyimpan..." : "Simpan"}
                 </button>
               </div>

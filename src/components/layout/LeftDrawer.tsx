@@ -164,14 +164,14 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
             {avatarUrl ? (
               <img src={avatarUrl} alt={displayName} className="w-20 h-20 rounded-full object-cover" />
             ) : (
-              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#2D7D46] to-[#1a5c33] flex items-center justify-center">
+              <div className="w-20 h-20 rounded-full bg-gradient-to-br from-[#F5C400] to-[#111111] flex items-center justify-center">
                 <span className="text-white text-2xl font-bold">{avatarLetter}</span>
               </div>
             )}
           </div>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="text-xs text-[#2D7D46] font-medium hover:underline"
+            className="text-xs text-[#F5C400] font-medium hover:underline"
           >
             Ubah foto profil
           </button>
@@ -208,13 +208,13 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
                   type="text"
                   value={editName}
                   onChange={(e) => setEditName(e.target.value)}
-                  className="w-full mt-2 text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#2D7D46] focus:ring-1 focus:ring-[#2D7D46]/20"
+                  className="w-full mt-2 text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/20"
                   placeholder="Nama lengkap"
                 />
                 <button
                   onClick={handleSaveName}
                   disabled={savingName}
-                  className="mt-2 text-xs bg-[#2D7D46] text-white px-4 py-1.5 rounded-lg hover:bg-[#236137] transition-colors disabled:opacity-50"
+                  className="mt-2 text-xs bg-[#F5C400] text-black px-4 py-1.5 rounded-lg hover:bg-[#c9a000] transition-colors disabled:opacity-50"
                 >
                   {savingName ? "Menyimpan..." : "Simpan"}
                 </button>
@@ -264,12 +264,12 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
                   value={instructions}
                   onChange={(e) => setInstructions(e.target.value)}
                   rows={4}
-                  className="w-full mt-2 text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#2D7D46] focus:ring-1 focus:ring-[#2D7D46]/20 resize-none"
+                  className="w-full mt-2 text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/20 resize-none"
                   placeholder="Contoh: Jawab selalu dalam format poin-poin. Gunakan bahasa yang santai."
                 />
                 <button
                   onClick={handleSaveInstructions}
-                  className="mt-2 text-xs bg-[#2D7D46] text-white px-4 py-1.5 rounded-lg hover:bg-[#236137] transition-colors"
+                  className="mt-2 text-xs bg-[#F5C400] text-black px-4 py-1.5 rounded-lg hover:bg-[#c9a000] transition-colors"
                 >
                   Simpan
                 </button>
@@ -302,12 +302,12 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
                   value={prompt}
                   onChange={(e) => setPrompt(e.target.value)}
                   rows={3}
-                  className="w-full mt-2 text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#2D7D46] focus:ring-1 focus:ring-[#2D7D46]/20 resize-none"
+                  className="w-full mt-2 text-sm border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#F5C400] focus:ring-1 focus:ring-[#F5C400]/20 resize-none"
                   placeholder="Contoh: Tolong jelaskan secara detail tentang..."
                 />
                 <button
                   onClick={handleSavePrompt}
-                  className="mt-2 text-xs bg-[#2D7D46] text-white px-4 py-1.5 rounded-lg hover:bg-[#236137] transition-colors"
+                  className="mt-2 text-xs bg-[#F5C400] text-black px-4 py-1.5 rounded-lg hover:bg-[#c9a000] transition-colors"
                 >
                   Simpan
                 </button>
@@ -374,7 +374,7 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
               <img src={avatarUrl} alt={displayName} className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
             ) : (
               <div className="w-11 h-11 rounded-full bg-[#b8d4c0] dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
-                <span className="text-[#2D7D46] dark:text-emerald-400 text-base font-bold">{avatarLetter}</span>
+                <span className="text-[#F5C400] dark:text-yellow-400 text-base font-bold">{avatarLetter}</span>
               </div>
             )}
             <div className="flex-1 min-w-0">
@@ -385,7 +385,7 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
         ) : (
           <div className="px-4 py-4 flex items-center gap-3">
             <div className="w-11 h-11 rounded-full bg-[#b8d4c0] dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
-              <span className="text-[#2D7D46] dark:text-emerald-400 text-base font-bold">GU</span>
+              <span className="text-[#F5C400] dark:text-yellow-400 text-base font-bold">GU</span>
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Nama User</p>
@@ -433,7 +433,7 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
           <div className="px-3 py-2">
             {loadingChats ? (
               <div className="flex justify-center py-4">
-                <div className="w-4 h-4 border-2 border-[#2D7D46] border-t-transparent rounded-full animate-spin" />
+                <div className="w-4 h-4 border-2 border-[#F5C400] border-t-transparent rounded-full animate-spin" />
               </div>
             ) : recentChats.length > 0 ? (
               groupChatsByDate(recentChats).map((group) => (
@@ -463,7 +463,7 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
                           <div className="flex items-start gap-1">
                             <button
                               onClick={() => handleLoadChat(chat)}
-                              className="flex-1 text-left px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors flex items-start gap-2"
+                              className="flex-1 text-left px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors flex items-start gap-2"
                             >
                               <svg className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-gray-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />

@@ -13,7 +13,7 @@ type CalloutType = "info" | "warning" | "success" | "error";
 const CALLOUT_STYLES: Record<CalloutType, { border: string; bg: string; iconDefault: string }> = {
   info:    { border: "border-blue-600",    bg: "bg-blue-50 dark:bg-blue-950/30",    iconDefault: "ℹ️" },
   warning: { border: "border-amber-700",   bg: "bg-amber-50 dark:bg-amber-950/30",  iconDefault: "⚠️" },
-  success: { border: "border-emerald-700", bg: "bg-emerald-50 dark:bg-emerald-950/30", iconDefault: "✅" },
+  success: { border: "border-yellow-700", bg: "bg-yellow-50 dark:bg-yellow-950/30", iconDefault: "✅" },
   error:   { border: "border-red-600",     bg: "bg-red-50 dark:bg-red-950/30",      iconDefault: "❌" },
 };
 

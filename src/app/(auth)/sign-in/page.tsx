@@ -76,7 +76,7 @@ function SignInForm() {
   if (magicSent) {
     return (
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 shadow-sm p-6 text-center space-y-4">
-        <div className="w-14 h-14 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center mx-auto">
+        <div className="w-14 h-14 bg-yellow-100 dark:bg-yellow-900/40 rounded-full flex items-center justify-center mx-auto">
           <span className="text-2xl">📧</span>
         </div>
         <div>
@@ -86,7 +86,7 @@ function SignInForm() {
             Klik link di email untuk masuk otomatis.
           </p>
         </div>
-        <button onClick={() => setMagicSent(false)} className="text-xs text-[#2D7D46] dark:text-emerald-400 hover:underline">
+        <button onClick={() => setMagicSent(false)} className="text-xs text-[#F5C400] dark:text-yellow-400 hover:underline">
           ← Kirim ulang atau ganti email
         </button>
       </div>
@@ -123,7 +123,7 @@ function SignInForm() {
           <button key={t} type="button" onClick={() => { setTab(t); setError(null); }}
             className={`flex-1 text-xs font-medium py-1.5 rounded-lg transition-colors ${
               tab === t
-                ? "bg-[#2D7D46] text-white"
+                ? "bg-[#F5C400] text-black"
                 : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200"
             }`}>
             {t === "password" ? "🔑 Password" : "✉️ Magic Link"}
@@ -137,22 +137,22 @@ function SignInForm() {
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
               placeholder="nama@email.com"
-              className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white outline-none focus:border-[#2D7D46] dark:focus:border-emerald-500 focus:ring-2 focus:ring-[#2D7D46]/20 transition-all" />
+              className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white outline-none focus:border-[#F5C400] dark:focus:border-yellow-500 focus:ring-2 focus:ring-[#F5C400]/20 transition-all" />
           </div>
           <div>
             <div className="flex items-center justify-between mb-1">
               <label className="text-xs font-medium text-gray-700 dark:text-gray-300">Password</label>
               <button type="button" onClick={() => setTab("magic")}
-                className="text-[10px] text-[#2D7D46] dark:text-emerald-400 hover:underline">
+                className="text-[10px] text-[#F5C400] dark:text-yellow-400 hover:underline">
                 Lupa password?
               </button>
             </div>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required
               placeholder="••••••••"
-              className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white outline-none focus:border-[#2D7D46] dark:focus:border-emerald-500 focus:ring-2 focus:ring-[#2D7D46]/20 transition-all" />
+              className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white outline-none focus:border-[#F5C400] dark:focus:border-yellow-500 focus:ring-2 focus:ring-[#F5C400]/20 transition-all" />
           </div>
           <button type="submit" disabled={loading || googleLoading}
-            className="w-full bg-[#2D7D46] text-white text-sm font-medium py-2.5 rounded-xl hover:bg-[#236137] transition-colors disabled:opacity-50">
+            className="w-full bg-[#F5C400] text-black text-sm font-medium py-2.5 rounded-xl hover:bg-[#c9a000] transition-colors disabled:opacity-50">
             {loading ? "Masuk…" : "Masuk"}
           </button>
         </form>
@@ -165,10 +165,10 @@ function SignInForm() {
             <label className="block text-xs font-medium text-gray-700 dark:text-gray-300 mb-1">Email</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required
               placeholder="nama@email.com"
-              className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white outline-none focus:border-[#2D7D46] dark:focus:border-emerald-500 focus:ring-2 focus:ring-[#2D7D46]/20 transition-all" />
+              className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white outline-none focus:border-[#F5C400] dark:focus:border-yellow-500 focus:ring-2 focus:ring-[#F5C400]/20 transition-all" />
           </div>
           <button type="submit" disabled={loading || googleLoading}
-            className="w-full bg-[#2D7D46] text-white text-sm font-medium py-2.5 rounded-xl hover:bg-[#236137] transition-colors disabled:opacity-50">
+            className="w-full bg-[#F5C400] text-black text-sm font-medium py-2.5 rounded-xl hover:bg-[#c9a000] transition-colors disabled:opacity-50">
             {loading ? "Mengirim…" : "Kirim Magic Link"}
           </button>
         </form>
@@ -176,7 +176,7 @@ function SignInForm() {
 
       <p className="text-center text-xs text-gray-500 dark:text-gray-400">
         Belum punya akun?{" "}
-        <Link href="/sign-up" className="text-[#2D7D46] dark:text-emerald-400 font-medium hover:underline">
+        <Link href="/sign-up" className="text-[#F5C400] dark:text-yellow-400 font-medium hover:underline">
           Daftar sekarang
         </Link>
       </p>
@@ -189,7 +189,7 @@ export default function SignInPage() {
     <div className="flex-1 flex items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-[#2D7D46] to-[#1a5c33] rounded-xl flex items-center justify-center mx-auto mb-3">
+          <div className="w-12 h-12 bg-gradient-to-br from-[#F5C400] to-[#111111] rounded-xl flex items-center justify-center mx-auto mb-3">
             <span className="text-white font-bold text-sm">GU</span>
           </div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Masuk ke Gorontalo Unite</h1>

@@ -19,7 +19,7 @@ function GoogleIcon() {
 const inputCls =
   "w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 " +
   "bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-zinc-500 " +
-  "outline-none focus:border-[#2D7D46] dark:focus:border-emerald-500 focus:ring-2 focus:ring-[#2D7D46]/20 transition-all";
+  "outline-none focus:border-[#F5C400] dark:focus:border-yellow-500 focus:ring-2 focus:ring-[#F5C400]/20 transition-all";
 
 export default function SignUpPage() {
   const router = useRouter();
@@ -66,8 +66,8 @@ export default function SignUpPage() {
     return (
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm text-center">
-          <div className="w-16 h-16 bg-emerald-100 dark:bg-emerald-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-[#2D7D46] dark:text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
+            <svg className="w-8 h-8 text-[#F5C400] dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -77,7 +77,7 @@ export default function SignUpPage() {
           </p>
           <Link
             href="/sign-in"
-            className="inline-block bg-[#2D7D46] text-white text-sm font-medium px-6 py-2.5 rounded-xl hover:bg-[#236137] transition-colors"
+            className="inline-block bg-[#F5C400] text-black text-sm font-medium px-6 py-2.5 rounded-xl hover:bg-[#c9a000] transition-colors"
           >
             Masuk sekarang →
           </Link>
@@ -93,7 +93,7 @@ export default function SignUpPage() {
 
         {/* Header */}
         <div className="text-center mb-8">
-          <div className="w-12 h-12 bg-gradient-to-br from-[#2D7D46] to-[#1a5c33] rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm">
+          <div className="w-12 h-12 bg-gradient-to-br from-[#F5C400] to-[#111111] rounded-xl flex items-center justify-center mx-auto mb-3 shadow-sm">
             <span className="text-white font-bold text-sm">GU</span>
           </div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Buat akun gratis</h1>
@@ -204,7 +204,7 @@ export default function SignUpPage() {
                       key={threshold}
                       className={`h-1 flex-1 rounded-full transition-colors ${
                         password.length >= threshold
-                          ? password.length >= 12 ? "bg-emerald-500"
+                          ? password.length >= 12 ? "bg-yellow-400"
                             : password.length >= 8 ? "bg-amber-400"
                             : "bg-red-400"
                           : "bg-gray-100 dark:bg-zinc-700"
@@ -221,9 +221,9 @@ export default function SignUpPage() {
             {/* Terms */}
             <p className="text-[11px] text-gray-400 dark:text-zinc-500 leading-relaxed">
               Dengan mendaftar, kamu menyetujui{" "}
-              <Link href="/terms" className="text-[#2D7D46] dark:text-emerald-400 hover:underline">Syarat & Ketentuan</Link>
+              <Link href="/terms" className="text-[#F5C400] dark:text-yellow-400 hover:underline">Syarat & Ketentuan</Link>
               {" "}dan{" "}
-              <Link href="/privacy-policy" className="text-[#2D7D46] dark:text-emerald-400 hover:underline">Kebijakan Privasi</Link>
+              <Link href="/privacy-policy" className="text-[#F5C400] dark:text-yellow-400 hover:underline">Kebijakan Privasi</Link>
               {" "}kami.
             </p>
 
@@ -231,7 +231,7 @@ export default function SignUpPage() {
             <button
               type="submit"
               disabled={loading || googleLoading}
-              className="w-full bg-[#2D7D46] text-white text-sm font-medium py-2.5 rounded-xl hover:bg-[#236137] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full bg-[#F5C400] text-black text-sm font-medium py-2.5 rounded-xl hover:bg-[#c9a000] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {loading ? "Mendaftar…" : "Daftar Sekarang"}
             </button>
@@ -240,7 +240,7 @@ export default function SignUpPage() {
           {/* Sign-in link */}
           <p className="text-center text-xs text-gray-500 dark:text-gray-400">
             Sudah punya akun?{" "}
-            <Link href="/sign-in" className="text-[#2D7D46] dark:text-emerald-400 font-medium hover:underline">
+            <Link href="/sign-in" className="text-[#F5C400] dark:text-yellow-400 font-medium hover:underline">
               Masuk
             </Link>
           </p>

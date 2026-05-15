@@ -114,7 +114,7 @@ function ImageUploadField({ value, onChange, label }: {
       ) : (
         <div
           onClick={() => fileRef.current?.click()}
-          className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:border-[#2D7D46] transition-colors"
+          className="border-2 border-dashed border-gray-200 rounded-xl p-4 text-center cursor-pointer hover:border-[#F5C400] transition-colors"
         >
           <p className="text-2xl mb-1">🖼</p>
           <p className="text-[11px] text-gray-400">{loading ? "Mengunggah…" : "Klik untuk unggah"}</p>
@@ -124,7 +124,7 @@ function ImageUploadField({ value, onChange, label }: {
         type="text" value={value}
         onChange={(e) => onChange(e.target.value)}
         placeholder="atau tempel URL gambar…"
-        className="mt-1.5 w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+        className="mt-1.5 w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
       />
       <input ref={fileRef} type="file" accept="image/*" className="hidden"
         onChange={(e) => { const f = e.target.files?.[0]; if (f) handleFile(f); }} />
@@ -146,23 +146,23 @@ function CategorySelector({ value, onChange }: { value: string; onChange: (c: st
             <input type="radio" name="category" value={c}
               checked={value === c}
               onChange={() => onChange(c)}
-              className="accent-[#2D7D46]" />
+              className="accent-[#F5C400]" />
             <span className="text-[11px] text-gray-600">{c}</span>
           </label>
         ))}
         {/* Custom category if set */}
         {!isPreset && value && (
-          <label className="flex items-center gap-1.5 cursor-pointer bg-emerald-50 rounded px-1 py-0.5 col-span-2">
+          <label className="flex items-center gap-1.5 cursor-pointer bg-yellow-50 rounded px-1 py-0.5 col-span-2">
             <input type="radio" name="category" value={value}
               checked={true} onChange={() => {}}
-              className="accent-[#2D7D46]" />
+              className="accent-[#F5C400]" />
             <span className="text-[11px] text-emerald-700 font-medium">{value}</span>
           </label>
         )}
       </div>
       {!adding ? (
         <button type="button" onClick={() => setAdding(true)}
-          className="text-[11px] text-[#2D7D46] hover:underline flex items-center gap-1">
+          className="text-[11px] text-[#F5C400] hover:underline flex items-center gap-1">
           + Tambah kategori baru
         </button>
       ) : (
@@ -176,11 +176,11 @@ function CategorySelector({ value, onChange }: { value: string; onChange: (c: st
               if (e.key === "Escape") { setAdding(false); setCustom(""); }
             }}
             placeholder="Nama kategori baru…"
-            className="flex-1 text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+            className="flex-1 text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
           />
           <button type="button"
             onClick={() => { if (custom.trim()) { onChange(custom.trim()); setAdding(false); setCustom(""); } }}
-            className="text-[11px] bg-[#2D7D46] text-white px-2.5 py-1.5 rounded-lg hover:bg-[#236137]">OK</button>
+            className="text-[11px] bg-[#F5C400] text-black px-2.5 py-1.5 rounded-lg hover:bg-[#c9a000]">OK</button>
           <button type="button" onClick={() => { setAdding(false); setCustom(""); }}
             className="text-[11px] border border-gray-200 text-gray-500 px-2 py-1.5 rounded-lg hover:bg-gray-50">✕</button>
         </div>
@@ -213,7 +213,7 @@ function TagInput({ tags, onChange }: { tags: string[]; onChange: (t: string[]) 
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); } }}
           placeholder="Tambah tag, tekan Enter…"
-          className="flex-1 text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+          className="flex-1 text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
         />
         <button type="button" onClick={add} className="text-[11px] bg-gray-100 text-gray-700 px-2 py-1.5 rounded-lg hover:bg-gray-200">+</button>
       </div>
@@ -292,7 +292,7 @@ function BlockSettingsPanel({ block, onChange }: { block: Block | null; onChange
           <select
             value={(block.attrs.language as string) ?? "javascript"}
             onChange={(e) => onChange({ ...block, attrs: { ...block.attrs, language: e.target.value } })}
-            className="w-full text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+            className="w-full text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
           >
             {["javascript","typescript","python","html","css","json","bash","sql","php","java","kotlin","swift","go","rust","plaintext"].map((l) => (
               <option key={l}>{l}</option>
@@ -392,11 +392,11 @@ export default function EditorSidebar({
                     onChange={(e) => setField("published", e.target.checked)}
                     className="sr-only peer"
                   />
-                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#2D7D46]"></div>
+                  <div className="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-[#F5C400]"></div>
                 </label>
               </div>
               <span className={`text-[11px] px-2 py-0.5 rounded-full font-medium ${
-                meta.published ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"
+                meta.published ? "bg-yellow-100 text-emerald-700" : "bg-gray-100 text-gray-500"
               }`}>
                 {meta.published ? "Publik" : "Draft"}
               </span>
@@ -406,7 +406,7 @@ export default function EditorSidebar({
                   type="datetime-local"
                   value={meta.published_at}
                   onChange={(e) => setField("published_at", e.target.value)}
-                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
                 />
               </div>
             </Panel>
@@ -423,7 +423,7 @@ export default function EditorSidebar({
                       onSlugManualEdit?.();
                       setField("slug", e.target.value);
                     }}
-                    className="flex-1 font-mono text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+                    className="flex-1 font-mono text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
                   />
                   <button type="button"
                     onClick={() => { setField("slug", slugify(meta.title)); }}
@@ -465,7 +465,7 @@ export default function EditorSidebar({
                               : [...currentTags.filter((t) => !t.startsWith("stack:")), s];
                             setField("tags", next);
                           }}
-                          className="accent-[#2D7D46]"
+                          className="accent-[#F5C400]"
                         />
                         <span className="text-[11px] text-gray-600">{STACK_LABELS[s]}</span>
                       </label>
@@ -501,7 +501,7 @@ export default function EditorSidebar({
                 value={meta.excerpt}
                 onChange={(e) => setField("excerpt", e.target.value)}
                 placeholder="Ringkasan singkat yang tampil di halaman daftar…"
-                className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-2 outline-none focus:border-[#2D7D46] resize-none"
+                className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-2 outline-none focus:border-[#F5C400] resize-none"
               />
             </Panel>
 
@@ -522,7 +522,7 @@ export default function EditorSidebar({
                       value={(meta as unknown as Record<string, string>)[key] ?? ""}
                       onChange={(e) => setField(key as keyof PostMeta, e.target.value as never)}
                       placeholder={placeholder}
-                      className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+                      className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
                     />
                   </div>
                 ))}
@@ -532,7 +532,7 @@ export default function EditorSidebar({
                     type="date"
                     value={meta.project_date ?? ""}
                     onChange={(e) => setField("project_date", e.target.value)}
-                    className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+                    className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
                   />
                 </div>
                 <div>
@@ -542,7 +542,7 @@ export default function EditorSidebar({
                     value={(meta.tech_stack ?? []).join(", ")}
                     onChange={(e) => setField("tech_stack", e.target.value.split(",").map((s) => s.trim()).filter(Boolean))}
                     placeholder="Next.js, TypeScript, Supabase…"
-                    className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+                    className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
                   />
                 </div>
               </Panel>
@@ -555,7 +555,7 @@ export default function EditorSidebar({
                   type="checkbox"
                   checked={meta.allow_comments ?? false}
                   onChange={(e) => setField("allow_comments", e.target.checked)}
-                  className="accent-[#2D7D46]"
+                  className="accent-[#F5C400]"
                 />
                 <span className="text-[11px] text-gray-600">Izinkan komentar</span>
               </label>
@@ -570,7 +570,7 @@ export default function EditorSidebar({
                   value={meta.seo_title}
                   onChange={(e) => setField("seo_title", e.target.value)}
                   placeholder={meta.title || "Judul SEO…"}
-                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
                 />
               </div>
               <div>
@@ -581,7 +581,7 @@ export default function EditorSidebar({
                   onChange={(e) => setField("seo_description", e.target.value)}
                   placeholder={meta.excerpt || "Deskripsi SEO (max 160 karakter)…"}
                   maxLength={160}
-                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-2 outline-none focus:border-[#2D7D46] resize-none"
+                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-2 outline-none focus:border-[#F5C400] resize-none"
                 />
                 <p className="text-[10px] text-gray-300 text-right">{meta.seo_description.length}/160</p>
               </div>
@@ -595,12 +595,12 @@ export default function EditorSidebar({
                   value={meta.focus_keyword ?? ""}
                   onChange={(e) => setField("focus_keyword", e.target.value)}
                   placeholder="wisata gorontalo, kuliner khas…"
-                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
                 />
                 {meta.focus_keyword && meta.title && (
                   <p className={`text-[10px] mt-1 ${
                     meta.title.toLowerCase().includes(meta.focus_keyword.toLowerCase())
-                      ? "text-emerald-500" : "text-amber-500"
+                      ? "text-yellow-500" : "text-amber-500"
                   }`}>
                     {meta.title.toLowerCase().includes(meta.focus_keyword.toLowerCase())
                       ? "✓ Keyword ada di judul"
@@ -615,7 +615,7 @@ export default function EditorSidebar({
                 <select
                   value={meta.schema_type ?? "Article"}
                   onChange={(e) => setField("schema_type", e.target.value)}
-                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+                  className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
                 >
                   <option value="Article">Article</option>
                   <option value="NewsArticle">NewsArticle</option>

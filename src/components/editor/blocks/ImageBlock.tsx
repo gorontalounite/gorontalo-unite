@@ -50,7 +50,7 @@ export default function ImageBlock({ block, onChange, selected }: Props) {
         </div>
       ) : (
         <div
-          className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-[#2D7D46] transition-colors"
+          className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center cursor-pointer hover:border-[#F5C400] transition-colors"
           onClick={() => fileRef.current?.click()}
         >
           <p className="text-3xl mb-2">🖼</p>
@@ -66,7 +66,7 @@ export default function ImageBlock({ block, onChange, selected }: Props) {
             value={attrs.url ?? ""}
             onChange={(e) => set({ url: e.target.value })}
             placeholder="URL gambar…"
-            className="flex-1 min-w-0 text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#2D7D46]"
+            className="flex-1 min-w-0 text-xs border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
           />
           <button
             type="button"
@@ -98,7 +98,7 @@ export default function ImageBlock({ block, onChange, selected }: Props) {
               value={attrs.alt ?? ""}
               onChange={(e) => set({ alt: e.target.value })}
               placeholder="alt text…"
-              className="flex-1 text-[11px] border border-gray-200 rounded-lg px-2 py-0.5 outline-none focus:border-[#2D7D46]"
+              className="flex-1 text-[11px] border border-gray-200 rounded-lg px-2 py-0.5 outline-none focus:border-[#F5C400]"
             />
           </div>
         </div>

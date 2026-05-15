@@ -130,7 +130,7 @@ function ImageUploadField({
       <div className="flex gap-2">
         <input value={value} onChange={(e) => onChange(e.target.value)}
           placeholder="https://... atau unggah file"
-          className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+          className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
         <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
           className="text-xs px-3 py-2 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 disabled:opacity-50 whitespace-nowrap">
           {uploading ? "…" : "📂 Unggah"}
@@ -182,7 +182,7 @@ function ExtraImagesField({
           <div key={i} className="flex gap-2 items-center">
             <input value={url} onChange={(e) => updateUrl(i, e.target.value)}
               placeholder="https://..."
-              className="flex-1 text-xs border border-gray-200 rounded-xl px-3 py-1.5 outline-none focus:border-[#2D7D46]" />
+              className="flex-1 text-xs border border-gray-200 rounded-xl px-3 py-1.5 outline-none focus:border-[#F5C400]" />
             {url && (
               <div className="w-10 h-10 relative rounded-lg overflow-hidden border border-gray-100 flex-shrink-0">
                 <Image src={url} alt="" fill className="object-cover" unoptimized />
@@ -196,7 +196,7 @@ function ExtraImagesField({
       <div className="flex gap-2 mt-2">
         <button type="button"
           onClick={() => onChange([...images, ""])}
-          className="text-xs px-3 py-1.5 border border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-[#2D7D46] hover:text-[#2D7D46]">
+          className="text-xs px-3 py-1.5 border border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-[#F5C400] hover:text-[#F5C400]">
           + Tambah URL
         </button>
         <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
@@ -230,15 +230,15 @@ function FaqEditor({ faqs, onChange }: { faqs: FaqItem[]; onChange: (f: FaqItem[
             </div>
             <input value={faq.q} onChange={(e) => update(i, "q", e.target.value)}
               placeholder="Pertanyaan..."
-              className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] mb-2 bg-white" />
+              className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] mb-2 bg-white" />
             <textarea rows={3} value={faq.a} onChange={(e) => update(i, "a", e.target.value)}
               placeholder="Jawaban..."
-              className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] resize-none bg-white" />
+              className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] resize-none bg-white" />
           </div>
         ))}
       </div>
       <button type="button" onClick={add}
-        className="mt-2 text-xs px-3 py-1.5 border border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-[#2D7D46] hover:text-[#2D7D46] transition-colors">
+        className="mt-2 text-xs px-3 py-1.5 border border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-[#F5C400] hover:text-[#F5C400] transition-colors">
         + Tambah FAQ
       </button>
     </div>
@@ -348,7 +348,7 @@ export default function PortfolioAdminClient({ initialItems }: { initialItems: P
           <p className="text-sm text-gray-500">{items.length} proyek</p>
         </div>
         <button onClick={openCreate}
-          className="bg-[#2D7D46] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#236137] transition-colors flex items-center gap-2">
+          className="bg-[#F5C400] text-black text-sm px-4 py-2 rounded-xl hover:bg-[#c9a000] transition-colors flex items-center gap-2">
           <span>+</span> Proyek Baru
         </button>
       </div>
@@ -376,10 +376,10 @@ export default function PortfolioAdminClient({ initialItems }: { initialItems: P
               )}
               <div className="flex items-center gap-2 mt-auto flex-wrap">
                 <button onClick={() => togglePublished(item.id, item.published)}
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium transition-colors ${item.published ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-400"}`}>
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium transition-colors ${item.published ? "bg-yellow-100 text-emerald-700" : "bg-gray-100 text-gray-400"}`}>
                   {item.published ? "Publik" : "Draft"}
                 </button>
-                <button onClick={() => openEdit(item.id)} className="text-xs text-[#2D7D46] hover:underline">Edit</button>
+                <button onClick={() => openEdit(item.id)} className="text-xs text-[#F5C400] hover:underline">Edit</button>
                 <button onClick={() => setDeleteId(item.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
               </div>
             </div>
@@ -407,14 +407,14 @@ export default function PortfolioAdminClient({ initialItems }: { initialItems: P
                 <label className="text-xs font-medium text-gray-700 block mb-1">Judul *</label>
                 <input required value={form.title}
                   onChange={(e) => setForm((f) => ({ ...f, title: e.target.value, slug: f.slug || slugify(e.target.value) }))}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
               </div>
 
               <div>
                 <label className="text-xs font-medium text-gray-700 block mb-1">Slug (URL)</label>
                 <input value={form.slug}
                   onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] font-mono" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] font-mono" />
               </div>
 
               {/* Stack + Date */}
@@ -423,7 +423,7 @@ export default function PortfolioAdminClient({ initialItems }: { initialItems: P
                   <label className="text-xs font-medium text-gray-700 block mb-1">Tanggal Publish</label>
                   <input type="datetime-local" value={form.published_at}
                     onChange={(e) => setForm((f) => ({ ...f, published_at: e.target.value }))}
-                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
                 </div>
                 <div className="flex items-end pb-2">
                   <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
@@ -444,8 +444,8 @@ export default function PortfolioAdminClient({ initialItems }: { initialItems: P
                       onClick={() => setForm((f) => ({ ...f, stack: opt.value }))}
                       className={`text-xs px-3 py-2 rounded-xl border text-center transition-all ${
                         form.stack === opt.value
-                          ? "bg-[#2D7D46] text-white border-[#2D7D46]"
-                          : "bg-white text-gray-600 border-gray-200 hover:border-[#2D7D46]/40"
+                          ? "bg-[#F5C400] text-black border-[#F5C400]"
+                          : "bg-white text-gray-600 border-gray-200 hover:border-[#F5C400]/40"
                       }`}>
                       {opt.label}
                     </button>
@@ -457,7 +457,7 @@ export default function PortfolioAdminClient({ initialItems }: { initialItems: P
                 <label className="text-xs font-medium text-gray-700 block mb-1">Deskripsi singkat</label>
                 <textarea rows={2} value={form.excerpt}
                   onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] resize-none" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] resize-none" />
               </div>
 
               {/* Content with toolbar */}
@@ -469,7 +469,7 @@ export default function PortfolioAdminClient({ initialItems }: { initialItems: P
                 <RichToolbar target={contentRef} />
                 <textarea ref={contentRef} rows={10} value={form.content}
                   onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-                  className="w-full text-sm border border-gray-200 rounded-b-xl border-t-0 px-3 py-2 outline-none focus:border-[#2D7D46] resize-y font-mono"
+                  className="w-full text-sm border border-gray-200 rounded-b-xl border-t-0 px-3 py-2 outline-none focus:border-[#F5C400] resize-y font-mono"
                   placeholder="Tulis deskripsi proyek dalam format Markdown..." />
               </div>
 
@@ -491,7 +491,7 @@ export default function PortfolioAdminClient({ initialItems }: { initialItems: P
                 <input value={form.source_url}
                   onChange={(e) => setForm((f) => ({ ...f, source_url: e.target.value }))}
                   placeholder="https://..."
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
               </div>
 
               {/* FAQ editor */}
@@ -504,7 +504,7 @@ export default function PortfolioAdminClient({ initialItems }: { initialItems: P
                 <button type="button" onClick={() => setShowForm(false)}
                   className="flex-1 text-sm border border-gray-200 text-gray-600 py-2.5 rounded-xl hover:bg-gray-50">Batal</button>
                 <button type="submit" disabled={loading}
-                  className="flex-1 text-sm bg-[#2D7D46] text-white py-2.5 rounded-xl hover:bg-[#236137] disabled:opacity-50">
+                  className="flex-1 text-sm bg-[#F5C400] text-black py-2.5 rounded-xl hover:bg-[#c9a000] disabled:opacity-50">
                   {loading ? "Menyimpan…" : "Simpan"}
                 </button>
               </div>

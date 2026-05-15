@@ -45,7 +45,7 @@ function AffiliateCard({ item }: { item: AffiliateItem }) {
   return (
     <Link
       href={`/affiliate/${item.id}`}
-      className="group bg-white dark:bg-zinc-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-700 hover:shadow-lg hover:border-[#2D7D46]/40 dark:hover:border-[#2D7D46]/50 transition-all flex flex-col"
+      className="group bg-white dark:bg-zinc-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-700 hover:shadow-lg hover:border-[#F5C400]/40 dark:hover:border-[#F5C400]/50 transition-all flex flex-col"
     >
       {/* Image */}
       <div className="aspect-square relative bg-gray-50 dark:bg-zinc-700 overflow-hidden">
@@ -68,7 +68,7 @@ function AffiliateCard({ item }: { item: AffiliateItem }) {
           </span>
         )}
         {item.category && (
-          <span className="absolute top-2 right-2 text-xs bg-[#2D7D46] text-white font-medium px-2 py-0.5 rounded-full shadow-sm">
+          <span className="absolute top-2 right-2 text-xs bg-[#F5C400] text-black font-medium px-2 py-0.5 rounded-full shadow-sm">
             {item.category}
           </span>
         )}
@@ -101,11 +101,11 @@ function AffiliateCard({ item }: { item: AffiliateItem }) {
 
         <div className="mt-auto">
           {(item.price || item.price_label) && (
-            <p className="text-base font-bold text-[#2D7D46] dark:text-emerald-400 mb-2">
+            <p className="text-base font-bold text-[#F5C400] dark:text-yellow-400 mb-2">
               {item.price_label ?? formatPrice(item.price!)}
             </p>
           )}
-          <div className="w-full flex items-center justify-center gap-2 bg-gray-900 dark:bg-zinc-700 dark:group-hover:bg-[#2D7D46] text-white text-sm font-medium px-4 py-2.5 rounded-xl group-hover:bg-[#2D7D46] transition-colors">
+          <div className="w-full flex items-center justify-center gap-2 bg-gray-900 dark:bg-zinc-700 dark:group-hover:bg-[#F5C400] text-black text-sm font-medium px-4 py-2.5 rounded-xl group-hover:bg-[#F5C400] transition-colors">
             Lihat Detail
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -176,13 +176,13 @@ export default function AffiliateListClient({ items }: { items: AffiliateItem[] 
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Cari produk..."
-            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 dark:border-zinc-600 rounded-xl bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 outline-none focus:border-[#2D7D46] dark:focus:border-emerald-500 focus:ring-2 focus:ring-[#2D7D46]/20 transition-colors"
+            className="w-full pl-9 pr-4 py-2.5 text-sm border border-gray-200 dark:border-zinc-600 rounded-xl bg-white dark:bg-zinc-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-zinc-500 outline-none focus:border-[#F5C400] dark:focus:border-yellow-500 focus:ring-2 focus:ring-[#F5C400]/20 transition-colors"
           />
         </div>
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as SortOption)}
-          className="text-sm border border-gray-200 dark:border-zinc-600 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200 outline-none focus:border-[#2D7D46] cursor-pointer"
+          className="text-sm border border-gray-200 dark:border-zinc-600 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800 text-gray-700 dark:text-gray-200 outline-none focus:border-[#F5C400] cursor-pointer"
         >
           <option value="terbaru">Terbaru</option>
           <option value="termurah">Harga Terendah</option>
@@ -198,7 +198,7 @@ export default function AffiliateListClient({ items }: { items: AffiliateItem[] 
             onClick={() => setActiveCategory(cat)}
             className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors whitespace-nowrap ${
               activeCategory === cat
-                ? "bg-[#2D7D46] text-white shadow-sm"
+                ? "bg-[#F5C400] text-black shadow-sm"
                 : "bg-gray-100 dark:bg-zinc-700 text-gray-600 dark:text-gray-200 hover:bg-gray-200 dark:hover:bg-zinc-600"
             }`}
           >
@@ -216,7 +216,7 @@ export default function AffiliateListClient({ items }: { items: AffiliateItem[] 
               onClick={() => setActiveMarketplace(mp)}
               className={`text-xs px-3 py-1 rounded-full font-medium transition-colors whitespace-nowrap border ${
                 activeMarketplace === mp
-                  ? "border-[#2D7D46] bg-[#2D7D46]/10 dark:bg-[#2D7D46]/25 text-[#2D7D46] dark:text-emerald-400"
+                  ? "border-[#F5C400] bg-[#F5C400]/10 dark:bg-[#F5C400]/25 text-[#F5C400] dark:text-yellow-400"
                   : "border-gray-200 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-zinc-400"
               }`}
             >
@@ -253,7 +253,7 @@ export default function AffiliateListClient({ items }: { items: AffiliateItem[] 
               setActiveCategory("Semua");
               setActiveMarketplace("Semua");
             }}
-            className="mt-4 text-sm text-[#2D7D46] dark:text-emerald-400 hover:underline font-medium"
+            className="mt-4 text-sm text-[#F5C400] dark:text-yellow-400 hover:underline font-medium"
           >
             Reset filter
           </button>

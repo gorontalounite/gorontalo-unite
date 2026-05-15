@@ -21,7 +21,7 @@ export default function EmbedBlock({ block, onChange, selected }: Props) {
           value={url}
           onChange={(e) => onChange({ ...block, attrs: { ...attrs, url: e.target.value } })}
           placeholder="Tempel URL YouTube, Vimeo, atau embed lainnya…"
-          className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] mb-2"
+          className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] mb-2"
         />
       )}
       {ytId ? (
@@ -35,7 +35,7 @@ export default function EmbedBlock({ block, onChange, selected }: Props) {
         </div>
       ) : url ? (
         <div className="border border-gray-200 rounded-xl p-4 text-sm text-gray-500">
-          🔗 <a href={url} target="_blank" rel="noreferrer" className="text-[#2D7D46] underline">{url}</a>
+          🔗 <a href={url} target="_blank" rel="noreferrer" className="text-[#F5C400] underline">{url}</a>
         </div>
       ) : (
         <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">

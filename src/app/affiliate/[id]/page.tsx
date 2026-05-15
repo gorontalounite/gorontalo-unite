@@ -126,7 +126,7 @@ export default async function AffiliateDetailPage({
           {/* Category badge */}
           {product.category && (
             <div className="flex items-center gap-2">
-              <span className="text-xs bg-[#2D7D46]/10 dark:bg-[#2D7D46]/30 text-[#2D7D46] dark:text-emerald-300 border border-[#2D7D46]/20 dark:border-[#2D7D46]/40 px-3 py-1 rounded-full font-medium">
+              <span className="text-xs bg-[#F5C400]/10 dark:bg-[#F5C400]/30 text-[#F5C400] dark:text-emerald-300 border border-[#F5C400]/20 dark:border-[#F5C400]/40 px-3 py-1 rounded-full font-medium">
                 {product.category}
               </span>
             </div>
@@ -143,7 +143,7 @@ export default async function AffiliateDetailPage({
                 .map((tag) => (
                   <span
                     key={tag}
-                    className="text-xs bg-emerald-50 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-700 px-2.5 py-1 rounded-full font-medium"
+                    className="text-xs bg-yellow-50 dark:bg-yellow-900/40 text-emerald-700 dark:text-emerald-300 border border-yellow-200 dark:border-yellow-700 px-2.5 py-1 rounded-full font-medium"
                   >
                     {tag}
                   </span>
@@ -159,7 +159,7 @@ export default async function AffiliateDetailPage({
           {/* Price */}
           {(product.price || product.price_label) && (
             <div className="mb-6">
-              <p className="text-3xl font-bold text-[#2D7D46] dark:text-emerald-400">
+              <p className="text-3xl font-bold text-[#F5C400] dark:text-yellow-400">
                 {product.price_label ?? formatPrice(product.price!)}
               </p>
               <p className="text-xs text-text-tertiary mt-1">
@@ -205,7 +205,7 @@ export default async function AffiliateDetailPage({
               <Link
                 key={rel.id}
                 href={`/affiliate/${rel.id}`}
-                className="group bg-white dark:bg-zinc-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-700 hover:shadow-md hover:border-[#2D7D46]/40 dark:hover:border-[#2D7D46]/50 transition-all flex flex-col"
+                className="group bg-white dark:bg-zinc-800 rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-700 hover:shadow-md hover:border-[#F5C400]/40 dark:hover:border-[#F5C400]/50 transition-all flex flex-col"
               >
                 <div className="aspect-square relative bg-gray-50 dark:bg-zinc-700 overflow-hidden">
                   {rel.image_url ? (
@@ -227,7 +227,7 @@ export default async function AffiliateDetailPage({
                     {rel.title}
                   </p>
                   {(rel.price || rel.price_label) && (
-                    <p className="text-xs font-bold text-[#2D7D46] dark:text-emerald-400">
+                    <p className="text-xs font-bold text-[#F5C400] dark:text-yellow-400">
                       {rel.price_label ?? formatPrice(rel.price!)}
                     </p>
                   )}

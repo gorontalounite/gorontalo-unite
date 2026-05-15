@@ -88,7 +88,7 @@ function ChunkRow({
     <div className="border border-gray-100 rounded-xl bg-white overflow-hidden">
       {/* Header row */}
       <div className="flex items-start gap-3 px-4 py-3">
-        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-emerald-100 text-emerald-700 text-xs font-bold flex items-center justify-center mt-0.5">
+        <span className="flex-shrink-0 w-6 h-6 rounded-full bg-yellow-100 text-emerald-700 text-xs font-bold flex items-center justify-center mt-0.5">
           {index + 1}
         </span>
 
@@ -96,12 +96,12 @@ function ChunkRow({
           <input
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="flex-1 text-sm font-medium border border-[#2D7D46] rounded-lg px-2 py-1 outline-none"
+            className="flex-1 text-sm font-medium border border-[#F5C400] rounded-lg px-2 py-1 outline-none"
           />
         ) : (
           <button
             onClick={() => setExpanded((v) => !v)}
-            className="flex-1 text-sm font-medium text-gray-800 text-left hover:text-[#2D7D46] transition-colors"
+            className="flex-1 text-sm font-medium text-gray-800 text-left hover:text-[#F5C400] transition-colors"
           >
             {title || <span className="text-gray-400 italic">Tanpa judul</span>}
           </button>
@@ -112,7 +112,7 @@ function ChunkRow({
             <>
               <button
                 onClick={() => { setEditing(true); setExpanded(true); }}
-                className="text-xs text-[#2D7D46] hover:underline"
+                className="text-xs text-[#F5C400] hover:underline"
               >
                 Edit
               </button>
@@ -144,7 +144,7 @@ function ChunkRow({
               <button
                 onClick={handleSave}
                 disabled={saving}
-                className="text-xs text-white bg-[#2D7D46] px-2 py-0.5 rounded-md hover:bg-[#236137] disabled:opacity-50"
+                className="text-xs text-white bg-[#F5C400] px-2 py-0.5 rounded-md hover:bg-[#c9a000] disabled:opacity-50"
               >
                 {saving ? "Menyimpan..." : "Simpan"}
               </button>
@@ -167,7 +167,7 @@ function ChunkRow({
               value={content}
               onChange={(e) => setContent(e.target.value)}
               rows={8}
-              className="w-full mt-3 text-xs font-mono border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#2D7D46] resize-y bg-gray-50"
+              className="w-full mt-3 text-xs font-mono border border-gray-200 rounded-lg px-3 py-2 outline-none focus:border-[#F5C400] resize-y bg-gray-50"
             />
           ) : (
             <p className="text-xs text-gray-500 mt-2 leading-relaxed whitespace-pre-wrap line-clamp-6">
@@ -305,7 +305,7 @@ export default function MyRagPage() {
         onDragLeave={onDragLeave}
         onClick={() => !uploading && fileInputRef.current?.click()}
         className={`relative border-2 border-dashed rounded-2xl p-10 flex flex-col items-center justify-center gap-3 transition-all cursor-pointer select-none
-          ${dragOver ? "border-[#2D7D46] bg-emerald-50" : "border-gray-200 bg-white hover:border-[#2D7D46]/50 hover:bg-gray-50"}
+          ${dragOver ? "border-[#F5C400] bg-yellow-50" : "border-gray-200 bg-white hover:border-[#F5C400]/50 hover:bg-gray-50"}
           ${uploading ? "pointer-events-none opacity-60" : ""}
         `}
       >
@@ -320,14 +320,14 @@ export default function MyRagPage() {
 
         {uploading ? (
           <>
-            <div className="w-10 h-10 border-4 border-[#2D7D46] border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-[#F5C400] border-t-transparent rounded-full animate-spin" />
             <p className="text-sm font-medium text-gray-700">{uploadProgress}</p>
             <p className="text-xs text-gray-400">Harap tunggu, proses ini bisa memakan waktu 10–30 detik</p>
           </>
         ) : (
           <>
-            <div className="w-14 h-14 rounded-2xl bg-emerald-50 flex items-center justify-center">
-              <svg className="w-7 h-7 text-[#2D7D46]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-14 h-14 rounded-2xl bg-yellow-50 flex items-center justify-center">
+              <svg className="w-7 h-7 text-[#F5C400]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
               </svg>
             </div>
@@ -347,7 +347,7 @@ export default function MyRagPage() {
       {result && (
         <div className={`mt-4 px-4 py-3 rounded-xl text-sm flex items-start gap-3 ${
           result.success
-            ? "bg-emerald-50 border border-emerald-200 text-emerald-800"
+            ? "bg-yellow-50 border border-yellow-200 text-emerald-800"
             : "bg-red-50 border border-red-200 text-red-700"
         }`}>
           {result.success ? (
@@ -360,7 +360,7 @@ export default function MyRagPage() {
                 <p className="text-xs mt-0.5">
                   {result.elements} elemen diproses &rarr; <strong>{result.chunks}</strong> chunk tersimpan ke Knowledge Base.
                   {result.chunks !== result.elements && (
-                    <span className="text-emerald-600"> (elemen pendek/duplikat difilter otomatis)</span>
+                    <span className="text-yellow-600"> (elemen pendek/duplikat difilter otomatis)</span>
                   )}
                 </p>
               </div>
@@ -390,7 +390,7 @@ export default function MyRagPage() {
                 {uploadedChunks.length} chunk tersimpan. Klik judul untuk lihat isi, atau Edit untuk ubah konten.
               </p>
             </div>
-            <span className="text-xs bg-emerald-100 text-emerald-700 font-medium px-2 py-0.5 rounded-full">
+            <span className="text-xs bg-yellow-100 text-emerald-700 font-medium px-2 py-0.5 rounded-full">
               {uploadedChunks.length} chunk
             </span>
           </div>
@@ -419,7 +419,7 @@ export default function MyRagPage() {
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           {loadingHistory ? (
             <div className="flex justify-center py-10">
-              <div className="w-5 h-5 border-2 border-[#2D7D46] border-t-transparent rounded-full animate-spin" />
+              <div className="w-5 h-5 border-2 border-[#F5C400] border-t-transparent rounded-full animate-spin" />
             </div>
           ) : uploads.length === 0 ? (
             <div className="py-12 text-center text-gray-400 text-sm">
@@ -458,7 +458,7 @@ export default function MyRagPage() {
                     </td>
                     <td className="px-4 py-3">
                       {u.status === "done" ? (
-                        <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-emerald-100 text-emerald-700">Selesai</span>
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-yellow-100 text-emerald-700">Selesai</span>
                       ) : u.status === "error" ? (
                         <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-red-100 text-red-600" title={u.error_message ?? ""}>
                           Gagal

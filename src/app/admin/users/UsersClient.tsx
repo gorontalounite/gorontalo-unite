@@ -57,7 +57,7 @@ export default function UsersClient({ initialUsers }: { initialUsers: UserProfil
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Cari nama / email..."
-          className="text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] w-56"
+          className="text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] w-56"
         />
       </div>
 
@@ -91,7 +91,7 @@ export default function UsersClient({ initialUsers }: { initialUsers: UserProfil
                 <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#2D7D46] to-[#1a5c33] flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#F5C400] to-[#111111] flex items-center justify-center flex-shrink-0">
                         <span className="text-white text-xs font-bold">
                           {(u.full_name?.[0] ?? u.email[0]).toUpperCase()}
                         </span>

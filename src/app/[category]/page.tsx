@@ -14,7 +14,7 @@ const CATEGORIES: Record<string, {
   bgColor: string;
 }> = {
   // Main categories
-  wisata:          { label: "Wisata",          description: "Destinasi dan pengalaman wisata terbaik di Gorontalo.",              color: "text-emerald-600 dark:text-emerald-400",  bgColor: "bg-emerald-100 dark:bg-emerald-900/30" },
+  wisata:          { label: "Wisata",          description: "Destinasi dan pengalaman wisata terbaik di Gorontalo.",              color: "text-yellow-600 dark:text-yellow-400",  bgColor: "bg-yellow-100 dark:bg-yellow-900/30" },
   bisnis:          { label: "Bisnis",          description: "Peluang usaha, UMKM, investasi, dan ekonomi Gorontalo.",            color: "text-blue-600 dark:text-blue-400",        bgColor: "bg-blue-100 dark:bg-blue-900/30"       },
   daerah:          { label: "Daerah",          description: "Berita pemerintahan, infrastruktur, dan kebijakan daerah.",         color: "text-purple-600 dark:text-purple-400",    bgColor: "bg-purple-100 dark:bg-purple-900/30"   },
   event:           { label: "Event",           description: "Festival, pameran, dan acara terkini di Gorontalo.",                color: "text-orange-600 dark:text-orange-400",    bgColor: "bg-orange-100 dark:bg-orange-900/30"   },
@@ -109,7 +109,7 @@ export default async function CategoryPage({ params }: Props) {
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
-        <Link href="/" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">Beranda</Link>
+        <Link href="/" className="hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Beranda</Link>
         <span>/</span>
         <span className={`font-medium ${cat.color}`}>{cat.label}</span>
       </nav>
@@ -133,7 +133,7 @@ export default async function CategoryPage({ params }: Props) {
           <p className="text-sm text-gray-400 dark:text-gray-500 max-w-xs">
             Konten kategori {cat.label} akan segera hadir. Pantau terus Gorontalo Unite!
           </p>
-          <Link href="/" className="mt-6 px-5 py-2 bg-[#2D7D46] text-white text-sm font-medium rounded-xl hover:bg-[#236137] transition-colors">
+          <Link href="/" className="mt-6 px-5 py-2 bg-[#F5C400] text-black text-sm font-medium rounded-xl hover:bg-[#c9a000] transition-colors">
             Kembali ke Beranda
           </Link>
         </div>
@@ -242,7 +242,7 @@ function ArticleCard({
             <span className="text-xs text-gray-400 dark:text-gray-500">{formatDate(article.published_at)}</span>
           )}
         </div>
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2 mb-2 group-hover:text-[#2D7D46] dark:group-hover:text-emerald-400 transition-colors">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2 mb-2 group-hover:text-[#F5C400] dark:group-hover:text-yellow-400 transition-colors">
           {article.title}
         </h3>
         {article.excerpt && (
@@ -250,7 +250,7 @@ function ArticleCard({
             {article.excerpt}
           </p>
         )}
-        <div className="flex items-center gap-1 mt-3 text-xs text-[#2D7D46] dark:text-emerald-400 font-medium">
+        <div className="flex items-center gap-1 mt-3 text-xs text-[#F5C400] dark:text-yellow-400 font-medium">
           Baca selengkapnya
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

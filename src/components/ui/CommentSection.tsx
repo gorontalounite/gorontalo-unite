@@ -94,7 +94,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
           {comments.map((c) => (
             <div key={c.id} className="flex gap-3">
               {/* Avatar */}
-              <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 uppercase">
+              <div className="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-xs font-bold shrink-0 mt-0.5 uppercase">
                 {c.user_name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
@@ -117,7 +117,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
           Komentar dinonaktifkan untuk artikel ini.
         </p>
       ) : submitted ? (
-        <div className="bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 rounded-xl px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
+        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
           ✓ Komentar terkirim — menunggu moderasi sebelum tampil.
         </div>
       ) : !user ? (
@@ -127,7 +127,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
           </p>
           <Link
             href={`/sign-in?redirect=${encodeURIComponent(`/news/${slug}`)}`}
-            className="inline-flex items-center gap-1.5 bg-[#2D7D46] text-white text-xs font-medium px-4 py-2 rounded-lg hover:bg-[#236137] transition-colors"
+            className="inline-flex items-center gap-1.5 bg-[#F5C400] text-black text-xs font-medium px-4 py-2 rounded-lg hover:bg-[#c9a000] transition-colors"
           >
             Masuk / Daftar
           </Link>
@@ -135,7 +135,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
       ) : (
         <form onSubmit={handleSubmit} className="space-y-3">
           <div className="flex gap-3 items-start">
-            <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-xs font-bold shrink-0 mt-1 uppercase">
+            <div className="w-8 h-8 rounded-full bg-yellow-100 dark:bg-yellow-900/40 text-emerald-700 dark:text-emerald-300 flex items-center justify-center text-xs font-bold shrink-0 mt-1 uppercase">
               {user.name.charAt(0)}
             </div>
             <div className="flex-1">
@@ -145,7 +145,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
                 placeholder="Tulis komentar kamu..."
                 rows={3}
                 maxLength={2000}
-                className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white outline-none focus:border-[#2D7D46] dark:focus:border-emerald-500 resize-none transition-colors"
+                className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white outline-none focus:border-[#F5C400] dark:focus:border-yellow-500 resize-none transition-colors"
               />
               <div className="flex items-center justify-between mt-2">
                 <span className="text-xs text-gray-400">{content.length}/2000</span>
@@ -153,7 +153,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
                 <button
                   type="submit"
                   disabled={submitting || !content.trim()}
-                  className="text-xs bg-[#2D7D46] text-white font-medium px-4 py-1.5 rounded-lg hover:bg-[#236137] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="text-xs bg-[#F5C400] text-black font-medium px-4 py-1.5 rounded-lg hover:bg-[#c9a000] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {submitting ? "Mengirim…" : "Kirim Komentar"}
                 </button>

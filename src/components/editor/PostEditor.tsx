@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import BlockCanvas from "./BlockCanvas";
 import EditorSidebar, { PostMeta, EMPTY_META } from "./EditorSidebar";
@@ -30,43 +30,81 @@ const PORTFOLIO_SECTIONS: { key: SectionKey; label: string; emoji: string }[] = 
   { key: "result",    label: "Result / Outcome",   emoji: "🏆" },
 ];
 
+const MAX_HISTORY = 50;
+
 /* ─── Top bar ─────────────────────────────────────────────── */
 function TopBar({
   postType, title, saving, saved, published,
   previewMode, onPreview,
   onSaveDraft, onPublish, onBack,
+  canUndo, canRedo, onUndo, onRedo,
+  isFullscreen, onToggleFullscreen,
 }: {
   postType: string; title: string; saving: boolean; saved: boolean;
   published: boolean; previewMode: boolean;
   onPreview: () => void; onSaveDraft: () => void;
   onPublish: () => void; onBack: () => void;
+  canUndo: boolean; canRedo: boolean;
+  onUndo: () => void; onRedo: () => void;
+  isFullscreen: boolean; onToggleFullscreen: () => void;
 }) {
   return (
-    <div className="h-12 border-b border-gray-200 bg-white flex items-center px-4 gap-3 flex-shrink-0 z-10">
+    <div className="h-12 border-b border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 flex items-center px-4 gap-3 flex-shrink-0 z-10">
       <button
         type="button"
         onClick={onBack}
-        className="text-xs text-gray-500 hover:text-gray-800 flex items-center gap-1.5 transition-colors"
+        className="text-xs text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-100 flex items-center gap-1.5 transition-colors"
       >
         ← {postType === "portfolio" ? "Portofolio" : "Berita"}
       </button>
 
       <div className="flex-1 flex items-center gap-2 min-w-0">
-        <span className="text-xs text-gray-300">|</span>
-        <span className="text-xs text-gray-500 truncate max-w-xs">{title || "Post tanpa judul"}</span>
+        <span className="text-xs text-gray-300 dark:text-zinc-600">|</span>
+        <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-xs">{title || "Post tanpa judul"}</span>
         {saved && !saving && (
-          <span className="text-[11px] text-emerald-500">● Tersimpan</span>
+          <span className="text-[11px] text-yellow-500">● Tersimpan</span>
         )}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
+        {/* Undo / Redo */}
+        <button
+          type="button"
+          onClick={onUndo}
+          disabled={!canUndo}
+          title="Undo (Ctrl+Z)"
+          className="text-xs px-2 py-1.5 rounded-lg border border-gray-200 dark:border-zinc-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-colors"
+        >↩</button>
+        <button
+          type="button"
+          onClick={onRedo}
+          disabled={!canRedo}
+          title="Redo (Ctrl+Y)"
+          className="text-xs px-2 py-1.5 rounded-lg border border-gray-200 dark:border-zinc-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-30 transition-colors"
+        >↪</button>
+
+        <div className="w-px h-4 bg-gray-200 dark:bg-zinc-600 mx-0.5" />
+
+        <button
+          type="button"
+          onClick={onToggleFullscreen}
+          title={isFullscreen ? "Keluar Fullscreen" : "Fullscreen"}
+          className={`text-xs px-2 py-1.5 rounded-lg border transition-colors ${
+            isFullscreen
+              ? "border-gray-900 dark:border-zinc-300 bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
+              : "border-gray-200 dark:border-zinc-600 text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800"
+          }`}
+        >
+          {isFullscreen ? "✕ Keluar Fullscreen" : "⛶"}
+        </button>
+
         <button
           type="button"
           onClick={onPreview}
           className={`text-xs px-3 py-1.5 rounded-lg border transition-colors ${
             previewMode
-              ? "bg-gray-900 text-white border-gray-900"
-              : "border-gray-200 text-gray-600 hover:bg-gray-50"
+              ? "bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900 border-gray-900 dark:border-zinc-100"
+              : "border-gray-200 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800"
           }`}
         >
           {previewMode ? "✎ Edit" : "👁 Preview"}
@@ -75,7 +113,7 @@ function TopBar({
           type="button"
           onClick={onSaveDraft}
           disabled={saving}
-          className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-50 transition-colors"
+          className="text-xs px-3 py-1.5 rounded-lg border border-gray-200 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 transition-colors"
         >
           {saving ? "Menyimpan…" : "Simpan Draft"}
         </button>
@@ -83,7 +121,7 @@ function TopBar({
           type="button"
           onClick={onPublish}
           disabled={saving}
-          className="text-xs px-4 py-1.5 rounded-lg bg-[#2D7D46] text-white hover:bg-[#236137] disabled:opacity-50 transition-colors font-medium"
+          className="text-xs px-4 py-1.5 rounded-lg bg-[#F5C400] text-black hover:bg-[#c9a000] disabled:opacity-50 transition-colors font-medium"
         >
           {published ? "Perbarui" : "Terbitkan"}
         </button>
@@ -97,20 +135,20 @@ function PreviewPane({ blocks, meta, postType }: {
   blocks: Block[]; meta: PostMeta; postType: "news" | "portfolio";
 }) {
   return (
-    <div className="flex-1 overflow-auto bg-gray-50">
+    <div className="flex-1 overflow-auto bg-gray-50 dark:bg-zinc-950">
       <div className="max-w-3xl mx-auto px-6 py-10">
         {/* Simulated article header */}
         <div className="mb-6">
           {meta.category && (
-            <span className="text-xs font-semibold bg-emerald-100 text-emerald-700 px-2.5 py-1 rounded-full">
+            <span className="text-xs font-semibold bg-yellow-100 text-emerald-700 px-2.5 py-1 rounded-full">
               {meta.category}
             </span>
           )}
-          <h1 className="mt-3 text-3xl font-bold text-gray-900 leading-tight">
-            {meta.title || <span className="text-gray-300">Judul artikel…</span>}
+          <h1 className="mt-3 text-3xl font-bold text-gray-900 dark:text-white leading-tight">
+            {meta.title || <span className="text-gray-300 dark:text-zinc-600">Judul artikel…</span>}
           </h1>
           {meta.excerpt && (
-            <p className="mt-3 text-gray-500 italic border-l-4 border-[#2D7D46] pl-4">
+            <p className="mt-3 text-gray-500 italic border-l-4 border-[#F5C400] pl-4">
               {meta.excerpt}
             </p>
           )}
@@ -121,7 +159,7 @@ function PreviewPane({ blocks, meta, postType }: {
         </div>
 
         {/* Blocks rendered */}
-        <div className="prose max-w-none">
+        <div className="prose max-w-none dark:prose-invert">
           {blocks.map((block) => <PreviewBlock key={block.id} block={block} />)}
         </div>
 
@@ -134,7 +172,7 @@ function PreviewPane({ blocks, meta, postType }: {
             {meta.project_url && (
               <div className="col-span-2">
                 <a href={meta.project_url} target="_blank" rel="noreferrer"
-                  className="inline-flex items-center gap-2 bg-[#2D7D46] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#1f5a33]">
+                  className="inline-flex items-center gap-2 bg-[#F5C400] text-black text-sm px-4 py-2 rounded-xl hover:bg-[#1f5a33]">
                   Lihat Proyek →
                 </a>
               </div>
@@ -153,8 +191,7 @@ function PreviewBlock({ block }: { block: Block }) {
     case "heading": {
       const l = (block.attrs.level as number) ?? 2;
       const cls = ["","text-4xl font-bold","text-3xl font-bold","text-2xl font-semibold","text-xl font-semibold","text-lg font-medium","text-base font-medium"][l];
-      const hTag = `h${l}` as "h1"|"h2"|"h3"|"h4"|"h5"|"h6";
-      const HTag = hTag;
+      const HTag = `h${l}` as "h1"|"h2"|"h3"|"h4"|"h5"|"h6";
       return <HTag className={`${cls} text-gray-900 mt-6 mb-3`}>{block.content}</HTag>;
     }
     case "image":
@@ -192,7 +229,7 @@ function PreviewBlock({ block }: { block: Block }) {
     }
     case "quote":
       return (
-        <blockquote className="border-l-4 border-[#2D7D46] pl-4 italic text-gray-600 my-4">
+        <blockquote className="border-l-4 border-[#F5C400] pl-4 italic text-gray-600 my-4">
           <p>{block.content}</p>
           {block.attrs.cite ? <cite className="text-xs text-gray-400 not-italic">— {block.attrs.cite as string}</cite> : null}
         </blockquote>
@@ -214,9 +251,25 @@ function PreviewBlock({ block }: { block: Block }) {
         </div>
       ) : url ? (
         <div className="border border-gray-200 rounded-xl p-4 my-4 text-sm text-gray-500">
-          🔗 <a href={url} target="_blank" rel="noreferrer" className="text-[#2D7D46] underline">{url}</a>
+          🔗 <a href={url} target="_blank" rel="noreferrer" className="text-[#F5C400] underline">{url}</a>
         </div>
       ) : null;
+    }
+    case "callout": {
+      const ctype = (block.attrs.type as string) ?? "info";
+      const icon  = (block.attrs.icon as string) ?? "ℹ️";
+      const colorMap: Record<string, string> = {
+        info:    "border-blue-600 bg-blue-50",
+        warning: "border-amber-700 bg-amber-50",
+        success: "border-yellow-700 bg-yellow-50",
+        error:   "border-red-600 bg-red-50",
+      };
+      return (
+        <div className={`border-l-4 ${colorMap[ctype] ?? colorMap.info} rounded-r-xl px-4 py-3 my-4 flex gap-3`}>
+          <span className="text-xl flex-shrink-0">{icon}</span>
+          <p className="text-sm text-gray-700">{block.content}</p>
+        </div>
+      );
     }
     default: return null;
   }
@@ -226,9 +279,56 @@ function PreviewBlock({ block }: { block: Block }) {
 export default function PostEditor({ postType, editId, initialMeta, initialBlocks, initialSections }: PostEditorProps) {
   const router = useRouter();
 
-  const [blocks, setBlocks]   = useState<Block[]>(
-    initialBlocks?.length ? initialBlocks : [createBlock("paragraph")]
-  );
+  const initialBlocksValue = initialBlocks?.length ? initialBlocks : [createBlock("paragraph")];
+
+  const [blocks, setBlocksRaw]   = useState<Block[]>(initialBlocksValue);
+  const [history, setHistory]    = useState<Block[][]>([initialBlocksValue]);
+  const [historyIndex, setHistoryIndex] = useState(0);
+  const isUndoRedoRef = useRef(false);
+
+  // Wrap setBlocks to also push history
+  const setBlocks = useCallback((newBlocks: Block[] | ((prev: Block[]) => Block[])) => {
+    setBlocksRaw((prev) => {
+      const next = typeof newBlocks === "function" ? newBlocks(prev) : newBlocks;
+      if (!isUndoRedoRef.current) {
+        setHistory((h) => {
+          const sliced = h.slice(0, historyIndex + 1);
+          const updated = [...sliced, next];
+          if (updated.length > MAX_HISTORY) updated.shift();
+          return updated;
+        });
+        setHistoryIndex((i) => Math.min(i + 1, MAX_HISTORY - 1));
+      }
+      return next;
+    });
+  }, [historyIndex]);
+
+  const undo = useCallback(() => {
+    setHistory((h) => {
+      const newIdx = historyIndex - 1;
+      if (newIdx < 0) return h;
+      isUndoRedoRef.current = true;
+      setHistoryIndex(newIdx);
+      setBlocksRaw(h[newIdx]);
+      setTimeout(() => { isUndoRedoRef.current = false; }, 0);
+      return h;
+    });
+  }, [historyIndex]);
+
+  const redo = useCallback(() => {
+    setHistory((h) => {
+      const newIdx = historyIndex + 1;
+      if (newIdx >= h.length) return h;
+      isUndoRedoRef.current = true;
+      setHistoryIndex(newIdx);
+      setBlocksRaw(h[newIdx]);
+      setTimeout(() => { isUndoRedoRef.current = false; }, 0);
+      return h;
+    });
+  }, [historyIndex]);
+
+  const canUndo = historyIndex > 0;
+  const canRedo = historyIndex < history.length - 1;
 
   // Portfolio sections (separate block arrays per section)
   const [activeSection, setActiveSection] = useState<SectionKey>("overview");
@@ -248,8 +348,102 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
   const [saving, setSaving]   = useState(false);
   const [saved, setSaved]     = useState(!!editId);
   const [error, setError]     = useState<string | null>(null);
-  // Track whether user manually edited slug so we stop auto-syncing
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [draftBanner, setDraftBanner] = useState<string | null>(null);
   const slugManualRef = useRef(false);
+  const autosaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const draftKey = `gu-draft-${postType}-${editId ?? "new"}`;
+
+  /* ─── Keyboard shortcuts ────────────────────────────────── */
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const isMac = navigator.platform.includes("Mac");
+      const ctrl  = isMac ? e.metaKey : e.ctrlKey;
+      if (!ctrl) return;
+      if (e.key === "z" && !e.shiftKey) { e.preventDefault(); undo(); }
+      if (e.key === "y" || (e.key === "z" && e.shiftKey)) { e.preventDefault(); redo(); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [undo, redo]);
+
+  /* ─── Autosave ──────────────────────────────────────────── */
+  useEffect(() => {
+    if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    autosaveTimer.current = setTimeout(() => {
+      const draft = {
+        blocks,
+        meta,
+        savedAt: Date.now(),
+      };
+      try {
+        localStorage.setItem(draftKey, JSON.stringify(draft));
+      } catch {
+        // quota exceeded — ignore
+      }
+    }, 2000);
+    return () => {
+      if (autosaveTimer.current) clearTimeout(autosaveTimer.current);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blocks, meta]);
+
+  /* ─── Check for draft on mount ──────────────────────────── */
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as { blocks: Block[]; meta: PostMeta; savedAt: number };
+      if (draft.blocks && Array.isArray(draft.blocks)) {
+        setDraftBanner(new Date(draft.savedAt).toLocaleString("id-ID"));
+      }
+    } catch {
+      // ignore
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const loadDraft = () => {
+    try {
+      const raw = localStorage.getItem(draftKey);
+      if (!raw) return;
+      const draft = JSON.parse(raw) as { blocks: Block[]; meta: PostMeta; savedAt: number };
+      if (draft.blocks) setBlocks(draft.blocks);
+      if (draft.meta)   setMeta(draft.meta);
+    } catch {
+      // ignore
+    }
+    setDraftBanner(null);
+  };
+
+  const dismissDraft = () => setDraftBanner(null);
+
+  /* ─── Fullscreen ────────────────────────────────────────── */
+  const toggleFullscreen = () => {
+    if (!isFullscreen) {
+      if (document.documentElement.requestFullscreen) {
+        document.documentElement.requestFullscreen().catch(() => {
+          // CSS-only fallback if native fails
+        });
+      }
+      setIsFullscreen(true);
+    } else {
+      if (document.fullscreenElement && document.exitFullscreen) {
+        document.exitFullscreen().catch(() => {});
+      }
+      setIsFullscreen(false);
+    }
+  };
+
+  // Listen for Escape key / browser exiting fullscreen
+  useEffect(() => {
+    const handler = () => {
+      if (!document.fullscreenElement) setIsFullscreen(false);
+    };
+    document.addEventListener("fullscreenchange", handler);
+    return () => document.removeEventListener("fullscreenchange", handler);
+  }, []);
 
   const selectedBlock = blocks.find((b) => b.id === selectedId) ?? null;
 
@@ -258,7 +452,7 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
   }
 
   const handleBlockChange = useCallback((updated: Block) => {
-    setBlocks((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
+    setBlocksRaw((prev) => prev.map((b) => (b.id === updated.id ? updated : b)));
   }, []);
 
   const buildPayload = (publish: boolean) => {
@@ -268,8 +462,8 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
       title:        meta.title,
       slug:         finalSlug,
       excerpt:      meta.excerpt || null,
-      content:      blocksToText(blocks),   // Markdown fallback
-      blocks:       blocks,                  // JSON blocks
+      content:      blocksToText(blocks),
+      blocks:       blocks,
       image_url:    meta.image_url || null,
       category:     cat,
       tags:         meta.tags?.length ? meta.tags : null,
@@ -279,11 +473,9 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
         : null,
       seo_title:       meta.seo_title || null,
       seo_description: meta.seo_description || null,
-      // SEO
       focus_keyword:    meta.focus_keyword    || null,
       schema_type:      meta.schema_type      || "Article",
       allow_comments:   meta.allow_comments   ?? false,
-      // Portfolio CPT
       ...(postType === "portfolio" ? {
         project_url:      meta.project_url  || null,
         client_name:      meta.client_name  || null,
@@ -321,9 +513,10 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
     if (!res.ok) { setError(json.error ?? "Terjadi kesalahan"); return; }
 
     setSaved(true);
+    // Clear autosave draft after successful save
+    try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
     setMeta((m) => ({ ...m, published: publish, slug: payload.slug }));
 
-    // If new post, redirect to edit URL so subsequent saves use PATCH
     if (!editId && json.data?.id) {
       router.replace(`/admin/${postType === "portfolio" ? "portfolio" : "news"}/edit/${json.data.id}`);
     }
@@ -332,7 +525,7 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
   const backPath = postType === "portfolio" ? "/admin/portfolio" : "/admin/news";
 
   return (
-    <div className="flex flex-col h-full">
+    <div className={`flex flex-col ${isFullscreen ? "fixed inset-0 z-50 bg-white dark:bg-zinc-900" : "h-full"}`}>
       <TopBar
         postType={postType}
         title={meta.title}
@@ -344,10 +537,33 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
         onSaveDraft={() => save(false)}
         onPublish={() => save(true)}
         onBack={() => router.push(backPath)}
+        canUndo={canUndo}
+        canRedo={canRedo}
+        onUndo={undo}
+        onRedo={redo}
+        isFullscreen={isFullscreen}
+        onToggleFullscreen={toggleFullscreen}
       />
 
+      {/* Draft banner */}
+      {draftBanner && (
+        <div className="bg-amber-50 dark:bg-amber-900/20 border-b border-amber-200 dark:border-amber-700 text-amber-800 dark:text-amber-300 text-xs px-4 py-2 flex items-center gap-3 flex-shrink-0">
+          <span>💾 Draft tersimpan ditemukan — {draftBanner} — Muat draft?</span>
+          <button
+            type="button"
+            onClick={loadDraft}
+            className="px-2.5 py-1 bg-amber-600 text-white rounded-lg hover:bg-amber-700 font-medium"
+          >Muat</button>
+          <button
+            type="button"
+            onClick={dismissDraft}
+            className="px-2.5 py-1 border border-amber-300 dark:border-amber-600 text-amber-700 dark:text-amber-300 rounded-lg hover:bg-amber-100 dark:hover:bg-amber-900/30"
+          >Abaikan</button>
+        </div>
+      )}
+
       {error && (
-        <div className="bg-red-50 text-red-600 text-xs px-4 py-2 flex items-center gap-2 flex-shrink-0">
+        <div className="bg-red-50 dark:bg-red-950/20 text-red-600 dark:text-red-400 text-xs px-4 py-2 flex items-center gap-2 flex-shrink-0">
           ⚠ {error}
           <button type="button" onClick={() => setError(null)} className="ml-auto text-red-400">✕</button>
         </div>
@@ -360,7 +576,7 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
         ) : (
           /* ── Edit mode ── */
           <div
-            className="flex-1 overflow-auto bg-gray-50 p-8"
+            className="flex-1 overflow-auto bg-gray-50 dark:bg-zinc-950 p-8"
             onClick={() => setSelectedId(null)}
           >
             <div className="max-w-3xl mx-auto">
@@ -373,18 +589,17 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
                   setMeta((m) => ({
                     ...m,
                     title,
-                    // Auto-sync slug unless user manually edited it
                     slug: slugManualRef.current ? m.slug : slugify(title),
                   }));
                   setSaved(false);
                 }}
                 placeholder="Tambahkan judul…"
-                className="w-full text-4xl font-bold text-gray-900 outline-none bg-transparent placeholder:text-gray-200 mb-6 leading-tight"
+                className="w-full text-4xl font-bold text-gray-900 dark:text-white outline-none bg-transparent placeholder:text-gray-200 dark:placeholder:text-zinc-700 mb-6 leading-tight"
               />
 
               {/* Portfolio section tabs */}
               {postType === "portfolio" && (
-                <div className="flex gap-1 mb-6 border-b border-gray-100 pb-2 flex-wrap">
+                <div className="flex gap-1 mb-6 border-b border-gray-100 dark:border-zinc-700 pb-2 flex-wrap">
                   {PORTFOLIO_SECTIONS.map((s) => (
                     <button
                       key={s.key}
@@ -392,8 +607,8 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
                       onClick={(e) => { e.stopPropagation(); setActiveSection(s.key); setSelectedId(null); }}
                       className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
                         activeSection === s.key
-                          ? "bg-gray-900 text-white"
-                          : "text-gray-500 hover:bg-gray-100 hover:text-gray-700"
+                          ? "bg-gray-900 dark:bg-zinc-100 text-white dark:text-zinc-900"
+                          : "text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-800 hover:text-gray-700 dark:hover:text-gray-200"
                       }`}
                     >
                       <span>{s.emoji}</span> {s.label}

@@ -66,7 +66,7 @@ export default function ListBlock({ block, onChange, selected }: Props) {
       {selected && (
         <button type="button"
           onClick={() => setItems([...items, ""])}
-          className="mt-1.5 text-xs text-[#2D7D46] hover:underline"
+          className="mt-1.5 text-xs text-[#F5C400] hover:underline"
         >+ Tambah item</button>
       )}
     </div>

@@ -72,7 +72,7 @@ export default function ShopPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
-          <Link href="/" className="hover:text-[#2D7D46]">Home</Link>
+          <Link href="/" className="hover:text-[#F5C400]">Home</Link>
           <span>/</span>
           <span className="text-gray-600">Shop</span>
         </div>
@@ -87,7 +87,7 @@ export default function ShopPage() {
         {products.map((product) => (
           <article
             key={product.id}
-            className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-[#2D7D46]/20 transition-all flex flex-col overflow-hidden"
+            className="bg-white rounded-2xl border border-gray-100 shadow-sm hover:shadow-md hover:border-[#F5C400]/20 transition-all flex flex-col overflow-hidden"
           >
             {/* Image placeholder */}
             <div className="h-40 bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center relative">
@@ -95,7 +95,7 @@ export default function ShopPage() {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
               {product.badge && (
-                <span className="absolute top-3 left-3 text-xs font-medium bg-[#2D7D46] text-white px-2 py-0.5 rounded-full">
+                <span className="absolute top-3 left-3 text-xs font-medium bg-[#F5C400] text-black px-2 py-0.5 rounded-full">
                   {product.badge}
                 </span>
               )}
@@ -112,8 +112,8 @@ export default function ShopPage() {
               <h3 className="text-sm font-semibold text-gray-900 mb-1">{product.name}</h3>
               <p className="text-xs text-gray-500 leading-relaxed mb-3 flex-1">{product.description}</p>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-[#2D7D46]">{product.price}</span>
-                <button className="text-xs bg-[#2D7D46] text-white px-3 py-1.5 rounded-lg hover:bg-[#236137] transition-colors active:scale-95">
+                <span className="text-sm font-bold text-[#F5C400]">{product.price}</span>
+                <button className="text-xs bg-[#F5C400] text-black px-3 py-1.5 rounded-lg hover:bg-[#c9a000] transition-colors active:scale-95">
                   Pesan
                 </button>
               </div>

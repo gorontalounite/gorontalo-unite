@@ -118,7 +118,7 @@ function ImageField({ value, onChange }: { value: string; onChange: (url: string
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder="https://... atau unggah file"
-          className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]"
+          className="flex-1 text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]"
         />
         <button
           type="button"
@@ -222,7 +222,7 @@ export default function GoodNewsClient({ initialArticles }: { initialArticles: A
           <p className="text-sm text-gray-500">{articles.length} artikel berita positif</p>
         </div>
         <button onClick={openCreate}
-          className="bg-[#2D7D46] text-white text-sm px-4 py-2 rounded-xl hover:bg-[#236137] transition-colors flex items-center gap-2">
+          className="bg-[#F5C400] text-black text-sm px-4 py-2 rounded-xl hover:bg-[#c9a000] transition-colors flex items-center gap-2">
           <span>+</span> Berita Baru
         </button>
       </div>
@@ -253,13 +253,13 @@ export default function GoodNewsClient({ initialArticles }: { initialArticles: A
                     {new Date(a.published_at ?? a.created_at).toLocaleDateString("id-ID")}
                   </td>
                   <td className="px-4 py-3">
-                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${a.published ? "bg-emerald-100 text-emerald-700" : "bg-gray-100 text-gray-500"}`}>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${a.published ? "bg-yellow-100 text-emerald-700" : "bg-gray-100 text-gray-500"}`}>
                       {a.published ? "Publik" : "Draft"}
                     </span>
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => openEdit(a.id)} className="text-xs text-[#2D7D46] hover:underline">Edit</button>
+                      <button onClick={() => openEdit(a.id)} className="text-xs text-[#F5C400] hover:underline">Edit</button>
                       <button onClick={() => setDeleteId(a.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
                     </div>
                   </td>
@@ -276,7 +276,7 @@ export default function GoodNewsClient({ initialArticles }: { initialArticles: A
             <div className="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white z-10">
               <div>
                 <h2 className="font-semibold text-gray-900">{editId ? "Edit Berita" : "Berita Baru"}</h2>
-                <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">Kategori: Good News</span>
+                <span className="text-xs text-yellow-600 bg-yellow-50 px-2 py-0.5 rounded-full">Kategori: Good News</span>
               </div>
               <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600 text-xl">✕</button>
             </div>
@@ -287,7 +287,7 @@ export default function GoodNewsClient({ initialArticles }: { initialArticles: A
                 <label className="text-xs font-medium text-gray-700 block mb-1">Judul *</label>
                 <input required value={form.title}
                   onChange={(e) => setForm((f) => ({ ...f, title: e.target.value, slug: f.slug || slugify(e.target.value) }))}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]"
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]"
                   placeholder="Judul berita positif..." />
               </div>
 
@@ -295,7 +295,7 @@ export default function GoodNewsClient({ initialArticles }: { initialArticles: A
                 <label className="text-xs font-medium text-gray-700 block mb-1">Slug (URL)</label>
                 <input value={form.slug}
                   onChange={(e) => setForm((f) => ({ ...f, slug: e.target.value }))}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] font-mono" />
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] font-mono" />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
@@ -303,7 +303,7 @@ export default function GoodNewsClient({ initialArticles }: { initialArticles: A
                   <label className="text-xs font-medium text-gray-700 block mb-1">Tanggal Tayang</label>
                   <input type="datetime-local" value={form.published_at}
                     onChange={(e) => setForm((f) => ({ ...f, published_at: e.target.value }))}
-                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46]" />
+                    className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400]" />
                 </div>
                 <div className="flex items-end pb-2">
                   <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
@@ -319,7 +319,7 @@ export default function GoodNewsClient({ initialArticles }: { initialArticles: A
                 <label className="text-xs font-medium text-gray-700 block mb-1">Ringkasan</label>
                 <textarea rows={2} value={form.excerpt}
                   onChange={(e) => setForm((f) => ({ ...f, excerpt: e.target.value }))}
-                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#2D7D46] resize-none"
+                  className="w-full text-sm border border-gray-200 rounded-xl px-3 py-2 outline-none focus:border-[#F5C400] resize-none"
                   placeholder="Ringkasan singkat berita..." />
               </div>
 
@@ -328,7 +328,7 @@ export default function GoodNewsClient({ initialArticles }: { initialArticles: A
                 <RichToolbar target={contentRef} />
                 <textarea ref={contentRef} rows={10} value={form.content}
                   onChange={(e) => setForm((f) => ({ ...f, content: e.target.value }))}
-                  className="w-full text-sm border border-gray-200 rounded-b-xl border-t-0 px-3 py-2 outline-none focus:border-[#2D7D46] resize-y font-mono"
+                  className="w-full text-sm border border-gray-200 rounded-b-xl border-t-0 px-3 py-2 outline-none focus:border-[#F5C400] resize-y font-mono"
                   placeholder="Tulis konten berita dalam format Markdown..." />
               </div>
 
@@ -338,7 +338,7 @@ export default function GoodNewsClient({ initialArticles }: { initialArticles: A
                 <button type="button" onClick={() => setShowForm(false)}
                   className="flex-1 text-sm border border-gray-200 text-gray-600 py-2.5 rounded-xl hover:bg-gray-50">Batal</button>
                 <button type="submit" disabled={loading}
-                  className="flex-1 text-sm bg-[#2D7D46] text-white py-2.5 rounded-xl hover:bg-[#236137] disabled:opacity-50">
+                  className="flex-1 text-sm bg-[#F5C400] text-black py-2.5 rounded-xl hover:bg-[#c9a000] disabled:opacity-50">
                   {loading ? "Menyimpan…" : "Simpan"}
                 </button>
               </div>

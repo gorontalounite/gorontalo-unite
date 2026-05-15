@@ -140,7 +140,7 @@ export default function InputBar({ onSend, isLoading = false }: InputBarProps) {
           </div>
         )}
 
-        <div className="flex items-end gap-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl px-4 py-2 focus-within:border-[#2D7D46] dark:focus-within:border-emerald-500 focus-within:ring-2 focus-within:ring-[#2D7D46]/20 dark:focus-within:ring-emerald-500/20 transition-all">
+        <div className="flex items-end gap-2 bg-gray-50 dark:bg-zinc-900 border border-gray-200 dark:border-zinc-800 rounded-2xl px-4 py-2 focus-within:border-[#F5C400] dark:focus-within:border-yellow-500 focus-within:ring-2 focus-within:ring-[#F5C400]/20 dark:focus-within:ring-yellow-500/20 transition-all">
           {/* Text input */}
           <textarea
             ref={textareaRef}
@@ -207,7 +207,7 @@ export default function InputBar({ onSend, isLoading = false }: InputBarProps) {
           <button
             onClick={handleSend}
             disabled={!value.trim() || isLoading}
-            className="flex-shrink-0 mb-1 w-8 h-8 bg-[#2D7D46] dark:bg-emerald-500 text-white rounded-xl flex items-center justify-center transition-all hover:bg-[#236137] dark:hover:bg-emerald-400 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
+            className="flex-shrink-0 mb-1 w-8 h-8 bg-[#F5C400] dark:bg-yellow-400 text-white rounded-xl flex items-center justify-center transition-all hover:bg-[#c9a000] dark:hover:bg-yellow-400 disabled:opacity-30 disabled:cursor-not-allowed active:scale-95"
             aria-label="Kirim pesan"
           >
             {isLoading ? (

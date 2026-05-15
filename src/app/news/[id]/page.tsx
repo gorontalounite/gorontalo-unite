@@ -59,14 +59,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Wisata:        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  Wisata:        "bg-yellow-100 text-emerald-700 dark:bg-yellow-900/40 dark:text-emerald-300",
   Budaya:        "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
   Kuliner:       "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
   Pendidikan:    "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
   Ekonomi:       "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
   Kesehatan:     "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
   Infrastruktur: "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300",
-  "Good News":   "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  "Good News":   "bg-yellow-100 text-emerald-700 dark:bg-yellow-900/40 dark:text-emerald-300",
 };
 
 export default async function NewsDetailPage({ params }: Props) {
@@ -144,9 +144,9 @@ export default async function NewsDetailPage({ params }: Props) {
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
-        <Link href="/" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">Beranda</Link>
+        <Link href="/" className="hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Beranda</Link>
         <span>/</span>
-        <Link href="/good-news" className="hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors">Berita</Link>
+        <Link href="/good-news" className="hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Berita</Link>
         <span>/</span>
         <span className="text-gray-500 dark:text-gray-400 truncate max-w-[200px]">{article.title}</span>
       </nav>
@@ -179,7 +179,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
         {/* Excerpt */}
         {article.excerpt && (
-          <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed mb-6 border-l-4 border-[#2D7D46] dark:border-emerald-500 pl-4 italic">
+          <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed mb-6 border-l-4 border-[#F5C400] dark:border-yellow-500 pl-4 italic">
             {article.excerpt}
           </p>
         )}
@@ -225,7 +225,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
       {/* Back navigation */}
       <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 flex gap-4">
-        <Link href="/good-news" className="text-sm text-[#2D7D46] dark:text-emerald-400 font-medium hover:underline">
+        <Link href="/good-news" className="text-sm text-[#F5C400] dark:text-yellow-400 font-medium hover:underline">
           ← Semua berita
         </Link>
         <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium">

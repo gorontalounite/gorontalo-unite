@@ -59,7 +59,7 @@ function getStack(item: PortfolioItem): StackKey | null {
 }
 
 const CATEGORY_BADGE: Record<string, string> = {
-  Wisata: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  Wisata: "bg-yellow-100 text-emerald-700 dark:bg-yellow-900/40 dark:text-emerald-300",
   Budaya: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
   Kuliner: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
   Pendidikan: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
@@ -97,22 +97,22 @@ function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
 
   return (
     <section className="relative px-4 sm:px-6 overflow-hidden" style={{ minHeight: "60vh", display: "flex", alignItems: "center" }}>
-      <div className="absolute inset-0 bg-gradient-to-b from-emerald-50/50 via-transparent to-transparent dark:from-emerald-950/20 pointer-events-none" />
+      <div className="absolute inset-0 bg-gradient-to-b from-yellow-50/50 via-transparent to-transparent dark:from-yellow-950/20 pointer-events-none" />
 
       <div className="relative max-w-3xl mx-auto text-center w-full py-12 sm:py-16">
-        <span className="inline-block text-xs font-semibold text-[#2D7D46] dark:text-emerald-400 uppercase tracking-widest mb-3">
+        <span className="inline-block text-xs font-semibold text-[#F5C400] dark:text-yellow-400 uppercase tracking-widest mb-3">
           AI Lokal Gorontalo
         </span>
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight mb-3">
           Tanyakan apapun{" "}
-          <span className="text-[#2D7D46] dark:text-emerald-400">tentang Gorontalo</span>
+          <span className="text-[#F5C400] dark:text-yellow-400">tentang Gorontalo</span>
         </h1>
         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto mb-8">
           Chatbot AI lokal yang memahami wisata, budaya, kuliner, dan layanan publik Gorontalo.
         </p>
 
         {/* Large chat box */}
-        <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl overflow-hidden shadow-lg shadow-emerald-900/10 dark:shadow-black/40">
+        <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl overflow-hidden shadow-lg shadow-yellow-900/10 dark:shadow-black/40">
           <textarea
             ref={textareaRef}
             value={value}
@@ -165,7 +165,7 @@ function SectionHeading({
   return (
     <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-10">
       <div className="max-w-2xl">
-        <span className="text-xs font-semibold text-[#2D7D46] dark:text-emerald-400 uppercase tracking-widest">
+        <span className="text-xs font-semibold text-[#F5C400] dark:text-yellow-400 uppercase tracking-widest">
           {eyebrow}
         </span>
         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2">
@@ -187,7 +187,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
   return (
     <Link
       href={`/portfolio/${item.slug}`}
-      className="group block bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#2D7D46]/40 dark:hover:border-emerald-500/40 hover:shadow-lg dark:hover:shadow-black/40 transition-all"
+      className="group block bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40 hover:shadow-lg dark:hover:shadow-black/40 transition-all"
     >
       <div className="aspect-[4/3] bg-gray-100 dark:bg-zinc-800 relative overflow-hidden">
         {item.image_url ? (
@@ -199,7 +199,7 @@ function PortfolioCard({ item }: { item: PortfolioItem }) {
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-emerald-50 to-emerald-100 dark:from-emerald-950/40 dark:to-emerald-900/20">
+          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-950/40 dark:to-yellow-900/20">
             <span className="text-4xl">🌿</span>
           </div>
         )}
@@ -259,7 +259,7 @@ function PortfolioSection({ items }: { items: PortfolioItem[] }) {
           action={
             <Link
               href="/portfolio"
-              className="text-sm font-semibold text-[#2D7D46] dark:text-emerald-400 hover:underline inline-flex items-center gap-1.5"
+              className="text-sm font-semibold text-[#F5C400] dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
             >
               Lihat semua
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -278,8 +278,8 @@ function PortfolioSection({ items }: { items: PortfolioItem[] }) {
                 onClick={() => setActiveTab(tab.key)}
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                   activeTab === tab.key
-                    ? "bg-[#2D7D46] dark:bg-emerald-500 text-white shadow-sm"
-                    : "bg-white dark:bg-zinc-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-800 hover:border-[#2D7D46]/40 dark:hover:border-emerald-500/40"
+                    ? "bg-[#F5C400] dark:bg-yellow-400 text-white shadow-sm"
+                    : "bg-white dark:bg-zinc-900 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-800 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40"
                 }`}
               >
                 {tab.label}
@@ -373,7 +373,7 @@ function NewsSection({ items: _items }: { items: NewsItem[] }) {
           action={
             <Link
               href="/good-news"
-              className="text-sm font-semibold text-[#2D7D46] dark:text-emerald-400 hover:underline inline-flex items-center gap-1.5"
+              className="text-sm font-semibold text-[#F5C400] dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
             >
               Semua berita
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -388,7 +388,7 @@ function NewsSection({ items: _items }: { items: NewsItem[] }) {
             <Link
               key={item.id}
               href={`/news/${item.slug}`}
-              className="group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#2D7D46]/40 dark:hover:border-emerald-500/40 hover:shadow-lg dark:hover:shadow-black/40 transition-all flex flex-col"
+              className="group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40 hover:shadow-lg dark:hover:shadow-black/40 transition-all flex flex-col"
             >
               <div className="aspect-[16/10] bg-gray-100 dark:bg-zinc-800 relative overflow-hidden">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -408,7 +408,7 @@ function NewsSection({ items: _items }: { items: NewsItem[] }) {
                 >
                   {item.category}
                 </span>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mt-2.5 line-clamp-2 group-hover:text-[#2D7D46] dark:group-hover:text-emerald-400 transition-colors leading-snug flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mt-2.5 line-clamp-2 group-hover:text-[#F5C400] dark:group-hover:text-yellow-400 transition-colors leading-snug flex-1">
                   {item.title}
                 </h3>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-2.5">
@@ -447,7 +447,7 @@ function AboutSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           {/* Left: text */}
           <div>
-            <span className="text-xs font-semibold text-[#2D7D46] dark:text-emerald-400 uppercase tracking-widest">
+            <span className="text-xs font-semibold text-[#F5C400] dark:text-yellow-400 uppercase tracking-widest">
               Tentang Kami
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2 mb-5">
@@ -468,13 +468,13 @@ function AboutSection() {
             <div className="flex flex-col sm:flex-row gap-3 mt-7">
               <Link
                 href="/about"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#2D7D46] dark:bg-emerald-500 text-white font-semibold rounded-xl hover:bg-[#1f5a33] dark:hover:bg-emerald-400 transition-colors shadow-sm"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 bg-[#F5C400] dark:bg-yellow-400 text-white font-semibold rounded-xl hover:bg-[#1f5a33] dark:hover:bg-yellow-400 transition-colors shadow-sm"
               >
                 Selengkapnya tentang kami
               </Link>
               <Link
                 href="/about#kontak"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-200 font-semibold rounded-xl hover:border-[#2D7D46] dark:hover:border-emerald-500 hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-200 font-semibold rounded-xl hover:border-[#F5C400] dark:hover:border-yellow-500 hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors"
               >
                 Hubungi kami
               </Link>
@@ -491,7 +491,7 @@ function AboutSection() {
                 <div
                   key={tech.name}
                   title={tech.name}
-                  className="flex flex-col items-center gap-2 bg-white dark:bg-zinc-900 rounded-2xl p-3 border border-gray-200 dark:border-zinc-800 hover:border-[#2D7D46]/40 dark:hover:border-emerald-500/40 hover:shadow-sm transition-all group"
+                  className="flex flex-col items-center gap-2 bg-white dark:bg-zinc-900 rounded-2xl p-3 border border-gray-200 dark:border-zinc-800 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40 hover:shadow-sm transition-all group"
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
@@ -503,7 +503,7 @@ function AboutSection() {
                       e.currentTarget.style.display = "none";
                     }}
                   />
-                  <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 text-center leading-tight group-hover:text-[#2D7D46] dark:group-hover:text-emerald-400 transition-colors">
+                  <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 text-center leading-tight group-hover:text-[#F5C400] dark:group-hover:text-yellow-400 transition-colors">
                     {tech.name}
                   </span>
                 </div>
@@ -580,7 +580,7 @@ function FooterCol({
           <li key={href}>
             <Link
               href={href}
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#2D7D46] dark:hover:text-emerald-400 transition-colors"
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors"
             >
               {label}
             </Link>
@@ -620,7 +620,7 @@ export default function LandingPage({ portfolioItems, newsItems }: LandingPagePr
           <Suspense
             fallback={
               <div className="flex-1 flex items-center justify-center">
-                <div className="w-5 h-5 border-2 border-[#2D7D46] dark:border-emerald-500 border-t-transparent rounded-full animate-spin" />
+                <div className="w-5 h-5 border-2 border-[#F5C400] dark:border-yellow-500 border-t-transparent rounded-full animate-spin" />
               </div>
             }
           >

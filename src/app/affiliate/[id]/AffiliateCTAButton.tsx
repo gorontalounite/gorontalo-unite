@@ -22,7 +22,7 @@ export default function AffiliateCTAButton({ productId, marketplaceUrl, marketpl
   return (
     <button
       onClick={handleClick}
-      className="w-full flex items-center justify-center gap-2 bg-[#2D7D46] text-white font-semibold px-6 py-4 rounded-2xl hover:bg-[#236137] active:scale-[0.98] transition-all text-sm"
+      className="w-full flex items-center justify-center gap-2 bg-[#F5C400] text-black font-semibold px-6 py-4 rounded-2xl hover:bg-[#c9a000] active:scale-[0.98] transition-all text-sm"
     >
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path

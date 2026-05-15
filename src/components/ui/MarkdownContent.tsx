@@ -53,7 +53,7 @@ export default function MarkdownContent({ content, className = "" }: Props) {
             <li className="leading-relaxed">{children}</li>
           ),
           blockquote: ({ children }) => (
-            <blockquote className="border-l-4 border-[#2D7D46] dark:border-emerald-500 pl-4 italic text-gray-500 dark:text-gray-400 my-4">
+            <blockquote className="border-l-4 border-[#F5C400] dark:border-yellow-500 pl-4 italic text-gray-500 dark:text-gray-400 my-4">
               {children}
             </blockquote>
           ),
@@ -69,7 +69,7 @@ export default function MarkdownContent({ content, className = "" }: Props) {
               );
             }
             return (
-              <code className="bg-gray-100 dark:bg-zinc-800 text-[#2D7D46] dark:text-emerald-400 text-sm font-mono px-1.5 py-0.5 rounded-md">
+              <code className="bg-gray-100 dark:bg-zinc-800 text-[#F5C400] dark:text-yellow-400 text-sm font-mono px-1.5 py-0.5 rounded-md">
                 {children}
               </code>
             );
@@ -79,7 +79,7 @@ export default function MarkdownContent({ content, className = "" }: Props) {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#2D7D46] dark:text-emerald-400 underline underline-offset-2 hover:text-[#1f5a33] dark:hover:text-emerald-300 transition-colors"
+              className="text-[#F5C400] dark:text-yellow-400 underline underline-offset-2 hover:text-[#1f5a33] dark:hover:text-yellow-300 transition-colors"
             >
               {children}
             </a>

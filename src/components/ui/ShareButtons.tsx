@@ -93,7 +93,7 @@ export default function ShareButtons({ url, title }: Props) {
         onClick={copyLink}
         className={`${btnBase} border transition-colors ${
           copied
-            ? "border-emerald-300 bg-emerald-50 text-emerald-700 dark:border-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300"
+            ? "border-yellow-300 bg-yellow-50 text-emerald-700 dark:border-yellow-700 dark:bg-yellow-900/30 dark:text-emerald-300"
             : "border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800"
         }`}
       >

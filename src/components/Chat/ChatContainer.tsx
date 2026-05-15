@@ -298,7 +298,7 @@ export default function ChatContainer({ initialMessage, chatToLoad }: ChatContai
   if (!historyLoaded) {
     return (
       <div className="flex-1 flex items-center justify-center">
-        <div className="w-6 h-6 border-2 border-[#2D7D46] border-t-transparent rounded-full animate-spin" />
+        <div className="w-6 h-6 border-2 border-[#F5C400] border-t-transparent rounded-full animate-spin" />
       </div>
     );
   }
@@ -334,7 +334,7 @@ export default function ChatContainer({ initialMessage, chatToLoad }: ChatContai
                   <button
                     key={q}
                     onClick={() => handleSend(q)}
-                    className="w-full text-left text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:border-[#2D7D46] dark:hover:border-emerald-500 hover:text-[#2D7D46] dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-4 py-3 rounded-xl transition-all leading-snug"
+                    className="w-full text-left text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:border-[#F5C400] dark:hover:border-yellow-500 hover:text-[#F5C400] dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 px-4 py-3 rounded-xl transition-all leading-snug"
                   >
                     {q}
                   </button>
@@ -348,7 +348,7 @@ export default function ChatContainer({ initialMessage, chatToLoad }: ChatContai
             <div className="flex justify-end pb-1 relative">
               <button
                 onClick={handleShare}
-                className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-[#2D7D46] dark:hover:text-emerald-400 border border-gray-200 dark:border-zinc-700 hover:border-[#2D7D46] dark:hover:border-emerald-500 px-3 py-1.5 rounded-lg transition-all bg-white dark:bg-zinc-900"
+                className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-[#F5C400] dark:hover:text-yellow-400 border border-gray-200 dark:border-zinc-700 hover:border-[#F5C400] dark:hover:border-yellow-500 px-3 py-1.5 rounded-lg transition-all bg-white dark:bg-zinc-900"
                 aria-label="Bagikan percakapan"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -357,7 +357,7 @@ export default function ChatContainer({ initialMessage, chatToLoad }: ChatContai
                 Bagikan
               </button>
               {shareToast && (
-                <span className="absolute right-0 top-full mt-1 text-xs bg-emerald-600 text-white px-2.5 py-1 rounded-lg shadow-sm animate-fade-in">
+                <span className="absolute right-0 top-full mt-1 text-xs bg-yellow-500 text-white px-2.5 py-1 rounded-lg shadow-sm animate-fade-in">
                   Disalin
                 </span>
               )}
@@ -389,7 +389,7 @@ export default function ChatContainer({ initialMessage, chatToLoad }: ChatContai
           {pendingMessage && (
             <div className="flex justify-end px-2 sm:px-0 animate-fade-in">
               <div className="max-w-[80%] sm:max-w-[65%]">
-                <div className="bg-[#2D7D46] text-white px-4 py-3 rounded-2xl rounded-tr-sm text-sm leading-relaxed shadow-sm">
+                <div className="bg-[#F5C400] text-black px-4 py-3 rounded-2xl rounded-tr-sm text-sm leading-relaxed shadow-sm">
                   {pendingMessage}
                 </div>
               </div>
@@ -411,7 +411,7 @@ export default function ChatContainer({ initialMessage, chatToLoad }: ChatContai
                     </span>
                   )}
                   {streamingText && (
-                    <span className="inline-block w-0.5 h-4 bg-emerald-500 ml-0.5 animate-pulse align-middle" />
+                    <span className="inline-block w-0.5 h-4 bg-yellow-400 ml-0.5 animate-pulse align-middle" />
                   )}
                 </div>
               </div>
@@ -426,7 +426,7 @@ export default function ChatContainer({ initialMessage, chatToLoad }: ChatContai
                 <button
                   key={q}
                   onClick={() => handleSend(q)}
-                  className="w-full text-left text-xs text-gray-600 dark:text-gray-300 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:border-[#2D7D46] dark:hover:border-emerald-500 hover:text-[#2D7D46] dark:hover:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-emerald-900/20 px-3 py-2.5 rounded-xl transition-all leading-snug"
+                  className="w-full text-left text-xs text-gray-600 dark:text-gray-300 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:border-[#F5C400] dark:hover:border-yellow-500 hover:text-[#F5C400] dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 px-3 py-2.5 rounded-xl transition-all leading-snug"
                 >
                   {q}
                 </button>
