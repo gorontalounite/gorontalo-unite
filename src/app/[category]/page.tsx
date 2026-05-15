@@ -10,17 +10,28 @@ export const dynamic = "force-dynamic";
 const CATEGORIES: Record<string, {
   label: string;
   description: string;
-  color: string;         // Tailwind text color
-  bgColor: string;       // badge bg
-  emoji: string;
+  color: string;
+  bgColor: string;
 }> = {
-  wisata:   { label: "Wisata",   description: "Destinasi dan pengalaman wisata terbaik di Gorontalo.",          color: "text-emerald-600 dark:text-emerald-400",  bgColor: "bg-emerald-100 dark:bg-emerald-900/30", emoji: "🏖️" },
-  bisnis:   { label: "Bisnis",   description: "Peluang usaha, UMKM, investasi, dan ekonomi Gorontalo.",        color: "text-blue-600 dark:text-blue-400",        bgColor: "bg-blue-100 dark:bg-blue-900/30",       emoji: "💼" },
-  daerah:   { label: "Daerah",   description: "Berita pemerintahan, infrastruktur, dan kebijakan daerah.",     color: "text-purple-600 dark:text-purple-400",    bgColor: "bg-purple-100 dark:bg-purple-900/30",   emoji: "🏛️" },
-  event:    { label: "Event",    description: "Festival, pameran, dan acara terkini di Gorontalo.",            color: "text-orange-600 dark:text-orange-400",    bgColor: "bg-orange-100 dark:bg-orange-900/30",   emoji: "🎉" },
-  inspire:  { label: "Inspire",  description: "Kisah inspiratif dan tokoh-tokoh berprestasi dari Gorontalo.",  color: "text-rose-600 dark:text-rose-400",        bgColor: "bg-rose-100 dark:bg-rose-900/30",       emoji: "✨" },
-  insight:  { label: "Insight",  description: "Analisis mendalam, opini, dan wawasan seputar Gorontalo.",     color: "text-indigo-600 dark:text-indigo-400",    bgColor: "bg-indigo-100 dark:bg-indigo-900/30",   emoji: "💡" },
-  interest: { label: "Interest", description: "Topik-topik menarik dan konten pilihan dari Gorontalo.",       color: "text-amber-600 dark:text-amber-400",      bgColor: "bg-amber-100 dark:bg-amber-900/30",     emoji: "⭐" },
+  // Main categories
+  wisata:          { label: "Wisata",          description: "Destinasi dan pengalaman wisata terbaik di Gorontalo.",              color: "text-emerald-600 dark:text-emerald-400",  bgColor: "bg-emerald-100 dark:bg-emerald-900/30" },
+  bisnis:          { label: "Bisnis",          description: "Peluang usaha, UMKM, investasi, dan ekonomi Gorontalo.",            color: "text-blue-600 dark:text-blue-400",        bgColor: "bg-blue-100 dark:bg-blue-900/30"       },
+  daerah:          { label: "Daerah",          description: "Berita pemerintahan, infrastruktur, dan kebijakan daerah.",         color: "text-purple-600 dark:text-purple-400",    bgColor: "bg-purple-100 dark:bg-purple-900/30"   },
+  event:           { label: "Event",           description: "Festival, pameran, dan acara terkini di Gorontalo.",                color: "text-orange-600 dark:text-orange-400",    bgColor: "bg-orange-100 dark:bg-orange-900/30"   },
+  inspire:         { label: "Inspire",         description: "Kisah inspiratif dan tokoh-tokoh berprestasi dari Gorontalo.",      color: "text-rose-600 dark:text-rose-400",        bgColor: "bg-rose-100 dark:bg-rose-900/30"       },
+  insight:         { label: "Insight",         description: "Analisis mendalam, opini, dan wawasan seputar Gorontalo.",         color: "text-indigo-600 dark:text-indigo-400",    bgColor: "bg-indigo-100 dark:bg-indigo-900/30"   },
+  interest:        { label: "Interest",        description: "Topik-topik menarik dan konten pilihan dari Gorontalo.",           color: "text-amber-600 dark:text-amber-400",      bgColor: "bg-amber-100 dark:bg-amber-900/30"     },
+  // Sub-categories
+  lifestyle:       { label: "Lifestyle",       description: "Gaya hidup, kesehatan, kuliner, dan tren terkini.",                color: "text-pink-600 dark:text-pink-400",        bgColor: "bg-pink-100 dark:bg-pink-900/30"       },
+  properti:        { label: "Properti",        description: "Properti, hunian, dan pembangunan di Gorontalo.",                  color: "text-stone-600 dark:text-stone-400",      bgColor: "bg-stone-100 dark:bg-stone-900/30"     },
+  community:       { label: "Community",       description: "Komunitas, sosial kemasyarakatan, dan kehidupan warga.",           color: "text-teal-600 dark:text-teal-400",        bgColor: "bg-teal-100 dark:bg-teal-900/30"       },
+  "ekonomi-bisnis":{ label: "Ekonomi & Bisnis",description: "Ekonomi, keuangan, dan bisnis Gorontalo.",                        color: "text-cyan-600 dark:text-cyan-400",        bgColor: "bg-cyan-100 dark:bg-cyan-900/30"       },
+  technology:      { label: "Technology",      description: "Teknologi, digital, inovasi, dan startup lokal.",                  color: "text-violet-600 dark:text-violet-400",    bgColor: "bg-violet-100 dark:bg-violet-900/30"   },
+  sport:           { label: "Sport",           description: "Olahraga, atletik, dan prestasi Gorontalo.",                      color: "text-green-600 dark:text-green-400",      bgColor: "bg-green-100 dark:bg-green-900/30"     },
+  automotive:      { label: "Automotive",      description: "Kendaraan, transportasi, dan mobilitas di Gorontalo.",            color: "text-gray-600 dark:text-gray-400",        bgColor: "bg-gray-100 dark:bg-gray-900/30"       },
+  food:            { label: "Food",            description: "Kuliner, makanan khas, dan restoran di Gorontalo.",               color: "text-yellow-600 dark:text-yellow-400",    bgColor: "bg-yellow-100 dark:bg-yellow-900/30"   },
+  travel:          { label: "Travel",          description: "Perjalanan, destinasi, dan pengalaman wisata Gorontalo.",         color: "text-lime-600 dark:text-lime-400",        bgColor: "bg-lime-100 dark:bg-lime-900/30"       },
+  affiliate:       { label: "Affiliate",       description: "Produk dan rekomendasi pilihan untuk Anda.",                      color: "text-red-600 dark:text-red-400",          bgColor: "bg-red-100 dark:bg-red-900/30"         },
 };
 
 /* ─── Types ──────────────────────────────────────────────────────────── */
@@ -87,7 +98,7 @@ export default async function CategoryPage({ params }: Props) {
       view_count:   (a.view_count as number) ?? 0,
     }));
   } catch {
-    // Supabase unavailable (e.g. missing env vars in dev) — render empty state
+    // Supabase unavailable in dev — show empty state
   }
 
   const featured = articles.find((a) => a.is_trending) ?? articles[0] ?? null;
@@ -104,11 +115,8 @@ export default async function CategoryPage({ params }: Props) {
       </nav>
 
       {/* Category Header */}
-      <div className="mb-8">
-        <div className="flex items-center gap-3 mb-2">
-          <span className="text-3xl">{cat.emoji}</span>
-          <h1 className={`text-2xl sm:text-3xl font-bold ${cat.color}`}>{cat.label}</h1>
-        </div>
+      <div className="mb-8 pb-6 border-b border-gray-100 dark:border-zinc-800">
+        <h1 className={`text-2xl sm:text-3xl font-bold mb-1 ${cat.color}`}>{cat.label}</h1>
         <p className="text-gray-500 dark:text-gray-400 text-sm max-w-xl">{cat.description}</p>
         <p className="text-xs text-gray-400 dark:text-gray-500 mt-1">{articles.length} artikel tersedia</p>
       </div>
@@ -116,7 +124,11 @@ export default async function CategoryPage({ params }: Props) {
       {/* Empty state */}
       {articles.length === 0 && (
         <div className="flex flex-col items-center justify-center py-24 text-center">
-          <span className="text-6xl mb-4">{cat.emoji}</span>
+          <div className="w-16 h-16 rounded-2xl bg-gray-100 dark:bg-zinc-800 flex items-center justify-center mb-4">
+            <svg className="w-8 h-8 text-gray-400 dark:text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+            </svg>
+          </div>
           <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">Belum ada artikel</h2>
           <p className="text-sm text-gray-400 dark:text-gray-500 max-w-xs">
             Konten kategori {cat.label} akan segera hadir. Pantau terus Gorontalo Unite!
@@ -142,15 +154,15 @@ export default async function CategoryPage({ params }: Props) {
                     priority
                   />
                 ) : (
-                  <div className="w-full h-full bg-gradient-to-br from-[#2D7D46] to-[#1a5c33]" />
+                  <div className={`w-full h-full ${cat.bgColor}`} />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-7">
                   <div className="flex items-center gap-2 mb-2 flex-wrap">
                     {featured.is_trending && (
-                      <span className="text-xs font-semibold bg-orange-500 text-white px-2 py-0.5 rounded-full">🔥 Trending</span>
+                      <span className="text-xs font-semibold bg-orange-500 text-white px-2 py-0.5 rounded-full">Trending</span>
                     )}
-                    <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${cat.bgColor} ${cat.color}`}>
+                    <span className="text-xs font-semibold bg-white/20 text-white px-2 py-0.5 rounded-full backdrop-blur-sm">
                       {cat.label}
                     </span>
                   </div>
@@ -199,7 +211,10 @@ function ArticleCard({
   cat: (typeof CATEGORIES)[string];
 }) {
   return (
-    <Link href={`/news/${article.slug}`} className="group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:shadow-lg hover:shadow-emerald-900/10 dark:hover:shadow-black/30 transition-all duration-200">
+    <Link
+      href={`/news/${article.slug}`}
+      className="group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/30 transition-all duration-200"
+    >
       {/* Thumbnail */}
       <div className="relative aspect-[16/9] bg-gray-100 dark:bg-zinc-800 flex-shrink-0 overflow-hidden">
         {article.image_url ? (
@@ -210,12 +225,10 @@ function ArticleCard({
             className="object-cover group-hover:scale-105 transition-transform duration-500"
           />
         ) : (
-          <div className="w-full h-full bg-gradient-to-br from-[#2D7D46]/20 to-[#1a5c33]/20 flex items-center justify-center">
-            <span className="text-3xl opacity-50">{cat.emoji}</span>
-          </div>
+          <div className={`w-full h-full ${cat.bgColor} opacity-60`} />
         )}
         {article.is_trending && (
-          <span className="absolute top-2 left-2 text-xs font-semibold bg-orange-500 text-white px-2 py-0.5 rounded-full">🔥</span>
+          <span className="absolute top-2 left-2 text-xs font-semibold bg-orange-500 text-white px-2 py-0.5 rounded-full">Trending</span>
         )}
       </div>
 
