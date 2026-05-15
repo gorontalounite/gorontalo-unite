@@ -599,4 +599,4 @@ Lihat juga: [docs/COMMUNITY.md](./docs/COMMUNITY.md)
 
 ---
 
-*Diperbarui: Mei 2026 · v0.6*
+*Diperbarui: Mei 2026 · v0.7**

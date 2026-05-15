@@ -1,12 +1,8 @@
-import { createAdminClient } from "@/lib/supabase/admin";
-import KnowledgeBaseClient from "./KnowledgeBaseClient";
+export const dynamic = "force-dynamic";
+export const metadata = { title: "RAG Knowledge Base | Admin Gorontalo Unite" };
 
-export default async function AdminKnowledgeBasePage() {
-  const adminClient = createAdminClient();
-  const { data: entries } = await adminClient
-    .from("knowledge_base")
-    .select("id, title, category, is_active, created_at")
-    .order("created_at", { ascending: false });
+import RagAdminClient from "./RagAdminClient";
 
-  return <KnowledgeBaseClient initialEntries={entries ?? []} />;
+export default function AdminKnowledgeBasePage() {
+  return <RagAdminClient />;
 }

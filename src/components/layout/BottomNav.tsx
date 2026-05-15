@@ -18,7 +18,7 @@ const navItems = [
     ),
   },
   {
-    href: "/wisata",
+    href: "/blog",
     label: "Blog",
     icon: (active: boolean) => (
       <svg

@@ -387,7 +387,7 @@ function NewsSection({ items: _items }: { items: NewsItem[] }) {
           {DUMMY_NEWS.map((item) => (
             <Link
               key={item.id}
-              href={`/news/${item.slug}`}
+              href={`/news/${item.id}`}
               className="group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40 hover:shadow-lg dark:hover:shadow-black/40 transition-all flex flex-col"
             >
               <div className="aspect-[16/10] bg-gray-100 dark:bg-zinc-800 relative overflow-hidden">
