@@ -251,7 +251,7 @@ function PreviewBlock({ block }: { block: Block }) {
         </div>
       ) : url ? (
         <div className="border border-gray-200 rounded-xl p-4 my-4 text-sm text-gray-500">
-          🔗 <a href={url} target="_blank" rel="noreferrer" className="text-[#F5C400] underline">{url}</a>
+          🔗 <a href={url} target="_blank" rel="noreferrer" className="text-brand underline">{url}</a>
         </div>
       ) : null;
     }

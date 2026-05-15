@@ -194,7 +194,7 @@ export default function AffiliateAdminClient({
                     <span className="text-xs text-gray-500">{item.category ?? "—"}</span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-xs font-bold text-[#F5C400]">
+                    <span className="text-xs font-bold text-brand">
                       {item.price_label ?? (item.price ? formatPrice(item.price) : "—")}
                     </span>
                   </td>
@@ -214,7 +214,7 @@ export default function AffiliateAdminClient({
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => openEdit(item)} className="text-xs text-[#F5C400] hover:underline">Edit</button>
+                      <button onClick={() => openEdit(item)} className="text-xs text-brand hover:underline">Edit</button>
                       <button onClick={() => setDeleteId(item.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
                     </div>
                   </td>
@@ -252,7 +252,7 @@ export default function AffiliateAdminClient({
                   <span className="text-[10px] text-gray-400">{item.category}</span>
                 )}
                 {(item.price || item.price_label) && (
-                  <p className="text-xs font-bold text-[#F5C400]">
+                  <p className="text-xs font-bold text-brand">
                     {item.price_label ?? formatPrice(item.price!)}
                   </p>
                 )}
@@ -266,7 +266,7 @@ export default function AffiliateAdminClient({
                   >
                     {item.published ? "Publik" : "Draft"}
                   </button>
-                  <button onClick={() => openEdit(item)} className="text-xs text-[#F5C400] hover:underline">Edit</button>
+                  <button onClick={() => openEdit(item)} className="text-xs text-brand hover:underline">Edit</button>
                   <button onClick={() => setDeleteId(item.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
                 </div>
               </div>
@@ -363,7 +363,7 @@ export default function AffiliateAdminClient({
 
               <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                 <input type="checkbox" checked={form.published} onChange={(e) => setForm((f) => ({ ...f, published: e.target.checked }))}
-                  className="w-4 h-4 text-[#F5C400] rounded" />
+                  className="w-4 h-4 text-brand rounded" />
                 Publikasikan (tampil di /affiliate)
               </label>
 

@@ -101,7 +101,7 @@ function AffiliateCard({ item }: { item: AffiliateItem }) {
 
         <div className="mt-auto">
           {(item.price || item.price_label) && (
-            <p className="text-base font-bold text-[#F5C400] dark:text-yellow-400 mb-2">
+            <p className="text-base font-bold text-brand dark:text-yellow-400 mb-2">
               {item.price_label ?? formatPrice(item.price!)}
             </p>
           )}
@@ -216,7 +216,7 @@ export default function AffiliateListClient({ items }: { items: AffiliateItem[] 
               onClick={() => setActiveMarketplace(mp)}
               className={`text-xs px-3 py-1 rounded-full font-medium transition-colors whitespace-nowrap border ${
                 activeMarketplace === mp
-                  ? "border-[#F5C400] bg-[#F5C400]/10 dark:bg-[#F5C400]/25 text-[#F5C400] dark:text-yellow-400"
+                  ? "border-[#F5C400] bg-[#F5C400]/10 dark:bg-[#F5C400]/25 text-brand dark:text-yellow-400"
                   : "border-gray-200 dark:border-zinc-600 text-gray-600 dark:text-gray-300 hover:border-gray-400 dark:hover:border-zinc-400"
               }`}
             >
@@ -253,7 +253,7 @@ export default function AffiliateListClient({ items }: { items: AffiliateItem[] 
               setActiveCategory("Semua");
               setActiveMarketplace("Semua");
             }}
-            className="mt-4 text-sm text-[#F5C400] dark:text-yellow-400 hover:underline font-medium"
+            className="mt-4 text-sm text-brand dark:text-yellow-400 hover:underline font-medium"
           >
             Reset filter
           </button>

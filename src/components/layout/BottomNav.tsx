@@ -9,7 +9,7 @@ const navItems = [
     label: "Home",
     icon: (active: boolean) => (
       <svg
-        className={`w-6 h-6 ${active ? "text-[#F5C400] dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
+        className={`w-6 h-6 ${active ? "text-brand dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
         fill="none" stroke="currentColor" viewBox="0 0 24 24"
       >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.5}
@@ -22,7 +22,7 @@ const navItems = [
     label: "Blog",
     icon: (active: boolean) => (
       <svg
-        className={`w-6 h-6 ${active ? "text-[#F5C400] dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
+        className={`w-6 h-6 ${active ? "text-brand dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
         fill="none" stroke="currentColor" viewBox="0 0 24 24"
       >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.5}
@@ -35,7 +35,7 @@ const navItems = [
     label: "Services",
     icon: (active: boolean) => (
       <svg
-        className={`w-6 h-6 ${active ? "text-[#F5C400] dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
+        className={`w-6 h-6 ${active ? "text-brand dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
         fill="none" stroke="currentColor" viewBox="0 0 24 24"
       >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.5}
@@ -48,7 +48,7 @@ const navItems = [
     label: "Profile",
     icon: (active: boolean) => (
       <svg
-        className={`w-6 h-6 ${active ? "text-[#F5C400] dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
+        className={`w-6 h-6 ${active ? "text-brand dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
         fill="none" stroke="currentColor" viewBox="0 0 24 24"
       >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.5}
@@ -73,7 +73,7 @@ export default function BottomNav() {
               className="flex flex-col items-center justify-center gap-1 flex-1 py-2"
             >
               {item.icon(active)}
-              <span className={`text-[10px] font-medium ${active ? "text-[#F5C400] dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}>
+              <span className={`text-[10px] font-medium ${active ? "text-brand dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}>
                 {item.label}
               </span>
             </Link>

@@ -108,7 +108,7 @@ export default function PortfolioAdminList({ initialItems }: { initialItems: Por
                   <div className="flex items-center gap-3 mt-3 pt-3 border-t border-gray-100">
                     <Link
                       href={`/admin/portfolio/edit/${item.id}`}
-                      className="text-xs text-[#F5C400] hover:underline font-medium"
+                      className="text-xs text-brand hover:underline font-medium"
                     >
                       Edit
                     </Link>

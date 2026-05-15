@@ -86,7 +86,7 @@ function SignInForm() {
             Klik link di email untuk masuk otomatis.
           </p>
         </div>
-        <button onClick={() => setMagicSent(false)} className="text-xs text-[#F5C400] dark:text-yellow-400 hover:underline">
+        <button onClick={() => setMagicSent(false)} className="text-xs text-brand dark:text-yellow-400 hover:underline">
           ← Kirim ulang atau ganti email
         </button>
       </div>
@@ -143,7 +143,7 @@ function SignInForm() {
             <div className="flex items-center justify-between mb-1">
               <label className="text-xs font-medium text-gray-700 dark:text-gray-300">Password</label>
               <button type="button" onClick={() => setTab("magic")}
-                className="text-[10px] text-[#F5C400] dark:text-yellow-400 hover:underline">
+                className="text-[10px] text-brand dark:text-yellow-400 hover:underline">
                 Lupa password?
               </button>
             </div>
@@ -176,7 +176,7 @@ function SignInForm() {
 
       <p className="text-center text-xs text-gray-500 dark:text-gray-400">
         Belum punya akun?{" "}
-        <Link href="/sign-up" className="text-[#F5C400] dark:text-yellow-400 font-medium hover:underline">
+        <Link href="/sign-up" className="text-brand dark:text-yellow-400 font-medium hover:underline">
           Daftar sekarang
         </Link>
       </p>

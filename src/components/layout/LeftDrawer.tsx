@@ -171,7 +171,7 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
           </div>
           <button
             onClick={() => fileInputRef.current?.click()}
-            className="text-xs text-[#F5C400] font-medium hover:underline"
+            className="text-xs text-brand font-medium hover:underline"
           >
             Ubah foto profil
           </button>
@@ -374,7 +374,7 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
               <img src={avatarUrl} alt={displayName} className="w-11 h-11 rounded-full object-cover flex-shrink-0" />
             ) : (
               <div className="w-11 h-11 rounded-full bg-[#b8d4c0] dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
-                <span className="text-[#F5C400] dark:text-yellow-400 text-base font-bold">{avatarLetter}</span>
+                <span className="text-brand dark:text-yellow-400 text-base font-bold">{avatarLetter}</span>
               </div>
             )}
             <div className="flex-1 min-w-0">
@@ -385,7 +385,7 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
         ) : (
           <div className="px-4 py-4 flex items-center gap-3">
             <div className="w-11 h-11 rounded-full bg-[#b8d4c0] dark:bg-zinc-700 flex items-center justify-center flex-shrink-0">
-              <span className="text-[#F5C400] dark:text-yellow-400 text-base font-bold">GU</span>
+              <span className="text-brand dark:text-yellow-400 text-base font-bold">GU</span>
             </div>
             <div>
               <p className="text-sm font-semibold text-gray-900 dark:text-gray-100">Nama User</p>
@@ -463,7 +463,7 @@ export default function LeftDrawer({ open, onClose }: LeftDrawerProps) {
                           <div className="flex items-start gap-1">
                             <button
                               onClick={() => handleLoadChat(chat)}
-                              className="flex-1 text-left px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors flex items-start gap-2"
+                              className="flex-1 text-left px-3 py-2.5 rounded-xl text-xs text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-zinc-900 hover:text-brand dark:hover:text-yellow-400 transition-colors flex items-start gap-2"
                             >
                               <svg className="w-3.5 h-3.5 mt-0.5 flex-shrink-0 text-gray-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />

@@ -72,7 +72,7 @@ export default function ShopPage() {
       {/* Header */}
       <div className="mb-8">
         <div className="flex items-center gap-2 text-sm text-gray-400 mb-3">
-          <Link href="/" className="hover:text-[#F5C400]">Home</Link>
+          <Link href="/" className="hover:text-brand">Home</Link>
           <span>/</span>
           <span className="text-gray-600">Shop</span>
         </div>
@@ -112,7 +112,7 @@ export default function ShopPage() {
               <h3 className="text-sm font-semibold text-gray-900 mb-1">{product.name}</h3>
               <p className="text-xs text-gray-500 leading-relaxed mb-3 flex-1">{product.description}</p>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-bold text-[#F5C400]">{product.price}</span>
+                <span className="text-sm font-bold text-brand">{product.price}</span>
                 <button className="text-xs bg-[#F5C400] text-black px-3 py-1.5 rounded-lg hover:bg-[#c9a000] transition-colors active:scale-95">
                   Pesan
                 </button>

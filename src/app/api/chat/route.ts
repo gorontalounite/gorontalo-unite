@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import Groq from "groq-sdk";
 import { tavily } from "@tavily/core";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY! });
@@ -72,6 +73,44 @@ export async function POST(req: NextRequest) {
     let sources: { title: string; url: string | null; category: string }[] = [];
     let hasContext = false;
 
+    // KB semantic search — runs in parallel with Tavily
+    let kbBlock = "";
+    try {
+      const adminClient = createAdminClient();
+      let kbChunks: { id: string; title: string; content: string; category: string }[] = [];
+
+      // Try vector search first, fall back to full-text
+      try {
+        const embRes = await groq.embeddings.create({
+          model: "nomic-ai/nomic-embed-text-v1.5",
+          input: message.slice(0, 2000),
+        });
+        const queryVec = embRes.data[0]?.embedding;
+        if (queryVec) {
+          const { data } = await adminClient.rpc("match_knowledge_base", {
+            query_embedding: JSON.stringify(queryVec),
+            match_count: 4,
+            min_similarity: 0.45,
+          });
+          kbChunks = (data ?? []) as typeof kbChunks;
+        }
+      } catch {
+        // Vector search failed, try full-text
+        const { data } = await adminClient.rpc("search_knowledge_base_fts", {
+          search_query: message,
+          match_count: 4,
+        });
+        kbChunks = (data ?? []) as typeof kbChunks;
+      }
+
+      if (kbChunks.length > 0) {
+        kbBlock = "## DOKUMEN INTERNAL (gunakan jika relevan):\n\n" +
+          kbChunks.map((c, i) => `[KB${i + 1}] ${c.title}\n${c.content}`).join("\n\n---\n\n");
+      }
+    } catch (err) {
+      console.error("[/api/chat] KB retrieval error:", err);
+    }
+
     // Tavily search (non-streaming, awaited before Groq stream starts)
     try {
       const searchQuery =
@@ -114,28 +153,30 @@ export async function POST(req: NextRequest) {
 
 ## CARA MENJAWAB:
 
-1. **Jika ada HASIL PENCARIAN yang relevan** di bawah, utamakan informasi dari sana.
+1. **Jika ada DOKUMEN INTERNAL**, utamakan informasi dari sana — itu adalah data resmi yang sudah diverifikasi.
+2. **Jika ada HASIL PENCARIAN yang relevan**, gunakan sebagai pelengkap.
+3. **Jika tidak ada keduanya**, jawab berdasarkan pengetahuanmu. Jangan katakan "hubungi Dinas" kecuali soal prosedur administrasi resmi.
+4. **Jika benar-benar tidak tahu**, katakan: "Saya tidak memiliki informasi yang cukup tentang hal ini."
 
-2. **Jika hasil pencarian tidak relevan atau kosong**, jawab berdasarkan pengetahuanmu sendiri. Jangan pernah mengatakan "hubungi Dinas" kecuali pertanyaannya memang menyangkut prosedur administrasi pemerintahan (seperti mengurus KTP, izin usaha, dll).
+${SHARED_RULES}
 
-3. **Jika kamu benar-benar tidak tahu**, katakan dengan jujur: "Saya tidak memiliki informasi yang cukup tentang hal ini."
+${kbBlock}
 
-4. ${SHARED_RULES}
-
-${hasContext ? "## HASIL PENCARIAN (gunakan jika relevan):\n\n" + contextBlock : "## CATATAN: Tidak ada hasil pencarian. Jawab berdasarkan pengetahuanmu."}`;
+${hasContext ? "## HASIL PENCARIAN WEB (gunakan jika relevan):\n\n" + contextBlock : ""}`;
     } else {
       systemPrompt = `Kamu adalah Gorontalo AI — asisten AI yang membantu menjawab berbagai pertanyaan.
 
-Kamu ahli tentang Provinsi Gorontalo, tetapi juga mampu menjawab pertanyaan umum berdasarkan hasil pencarian web di bawah ini.
-
 ## ATURAN:
+1. **Utamakan DOKUMEN INTERNAL** jika tersedia dan relevan.
+2. **Gunakan HASIL PENCARIAN WEB** sebagai pelengkap.
+3. Jika tidak ada keduanya, jawab berdasarkan pengetahuanmu.
+4. Jika benar-benar tidak tahu: "Saya tidak memiliki informasi yang cukup tentang ini."
 
-1. **Utamakan informasi dari HASIL PENCARIAN** di bawah jika tersedia dan relevan.
-2. Jika hasil pencarian tidak relevan atau kosong, jawab berdasarkan pengetahuanmu.
-3. Jika kamu benar-benar tidak tahu, katakan jujur: "Saya tidak memiliki informasi yang cukup tentang ini."
-4. ${SHARED_RULES}
+${SHARED_RULES}
 
-${hasContext ? "## HASIL PENCARIAN:\n\n" + contextBlock : "## CATATAN: Tidak ada hasil pencarian. Jawab berdasarkan pengetahuanmu."}`;
+${kbBlock}
+
+${hasContext ? "## HASIL PENCARIAN WEB:\n\n" + contextBlock : ""}`;
     }
 
     const messages: Groq.Chat.ChatCompletionMessageParam[] = [

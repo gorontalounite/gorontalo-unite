@@ -259,7 +259,7 @@ export default function GoodNewsClient({ initialArticles }: { initialArticles: A
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => openEdit(a.id)} className="text-xs text-[#F5C400] hover:underline">Edit</button>
+                      <button onClick={() => openEdit(a.id)} className="text-xs text-brand hover:underline">Edit</button>
                       <button onClick={() => setDeleteId(a.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
                     </div>
                   </td>

@@ -35,7 +35,7 @@ export default function EmbedBlock({ block, onChange, selected }: Props) {
         </div>
       ) : url ? (
         <div className="border border-gray-200 rounded-xl p-4 text-sm text-gray-500">
-          🔗 <a href={url} target="_blank" rel="noreferrer" className="text-[#F5C400] underline">{url}</a>
+          🔗 <a href={url} target="_blank" rel="noreferrer" className="text-brand underline">{url}</a>
         </div>
       ) : (
         <div className="border-2 border-dashed border-gray-200 rounded-xl p-8 text-center text-gray-400 text-sm">

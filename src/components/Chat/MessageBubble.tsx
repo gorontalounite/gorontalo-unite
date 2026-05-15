@@ -153,7 +153,7 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
             {/* Thumbs up */}
             <button
               onClick={() => setFeedback(feedback === "up" ? null : "up")}
-              className={`transition-all ${feedback === "up" ? "text-[#F5C400] scale-110" : "text-gray-300 hover:text-gray-500"}`}
+              className={`transition-all ${feedback === "up" ? "text-brand scale-110" : "text-gray-300 hover:text-gray-500"}`}
               title="Jawaban membantu"
             >
               <svg className="w-4 h-4" fill={feedback === "up" ? "currentColor" : "none"} stroke="currentColor" viewBox="0 0 24 24">
@@ -180,10 +180,10 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
             >
               {copied ? (
                 <>
-                  <svg className="w-3.5 h-3.5 text-[#F5C400]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-[#F5C400]">Disalin</span>
+                  <span className="text-brand">Disalin</span>
                 </>
               ) : (
                 <>
@@ -203,10 +203,10 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
             >
               {shared ? (
                 <>
-                  <svg className="w-3.5 h-3.5 text-[#F5C400]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <svg className="w-3.5 h-3.5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                   </svg>
-                  <span className="text-[#F5C400]">Disalin</span>
+                  <span className="text-brand">Disalin</span>
                 </>
               ) : (
                 <>
@@ -222,7 +222,7 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
             {hasSources && (
               <button
                 onClick={() => setSourcesOpen((v) => !v)}
-                className="ml-auto flex items-center gap-1 text-xs text-gray-400 hover:text-[#F5C400] transition-colors"
+                className="ml-auto flex items-center gap-1 text-xs text-gray-400 hover:text-brand transition-colors"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
@@ -247,9 +247,9 @@ export default function MessageBubble({ conversation, isNew = false }: MessageBu
                   href={source.url || "#"}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-start gap-2 text-xs text-gray-500 hover:text-[#F5C400] bg-gray-50 hover:bg-yellow-50 border border-gray-100 hover:border-[#F5C400]/20 px-3 py-2 rounded-xl transition-all group"
+                  className="flex items-start gap-2 text-xs text-gray-500 hover:text-brand bg-gray-50 hover:bg-yellow-50 border border-gray-100 hover:border-[#F5C400]/20 px-3 py-2 rounded-xl transition-all group"
                 >
-                  <span className="flex-shrink-0 w-4 h-4 bg-gray-200 group-hover:bg-[#F5C400]/10 rounded-full flex items-center justify-center text-[10px] font-bold text-gray-500 group-hover:text-[#F5C400] mt-0.5">
+                  <span className="flex-shrink-0 w-4 h-4 bg-gray-200 group-hover:bg-[#F5C400]/10 rounded-full flex items-center justify-center text-[10px] font-bold text-gray-500 group-hover:text-brand mt-0.5">
                     {i + 1}
                   </span>
                   <span className="leading-snug line-clamp-2 flex-1">{source.title}</span>

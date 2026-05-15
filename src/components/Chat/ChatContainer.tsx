@@ -334,7 +334,7 @@ export default function ChatContainer({ initialMessage, chatToLoad }: ChatContai
                   <button
                     key={q}
                     onClick={() => handleSend(q)}
-                    className="w-full text-left text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:border-[#F5C400] dark:hover:border-yellow-500 hover:text-[#F5C400] dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 px-4 py-3 rounded-xl transition-all leading-snug"
+                    className="w-full text-left text-sm text-gray-600 dark:text-gray-300 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:border-[#F5C400] dark:hover:border-yellow-500 hover:text-brand dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 px-4 py-3 rounded-xl transition-all leading-snug"
                   >
                     {q}
                   </button>
@@ -348,7 +348,7 @@ export default function ChatContainer({ initialMessage, chatToLoad }: ChatContai
             <div className="flex justify-end pb-1 relative">
               <button
                 onClick={handleShare}
-                className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-[#F5C400] dark:hover:text-yellow-400 border border-gray-200 dark:border-zinc-700 hover:border-[#F5C400] dark:hover:border-yellow-500 px-3 py-1.5 rounded-lg transition-all bg-white dark:bg-zinc-900"
+                className="flex items-center gap-1.5 text-xs text-gray-500 dark:text-gray-400 hover:text-brand dark:hover:text-yellow-400 border border-gray-200 dark:border-zinc-700 hover:border-[#F5C400] dark:hover:border-yellow-500 px-3 py-1.5 rounded-lg transition-all bg-white dark:bg-zinc-900"
                 aria-label="Bagikan percakapan"
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -426,7 +426,7 @@ export default function ChatContainer({ initialMessage, chatToLoad }: ChatContai
                 <button
                   key={q}
                   onClick={() => handleSend(q)}
-                  className="w-full text-left text-xs text-gray-600 dark:text-gray-300 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:border-[#F5C400] dark:hover:border-yellow-500 hover:text-[#F5C400] dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 px-3 py-2.5 rounded-xl transition-all leading-snug"
+                  className="w-full text-left text-xs text-gray-600 dark:text-gray-300 bg-white dark:bg-zinc-800 border border-gray-200 dark:border-zinc-700 hover:border-[#F5C400] dark:hover:border-yellow-500 hover:text-brand dark:hover:text-yellow-400 hover:bg-yellow-50 dark:hover:bg-yellow-900/20 px-3 py-2.5 rounded-xl transition-all leading-snug"
                 >
                   {q}
                 </button>

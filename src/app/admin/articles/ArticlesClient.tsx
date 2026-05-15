@@ -337,7 +337,7 @@ export default function ArticlesClient({ initialArticles }: { initialArticles: A
                     <div className="flex items-center justify-end gap-2">
                       <button
                         onClick={() => openEdit(a.id)}
-                        className="text-xs text-[#F5C400] hover:underline"
+                        className="text-xs text-brand hover:underline"
                       >
                         Edit
                       </button>

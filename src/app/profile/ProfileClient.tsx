@@ -64,7 +64,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
     <div className="max-w-lg mx-auto px-4 sm:px-6 py-10">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
-        <Link href="/" className="hover:text-[#F5C400] dark:hover:text-yellow-400">Beranda</Link>
+        <Link href="/" className="hover:text-brand dark:hover:text-yellow-400">Beranda</Link>
         <span>/</span>
         <span className="text-gray-600 dark:text-gray-300">Profil Saya</span>
       </nav>
@@ -149,7 +149,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
           <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-2">Akses Staf</p>
           <Link
             href="/admin/news"
-            className="text-sm text-[#F5C400] dark:text-yellow-400 font-medium hover:underline"
+            className="text-sm text-brand dark:text-yellow-400 font-medium hover:underline"
           >
             → Buka Dashboard Admin
           </Link>

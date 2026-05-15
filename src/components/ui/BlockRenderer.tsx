@@ -177,7 +177,7 @@ function RenderBlock({ block }: { block: Block }) {
             <div className="border border-gray-200 dark:border-zinc-700 rounded-xl p-4 text-sm text-gray-500">
               🔗{" "}
               <a href={url} target="_blank" rel="noopener noreferrer"
-                className="text-[#F5C400] dark:text-yellow-400 underline underline-offset-2">
+                className="text-brand dark:text-yellow-400 underline underline-offset-2">
                 {url}
               </a>
             </div>

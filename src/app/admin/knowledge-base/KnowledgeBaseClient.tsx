@@ -154,7 +154,7 @@ export default function KnowledgeBaseClient({ initialEntries }: { initialEntries
                   </td>
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <button onClick={() => openEdit(e.id)} className="text-xs text-[#F5C400] hover:underline">Edit</button>
+                      <button onClick={() => openEdit(e.id)} className="text-xs text-brand hover:underline">Edit</button>
                       <button onClick={() => setDeleteId(e.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
                     </div>
                   </td>
@@ -200,7 +200,7 @@ export default function KnowledgeBaseClient({ initialEntries }: { initialEntries
                 <div className="flex items-end">
                   <label className="flex items-center gap-2 text-sm text-gray-700 cursor-pointer">
                     <input type="checkbox" checked={form.is_active} onChange={(e) => setForm((f) => ({ ...f, is_active: e.target.checked }))}
-                      className="w-4 h-4 text-[#F5C400] rounded" />
+                      className="w-4 h-4 text-brand rounded" />
                     Aktif (dipakai AI)
                   </label>
                 </div>

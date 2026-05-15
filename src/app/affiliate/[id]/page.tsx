@@ -126,7 +126,7 @@ export default async function AffiliateDetailPage({
           {/* Category badge */}
           {product.category && (
             <div className="flex items-center gap-2">
-              <span className="text-xs bg-[#F5C400]/10 dark:bg-[#F5C400]/30 text-[#F5C400] dark:text-emerald-300 border border-[#F5C400]/20 dark:border-[#F5C400]/40 px-3 py-1 rounded-full font-medium">
+              <span className="text-xs bg-[#F5C400]/10 dark:bg-[#F5C400]/30 text-brand dark:text-emerald-300 border border-[#F5C400]/20 dark:border-[#F5C400]/40 px-3 py-1 rounded-full font-medium">
                 {product.category}
               </span>
             </div>
@@ -159,7 +159,7 @@ export default async function AffiliateDetailPage({
           {/* Price */}
           {(product.price || product.price_label) && (
             <div className="mb-6">
-              <p className="text-3xl font-bold text-[#F5C400] dark:text-yellow-400">
+              <p className="text-3xl font-bold text-brand dark:text-yellow-400">
                 {product.price_label ?? formatPrice(product.price!)}
               </p>
               <p className="text-xs text-text-tertiary mt-1">
@@ -227,7 +227,7 @@ export default async function AffiliateDetailPage({
                     {rel.title}
                   </p>
                   {(rel.price || rel.price_label) && (
-                    <p className="text-xs font-bold text-[#F5C400] dark:text-yellow-400">
+                    <p className="text-xs font-bold text-brand dark:text-yellow-400">
                       {rel.price_label ?? formatPrice(rel.price!)}
                     </p>
                   )}

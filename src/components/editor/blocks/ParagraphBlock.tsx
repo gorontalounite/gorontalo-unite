@@ -177,7 +177,7 @@ function RichToolbar({
         type="button"
         title="Sisipkan link"
         onMouseDown={(e) => { e.preventDefault(); onShowLink(); }}
-        className="px-2 py-1 text-xs font-semibold rounded-lg border border-gray-200 text-[#F5C400] hover:bg-yellow-50 hover:border-yellow-200 transition-colors"
+        className="px-2 py-1 text-xs font-semibold rounded-lg border border-gray-200 text-brand hover:bg-yellow-50 hover:border-yellow-200 transition-colors"
       >
         🔗 Link
       </button>

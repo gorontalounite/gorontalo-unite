@@ -132,9 +132,9 @@ export default async function PortfolioDetailPage({ params }: Props) {
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
-        <Link href="/" className="hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Beranda</Link>
+        <Link href="/" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Beranda</Link>
         <span>/</span>
-        <Link href="/portfolio" className="hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Portofolio</Link>
+        <Link href="/portfolio" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Portofolio</Link>
         <span>/</span>
         <span className="text-gray-500 dark:text-gray-400 truncate max-w-[180px]">{item.title}</span>
       </nav>
@@ -312,7 +312,7 @@ export default async function PortfolioDetailPage({ params }: Props) {
 
       {/* Back */}
       <div className="mt-8 flex gap-4">
-        <Link href="/portfolio" className="text-sm text-[#F5C400] dark:text-yellow-400 font-medium hover:underline">
+        <Link href="/portfolio" className="text-sm text-brand dark:text-yellow-400 font-medium hover:underline">
           ← Semua portofolio
         </Link>
         <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300">

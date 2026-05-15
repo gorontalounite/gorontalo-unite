@@ -158,7 +158,7 @@ export default function RagAdminClient() {
     const formData = new FormData();
     formData.append("file", file);
     try {
-      setProgress("Memproses dokumen via Unstructured API…");
+      setProgress("Memproses dokumen & membuat vector embeddings…");
       const res  = await fetch("/api/rag/upload", { method: "POST", body: formData });
       const json = await res.json();
       if (!res.ok) { setResult({ error: json.error ?? `Error ${res.status}` }); }
@@ -190,11 +190,17 @@ export default function RagAdminClient() {
   return (
     <div className="p-6 max-w-4xl">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="text-xl font-bold text-gray-900">RAG Knowledge Base</h1>
-        <p className="text-sm text-gray-500 mt-1">
-          Upload dokumen untuk dijadikan konteks AI Gorontalo. Dokumen diproses menjadi vector chunks yang bisa dicari secara semantik.
-        </p>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-xl font-bold text-gray-900">RAG Dokumen</h1>
+          <p className="text-sm text-gray-500 mt-1">
+            Upload dokumen untuk dijadikan konteks AI. Setiap chunk di-embed dengan pgvector (nomic-embed-text-v1.5) dan digunakan saat AI menjawab pertanyaan.
+          </p>
+        </div>
+        <div className="flex-shrink-0 flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
+          <span className="w-1.5 h-1.5 rounded-full bg-green-500 flex-shrink-0" />
+          <span className="text-xs font-medium text-green-700">pgvector aktif</span>
+        </div>
       </div>
 
       {/* Drop zone */}

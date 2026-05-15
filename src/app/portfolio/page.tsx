@@ -29,7 +29,7 @@ export default async function PortfolioPage() {
           </svg>
           Beranda
         </Link>
-        <p className="text-xs font-semibold text-[#F5C400] uppercase tracking-widest mb-1">Portofolio</p>
+        <p className="text-xs font-semibold text-brand uppercase tracking-widest mb-1">Portofolio</p>
         <h1 className="text-3xl font-bold text-gray-900">Karya & Proyek Kami</h1>
         <p className="text-sm text-gray-500 mt-2">Koleksi proyek digital, konten, dan karya yang telah kami hasilkan.</p>
       </div>
@@ -70,7 +70,7 @@ export default async function PortfolioPage() {
           <span className="text-6xl">🌿</span>
           <p className="text-gray-500 mt-4 font-medium">Portofolio sedang disiapkan</p>
           <p className="text-sm text-gray-400 mt-1">Pantau terus untuk update terbaru.</p>
-          <Link href="/" className="inline-block mt-6 text-sm text-[#F5C400] hover:underline">← Kembali ke beranda</Link>
+          <Link href="/" className="inline-block mt-6 text-sm text-brand hover:underline">← Kembali ke beranda</Link>
         </div>
       )}
     </div>

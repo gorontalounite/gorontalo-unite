@@ -69,7 +69,7 @@ export default function MarkdownContent({ content, className = "" }: Props) {
               );
             }
             return (
-              <code className="bg-gray-100 dark:bg-zinc-800 text-[#F5C400] dark:text-yellow-400 text-sm font-mono px-1.5 py-0.5 rounded-md">
+              <code className="bg-gray-100 dark:bg-zinc-800 text-brand dark:text-yellow-400 text-sm font-mono px-1.5 py-0.5 rounded-md">
                 {children}
               </code>
             );
@@ -79,7 +79,7 @@ export default function MarkdownContent({ content, className = "" }: Props) {
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-[#F5C400] dark:text-yellow-400 underline underline-offset-2 hover:text-[#1f5a33] dark:hover:text-yellow-300 transition-colors"
+              className="text-brand dark:text-yellow-400 underline underline-offset-2 hover:text-[#1f5a33] dark:hover:text-yellow-300 transition-colors"
             >
               {children}
             </a>

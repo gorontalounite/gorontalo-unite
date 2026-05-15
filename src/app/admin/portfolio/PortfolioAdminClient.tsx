@@ -196,7 +196,7 @@ function ExtraImagesField({
       <div className="flex gap-2 mt-2">
         <button type="button"
           onClick={() => onChange([...images, ""])}
-          className="text-xs px-3 py-1.5 border border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-[#F5C400] hover:text-[#F5C400]">
+          className="text-xs px-3 py-1.5 border border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-[#F5C400] hover:text-brand">
           + Tambah URL
         </button>
         <button type="button" onClick={() => fileRef.current?.click()} disabled={uploading}
@@ -238,7 +238,7 @@ function FaqEditor({ faqs, onChange }: { faqs: FaqItem[]; onChange: (f: FaqItem[
         ))}
       </div>
       <button type="button" onClick={add}
-        className="mt-2 text-xs px-3 py-1.5 border border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-[#F5C400] hover:text-[#F5C400] transition-colors">
+        className="mt-2 text-xs px-3 py-1.5 border border-dashed border-gray-300 text-gray-500 rounded-xl hover:border-[#F5C400] hover:text-brand transition-colors">
         + Tambah FAQ
       </button>
     </div>
@@ -379,7 +379,7 @@ export default function PortfolioAdminClient({ initialItems }: { initialItems: P
                   className={`text-xs px-2 py-0.5 rounded-full font-medium transition-colors ${item.published ? "bg-yellow-100 text-emerald-700" : "bg-gray-100 text-gray-400"}`}>
                   {item.published ? "Publik" : "Draft"}
                 </button>
-                <button onClick={() => openEdit(item.id)} className="text-xs text-[#F5C400] hover:underline">Edit</button>
+                <button onClick={() => openEdit(item.id)} className="text-xs text-brand hover:underline">Edit</button>
                 <button onClick={() => setDeleteId(item.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
               </div>
             </div>

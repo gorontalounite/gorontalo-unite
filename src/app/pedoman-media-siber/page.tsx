@@ -13,16 +13,16 @@ export default function PedomanMediaSiberPage() {
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-8">
-        <Link href="/" className="hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Beranda</Link>
+        <Link href="/" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Beranda</Link>
         <span>/</span>
-        <Link href="/about" className="hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Tentang Kami</Link>
+        <Link href="/about" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Tentang Kami</Link>
         <span>/</span>
         <span className="text-gray-600 dark:text-gray-300">Pedoman Media Siber</span>
       </nav>
 
       {/* Header */}
       <div className="mb-10">
-        <span className="inline-block text-xs font-semibold uppercase tracking-widest text-[#F5C400] dark:text-yellow-400 mb-3">Dewan Pers</span>
+        <span className="inline-block text-xs font-semibold uppercase tracking-widest text-brand dark:text-yellow-400 mb-3">Dewan Pers</span>
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight mb-3">
           Pedoman Pemberitaan Media Siber
         </h1>
@@ -143,11 +143,11 @@ export default function PedomanMediaSiberPage() {
 
       {/* Nav links */}
       <div className="mt-8 flex flex-wrap gap-3">
-        <Link href="/privacy-policy" className="text-xs text-gray-400 dark:text-gray-500 hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Kebijakan Privasi</Link>
+        <Link href="/privacy-policy" className="text-xs text-gray-400 dark:text-gray-500 hover:text-brand dark:hover:text-yellow-400 transition-colors">Kebijakan Privasi</Link>
         <span className="text-gray-300 dark:text-zinc-700">·</span>
-        <Link href="/terms" className="text-xs text-gray-400 dark:text-gray-500 hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Syarat & Ketentuan</Link>
+        <Link href="/terms" className="text-xs text-gray-400 dark:text-gray-500 hover:text-brand dark:hover:text-yellow-400 transition-colors">Syarat & Ketentuan</Link>
         <span className="text-gray-300 dark:text-zinc-700">·</span>
-        <Link href="/about" className="text-xs text-gray-400 dark:text-gray-500 hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Tentang Kami</Link>
+        <Link href="/about" className="text-xs text-gray-400 dark:text-gray-500 hover:text-brand dark:hover:text-yellow-400 transition-colors">Tentang Kami</Link>
       </div>
 
     </div>
@@ -158,7 +158,7 @@ function Section({ number, title, children }: { number: string; title: string; c
   return (
     <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 overflow-hidden">
       <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-100 dark:border-zinc-800">
-        <span className="w-7 h-7 rounded-lg bg-[#F5C400]/10 dark:bg-yellow-900/30 text-[#F5C400] dark:text-yellow-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
+        <span className="w-7 h-7 rounded-lg bg-[#F5C400]/10 dark:bg-yellow-900/30 text-brand dark:text-yellow-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
           {number}
         </span>
         <h2 className="text-sm font-semibold text-gray-900 dark:text-white">{title}</h2>

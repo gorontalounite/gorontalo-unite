@@ -67,7 +67,7 @@ export default function SignUpPage() {
       <div className="flex-1 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-sm text-center">
           <div className="w-16 h-16 bg-yellow-100 dark:bg-yellow-900/40 rounded-full flex items-center justify-center mx-auto mb-4">
-            <svg className="w-8 h-8 text-[#F5C400] dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-8 h-8 text-brand dark:text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>
           </div>
@@ -221,9 +221,9 @@ export default function SignUpPage() {
             {/* Terms */}
             <p className="text-[11px] text-gray-400 dark:text-zinc-500 leading-relaxed">
               Dengan mendaftar, kamu menyetujui{" "}
-              <Link href="/terms" className="text-[#F5C400] dark:text-yellow-400 hover:underline">Syarat & Ketentuan</Link>
+              <Link href="/terms" className="text-brand dark:text-yellow-400 hover:underline">Syarat & Ketentuan</Link>
               {" "}dan{" "}
-              <Link href="/privacy-policy" className="text-[#F5C400] dark:text-yellow-400 hover:underline">Kebijakan Privasi</Link>
+              <Link href="/privacy-policy" className="text-brand dark:text-yellow-400 hover:underline">Kebijakan Privasi</Link>
               {" "}kami.
             </p>
 
@@ -240,7 +240,7 @@ export default function SignUpPage() {
           {/* Sign-in link */}
           <p className="text-center text-xs text-gray-500 dark:text-gray-400">
             Sudah punya akun?{" "}
-            <Link href="/sign-in" className="text-[#F5C400] dark:text-yellow-400 font-medium hover:underline">
+            <Link href="/sign-in" className="text-brand dark:text-yellow-400 font-medium hover:underline">
               Masuk
             </Link>
           </p>

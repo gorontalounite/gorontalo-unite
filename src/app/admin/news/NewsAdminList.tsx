@@ -247,7 +247,7 @@ export default function NewsAdminList({ initialItems }: { initialItems: NewsItem
                   <td className="px-4 py-3 text-right">
                     <div className="flex items-center justify-end gap-3">
                       <Link href={`/admin/news/edit/${a.id}`}
-                        className="text-xs text-[#F5C400] hover:underline font-medium">Edit</Link>
+                        className="text-xs text-brand hover:underline font-medium">Edit</Link>
                       <Link href={`/news/${a.slug}`} target="_blank"
                         className="text-xs text-gray-400 hover:underline hidden lg:inline">Lihat →</Link>
                       <button onClick={() => setDeleteId(a.id)}

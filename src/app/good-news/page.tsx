@@ -50,7 +50,7 @@ export default async function GoodNewsPage() {
     <div className="max-w-5xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
-        <Link href="/" className="hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Beranda</Link>
+        <Link href="/" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Beranda</Link>
         <span>/</span>
         <span className="text-gray-600 dark:text-gray-300">Berita</span>
       </nav>

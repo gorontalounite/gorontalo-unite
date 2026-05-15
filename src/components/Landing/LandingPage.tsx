@@ -100,12 +100,12 @@ function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
       <div className="absolute inset-0 bg-gradient-to-b from-yellow-50/50 via-transparent to-transparent dark:from-yellow-950/20 pointer-events-none" />
 
       <div className="relative max-w-3xl mx-auto text-center w-full py-12 sm:py-16">
-        <span className="inline-block text-xs font-semibold text-[#F5C400] dark:text-yellow-400 uppercase tracking-widest mb-3">
+        <span className="inline-block text-xs font-semibold text-brand dark:text-yellow-400 uppercase tracking-widest mb-3">
           AI Lokal Gorontalo
         </span>
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-bold text-gray-900 dark:text-white leading-tight tracking-tight mb-3">
           Tanyakan apapun{" "}
-          <span className="text-[#F5C400] dark:text-yellow-400">tentang Gorontalo</span>
+          <span className="text-brand dark:text-yellow-400">tentang Gorontalo</span>
         </h1>
         <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 max-w-xl mx-auto mb-8">
           Chatbot AI lokal yang memahami wisata, budaya, kuliner, dan layanan publik Gorontalo.
@@ -165,7 +165,7 @@ function SectionHeading({
   return (
     <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8 sm:mb-10">
       <div className="max-w-2xl">
-        <span className="text-xs font-semibold text-[#F5C400] dark:text-yellow-400 uppercase tracking-widest">
+        <span className="text-xs font-semibold text-brand dark:text-yellow-400 uppercase tracking-widest">
           {eyebrow}
         </span>
         <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2">
@@ -259,7 +259,7 @@ function PortfolioSection({ items }: { items: PortfolioItem[] }) {
           action={
             <Link
               href="/portfolio"
-              className="text-sm font-semibold text-[#F5C400] dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
+              className="text-sm font-semibold text-brand dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
             >
               Lihat semua
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -373,7 +373,7 @@ function NewsSection({ items }: { items: NewsItem[] }) {
           action={
             <Link
               href="/blog"
-              className="text-sm font-semibold text-[#F5C400] dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
+              className="text-sm font-semibold text-brand dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
             >
               Semua berita
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -415,7 +415,7 @@ function NewsSection({ items }: { items: NewsItem[] }) {
                 >
                   {item.category}
                 </span>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mt-2.5 line-clamp-2 group-hover:text-[#F5C400] dark:group-hover:text-yellow-400 transition-colors leading-snug flex-1">
+                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mt-2.5 line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors leading-snug flex-1">
                   {item.title}
                 </h3>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-2.5">
@@ -454,7 +454,7 @@ function AboutSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           {/* Left: text */}
           <div>
-            <span className="text-xs font-semibold text-[#F5C400] dark:text-yellow-400 uppercase tracking-widest">
+            <span className="text-xs font-semibold text-brand dark:text-yellow-400 uppercase tracking-widest">
               Tentang Kami
             </span>
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-2 mb-5">
@@ -481,7 +481,7 @@ function AboutSection() {
               </Link>
               <Link
                 href="/about#kontak"
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-200 font-semibold rounded-xl hover:border-[#F5C400] dark:hover:border-yellow-500 hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 border border-gray-300 dark:border-zinc-700 text-gray-900 dark:text-gray-200 font-semibold rounded-xl hover:border-[#F5C400] dark:hover:border-yellow-500 hover:text-brand dark:hover:text-yellow-400 transition-colors"
               >
                 Hubungi kami
               </Link>
@@ -510,7 +510,7 @@ function AboutSection() {
                       e.currentTarget.style.display = "none";
                     }}
                   />
-                  <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 text-center leading-tight group-hover:text-[#F5C400] dark:group-hover:text-yellow-400 transition-colors">
+                  <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 text-center leading-tight group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
                     {tech.name}
                   </span>
                 </div>
@@ -587,7 +587,7 @@ function FooterCol({
           <li key={href}>
             <Link
               href={href}
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors"
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-yellow-400 transition-colors"
             >
               {label}
             </Link>

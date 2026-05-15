@@ -221,7 +221,7 @@ export default function GoodNewsList({ items, featured }: Props) {
                   </div>
 
                   {/* Title */}
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2 group-hover:text-[#F5C400] dark:group-hover:text-yellow-400 transition-colors leading-snug flex-1">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2 mb-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors leading-snug flex-1">
                     {item.title}
                   </h3>
 

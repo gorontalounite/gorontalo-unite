@@ -109,7 +109,7 @@ export default async function CategoryPage({ params }: Props) {
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
-        <Link href="/" className="hover:text-[#F5C400] dark:hover:text-yellow-400 transition-colors">Beranda</Link>
+        <Link href="/" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Beranda</Link>
         <span>/</span>
         <span className={`font-medium ${cat.color}`}>{cat.label}</span>
       </nav>
@@ -242,7 +242,7 @@ function ArticleCard({
             <span className="text-xs text-gray-400 dark:text-gray-500">{formatDate(article.published_at)}</span>
           )}
         </div>
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2 mb-2 group-hover:text-[#F5C400] dark:group-hover:text-yellow-400 transition-colors">
+        <h3 className="text-sm font-semibold text-gray-900 dark:text-gray-100 leading-snug line-clamp-2 mb-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
           {article.title}
         </h3>
         {article.excerpt && (
@@ -250,7 +250,7 @@ function ArticleCard({
             {article.excerpt}
           </p>
         )}
-        <div className="flex items-center gap-1 mt-3 text-xs text-[#F5C400] dark:text-yellow-400 font-medium">
+        <div className="flex items-center gap-1 mt-3 text-xs text-brand dark:text-yellow-400 font-medium">
           Baca selengkapnya
           <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

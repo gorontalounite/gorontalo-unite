@@ -162,7 +162,7 @@ function CategorySelector({ value, onChange }: { value: string; onChange: (c: st
       </div>
       {!adding ? (
         <button type="button" onClick={() => setAdding(true)}
-          className="text-[11px] text-[#F5C400] hover:underline flex items-center gap-1">
+          className="text-[11px] text-brand hover:underline flex items-center gap-1">
           + Tambah kategori baru
         </button>
       ) : (

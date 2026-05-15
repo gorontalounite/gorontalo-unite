@@ -15,7 +15,7 @@ export default function DMPage() {
       headline="Pertumbuhan bisnis yang **terukur dan konsisten**."
       subheadline="Strategi pemasaran digital yang dirancang berdasarkan data — bukan asumsi. Kami membantu bisnis Anda ditemukan, dipercaya, dan dipilih."
       accentColor="bg-[#F5C400]"
-      accentText="text-[#F5C400]"
+      accentText="text-brand"
       features={[
         {
           title: "Search Engine Optimization (SEO)",
