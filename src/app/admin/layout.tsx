@@ -28,11 +28,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   }
 
   const navItems = [
-    { href: "/admin/news",           icon: "📰", label: "Berita" },
-    { href: "/admin/portfolio",      icon: "🌿", label: "Portofolio" },
-    { href: "/admin/affiliate",      icon: "🛍️", label: "Affiliate" },
-    { href: "/admin/knowledge-base", icon: "🧠", label: "Knowledge Base" },
-    { href: "/admin/users",          icon: "👥", label: "Pengguna" },
+    { href: "/admin/news",      icon: "📰", label: "Konten" },
+    { href: "/admin/affiliate", icon: "🛍️", label: "Affiliate" },
+    { href: "/admin/users",     icon: "👥", label: "Pengguna" },
   ];
 
   return (
