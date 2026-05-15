@@ -211,8 +211,40 @@ export default async function NewsDetailPage({ params }: Props) {
           </div>
         )}
 
+        {/* Tags */}
+        {Array.isArray(article.tags) && article.tags.length > 0 && (
+          <div className="mt-8 flex flex-wrap gap-2">
+            {(article.tags as string[]).map((tag) => (
+              <span key={tag} className="text-xs px-2.5 py-1 rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-600 dark:text-gray-300">
+                {tag}
+              </span>
+            ))}
+          </div>
+        )}
+
+        {/* Source attribution */}
+        {article.source_url && (
+          <div className="mt-6 text-xs text-gray-400 dark:text-gray-500">
+            Sumber:{" "}
+            <a
+              href={article.source_url as string}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-brand dark:hover:text-yellow-400 transition-colors"
+            >
+              {(article.source_url as string).includes("gorontalokab")
+                ? "Pemkab Gorontalo"
+                : (article.source_url as string).includes("gorontalokota")
+                ? "Pemkot Gorontalo"
+                : (article.source_url as string).includes("gorontaloprov")
+                ? "Pemprov Gorontalo"
+                : article.source_url as string}
+            </a>
+          </div>
+        )}
+
         {/* Share buttons */}
-        <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800">
+        <div className="mt-8 pt-6 border-t border-gray-100 dark:border-zinc-800">
           <ShareButtons url={canonicalUrl} title={article.title} />
         </div>
       </article>
