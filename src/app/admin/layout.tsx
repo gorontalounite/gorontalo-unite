@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
+import AdminSidebar from "./AdminSidebar";
 
 export const metadata: Metadata = {
   title: "Admin Dashboard | Gorontalo Unite",
@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
-  if (!user) redirect("/sign-in?redirect=/admin/news");
+  if (!user) redirect("/sign-in?redirect=/admin");
 
   const adminClient = createAdminClient();
   const { data: profileRaw } = await adminClient
@@ -27,48 +27,9 @@ export default async function AdminLayout({ children }: { children: React.ReactN
     redirect("/?error=unauthorized");
   }
 
-  const navItems = [
-    { href: "/admin/news",      icon: "📰", label: "Konten" },
-    { href: "/admin/affiliate", icon: "🛍️", label: "Affiliate" },
-    { href: "/admin/users",     icon: "👥", label: "Pengguna" },
-  ];
-
   return (
     <div className="force-light flex flex-1 min-h-0">
-      {/* Sidebar */}
-      <aside className="w-56 flex-shrink-0 bg-white border-r border-gray-200 flex flex-col">
-        <div className="p-4 border-b border-gray-100">
-          <p className="text-xs text-gray-400 font-medium">Admin Dashboard</p>
-          <p className="text-sm font-semibold text-gray-900 truncate">{profile.full_name}</p>
-          <span className="inline-block text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full mt-1 capitalize">
-            {profile.role}
-          </span>
-        </div>
-
-        <nav className="flex-1 p-3 space-y-0.5">
-          {navItems.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="flex items-center gap-2.5 px-3 py-2 text-sm text-gray-600 hover:bg-gray-50 hover:text-gray-900 rounded-lg transition-colors"
-            >
-              <span className="text-base leading-none">{item.icon}</span>
-              {item.label}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-3 border-t border-gray-100">
-          <Link
-            href="/"
-            className="flex items-center gap-2 px-3 py-2 text-xs text-gray-400 hover:text-gray-600 rounded-lg transition-colors"
-          >
-            ← Kembali ke situs
-          </Link>
-        </div>
-      </aside>
-
-      {/* Main content */}
+      <AdminSidebar fullName={profile.full_name} role={profile.role} />
       <main className="flex-1 overflow-auto bg-gray-50">{children}</main>
     </div>
   );

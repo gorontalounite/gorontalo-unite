@@ -15,10 +15,11 @@ interface NewsItem {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Wisata: "bg-yellow-100 text-emerald-700", Budaya: "bg-purple-100 text-purple-700",
-  Kuliner: "bg-orange-100 text-orange-700",  Pendidikan: "bg-blue-100 text-blue-700",
-  Ekonomi: "bg-amber-100 text-amber-700",    Kesehatan: "bg-red-100 text-red-700",
-  "Good News": "bg-yellow-100 text-emerald-700", Umum: "bg-gray-100 text-gray-600",
+  Wisata: "bg-yellow-50 text-yellow-700",    Budaya: "bg-purple-50 text-purple-700",
+  Kuliner: "bg-orange-50 text-orange-700",   Pendidikan: "bg-blue-50 text-blue-700",
+  Ekonomi: "bg-amber-50 text-amber-700",     Kesehatan: "bg-red-50 text-red-700",
+  Olahraga: "bg-green-50 text-green-700",    Teknologi: "bg-cyan-50 text-cyan-700",
+  "Good News": "bg-emerald-50 text-emerald-700", Umum: "bg-gray-100 text-gray-500",
 };
 
 const PAGE_SIZES = [10, 25, 50];
@@ -115,14 +116,20 @@ export default function NewsAdminList({ initialItems }: { initialItems: NewsItem
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
-          <h1 className="text-xl font-bold text-gray-900">Manajemen Berita</h1>
-          <p className="text-sm text-gray-500">{items.length} artikel total · {filtered.length} ditampilkan</p>
+          <h1 className="text-xl font-bold text-gray-900">Manajemen Konten</h1>
+          <p className="text-sm text-gray-500">
+            {items.length} total ·{" "}
+            <span className="text-green-600 font-medium">{items.filter((i) => i.published).length} publik</span>
+            {" · "}
+            <span className="text-gray-400">{items.filter((i) => !i.published).length} draft</span>
+          </p>
         </div>
         <Link
           href="/admin/news/new"
-          className="bg-[#F5C400] text-black text-sm px-4 py-2 rounded-xl hover:bg-[#c9a000] transition-colors flex items-center gap-2"
+          className="text-sm px-4 py-2 rounded-xl transition-colors flex items-center gap-2 font-semibold"
+          style={{ backgroundColor: '#F5C400', color: '#000' }}
         >
-          <span>+</span> Berita Baru
+          <span className="text-base leading-none">+</span> Konten Baru
         </Link>
       </div>
 
@@ -232,7 +239,7 @@ export default function NewsAdminList({ initialItems }: { initialItems: NewsItem
                   </td>
                   <td className="px-4 py-3">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
-                      a.published ? "bg-yellow-100 text-emerald-700" : "bg-gray-100 text-gray-500"
+                      a.published ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"
                     }`}>
                       {a.published ? "Publik" : "Draft"}
                     </span>
