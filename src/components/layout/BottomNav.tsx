@@ -18,8 +18,8 @@ const navItems = [
     ),
   },
   {
-    href: "/blog",
-    label: "Blog",
+    href: "/berita",
+    label: "Berita",
     icon: (active: boolean) => (
       <svg
         className={`w-6 h-6 ${active ? "text-brand dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
