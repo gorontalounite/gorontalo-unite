@@ -146,7 +146,7 @@ export default async function NewsDetailPage({ params }: Props) {
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
         <Link href="/" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Beranda</Link>
         <span>/</span>
-        <Link href="/good-news" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Berita</Link>
+        <Link href="/berita" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Berita</Link>
         <span>/</span>
         <span className="text-gray-500 dark:text-gray-400 truncate max-w-[200px]">{article.title}</span>
       </nav>
@@ -257,7 +257,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
       {/* Back navigation */}
       <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 flex gap-4">
-        <Link href="/good-news" className="text-sm text-brand dark:text-yellow-400 font-medium hover:underline">
+        <Link href="/berita" className="text-sm text-brand dark:text-yellow-400 font-medium hover:underline">
           ← Semua berita
         </Link>
         <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium">

@@ -90,7 +90,7 @@ export default async function BeritaCategoryPage({ params }: Props) {
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
         <Link href="/" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Beranda</Link>
         <span>/</span>
-        <Link href="/blog" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Berita</Link>
+        <Link href="/berita" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Berita</Link>
         <span>/</span>
         <span className={`font-medium ${cat.color}`}>{cat.label}</span>
       </nav>
@@ -109,7 +109,7 @@ export default async function BeritaCategoryPage({ params }: Props) {
           <p className="text-sm text-gray-400 dark:text-gray-500 max-w-xs">
             Konten kategori {cat.label} akan segera hadir.
           </p>
-          <Link href="/blog" className="mt-6 px-5 py-2 bg-[#F5C400] text-black text-sm font-medium rounded-xl hover:bg-[#c9a000] transition-colors">
+          <Link href="/berita" className="mt-6 px-5 py-2 bg-[#F5C400] text-black text-sm font-medium rounded-xl hover:bg-[#c9a000] transition-colors">
             ← Semua berita
           </Link>
         </div>
