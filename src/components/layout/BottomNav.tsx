@@ -18,7 +18,7 @@ const navItems = [
     ),
   },
   {
-    href: "/blog",
+    href: "/wisata",
     label: "Blog",
     icon: (active: boolean) => (
       <svg
@@ -31,7 +31,7 @@ const navItems = [
     ),
   },
   {
-    href: "/product",
+    href: "/affiliate",
     label: "Product",
     icon: (active: boolean) => (
       <svg

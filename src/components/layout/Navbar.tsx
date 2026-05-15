@@ -34,7 +34,7 @@ export default function Navbar() {
           {/* Right: Get Started + Theme + Book */}
           <div className="flex items-center gap-1">
             <Link
-              href="/auth/login"
+              href="/sign-in"
               className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
               aria-label="Login"
             >
