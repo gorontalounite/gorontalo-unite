@@ -200,55 +200,6 @@ const lainnyaItems = [
   },
 ];
 
-// About Us collapse items (Partnership, Info, Client, Kontak, Karir)
-const aboutUsItems = [
-  {
-    href: "/partnership",
-    label: "Partnership",
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/about",
-    label: "Informasi Perusahaan",
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/client",
-    label: "Client & Portofolio",
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/kontak",
-    label: "Kontak",
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/karir",
-    label: "Karir",
-    icon: (
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-      </svg>
-    ),
-  },
-];
-
 // Legal links shown below About Us (always visible)
 const legalLinks = [
   {
@@ -282,7 +233,6 @@ const legalLinks = [
 
 export default function RightPanel({ open, onClose }: RightPanelProps) {
   const [lainnyaOpen, setLainnyaOpen] = useState(false);
-  const [aboutUsOpen, setAboutUsOpen] = useState(false);
 
   return (
     <>
@@ -416,40 +366,31 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
 
           <div className="mx-4 border-t border-gray-100 dark:border-zinc-800" />
 
-          {/* ── ABOUT US (collapse) ── */}
+          {/* ── ABOUT US (direct link) ── */}
           <div className="px-4 pt-4">
-            <p className="text-[11px] font-semibold tracking-widest text-gray-400 dark:text-zinc-500 uppercase mb-1 px-3">
+            <p className="text-[11px] font-semibold tracking-widest text-gray-400 dark:text-zinc-500 uppercase mb-2 px-3">
               About Us
             </p>
-            <button
-              onClick={() => setAboutUsOpen((v) => !v)}
-              className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors"
+            <Link
+              href="/about"
+              onClick={onClose}
+              className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors group"
             >
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Gorontalo Unite
-              </span>
-              <svg
-                className={`w-4 h-4 text-gray-400 transition-transform duration-200 ${aboutUsOpen ? "rotate-180" : ""}`}
-                fill="none" stroke="currentColor" viewBox="0 0 24 24"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
-            </button>
-            {aboutUsOpen && (
-              <div className="mt-0.5 space-y-0.5">
-                {aboutUsItems.map((item) => (
-                  <Link
-                    key={item.href}
-                    href={item.href}
-                    onClick={onClose}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-900 hover:text-gray-900 dark:hover:text-gray-100 transition-colors"
-                  >
-                    <span className="text-gray-400 dark:text-zinc-500">{item.icon}</span>
-                    {item.label}
-                  </Link>
-                ))}
+              <div className="w-9 h-9 flex-shrink-0 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 flex items-center justify-center">
+                <svg className="w-5 h-5 text-[#2D7D46]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
-            )}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover:text-[#2D7D46] dark:group-hover:text-emerald-400 transition-colors">
+                  Tentang Gorontalo Unite
+                </p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500">Platform media hyperlokal Gorontalo</p>
+              </div>
+              <svg className="w-4 h-4 text-gray-300 dark:text-zinc-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
           </div>
 
           {/* ── LEGAL LINKS (always visible) ── */}
