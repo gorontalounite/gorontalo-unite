@@ -362,7 +362,7 @@ const DUMMY_NEWS = [
 ];
 
 /* ─── News Section (4×2 grid) ───────────────────────────────────────── */
-function NewsSection({ items: _items }: { items: NewsItem[] }) {
+function NewsSection({ items }: { items: NewsItem[] }) {
   return (
     <section id="berita" className="px-4 sm:px-6 py-16 sm:py-24 bg-gray-50/60 dark:bg-zinc-950/60 border-y border-gray-100 dark:border-zinc-800">
       <div className="max-w-6xl mx-auto">
@@ -372,7 +372,7 @@ function NewsSection({ items: _items }: { items: NewsItem[] }) {
           description="Liputan harian seputar wisata, ekonomi, pendidikan, dan budaya Gorontalo."
           action={
             <Link
-              href="/good-news"
+              href="/blog"
               className="text-sm font-semibold text-[#F5C400] dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
             >
               Semua berita
@@ -384,25 +384,32 @@ function NewsSection({ items: _items }: { items: NewsItem[] }) {
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          {DUMMY_NEWS.map((item) => (
+          {items.map((item) => (
             <Link
               key={item.id}
-              href={`/news/${item.id}`}
+              href={`/news/${item.slug}`}
               className="group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40 hover:shadow-lg dark:hover:shadow-black/40 transition-all flex flex-col"
             >
               <div className="aspect-[16/10] bg-gray-100 dark:bg-zinc-800 relative overflow-hidden">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`https://picsum.photos/seed/${item.image_seed}/400/250`}
-                  alt={item.title}
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                  loading="lazy"
-                />
+                {item.image_url ? (
+                  <img
+                    src={item.image_url}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-700">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                  </div>
+                )}
               </div>
               <div className="p-4 flex-1 flex flex-col">
                 <span
                   className={`self-start text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                    CATEGORY_BADGE[item.category] ??
+                    CATEGORY_BADGE[item.category ?? ""] ??
                     "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300"
                   }`}
                 >
@@ -412,7 +419,7 @@ function NewsSection({ items: _items }: { items: NewsItem[] }) {
                   {item.title}
                 </h3>
                 <p className="text-xs text-gray-400 dark:text-gray-500 mt-2.5">
-                  {formatDate(item.published_at)}
+                  {formatDate(item.published_at ?? item.created_at)}
                 </p>
               </div>
             </Link>
