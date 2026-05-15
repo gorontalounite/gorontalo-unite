@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
-import Groq from "groq-sdk";
 
 export const maxDuration = 120;
-
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
 interface UnstructuredElement {
   type: string;
@@ -49,11 +46,20 @@ function buildChunks(
 
 async function embedText(text: string): Promise<number[] | null> {
   try {
-    const res = await groq.embeddings.create({
-      model: "nomic-ai/nomic-embed-text-v1.5",
-      input: text.slice(0, 2000),
-    });
-    return res.data[0]?.embedding ?? null;
+    const res = await fetch(
+      `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+        },
+        body: JSON.stringify({ text }),
+      }
+    );
+    if (!res.ok) return null;
+    const json = await res.json() as { embedding?: number[] };
+    return json.embedding ?? null;
   } catch (err) {
     console.error("[rag/embed] embedding failed:", err);
     return null;

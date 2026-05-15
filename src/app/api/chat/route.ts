@@ -81,11 +81,19 @@ export async function POST(req: NextRequest) {
 
       // Try vector search first, fall back to full-text
       try {
-        const embRes = await groq.embeddings.create({
-          model: "nomic-ai/nomic-embed-text-v1.5",
-          input: message.slice(0, 2000),
-        });
-        const queryVec = embRes.data[0]?.embedding;
+        const embRes = await fetch(
+          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+            },
+            body: JSON.stringify({ text: message }),
+          }
+        );
+        const embJson = embRes.ok ? (await embRes.json() as { embedding?: number[] }) : null;
+        const queryVec = embJson?.embedding;
         if (queryVec) {
           const { data } = await adminClient.rpc("match_knowledge_base", {
             query_embedding: JSON.stringify(queryVec),
@@ -93,9 +101,9 @@ export async function POST(req: NextRequest) {
             min_similarity: 0.45,
           });
           kbChunks = (data ?? []) as typeof kbChunks;
-        }
+        } else throw new Error("no embedding");
       } catch {
-        // Vector search failed, try full-text
+        // Vector search failed, fall back to full-text
         const { data } = await adminClient.rpc("search_knowledge_base_fts", {
           search_query: message,
           match_count: 4,
