@@ -133,7 +133,6 @@ export default function BeritaFilters({
         </button>
         {CATEGORIES.map((c) => {
           const count = catCounts[c.label] ?? 0;
-          if (count === 0 && !activeCategory) return null;
           const active = activeCategory === c.key;
           return (
             <button

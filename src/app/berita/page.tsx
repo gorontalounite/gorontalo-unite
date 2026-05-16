@@ -4,14 +4,14 @@ import Image from "next/image";
 import { Suspense } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
 import BeritaFilters from "./BeritaFilters";
-import { CATEGORIES } from "./categories";
+import { CATEGORIES, CAT_COLOR as COLORS, DEFAULT_COLOR } from "./categories";
 import BeritaPagination from "./BeritaPagination";
 
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Berita Gorontalo — Gorontalo Unite",
-  description: "Berita terkini seputar Gorontalo — politik, ekonomi, pariwisata, pendidikan, kesehatan, dan lebih banyak lagi.",
+  description: "Berita terkini seputar Gorontalo — politik, ekonomi, wisata, pendidikan, kesehatan, dan lebih banyak lagi.",
   openGraph: { title: "Berita Gorontalo | Gorontalo Unite", type: "website" },
 };
 
@@ -22,22 +22,6 @@ const LIMIT = 18;
 const CAT_LABEL_MAP: Record<string, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c.key, c.label]),
 );
-
-const CAT_COLOR: Record<string, string> = {
-  "Politik & Pemerintahan":     "bg-blue-50   text-blue-700   dark:bg-blue-900/20   dark:text-blue-300",
-  "Pariwisata & Budaya":        "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300",
-  "Ekonomi & Bisnis":           "bg-green-50  text-green-700  dark:bg-green-900/20  dark:text-green-300",
-  "Pendidikan":                 "bg-teal-50   text-teal-700   dark:bg-teal-900/20   dark:text-teal-300",
-  "Sosial & Kemasyarakatan":    "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300",
-  "Kesehatan":                  "bg-red-50    text-red-700    dark:bg-red-900/20    dark:text-red-300",
-  "Pertanian & Perikanan":      "bg-lime-50   text-lime-700   dark:bg-lime-900/20   dark:text-lime-300",
-  "Teknologi & Digital":        "bg-cyan-50   text-cyan-700   dark:bg-cyan-900/20   dark:text-cyan-300",
-  "Infrastruktur & Pembangunan":"bg-gray-100  text-gray-600   dark:bg-zinc-800      dark:text-gray-300",
-  "Hukum & Keamanan":           "bg-rose-50   text-rose-700   dark:bg-rose-900/20   dark:text-rose-300",
-  "Agama & Keagamaan":          "bg-amber-50  text-amber-700  dark:bg-amber-900/20  dark:text-amber-300",
-  "Lingkungan & Alam":          "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300",
-  "Olahraga":                   "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300",
-};
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
@@ -72,7 +56,7 @@ type Article = {
 };
 
 function CategoryBadge({ category }: { category: string }) {
-  const cls = CAT_COLOR[category] ?? "bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-gray-300";
+  const cls = (COLORS[category] ?? DEFAULT_COLOR).badge;
   return (
     <span className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${cls}`}>
       {category}
