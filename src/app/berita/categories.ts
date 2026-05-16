@@ -1,0 +1,15 @@
+export const CATEGORIES = [
+  { key: "politik",       label: "Politik & Pemerintahan"      },
+  { key: "pariwisata",    label: "Pariwisata & Budaya"         },
+  { key: "ekonomi",       label: "Ekonomi & Bisnis"            },
+  { key: "pendidikan",    label: "Pendidikan"                  },
+  { key: "sosial",        label: "Sosial & Kemasyarakatan"     },
+  { key: "kesehatan",     label: "Kesehatan"                   },
+  { key: "pertanian",     label: "Pertanian & Perikanan"       },
+  { key: "teknologi",     label: "Teknologi & Digital"         },
+  { key: "infrastruktur", label: "Infrastruktur & Pembangunan" },
+  { key: "hukum",         label: "Hukum & Keamanan"            },
+  { key: "agama",         label: "Agama & Keagamaan"           },
+  { key: "lingkungan",    label: "Lingkungan & Alam"           },
+  { key: "olahraga",      label: "Olahraga"                    },
+] as const;

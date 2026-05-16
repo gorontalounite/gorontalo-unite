@@ -3,7 +3,8 @@ import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
-import BeritaFilters, { CATEGORIES } from "./BeritaFilters";
+import BeritaFilters from "./BeritaFilters";
+import { CATEGORIES } from "./categories";
 import BeritaPagination from "./BeritaPagination";
 
 export const dynamic = "force-dynamic";
