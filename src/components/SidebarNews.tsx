@@ -2,14 +2,26 @@ import Link from "next/link";
 import { featuredNews } from "@/data/mockConversations";
 
 const categoryColors: Record<string, string> = {
-  Wisata: "bg-yellow-100 text-emerald-700",
-  Budaya: "bg-purple-100 text-purple-700",
-  Kuliner: "bg-orange-100 text-orange-700",
-  Pendidikan: "bg-blue-100 text-blue-700",
-  Kesehatan: "bg-red-100 text-red-700",
-  Ekonomi: "bg-yellow-100 text-yellow-700",
-  Infrastruktur: "bg-gray-100 text-gray-700",
-  Sejarah: "bg-amber-100 text-amber-700",
+  Politik:"bg-blue-100 text-blue-700", Pemerintahan:"bg-sky-100 text-sky-700",
+  Wisata:"bg-yellow-100 text-yellow-700", Budaya:"bg-purple-100 text-purple-700",
+  Ekonomi:"bg-emerald-100 text-emerald-700", Bisnis:"bg-green-100 text-green-700",
+  Pendidikan:"bg-teal-100 text-teal-700", Sosial:"bg-orange-100 text-orange-700",
+  Kemasyarakatan:"bg-amber-100 text-amber-700", Kesehatan:"bg-red-100 text-red-700",
+  Pertanian:"bg-lime-100 text-lime-700", Perikanan:"bg-cyan-100 text-cyan-700",
+  Teknologi:"bg-violet-100 text-violet-700", Digital:"bg-indigo-100 text-indigo-700",
+  Infrastruktur:"bg-gray-100 text-gray-700", Pembangunan:"bg-stone-100 text-stone-700",
+  Hukum:"bg-rose-100 text-rose-700", Keamanan:"bg-pink-100 text-pink-700",
+  Agama:"bg-amber-100 text-amber-800", Lingkungan:"bg-green-100 text-green-800",
+  Alam:"bg-emerald-100 text-emerald-800", Olahraga:"bg-indigo-100 text-indigo-700",
+};
+
+const catKeyMap: Record<string, string> = {
+  Politik:"politik", Pemerintahan:"pemerintahan", Wisata:"wisata", Budaya:"budaya",
+  Ekonomi:"ekonomi", Bisnis:"bisnis", Pendidikan:"pendidikan", Sosial:"sosial",
+  Kemasyarakatan:"kemasyarakatan", Kesehatan:"kesehatan", Pertanian:"pertanian",
+  Perikanan:"perikanan", Teknologi:"teknologi", Digital:"digital",
+  Infrastruktur:"infrastruktur", Pembangunan:"pembangunan", Hukum:"hukum",
+  Keamanan:"keamanan", Agama:"agama", Lingkungan:"lingkungan", Alam:"alam", Olahraga:"olahraga",
 };
 
 export default function SidebarNews() {
@@ -42,13 +54,15 @@ export default function SidebarNews() {
                   </svg>
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span
+                  <Link
+                    href={`/berita/${catKeyMap[item.category] ?? item.category.toLowerCase()}`}
                     className={`inline-block text-xs px-1.5 py-0.5 rounded-md font-medium mb-1 ${
                       categoryColors[item.category] ?? "bg-gray-100 text-gray-700"
                     }`}
+                    onClick={(e) => e.stopPropagation()}
                   >
                     {item.category}
-                  </span>
+                  </Link>
                   <h4 className="text-xs font-medium text-gray-800 line-clamp-2 leading-snug group-hover:text-brand transition-colors">
                     {item.title}
                   </h4>

@@ -9,6 +9,7 @@ export interface PostMeta {
   slug:            string;
   excerpt:         string;
   category:        string;
+  categories:      string[];
   tags:            string[];
   image_url:       string;
   published:       boolean;
@@ -30,7 +31,7 @@ export interface PostMeta {
 }
 
 export const EMPTY_META: PostMeta = {
-  title: "", slug: "", excerpt: "", category: "", tags: [],
+  title: "", slug: "", excerpt: "", category: "", categories: [], tags: [],
   image_url: "", published: false, published_at: "",
   seo_title: "", seo_description: "",
 };
@@ -44,8 +45,10 @@ interface Props {
 }
 
 const NEWS_CATEGORIES = [
-  "Wisata","Budaya","Kuliner","Ekonomi","Pendidikan",
-  "Kesehatan","Infrastruktur","Sejarah","Good News","Umum",
+  "Politik","Pemerintahan","Wisata","Budaya","Ekonomi","Bisnis",
+  "Pendidikan","Sosial","Kemasyarakatan","Kesehatan","Pertanian","Perikanan",
+  "Teknologi","Digital","Infrastruktur","Pembangunan","Hukum","Keamanan",
+  "Agama","Lingkungan","Alam","Olahraga",
 ];
 
 const PORTFOLIO_STACKS = [
@@ -132,59 +135,35 @@ function ImageUploadField({ value, onChange, label }: {
   );
 }
 
-/* ─── Category selector with custom option ─────────────────── */
-function CategorySelector({ value, onChange }: { value: string; onChange: (c: string) => void }) {
-  const [custom, setCustom] = useState("");
-  const [adding, setAdding] = useState(false);
-  const isPreset = NEWS_CATEGORIES.includes(value);
+/* ─── Category selector — multi-select checkboxes ──────────── */
+function CategorySelector({ values, onChange }: { values: string[]; onChange: (c: string[]) => void }) {
+  const toggle = (c: string) =>
+    onChange(values.includes(c) ? values.filter((x) => x !== c) : [...values, c]);
 
   return (
     <div className="space-y-1.5">
-      <div className="grid grid-cols-2 gap-1">
+      {values.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {values.map((c) => (
+            <span key={c} className="inline-flex items-center gap-1 text-[11px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full font-medium">
+              {c}
+              <button type="button" onClick={() => toggle(c)} className="text-yellow-600 hover:text-red-500">✕</button>
+            </span>
+          ))}
+        </div>
+      )}
+      <div className="grid grid-cols-2 gap-0.5 max-h-52 overflow-y-auto pr-1">
         {NEWS_CATEGORIES.map((c) => (
-          <label key={c} className="flex items-center gap-1.5 cursor-pointer hover:bg-gray-50 rounded px-1 py-0.5">
-            <input type="radio" name="category" value={c}
-              checked={value === c}
-              onChange={() => onChange(c)}
+          <label key={c} className={`flex items-center gap-1.5 cursor-pointer rounded px-1 py-0.5 transition-colors ${values.includes(c) ? "bg-yellow-50" : "hover:bg-gray-50"}`}>
+            <input type="checkbox" value={c}
+              checked={values.includes(c)}
+              onChange={() => toggle(c)}
               className="accent-[#F5C400]" />
             <span className="text-[11px] text-gray-600">{c}</span>
           </label>
         ))}
-        {/* Custom category if set */}
-        {!isPreset && value && (
-          <label className="flex items-center gap-1.5 cursor-pointer bg-yellow-50 rounded px-1 py-0.5 col-span-2">
-            <input type="radio" name="category" value={value}
-              checked={true} onChange={() => {}}
-              className="accent-[#F5C400]" />
-            <span className="text-[11px] text-emerald-700 font-medium">{value}</span>
-          </label>
-        )}
       </div>
-      {!adding ? (
-        <button type="button" onClick={() => setAdding(true)}
-          className="text-[11px] text-brand hover:underline flex items-center gap-1">
-          + Tambah kategori baru
-        </button>
-      ) : (
-        <div className="flex gap-1 mt-1">
-          <input
-            autoFocus
-            value={custom}
-            onChange={(e) => setCustom(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && custom.trim()) { onChange(custom.trim()); setAdding(false); setCustom(""); }
-              if (e.key === "Escape") { setAdding(false); setCustom(""); }
-            }}
-            placeholder="Nama kategori baru…"
-            className="flex-1 text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
-          />
-          <button type="button"
-            onClick={() => { if (custom.trim()) { onChange(custom.trim()); setAdding(false); setCustom(""); } }}
-            className="text-[11px] bg-[#F5C400] text-black px-2.5 py-1.5 rounded-lg hover:bg-[#c9a000]">OK</button>
-          <button type="button" onClick={() => { setAdding(false); setCustom(""); }}
-            className="text-[11px] border border-gray-200 text-gray-500 px-2 py-1.5 rounded-lg hover:bg-gray-50">✕</button>
-        </div>
-      )}
+      <p className="text-[10px] text-gray-400 mt-1">{values.length} kategori dipilih</p>
     </div>
   );
 }
@@ -441,8 +420,8 @@ export default function EditorSidebar({
             {postType === "news" && (
               <Panel title="Kategori" defaultOpen>
                 <CategorySelector
-                  value={meta.category}
-                  onChange={(c) => setField("category", c)}
+                  values={meta.categories?.length ? meta.categories : (meta.category ? [meta.category] : [])}
+                  onChange={(cats) => onMeta({ ...meta, categories: cats, category: cats[0] ?? "" })}
                 />
               </Panel>
             )}

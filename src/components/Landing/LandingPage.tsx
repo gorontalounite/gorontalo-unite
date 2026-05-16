@@ -59,11 +59,37 @@ function getStack(item: PortfolioItem): StackKey | null {
 }
 
 const CATEGORY_BADGE: Record<string, string> = {
-  Wisata: "bg-yellow-100 text-emerald-700 dark:bg-yellow-900/40 dark:text-emerald-300",
-  Budaya: "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
-  Kuliner: "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
-  Pendidikan: "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
-  Ekonomi: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+  Politik:        "bg-blue-100 text-blue-700 dark:bg-blue-900/40 dark:text-blue-300",
+  Pemerintahan:   "bg-sky-100 text-sky-700 dark:bg-sky-900/40 dark:text-sky-300",
+  Wisata:         "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/40 dark:text-yellow-300",
+  Budaya:         "bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300",
+  Ekonomi:        "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/40 dark:text-emerald-300",
+  Bisnis:         "bg-green-100 text-green-700 dark:bg-green-900/40 dark:text-green-300",
+  Pendidikan:     "bg-teal-100 text-teal-700 dark:bg-teal-900/40 dark:text-teal-300",
+  Sosial:         "bg-orange-100 text-orange-700 dark:bg-orange-900/40 dark:text-orange-300",
+  Kemasyarakatan: "bg-amber-100 text-amber-700 dark:bg-amber-900/40 dark:text-amber-300",
+  Kesehatan:      "bg-red-100 text-red-700 dark:bg-red-900/40 dark:text-red-300",
+  Pertanian:      "bg-lime-100 text-lime-700 dark:bg-lime-900/40 dark:text-lime-300",
+  Perikanan:      "bg-cyan-100 text-cyan-700 dark:bg-cyan-900/40 dark:text-cyan-300",
+  Teknologi:      "bg-violet-100 text-violet-700 dark:bg-violet-900/40 dark:text-violet-300",
+  Digital:        "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
+  Infrastruktur:  "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300",
+  Pembangunan:    "bg-stone-100 text-stone-700 dark:bg-stone-900/40 dark:text-stone-300",
+  Hukum:          "bg-rose-100 text-rose-700 dark:bg-rose-900/40 dark:text-rose-300",
+  Keamanan:       "bg-pink-100 text-pink-700 dark:bg-pink-900/40 dark:text-pink-300",
+  Agama:          "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-200",
+  Lingkungan:     "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200",
+  Alam:           "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200",
+  Olahraga:       "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
+};
+
+const CAT_KEY_MAP: Record<string, string> = {
+  Politik:"politik", Pemerintahan:"pemerintahan", Wisata:"wisata", Budaya:"budaya",
+  Ekonomi:"ekonomi", Bisnis:"bisnis", Pendidikan:"pendidikan", Sosial:"sosial",
+  Kemasyarakatan:"kemasyarakatan", Kesehatan:"kesehatan", Pertanian:"pertanian",
+  Perikanan:"perikanan", Teknologi:"teknologi", Digital:"digital",
+  Infrastruktur:"infrastruktur", Pembangunan:"pembangunan", Hukum:"hukum",
+  Keamanan:"keamanan", Agama:"agama", Lingkungan:"lingkungan", Alam:"alam", Olahraga:"olahraga",
 };
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
@@ -372,7 +398,7 @@ function NewsSection({ items }: { items: NewsItem[] }) {
           description="Liputan harian seputar wisata, ekonomi, pendidikan, dan budaya Gorontalo."
           action={
             <Link
-              href="/blog"
+              href="/berita"
               className="text-sm font-semibold text-brand dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
             >
               Semua berita
@@ -384,46 +410,50 @@ function NewsSection({ items }: { items: NewsItem[] }) {
         />
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          {items.map((item) => (
-            <Link
-              key={item.id}
-              href={`/news/${item.slug}`}
-              className="group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40 hover:shadow-lg dark:hover:shadow-black/40 transition-all flex flex-col"
-            >
-              <div className="aspect-[16/10] bg-gray-100 dark:bg-zinc-800 relative overflow-hidden">
-                {item.image_url ? (
-                  <img
-                    src={item.image_url}
-                    alt={item.title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                    loading="lazy"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-700">
-                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                    </svg>
-                  </div>
-                )}
+          {items.map((item) => {
+            const catKey = CAT_KEY_MAP[item.category ?? ""] ?? (item.category ?? "").toLowerCase();
+            return (
+              <div
+                key={item.id}
+                className="relative group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40 hover:shadow-lg dark:hover:shadow-black/40 transition-all flex flex-col"
+              >
+                <Link href={`/news/${item.slug}`} className="absolute inset-0 z-[1]" aria-label={item.title} />
+                <div className="aspect-[16/10] bg-gray-100 dark:bg-zinc-800 relative overflow-hidden">
+                  {item.image_url ? (
+                    <img
+                      src={item.image_url}
+                      alt={item.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      loading="lazy"
+                    />
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-700">
+                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                      </svg>
+                    </div>
+                  )}
+                </div>
+                <div className="p-4 flex-1 flex flex-col">
+                  <Link
+                    href={`/berita/${catKey}`}
+                    className={`relative z-[2] self-start text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+                      CATEGORY_BADGE[item.category ?? ""] ??
+                      "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300"
+                    }`}
+                  >
+                    {item.category}
+                  </Link>
+                  <h3 className="relative z-[1] text-sm font-semibold text-gray-900 dark:text-white mt-2.5 line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors leading-snug flex-1">
+                    {item.title}
+                  </h3>
+                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-2.5">
+                    {formatDate(item.published_at ?? item.created_at)}
+                  </p>
+                </div>
               </div>
-              <div className="p-4 flex-1 flex flex-col">
-                <span
-                  className={`self-start text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                    CATEGORY_BADGE[item.category ?? ""] ??
-                    "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300"
-                  }`}
-                >
-                  {item.category}
-                </span>
-                <h3 className="text-sm font-semibold text-gray-900 dark:text-white mt-2.5 line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors leading-snug flex-1">
-                  {item.title}
-                </h3>
-                <p className="text-xs text-gray-400 dark:text-gray-500 mt-2.5">
-                  {formatDate(item.published_at ?? item.created_at)}
-                </p>
-              </div>
-            </Link>
-          ))}
+            );
+          })}
         </div>
       </div>
     </section>

@@ -4,6 +4,7 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient }      from "@/lib/supabase/server";
+import { CATEGORIES }        from "@/app/berita/categories";
 import MarkdownContent from "@/components/ui/MarkdownContent";
 import BlockRenderer   from "@/components/ui/BlockRenderer";
 import ShareButtons    from "@/components/ui/ShareButtons";
@@ -58,6 +59,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
+const CAT_LABEL_TO_KEY: Record<string, string> = Object.fromEntries(
+  CATEGORIES.map((c) => [c.label, c.key]),
+);
+
 const CATEGORY_COLORS: Record<string, string> = {
   Politik:        "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
   Pemerintahan:   "bg-sky-50 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300",
@@ -104,7 +109,6 @@ export default async function NewsDetailPage({ params }: Props) {
 
   const related: RelatedItem[] = relatedRaw ?? [];
 
-  const colorClass  = CATEGORY_COLORS[article.category] ?? "bg-gray-100 text-gray-700";
   const blocks: Block[] = Array.isArray(article.blocks) && article.blocks.length > 0
     ? (article.blocks as Block[]) : [];
 
@@ -168,9 +172,19 @@ export default async function NewsDetailPage({ params }: Props) {
       <article>
         {/* Category + Date + Trending */}
         <div className="flex flex-wrap items-center gap-3 mb-4">
-          <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${colorClass}`}>
-            {article.category}
-          </span>
+          {((article.categories as string[] | null)?.length
+            ? (article.categories as string[])
+            : [article.category]
+          ).map((cat: string) => {
+            const catKey = CAT_LABEL_TO_KEY[cat] ?? cat.toLowerCase();
+            const cls = CATEGORY_COLORS[cat] ?? "bg-gray-100 text-gray-700";
+            return (
+              <Link key={cat} href={`/berita/${catKey}`}
+                className={`text-xs font-semibold px-2.5 py-1 rounded-full ${cls}`}>
+                {cat}
+              </Link>
+            );
+          })}
           {isTrending && (
             <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300 flex items-center gap-1">
               🔥 Trending

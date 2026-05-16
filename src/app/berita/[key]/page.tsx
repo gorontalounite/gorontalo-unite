@@ -8,9 +8,10 @@ import { CATEGORIES, CAT_COLOR, DEFAULT_COLOR } from "../categories";
 export const dynamic = "force-dynamic";
 
 const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]));
+const LABEL_TO_KEY: Record<string, string> = Object.fromEntries(CATEGORIES.map((c) => [c.label, c.key]));
 
 interface Article {
-  id: string; title: string; slug: string; category: string;
+  id: string; title: string; slug: string; category: string; categories: string[];
   excerpt: string | null; image_url: string | null;
   published_at: string | null; created_at: string;
   is_trending: boolean; view_count: number;
@@ -44,9 +45,9 @@ export default async function BeritaCategoryPage({ params }: Props) {
   const admin = createAdminClient();
   const { data: raw } = await admin
     .from("articles")
-    .select("id, title, slug, category, excerpt, image_url, published_at, created_at, is_trending, view_count")
+    .select("id, title, slug, category, categories, excerpt, image_url, published_at, created_at, is_trending, view_count")
     .eq("published", true)
-    .eq("category", cat.label)
+    .contains("categories", [cat.label])
     .order("published_at", { ascending: false, nullsFirst: false })
     .limit(60);
 
@@ -55,6 +56,7 @@ export default async function BeritaCategoryPage({ params }: Props) {
     title:        a.title as string,
     slug:         a.slug as string,
     category:     a.category as string,
+    categories:   (a.categories as string[] | null) ?? [a.category as string],
     excerpt:      a.excerpt as string | null,
     image_url:    a.image_url as string | null,
     published_at: a.published_at as string | null,
@@ -124,7 +126,8 @@ export default async function BeritaCategoryPage({ params }: Props) {
         <>
           {/* Featured hero */}
           {featured && (
-            <Link href={`/news/${featured.slug}`} className="group block mb-10">
+            <div className="relative group mb-10">
+              <Link href={`/news/${featured.slug}`} className="absolute inset-0 z-[1]" aria-label={featured.title} />
               <div className="relative rounded-2xl overflow-hidden aspect-[16/8] sm:aspect-[16/7] bg-gray-100 dark:bg-zinc-800">
                 {featured.image_url ? (
                   <Image
@@ -142,7 +145,14 @@ export default async function BeritaCategoryPage({ params }: Props) {
                       Trending
                     </span>
                   )}
-                  <h2 className="font-display text-2xl sm:text-3xl font-bold text-white leading-tight mb-2 line-clamp-2 group-hover:underline">
+                  <div className="relative z-[2] flex flex-wrap gap-1 mb-2">
+                    {featured.categories.map((c) => {
+                      const k = LABEL_TO_KEY[c] ?? c.toLowerCase();
+                      const bc = CAT_COLOR[c] ?? DEFAULT_COLOR;
+                      return <Link key={c} href={`/berita/${k}`} className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${bc.badge}`}>{c}</Link>;
+                    })}
+                  </div>
+                  <h2 className="relative z-[1] font-display text-2xl sm:text-3xl font-bold text-white leading-tight mb-2 line-clamp-2 group-hover:underline">
                     {featured.title}
                   </h2>
                   {featured.excerpt && (
@@ -151,7 +161,7 @@ export default async function BeritaCategoryPage({ params }: Props) {
                   <p className="text-xs text-white/60">{formatDate(featured.published_at ?? featured.created_at)}</p>
                 </div>
               </div>
-            </Link>
+            </div>
           )}
 
           {/* Divider */}
@@ -167,11 +177,11 @@ export default async function BeritaCategoryPage({ params }: Props) {
           {/* Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {rest.map((article) => (
-              <Link
+              <div
                 key={article.id}
-                href={`/news/${article.slug}`}
-                className="group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-lg transition-all duration-300"
+                className="relative group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-lg transition-all duration-300"
               >
+                <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
                 <div className="relative aspect-[16/10] bg-gray-100 dark:bg-zinc-800 overflow-hidden">
                   {article.image_url ? (
                     <Image src={article.image_url} alt={article.title} fill
@@ -186,10 +196,19 @@ export default async function BeritaCategoryPage({ params }: Props) {
                   )}
                 </div>
                 <div className="flex flex-col flex-1 p-4 sm:p-5 space-y-2.5">
-                  <span className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full w-fit ${colors.badge}`}>
-                    {cat.label}
-                  </span>
-                  <h3 className="font-display text-sm sm:text-base font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+                  <div className="relative z-[2] flex flex-wrap gap-1">
+                    {article.categories.map((c) => {
+                      const k = LABEL_TO_KEY[c] ?? c.toLowerCase();
+                      const bc = CAT_COLOR[c] ?? DEFAULT_COLOR;
+                      return (
+                        <Link key={c} href={`/berita/${k}`}
+                          className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${bc.badge}`}>
+                          {c}
+                        </Link>
+                      );
+                    })}
+                  </div>
+                  <h3 className="relative z-[1] font-display text-sm sm:text-base font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
                     {article.title}
                   </h3>
                   {article.excerpt && (
@@ -201,7 +220,7 @@ export default async function BeritaCategoryPage({ params }: Props) {
                     {formatDate(article.published_at ?? article.created_at)}
                   </p>
                 </div>
-              </Link>
+              </div>
             ))}
           </div>
 

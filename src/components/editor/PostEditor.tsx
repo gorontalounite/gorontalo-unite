@@ -457,7 +457,10 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
 
   const buildPayload = (publish: boolean) => {
     const finalSlug = meta.slug || slugify(meta.title);
-    const cat = postType === "portfolio" ? "Portfolio" : (meta.category || "Umum");
+    const cats = postType === "portfolio"
+      ? ["Portfolio"]
+      : (meta.categories?.length ? meta.categories : (meta.category ? [meta.category] : ["Umum"]));
+    const cat = cats[0];
     return {
       title:        meta.title,
       slug:         finalSlug,
@@ -466,6 +469,7 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
       blocks:       blocks,
       image_url:    meta.image_url || null,
       category:     cat,
+      categories:   cats,
       tags:         meta.tags?.length ? meta.tags : null,
       published:    publish,
       published_at: publish

@@ -51,22 +51,36 @@ function getDateBound(key: string): string | null {
 
 type Article = {
   id: string; title: string; slug: string; excerpt: string | null;
-  image_url: string | null; category: string; published_at: string | null;
-  created_at: string; source_url: string | null; is_trending: boolean;
+  image_url: string | null; category: string; categories: string[];
+  published_at: string | null; created_at: string; source_url: string | null; is_trending: boolean;
 };
 
-function CategoryBadge({ category }: { category: string }) {
-  const cls = (COLORS[category] ?? DEFAULT_COLOR).badge;
+const LABEL_TO_KEY: Record<string, string> = Object.fromEntries(
+  CATEGORIES.map((c) => [c.label, c.key]),
+);
+
+function CategoryBadges({ article }: { article: Article }) {
+  const cats = article.categories?.length ? article.categories : [article.category];
   return (
-    <span className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${cls}`}>
-      {category}
-    </span>
+    <div className="relative z-10 flex flex-wrap gap-1">
+      {cats.map((cat) => {
+        const cls = (COLORS[cat] ?? DEFAULT_COLOR).badge;
+        const key = LABEL_TO_KEY[cat] ?? cat.toLowerCase();
+        return (
+          <Link key={cat} href={`/berita/${key}`}
+            className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${cls}`}>
+            {cat}
+          </Link>
+        );
+      })}
+    </div>
   );
 }
 
 function FeaturedCard({ article }: { article: Article }) {
   return (
-    <Link href={`/news/${article.slug}`} className="group block h-full">
+    <div className="group relative h-full">
+      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
       <div className="relative aspect-[4/3] sm:aspect-[3/2] rounded-2xl overflow-hidden bg-gray-100 dark:bg-zinc-800 mb-5">
         {article.image_url ? (
           <Image
@@ -84,8 +98,8 @@ function FeaturedCard({ article }: { article: Article }) {
         )}
       </div>
       <div className="space-y-2.5">
-        <CategoryBadge category={article.category} />
-        <h2 className="font-display text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white leading-tight group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors line-clamp-3">
+        <CategoryBadges article={article} />
+        <h2 className="relative z-[1] font-display text-xl sm:text-2xl font-semibold text-gray-900 dark:text-white leading-tight group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors line-clamp-3">
           {article.title}
         </h2>
         {article.excerpt && (
@@ -103,40 +117,36 @@ function FeaturedCard({ article }: { article: Article }) {
           )}
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
 function SideCard({ article }: { article: Article }) {
   return (
-    <Link
-      href={`/news/${article.slug}`}
-      className="group flex gap-4 py-4 border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:opacity-80 transition-opacity"
-    >
+    <div className="relative group flex gap-4 py-4 border-b border-gray-100 dark:border-zinc-800 last:border-0">
+      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
       {article.image_url && (
         <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-zinc-800">
           <Image src={article.image_url} alt={article.title} fill className="object-cover" unoptimized />
         </div>
       )}
       <div className="flex-1 min-w-0 space-y-1.5">
-        <CategoryBadge category={article.category} />
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+        <CategoryBadges article={article} />
+        <h3 className="relative z-[1] text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
           {article.title}
         </h3>
         <p className="text-xs text-gray-400 dark:text-gray-500">
           {formatDate(article.published_at ?? article.created_at)}
         </p>
       </div>
-    </Link>
+    </div>
   );
 }
 
 function ArticleCard({ article }: { article: Article }) {
   return (
-    <Link
-      href={`/news/${article.slug}`}
-      className="group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/30 transition-all duration-300"
-    >
+    <div className="relative group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/30 transition-all duration-300">
+      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
       <div className="relative aspect-[16/10] bg-gray-100 dark:bg-zinc-800 overflow-hidden">
         {article.image_url ? (
           <Image
@@ -154,8 +164,8 @@ function ArticleCard({ article }: { article: Article }) {
         )}
       </div>
       <div className="flex flex-col flex-1 p-4 sm:p-5 space-y-3">
-        <CategoryBadge category={article.category} />
-        <h3 className="font-display text-sm sm:text-base font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+        <CategoryBadges article={article} />
+        <h3 className="relative z-[1] font-display text-sm sm:text-base font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
           {article.title}
         </h3>
         {article.excerpt && (
@@ -174,29 +184,27 @@ function ArticleCard({ article }: { article: Article }) {
           )}
         </div>
       </div>
-    </Link>
+    </div>
   );
 }
 
 function ListArticleCard({ article, index }: { article: Article; index: number }) {
   return (
-    <Link
-      href={`/news/${article.slug}`}
-      className="group flex gap-4 py-5 border-b border-gray-100 dark:border-zinc-800 last:border-0 hover:opacity-80 transition-opacity"
-    >
+    <div className="relative group flex gap-4 py-5 border-b border-gray-100 dark:border-zinc-800 last:border-0">
+      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
       <span className="font-display text-3xl font-bold text-gray-100 dark:text-zinc-800 w-10 flex-shrink-0 leading-none mt-1 select-none tabular-nums">
         {String(index + 1).padStart(2, "0")}
       </span>
       <div className="flex-1 min-w-0 space-y-1.5">
-        <CategoryBadge category={article.category} />
-        <h3 className="text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+        <CategoryBadges article={article} />
+        <h3 className="relative z-[1] text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
           {article.title}
         </h3>
         <p className="text-xs text-gray-400 dark:text-gray-500">
           {formatDate(article.published_at ?? article.created_at)}
         </p>
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -226,14 +234,18 @@ export default async function BeritaPage({ searchParams }: PageProps) {
   // ── Category counts (always, for filter pills) ──
   const { data: allCats } = await admin
     .from("articles")
-    .select("category")
+    .select("category, categories")
     .eq("published", true)
     .neq("category", "Portfolio");
 
   const catCounts: Record<string, number> = {};
   for (const row of allCats ?? []) {
-    const lbl = row.category as string;
-    catCounts[lbl] = (catCounts[lbl] ?? 0) + 1;
+    const cats: string[] = (row.categories as string[] | null)?.length
+      ? (row.categories as string[])
+      : [row.category as string];
+    for (const lbl of cats) {
+      if (lbl && lbl !== "Portfolio") catCounts[lbl] = (catCounts[lbl] ?? 0) + 1;
+    }
   }
 
   // ── Hero articles (latest 4, only on page 1 with no filters) ──
@@ -241,12 +253,12 @@ export default async function BeritaPage({ searchParams }: PageProps) {
   if (!hasFilters && page === 1) {
     const { data } = await admin
       .from("articles")
-      .select("id, title, slug, excerpt, image_url, category, published_at, created_at, source_url, is_trending")
+      .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending")
       .eq("published", true)
       .neq("category", "Portfolio")
       .order("published_at", { ascending: false })
       .limit(4);
-    heroArticles = (data ?? []) as Article[];
+    heroArticles = (data ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[];
   }
 
   // ── Build filtered grid query ──
@@ -257,12 +269,12 @@ export default async function BeritaPage({ searchParams }: PageProps) {
   // eslint-disable-next-line prefer-const
   let q = admin
     .from("articles")
-    .select("id, title, slug, excerpt, image_url, category, published_at, created_at, source_url, is_trending", { count: "exact" })
+    .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending", { count: "exact" })
     .eq("published", true)
     .neq("category", "Portfolio")
     .order("published_at", { ascending: false });
 
-  if (catKey && CAT_LABEL_MAP[catKey])    q = q.eq("category", CAT_LABEL_MAP[catKey]);
+  if (catKey && CAT_LABEL_MAP[catKey])    q = q.contains("categories", [CAT_LABEL_MAP[catKey]]);
   if (source === "pemprov")               q = q.ilike("source_url", "%gorontaloprov%");
   else if (source === "pemkab")           q = q.ilike("source_url", "%gorontalokab%");
   else if (source === "pemkot")           q = q.ilike("source_url", "%gorontalokota%");
@@ -274,7 +286,7 @@ export default async function BeritaPage({ searchParams }: PageProps) {
 
   q = q.range(offset + gridOffset, offset + gridOffset + LIMIT - 1);
   const { data: gridData, count } = await q;
-  const gridArticles = (gridData ?? []) as Article[];
+  const gridArticles = (gridData ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[];
   const totalCount   = count ?? 0;
   const totalPages   = Math.ceil(totalCount / LIMIT);
 
@@ -283,23 +295,22 @@ export default async function BeritaPage({ searchParams }: PageProps) {
   if (!hasFilters && page === 1) {
     const { data } = await admin
       .from("articles")
-      .select("id, title, slug, excerpt, image_url, category, published_at, created_at, source_url, is_trending")
+      .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending")
       .eq("published", true)
       .neq("category", "Portfolio")
       .eq("is_trending", true)
       .order("published_at", { ascending: false })
       .limit(5);
-    trendingArticles = (data ?? []) as Article[];
+    trendingArticles = (data ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[];
     if (trendingArticles.length < 3) {
-      // Fall back to view_count ordered articles
       const { data: fallback } = await admin
         .from("articles")
-        .select("id, title, slug, excerpt, image_url, category, published_at, created_at, source_url, is_trending")
+        .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending")
         .eq("published", true)
         .neq("category", "Portfolio")
         .order("view_count", { ascending: false })
         .limit(5);
-      trendingArticles = [...trendingArticles, ...(fallback ?? []) as Article[]].slice(0, 5);
+      trendingArticles = [...trendingArticles, ...(fallback ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[]].slice(0, 5);
     }
   }
 
@@ -444,9 +455,10 @@ export default async function BeritaPage({ searchParams }: PageProps) {
                         <Image src={a.image_url} alt={a.title} fill className="object-cover" unoptimized />
                       </div>
                     )}
-                    <div className="flex-1 min-w-0 space-y-1.5">
-                      <CategoryBadge category={a.category} />
-                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-3 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+                    <div className="relative flex-1 min-w-0 space-y-1.5">
+                      <Link href={`/news/${a.slug}`} className="absolute inset-0 z-[1]" aria-label={a.title} />
+                      <CategoryBadges article={a} />
+                      <h3 className="relative z-[1] text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-3 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
                         {a.title}
                       </h3>
                       <p className="text-xs text-gray-400 dark:text-gray-500">

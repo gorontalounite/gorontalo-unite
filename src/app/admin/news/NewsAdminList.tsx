@@ -15,11 +15,17 @@ interface NewsItem {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  Wisata: "bg-yellow-50 text-yellow-700",    Budaya: "bg-purple-50 text-purple-700",
-  Kuliner: "bg-orange-50 text-orange-700",   Pendidikan: "bg-blue-50 text-blue-700",
-  Ekonomi: "bg-amber-50 text-amber-700",     Kesehatan: "bg-red-50 text-red-700",
-  Olahraga: "bg-green-50 text-green-700",    Teknologi: "bg-cyan-50 text-cyan-700",
-  "Good News": "bg-emerald-50 text-emerald-700", Umum: "bg-gray-100 text-gray-500",
+  Politik:"bg-blue-50 text-blue-700", Pemerintahan:"bg-sky-50 text-sky-700",
+  Wisata:"bg-yellow-50 text-yellow-700", Budaya:"bg-purple-50 text-purple-700",
+  Ekonomi:"bg-emerald-50 text-emerald-700", Bisnis:"bg-green-50 text-green-700",
+  Pendidikan:"bg-teal-50 text-teal-700", Sosial:"bg-orange-50 text-orange-700",
+  Kemasyarakatan:"bg-amber-50 text-amber-700", Kesehatan:"bg-red-50 text-red-700",
+  Pertanian:"bg-lime-50 text-lime-700", Perikanan:"bg-cyan-50 text-cyan-700",
+  Teknologi:"bg-violet-50 text-violet-700", Digital:"bg-indigo-50 text-indigo-700",
+  Infrastruktur:"bg-gray-100 text-gray-600", Pembangunan:"bg-stone-50 text-stone-700",
+  Hukum:"bg-rose-50 text-rose-700", Keamanan:"bg-pink-50 text-pink-700",
+  Agama:"bg-amber-50 text-amber-800", Lingkungan:"bg-green-50 text-green-800",
+  Alam:"bg-emerald-50 text-emerald-800", Olahraga:"bg-indigo-50 text-indigo-700",
 };
 
 const PAGE_SIZES = [10, 25, 50];
