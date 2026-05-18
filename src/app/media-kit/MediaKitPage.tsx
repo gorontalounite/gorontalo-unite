@@ -3,23 +3,7 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import GrowthCharts from "./GrowthCharts";
 import { TOP_POSTS_DATA, TOP_POSTS_MONTHS } from "./topPostsData";
-
-// ── Period selector ───────────────────────────────────────────
-const PERIODS = ["7 hari", "30 hari", "3 bulan", "6 bulan", "1 tahun"] as const;
-type Period = typeof PERIODS[number];
-
-interface PData {
-  label: string;
-  reach: number; views: number; interactions: number;
-  likes: number; comments: number; saves: number; shares: number; reposts: number;
-  followsGained: number; followsLost: number; netGrowth: number;
-  reachGrowthPct: number; reachSub: string;
-  followerTrend: number[]; followerTrendLabels: string[];
-  reachTrend: number[]; viewsTrend: number[]; engageTrend: number[];
-  trendLabels: string[];
-}
 
 // ── Static account data ───────────────────────────────────────
 const ACCOUNT = {
@@ -34,80 +18,6 @@ const METRICS = {
   followers:    63841,
   monthlyViews: 441341,
   monthlyReach: 98587,
-};
-
-// ── Per-period insight data ───────────────────────────────────
-const PERIOD_DATA: Record<Period, PData> = {
-  "7 hari": {
-    label: "25 Apr – 1 Mei 2026",
-    reach: 18671, views: 86302, interactions: 1868,
-    likes: 1218, comments: 19, saves: 49, shares: 97, reposts: 7,
-    followsGained: 103, followsLost: 94, netGrowth: 9,
-    reachGrowthPct: -23.8, reachSub: "-23.8% vs 7 hari lalu",
-    followerTrend:       [63829, 63830, 63833, 63833, 63834, 63841, 63843],
-    followerTrendLabels: ["25/4","26/4","27/4","28/4","29/4","30/4","1/5"],
-    reachTrend:  [4180,  2444, 1655,  872, 3067, 2096, 4357],
-    viewsTrend:  [22273,15646, 6621, 4024,10822, 7060,19856],
-    engageTrend: [440,   428,  143,   76,  213,  135,  433],
-    trendLabels: ["25/4","26/4","27/4","28/4","29/4","30/4","1/5"],
-  },
-  "30 hari": {
-    label: "April 2026",
-    reach: 98587, views: 441341, interactions: 7567,
-    likes: 4920, comments: 78, saves: 195, shares: 390, reposts: 29,
-    followsGained: 484, followsLost: 443, netGrowth: 41,
-    reachGrowthPct: -75.8, reachSub: "pasca viral bulan Maret",
-    followerTrend: [
-      63800,63802,63803,63804,63806,63808,63809,
-      63810,63811,63812,63813,63815,63817,63819,
-      63820,63820,63822,63823,63823,63824,63824,
-      63825,63826,63829,63829,63830,63833,63833,63834,63841,
-    ],
-    followerTrendLabels: [],
-    reachTrend:  [32466, 20749, 13604, 31768],
-    viewsTrend:  [136918, 83020, 75759,145644],
-    engageTrend: [2110, 1446, 1066, 2945],
-    trendLabels: ["Mg 1","Mg 2","Mg 3","Mg 4"],
-  },
-  "3 bulan": {
-    label: "Feb – Apr 2026",
-    reach: 721644, views: 2941341, interactions: 66600,
-    likes: 43350, comments: 666, saves: 1732, shares: 3463, reposts: 266,
-    followsGained: 1970, followsLost: 1806, netGrowth: 164,
-    reachGrowthPct: 29.3, reachSub: "+29.3% vs 3 bln lalu",
-    followerTrend:       [63722, 63800, 63841],
-    followerTrendLabels: ["Feb","Mar","Apr"],
-    reachTrend:  [215000, 408057,  98587],
-    viewsTrend:  [1150000,1350000, 441341],
-    engageTrend: [33033,  26000,   7567],
-    trendLabels: ["Feb","Mar","Apr"],
-  },
-  "6 bulan": {
-    label: "Nov 2025 – Apr 2026",
-    reach: 1279644, views: 4741341, interactions: 94600,
-    likes: 61580, comments: 946, saves: 2459, shares: 4919, reposts: 378,
-    followsGained: 3218, followsLost: 2900, netGrowth: 318,
-    reachGrowthPct: 0.5, reachSub: "+0.5% vs 6 bln lalu",
-    followerTrend:       [63568, 63630, 63677, 63722, 63800, 63841],
-    followerTrendLabels: ["Nov","Des","Jan","Feb","Mar","Apr"],
-    reachTrend:  [118000, 275000, 165000, 215000, 408057,  98587],
-    viewsTrend:  [550000, 880000, 370000,1150000,1350000, 441341],
-    engageTrend: [5000,   15000,   8000,  33033,  26000,   7567],
-    trendLabels: ["Nov","Des","Jan","Feb","Mar","Apr"],
-  },
-  "1 tahun": {
-    label: "Mei 2025 – Apr 2026",
-    reach: 2552644, views: 6173341, interactions: 112200,
-    likes: 73074, comments: 1122, saves: 2917, shares: 5835, reposts: 449,
-    followsGained: 11700, followsLost: 10264, netGrowth: 1436,
-    reachGrowthPct: 0, reachSub: "Mei 2025 – Apr 2026",
-    followerTrend:       [62622,62839,63079,63358,63433,63523,63568,63630,63677,63722,63800,63841],
-    followerTrendLabels: ["Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des","Jan","Feb","Mar","Apr"],
-    reachTrend:  [164000,205000,204000,117000,158000,425000,118000,275000,165000,215000,408057,98587],
-    viewsTrend:  [10000,12000,9000,122000,520000,790000,550000,880000,370000,1150000,1350000,441341],
-    engageTrend: [500,1000,800,300,3000,12000,5000,15000,8000,33033,26000,7567],
-    trendLabels: ["Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des","Jan","Feb","Mar","Apr"],
-  },
 };
 
 // ── Content type data ─────────────────────────────────────────
@@ -240,20 +150,13 @@ function Bar({ pct, color, height = 8 }: { pct: number; color: string; height?: 
 
 // ═══════════════════════════════════════════════════════════════
 export default function MediaKitPage() {
-  const [period, setPeriod]               = useState<Period>("30 hari");
-  const [isClient, setIsClient]           = useState(false);
   const [showAllCities, setShowAllCities] = useState(false);
-  const [topMonth, setTopMonth]           = useState(TOP_POSTS_MONTHS[0]);
+  const [topMonth, setTopMonth]           = useState(TOP_POSTS_MONTHS[TOP_POSTS_MONTHS.length - 1]);
   const [topSort, setTopSort]             = useState<"byViews" | "byReach">("byViews");
-  const [viewMode, setViewMode]           = useState<"summary" | "monthly">("summary");
   const [selYear, setSelYear]             = useState("2026");
   const [selMonth, setSelMonth]           = useState("04");
 
-  const d    = PERIOD_DATA[period];
-  const er   = ((d.interactions / d.reach) * 100).toFixed(1);
-  const erApril = ((PERIOD_DATA["30 hari"].interactions / PERIOD_DATA["30 hari"].reach) * 100).toFixed(1);
-
-  useEffect(() => { setIsClient(true); }, []);
+  useEffect(() => {}, []);
 
   const visibleCities = showAllCities ? TOP_CITIES : TOP_CITIES.slice(0, 5);
 
@@ -332,206 +235,80 @@ export default function MediaKitPage() {
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Insight Akun</h2>
           </div>
 
-          {/* ── View mode toggle ── */}
-          <div className="flex gap-2 mb-6">
-            {(["summary","monthly"] as const).map((mode) => (
+          {/* ── Year tabs ── */}
+          <div className="flex gap-2 mb-3">
+            {(["2024","2025","2026"] as const).map((y) => (
               <button
-                key={mode}
+                key={y}
                 type="button"
-                onClick={() => setViewMode(mode)}
-                style={viewMode === mode
+                onClick={() => {
+                  setSelYear(y);
+                  setSelMonth(YEAR_MONTHS[y][YEAR_MONTHS[y].length - 1]);
+                }}
+                style={selYear === y
                   ? { backgroundColor:"rgba(245,196,0,0.12)", borderColor:"#F5C400", color:"#F5C400" }
                   : {}}
-                className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all cursor-pointer ${
-                  viewMode !== mode
+                className={`text-sm font-bold px-5 py-2 rounded-xl border transition-all cursor-pointer ${
+                  selYear !== y
                     ? "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600"
                     : "border-transparent"
                 }`}
-              >
-                {mode === "summary" ? "Ringkasan" : "Per Bulan"}
-              </button>
+              >{y}</button>
             ))}
           </div>
 
-          {/* ── RINGKASAN mode ── */}
-          {viewMode === "summary" && (<>
-            {/* Period filter */}
-            <div className="flex gap-2 mb-8" style={{ overflowX:"auto", WebkitOverflowScrolling:"touch", paddingBottom:4 }}>
-              {PERIODS.map((p) => (
-                <button
-                  key={p}
-                  type="button"
-                  onClick={() => setPeriod(p)}
-                  style={period === p
-                    ? { backgroundColor:"rgba(245,196,0,0.12)", borderColor:"#F5C400", color:"#F5C400", whiteSpace:"nowrap" }
-                    : { whiteSpace:"nowrap" }
-                  }
-                  className={`flex-shrink-0 text-xs font-semibold px-4 py-2 rounded-xl border transition-all cursor-pointer ${
-                    period === p
-                      ? "border-transparent"
-                      : "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600 bg-transparent"
-                  }`}
-                >
-                  {p}
-                </button>
-              ))}
-            </div>
+          {/* ── Month chips ── */}
+          <div className="flex gap-2 flex-wrap mb-8">
+            {YEAR_MONTHS[selYear].map((m) => (
+              <button
+                key={m}
+                type="button"
+                onClick={() => setSelMonth(m)}
+                style={selMonth === m
+                  ? { backgroundColor:"rgba(245,196,0,0.12)", borderColor:"#F5C400", color:"#F5C400" }
+                  : {}}
+                className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                  selMonth !== m
+                    ? "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600"
+                    : "border-transparent"
+                }`}
+              >{MONTH_SHORT[parseInt(m) - 1]}</button>
+            ))}
+          </div>
 
-            {/* Metric grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-              {[
-                { label: "Accounts Reached",  value: fmtNum(d.reach),        sub: d.reachSub,                              green: d.reachGrowthPct > 0 },
-                { label: "Total Views",       value: fmtNum(d.views),        sub: "Reels 45.7% · Stories 38.6%",           green: false },
-                { label: "Total Interactions",value: fmtNum(d.interactions), sub: "Likes · Saves · Shares",                green: false },
-                { label: "Engagement Rate",   value: `${er}%`,               sub: "Interactions ÷ Reach",                  green: false },
-                { label: "Followers Growth",  value: `${d.netGrowth >= 0 ? "+" : ""}${d.netGrowth.toLocaleString("id-ID")}`,
-                  sub: `${d.followsGained.toLocaleString("id-ID")} masuk · ${d.followsLost.toLocaleString("id-ID")} keluar`,
-                  green: d.netGrowth >= 0 },
-                { label: "Total Followers",   value: fmtNum(METRICS.followers), sub: d.label,                              green: false },
-              ].map((m) => (
-                <div key={m.label} className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-4">
-                  <p className="text-xl font-bold text-gray-900 dark:text-white">{m.value}</p>
-                  <p className={`text-xs mt-0.5 leading-snug ${m.green ? "text-green-500 font-semibold" : "text-gray-400 dark:text-zinc-500"}`}>
-                    {m.sub}
-                  </p>
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-600 mt-2">{m.label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Interaction bars */}
-            <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-5 mb-6">
-              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-5">Breakdown Interaksi</p>
-              <div className="space-y-3.5">
-                {[
-                  { label: "Likes",    count: d.likes,    color: "#f87171" },
-                  { label: "Shares",   count: d.shares,   color: "#60a5fa" },
-                  { label: "Saves",    count: d.saves,    color: "#4ade80" },
-                  { label: "Comments", count: d.comments, color: "#c084fc" },
-                  { label: "Reposts",  count: d.reposts,  color: "#fb923c" },
-                ].map((item) => (
-                  <div key={item.label} className="flex items-center gap-3">
-                    <span className="text-xs text-gray-500 dark:text-zinc-400 w-16 flex-shrink-0">{item.label}</span>
-                    <div className="flex-1">
-                      <Bar pct={parseFloat((item.count / Math.max(d.likes, 1) * 100).toFixed(1))} color={item.color} height={8} />
-                    </div>
-                    <span className="text-xs font-semibold text-gray-700 dark:text-zinc-300 w-14 text-right tabular-nums">
-                      {item.count.toLocaleString("id-ID")}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Growth charts */}
-            {isClient ? (
-              <GrowthCharts
-                followerDaily={d.followerTrend}
-                reachWeekly={d.reachTrend}
-                viewsWeekly={d.viewsTrend}
-                engageWeekly={d.engageTrend}
-                netGrowth={d.netGrowth}
-                reachGrowthPct={d.reachGrowthPct}
-                monthlyViews={d.views}
-                er={er}
-                period={d.label}
-                followerLabels={d.followerTrendLabels.length > 0 ? d.followerTrendLabels : undefined}
-                trendLabels={d.trendLabels}
-              />
-            ) : (
-              <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-5">
-                <div className="h-4 w-48 rounded bg-gray-200 dark:bg-zinc-800 animate-pulse mb-5" />
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  {[0,1,2,3].map((i) => (
-                    <div key={i}>
-                      <div className="h-3 w-28 rounded bg-gray-200 dark:bg-zinc-800 animate-pulse mb-2" />
-                      <div className="h-[100px] w-full rounded-lg bg-gray-200 dark:bg-zinc-800 animate-pulse" />
+          {/* ── Monthly metric cards ── */}
+          {(() => {
+            const md = MONTHLY_DATA[`${selYear}-${selMonth}`];
+            if (!md) return null;
+            const erM = md.reach > 0 ? ((md.interactions / md.reach) * 100).toFixed(1) : null;
+            const cards = [
+              ...(md.views > 0 ? [{ label:"Total Views",        value:fmtNum(md.views),                         sub:"Semua format konten",     green:false }] : []),
+              { label:"Akun Terjangkau",   value:fmtNum(md.reach),                         sub:"Unique accounts reached", green:false },
+              { label:"Total Interaksi",   value:fmtNum(md.interactions),                  sub:"Likes · Shares · Saves",  green:false },
+              ...(erM ? [{ label:"Engagement Rate", value:`${erM}%`,                       sub:"Interaksi ÷ Jangkauan",   green:false }] : []),
+              { label:"Followers Baru",    value:`+${md.follows.toLocaleString("id-ID")}`, sub:"Follows diperoleh",       green:true  },
+              ...(md.posts != null ? [{ label:"Konten Diterbitkan", value:String(md.posts), sub:"Post dipublish",         green:false }] : []),
+            ];
+            return (
+              <>
+                <p className="text-xs font-semibold text-gray-500 dark:text-zinc-400 mb-4">{md.label}</p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                  {cards.map((card) => (
+                    <div key={card.label} className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-4">
+                      <p className="text-xl font-bold text-gray-900 dark:text-white">{card.value}</p>
+                      <p className={`text-xs mt-0.5 leading-snug ${card.green ? "text-green-500 font-semibold" : "text-gray-400 dark:text-zinc-500"}`}>
+                        {card.sub}
+                      </p>
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-600 mt-2">{card.label}</p>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-          </>)}
-
-          {/* ── PER BULAN mode ── */}
-          {viewMode === "monthly" && (
-            <div>
-              {/* Year tabs */}
-              <div className="flex gap-2 mb-4">
-                {(["2024","2025","2026"] as const).map((y) => (
-                  <button
-                    key={y}
-                    type="button"
-                    onClick={() => {
-                      setSelYear(y);
-                      setSelMonth(YEAR_MONTHS[y][YEAR_MONTHS[y].length - 1]);
-                    }}
-                    style={selYear === y
-                      ? { backgroundColor:"rgba(245,196,0,0.12)", borderColor:"#F5C400", color:"#F5C400" }
-                      : {}}
-                    className={`text-sm font-bold px-5 py-2 rounded-xl border transition-all cursor-pointer ${
-                      selYear !== y
-                        ? "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600"
-                        : "border-transparent"
-                    }`}
-                  >{y}</button>
-                ))}
-              </div>
-
-              {/* Month chips */}
-              <div className="flex gap-2 flex-wrap mb-6">
-                {YEAR_MONTHS[selYear].map((m) => (
-                  <button
-                    key={m}
-                    type="button"
-                    onClick={() => setSelMonth(m)}
-                    style={selMonth === m
-                      ? { backgroundColor:"rgba(245,196,0,0.12)", borderColor:"#F5C400", color:"#F5C400" }
-                      : {}}
-                    className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
-                      selMonth !== m
-                        ? "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600"
-                        : "border-transparent"
-                    }`}
-                  >{MONTH_SHORT[parseInt(m) - 1]}</button>
-                ))}
-              </div>
-
-              {/* Monthly metrics */}
-              {(() => {
-                const md = MONTHLY_DATA[`${selYear}-${selMonth}`];
-                if (!md) return null;
-                const erM = md.reach > 0 ? ((md.interactions / md.reach) * 100).toFixed(1) : null;
-                const cards = [
-                  ...(md.views > 0 ? [{ label:"Total Views",         value:fmtNum(md.views),                          sub:"Semua format konten",      green:false }] : []),
-                  { label:"Akun Terjangkau",    value:fmtNum(md.reach),                          sub:"Unique accounts reached",  green:false },
-                  { label:"Total Interaksi",    value:fmtNum(md.interactions),                   sub:"Likes · Shares · Saves",   green:false },
-                  ...(erM ? [{ label:"Engagement Rate",  value:`${erM}%`,                        sub:"Interaksi ÷ Jangkauan",    green:false }] : []),
-                  { label:"Followers Baru",     value:`+${md.follows.toLocaleString("id-ID")}`,  sub:"Follows diperoleh",        green:true  },
-                  ...(md.posts != null ? [{ label:"Konten Diterbitkan", value:String(md.posts),  sub:"Post dipublish",           green:false }] : []),
-                ];
-                return (
-                  <>
-                    <p className="text-sm font-bold text-gray-900 dark:text-white mb-4">{md.label}</p>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
-                      {cards.map((card) => (
-                        <div key={card.label} className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-4">
-                          <p className="text-xl font-bold text-gray-900 dark:text-white">{card.value}</p>
-                          <p className={`text-xs mt-0.5 leading-snug ${card.green ? "text-green-500 font-semibold" : "text-gray-400 dark:text-zinc-500"}`}>
-                            {card.sub}
-                          </p>
-                          <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-600 mt-2">{card.label}</p>
-                        </div>
-                      ))}
-                    </div>
-                    <p className="text-[10px] text-zinc-400 mt-2">
-                      ★ Jan 2024–Apr 2025: akumulasi lifetime per konten yang diterbitkan. Mei 2025–Apr 2026: insight akun bulanan.
-                    </p>
-                  </>
-                );
-              })()}
-            </div>
-          )}
+                <p className="text-[10px] text-zinc-400 mt-2">
+                  ★ Jan 2024–Apr 2025: akumulasi lifetime per konten. Mei 2025–Apr 2026: insight akun bulanan.
+                </p>
+              </>
+            );
+          })()}
         </div>
       </section>
 
@@ -868,7 +645,7 @@ export default function MediaKitPage() {
           <div className="grid sm:grid-cols-3 gap-4 mb-6">
             {[
               { icon: "📍", title: "Hyperlocal Reach",    desc: "27.1% audience dari Kota Gorontalo. Menjangkau komunitas lokal yang paling relevan untuk brand Anda." },
-              { icon: "🎯", title: `${erApril}% Engagement`, desc: "Jauh di atas rata-rata industri 3–6%. Audience aktif dan responsif terhadap konten." },
+              { icon: "🎯", title: "7.7% Engagement",          desc: "Jauh di atas rata-rata industri 3–6%. Audience aktif dan responsif terhadap konten." },
               { icon: "📈", title: "6.2M Views/Tahun",    desc: "Total views organik dalam 12 bulan terakhir (Mei 2025 – Apr 2026). Jangkauan terbukti konsisten." },
             ].map((item) => (
               <div key={item.title} className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5">
