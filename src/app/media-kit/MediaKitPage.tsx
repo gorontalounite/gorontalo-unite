@@ -168,37 +168,6 @@ const AUDIENCE_INTERESTS = [
   "Hiburan",
 ];
 
-// ── Rate packages (manual price, no auto-engine) ──────────────
-const RATE_PACKAGES = [
-  {
-    name: "IG Story",
-    reach: "15K–25K reach",
-    price: "Rp 250rb",
-    items: ["1× Story aktif 24 jam","Swipe-up / link sticker","Story Highlight optional"],
-    borderColor: "border-zinc-700", accent: "text-zinc-300", featured: false,
-  },
-  {
-    name: "Feed Post",
-    reach: "30K–45K reach",
-    price: "Rp 500rb",
-    items: ["1× Feed permanen","Caption endorse","Mention & tag brand"],
-    borderColor: "border-yellow-500/50", accent: "text-yellow-400", featured: true,
-  },
-  {
-    name: "Reel Endorse",
-    reach: "80K–200K views",
-    price: "Rp 1,2jt",
-    items: ["1× Reel kreatif","Brief / script diterima","Potensi viral reach"],
-    borderColor: "border-blue-500/50", accent: "text-blue-400", featured: false,
-  },
-  {
-    name: "Full Campaign",
-    reach: "500K+ total reach",
-    price: "Rp 2,5jt",
-    items: ["1× Reel + 2× Feed Post","3× Story + Highlight","Laporan performa akhir"],
-    borderColor: "border-green-500/50", accent: "text-green-400", featured: false,
-  },
-];
 
 // ── Helpers ───────────────────────────────────────────────────
 function fmtNum(n: number): string {
@@ -730,45 +699,7 @@ export default function MediaKitPage() {
         </div>
       </section>
 
-      {/* ━━ 5. RATE CARD ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
-      <section style={{ backgroundColor: "#09090b" }} className="text-white px-4 sm:px-6 py-14">
-        <div className="max-w-2xl mx-auto">
-          <p className="text-xs font-semibold uppercase tracking-widest text-zinc-500 mb-2">Rate Card Endorse</p>
-          <h2 className="text-2xl font-bold mb-2">Paket Endorsement</h2>
-          <p className="text-sm text-zinc-400 mb-8 max-w-md">
-            Harga menyesuaikan performa akun. Hubungi kami untuk negosiasi dan brief lebih lanjut.
-          </p>
-
-          <div className="grid sm:grid-cols-2 gap-4">
-            {RATE_PACKAGES.map((pkg) => (
-              <div key={pkg.name}
-                className={`rounded-2xl border ${pkg.borderColor} p-5 ${pkg.featured ? "ring-1 ring-yellow-400/30" : ""}`}
-                style={{ backgroundColor: pkg.featured ? "#1c1700" : "#111113" }}>
-                {pkg.featured && (
-                  <span className="inline-block text-[10px] font-bold uppercase tracking-widest text-black bg-yellow-400 px-2.5 py-0.5 rounded-full mb-3">
-                    Most Popular
-                  </span>
-                )}
-                <p className={`text-sm font-bold mb-0.5 ${pkg.accent}`}>{pkg.name}</p>
-                <p className="text-xs text-zinc-500 mb-4">{pkg.reach}</p>
-                <p className="text-2xl font-bold text-white mb-5">{pkg.price}</p>
-                <ul className="space-y-2">
-                  {pkg.items.map((item) => (
-                    <li key={item} className="flex items-center gap-2 text-xs text-zinc-400">
-                      <svg className="w-3 h-3 flex-shrink-0 text-zinc-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                      </svg>
-                      {item}
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* ━━ 6. TRUST SECTION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
+      {/* ━━ 5. TRUST SECTION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */}
       <section className="bg-gray-50 dark:bg-zinc-950 px-4 sm:px-6 py-12">
         <div className="max-w-2xl mx-auto">
           <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-1">Why Us</p>
