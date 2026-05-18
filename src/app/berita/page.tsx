@@ -176,7 +176,7 @@ function CatFeaturedCard({ article }: { article: Article }) {
           {article.title}
         </h3>
         {article.excerpt && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3 sm:line-clamp-5">
             {article.excerpt}
           </p>
         )}
