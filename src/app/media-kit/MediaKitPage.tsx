@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import GrowthCharts from "./GrowthCharts";
+import { TOP_POSTS_DATA, TOP_POSTS_MONTHS } from "./topPostsData";
 
 // ── Period selector ───────────────────────────────────────────
 const PERIODS = ["7 hari", "30 hari", "3 bulan", "6 bulan", "1 tahun"] as const;
@@ -115,27 +117,6 @@ const CONTENT_TYPES = [
   { label: "Feed Post", viewsPct: 15.6, interactionsPct: 18.2, color: "#60a5fa" },
 ];
 
-// ── Top posts (April 2026) — ganti url dengan URL asli ───────
-const TOP_POSTS = [
-  {
-    title: "Viral Info Terkini Gorontalo",
-    type: "Reel", date: "24 Apr 2026",
-    views: "30K", reach: "7.7K", likes: "936", shares: "42", saves: "21",
-    url: "https://www.instagram.com/gorontalo.unite/",
-  },
-  {
-    title: "Update Berita Lokal Gorontalo",
-    type: "Reel", date: "23 Apr 2026",
-    views: "38K", reach: "7.5K", likes: "458", shares: "36", saves: "18",
-    url: "https://www.instagram.com/gorontalo.unite/",
-  },
-  {
-    title: "Info Warga Gorontalo",
-    type: "Reel", date: "7 Apr 2026",
-    views: "31K", reach: "3.6K", likes: "122", shares: "14", saves: "8",
-    url: "https://www.instagram.com/gorontalo.unite/",
-  },
-];
 
 // ── Audience data ─────────────────────────────────────────────
 const AGE_RANGES = [
@@ -237,9 +218,11 @@ function Bar({ pct, color, height = 8 }: { pct: number; color: string; height?: 
 
 // ═══════════════════════════════════════════════════════════════
 export default function MediaKitPage() {
-  const [period, setPeriod]           = useState<Period>("30 hari");
-  const [isClient, setIsClient]       = useState(false);
+  const [period, setPeriod]               = useState<Period>("30 hari");
+  const [isClient, setIsClient]           = useState(false);
   const [showAllCities, setShowAllCities] = useState(false);
+  const [topMonth, setTopMonth]           = useState(TOP_POSTS_MONTHS[0]);
+  const [topSort, setTopSort]             = useState<"byViews" | "byReach">("byViews");
 
   const d    = PERIOD_DATA[period];
   const er   = ((d.interactions / d.reach) * 100).toFixed(1);
@@ -264,8 +247,16 @@ export default function MediaKitPage() {
           </div>
 
           <div className="flex items-start gap-4 mb-8">
-            <div className="w-16 h-16 rounded-2xl flex items-center justify-center flex-shrink-0 text-lg font-bold"
-              style={{ backgroundColor: "#F5C400", color: "#000" }}>GU</div>
+            <div className="w-16 h-16 rounded-2xl overflow-hidden flex-shrink-0 bg-black">
+              <Image
+                src="/logo-gu.png"
+                alt="Gorontalo Unite"
+                width={64}
+                height={64}
+                className="w-full h-full object-cover"
+                priority
+              />
+            </div>
             <div>
               <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{ACCOUNT.handle}</h1>
               <p className="text-sm text-zinc-400 mt-0.5">{ACCOUNT.niche}</p>
@@ -455,35 +446,68 @@ export default function MediaKitPage() {
 
           {/* ── Top posts — bento linktree style ── */}
           <div className="mb-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-4">
-              Top Konten {PERIOD_DATA["30 hari"].label}
-            </p>
-            <div className="space-y-3">
-              {TOP_POSTS.map((post, i) => (
+            {/* Header + filters */}
+            <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Top 10 Konten</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                {/* Sort toggle */}
+                <div className="flex rounded-xl overflow-hidden border border-gray-200 dark:border-zinc-700 text-xs font-semibold">
+                  {(["byViews", "byReach"] as const).map((s) => (
+                    <button
+                      key={s}
+                      type="button"
+                      onClick={() => setTopSort(s)}
+                      style={topSort === s ? { backgroundColor: "#F5C400", color: "#000" } : {}}
+                      className={`px-3 py-1.5 transition-colors ${topSort !== s ? "text-zinc-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800" : ""}`}
+                    >
+                      {s === "byViews" ? "Views" : "Reach"}
+                    </button>
+                  ))}
+                </div>
+                {/* Month picker */}
+                <select
+                  value={topMonth}
+                  onChange={(e) => setTopMonth(e.target.value)}
+                  className="text-xs font-semibold px-3 py-1.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 cursor-pointer"
+                >
+                  {TOP_POSTS_MONTHS.map((m) => (
+                    <option key={m} value={m}>{TOP_POSTS_DATA[m]?.label ?? m}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* Post list */}
+            <div className="space-y-2.5">
+              {(TOP_POSTS_DATA[topMonth]?.[topSort] ?? []).map((post, i) => (
                 <a
                   key={i}
                   href={post.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center gap-4 rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-4 hover:border-gray-300 dark:hover:border-zinc-600 transition-all group"
+                  className="flex items-center gap-3 rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 px-4 py-3.5 hover:border-gray-300 dark:hover:border-zinc-600 transition-all group"
                 >
                   {/* Rank badge */}
                   <div
-                    className="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0 text-sm font-bold"
-                    style={{ backgroundColor: i === 0 ? "#F5C400" : "#F5C40020", color: i === 0 ? "#000" : "#ca8a04" }}
+                    className="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-xs font-bold"
+                    style={{ backgroundColor: i === 0 ? "#F5C400" : "#F5C40018", color: i === 0 ? "#000" : "#ca8a04" }}
                   >
                     #{i + 1}
                   </div>
 
                   {/* Title & meta */}
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug truncate group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
+                    <p className="text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-1 group-hover:text-yellow-600 dark:group-hover:text-yellow-400 transition-colors">
                       {post.title}
                     </p>
-                    <div className="flex items-center gap-2 mt-1">
+                    <div className="flex items-center gap-2 mt-0.5">
                       <span
                         className="text-[10px] font-bold px-1.5 py-0.5 rounded"
-                        style={{ backgroundColor: "#F5C40020", color: "#ca8a04" }}
+                        style={
+                          post.type === "Reel"     ? { backgroundColor: "#F5C40020", color: "#ca8a04" } :
+                          post.type === "Carousel" ? { backgroundColor: "#60a5fa20", color: "#2563eb" } :
+                                                     { backgroundColor: "#4ade8020", color: "#16a34a" }
+                        }
                       >
                         {post.type}
                       </span>
@@ -491,22 +515,29 @@ export default function MediaKitPage() {
                     </div>
                   </div>
 
-                  {/* Stats pills */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  {/* Stats */}
+                  <div className="flex items-center gap-3 flex-shrink-0">
                     <div className="text-right hidden sm:block">
-                      <p className="text-xs font-bold text-gray-800 dark:text-gray-200 tabular-nums">{post.views}</p>
+                      <p className="text-xs font-bold text-gray-800 dark:text-gray-200 tabular-nums">
+                        {post.views >= 1000 ? `${(post.views/1000).toFixed(1)}K` : post.views}
+                      </p>
                       <p className="text-[10px] text-zinc-400">views</p>
                     </div>
-                    <div className="text-right hidden sm:block">
-                      <p className="text-xs font-bold text-gray-800 dark:text-gray-200 tabular-nums">{post.reach}</p>
-                      <p className="text-[10px] text-zinc-400">reach</p>
-                    </div>
+                    {post.reach > 0 && (
+                      <div className="text-right hidden sm:block">
+                        <p className="text-xs font-bold text-gray-800 dark:text-gray-200 tabular-nums">
+                          {post.reach >= 1000 ? `${(post.reach/1000).toFixed(1)}K` : post.reach}
+                        </p>
+                        <p className="text-[10px] text-zinc-400">reach</p>
+                      </div>
+                    )}
                     <div className="text-right">
-                      <p className="text-xs font-bold text-gray-800 dark:text-gray-200 tabular-nums">{post.likes}</p>
+                      <p className="text-xs font-bold text-gray-800 dark:text-gray-200 tabular-nums">
+                        {post.likes >= 1000 ? `${(post.likes/1000).toFixed(1)}K` : post.likes}
+                      </p>
                       <p className="text-[10px] text-zinc-400">likes</p>
                     </div>
-                    {/* Arrow */}
-                    <svg className="w-4 h-4 text-zinc-400 group-hover:text-yellow-500 transition-colors ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3.5 h-3.5 text-zinc-400 group-hover:text-yellow-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
                     </svg>
                   </div>
