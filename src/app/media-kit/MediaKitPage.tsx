@@ -170,6 +170,58 @@ const AUDIENCE_INTERESTS = [
 
 
 
+// ── Monthly insight data (Jan 2024 – Apr 2026) ────────────────
+interface MonthInsight {
+  label: string;
+  views: number;
+  reach: number;
+  interactions: number;
+  follows: number;
+  posts?: number;
+}
+
+const MONTHLY_DATA: Record<string, MonthInsight> = {
+  // ── 2024 (akumulasi lifetime per post dari CSV export) ────────
+  "2024-01": { label:"Januari 2024",    views:0,         reach:93050,   interactions:33511, follows:18,   posts:28 },
+  "2024-02": { label:"Februari 2024",   views:0,         reach:2193,    interactions:93083, follows:10,   posts:15 },
+  "2024-03": { label:"Maret 2024",      views:0,         reach:51518,   interactions:36565, follows:210,  posts:36 },
+  "2024-04": { label:"April 2024",      views:0,         reach:34456,   interactions:47804, follows:155,  posts:42 },
+  "2024-05": { label:"Mei 2024",        views:0,         reach:50433,   interactions:8320,  follows:163,  posts:13 },
+  "2024-06": { label:"Juni 2024",       views:0,         reach:273235,  interactions:19195, follows:516,  posts:25 },
+  "2024-07": { label:"Juli 2024",       views:1674968,   reach:845266,  interactions:51990, follows:900,  posts:25 },
+  "2024-08": { label:"Agustus 2024",    views:206100,    reach:108910,  interactions:7335,  follows:23,   posts:11 },
+  "2024-09": { label:"September 2024",  views:786934,    reach:417437,  interactions:21962, follows:81,   posts:29 },
+  "2024-10": { label:"Oktober 2024",    views:207285,    reach:114506,  interactions:7335,  follows:22,   posts:13 },
+  "2024-11": { label:"November 2024",   views:611955,    reach:341769,  interactions:16791, follows:76,   posts:17 },
+  "2024-12": { label:"Desember 2024",   views:1105708,   reach:615374,  interactions:41214, follows:392,  posts:42 },
+  // ── Jan–Apr 2025 (akumulasi lifetime per post dari CSV export) ─
+  "2025-01": { label:"Januari 2025",    views:414086,    reach:243025,  interactions:13489, follows:184,  posts:39 },
+  "2025-02": { label:"Februari 2025",   views:358599,    reach:198741,  interactions:11932, follows:232,  posts:18 },
+  "2025-03": { label:"Maret 2025",      views:765595,    reach:431126,  interactions:20679, follows:212,  posts:42 },
+  "2025-04": { label:"April 2025",      views:326095,    reach:176269,  interactions:8985,  follows:204,  posts:12 },
+  // ── Mei–Jul 2025 (views & interaksi dari post CSV, reach & follows dari insight akun harian) ──
+  "2025-05": { label:"Mei 2025",        views:233035,    reach:211448,  interactions:8963,  follows:1417, posts:15 },
+  "2025-06": { label:"Juni 2025",       views:328290,    reach:240548,  interactions:5777,  follows:1681, posts:22 },
+  "2025-07": { label:"Juli 2025",       views:427752,    reach:264424,  interactions:11739, follows:1996, posts:21 },
+  // ── Agu 2025–Apr 2026 (insight akun bulanan dari CSV harian) ──
+  "2025-08": { label:"Agustus 2025",    views:131464,    reach:160980,  interactions:2589,  follows:1104, posts:13 },
+  "2025-09": { label:"September 2025",  views:685218,    reach:186085,  interactions:4760,  follows:688,  posts:23 },
+  "2025-10": { label:"Oktober 2025",    views:984412,    reach:388971,  interactions:11137, follows:729,  posts:20 },
+  "2025-11": { label:"November 2025",   views:561637,    reach:146122,  interactions:5821,  follows:531,  posts:21 },
+  "2025-12": { label:"Desember 2025",   views:955134,    reach:294756,  interactions:14124, follows:738,  posts:32 },
+  "2026-01": { label:"Januari 2026",    views:445426,    reach:152331,  interactions:6835,  follows:583,  posts:15 },
+  "2026-02": { label:"Februari 2026",   views:1149503,   reach:249933,  interactions:7045,  follows:539,  posts:24 },
+  "2026-03": { label:"Maret 2026",      views:1746287,   reach:408057,  interactions:40572, follows:947           },
+  "2026-04": { label:"April 2026",      views:441341,    reach:98587,   interactions:7567,  follows:484           },
+};
+
+const YEAR_MONTHS: Record<string, string[]> = {
+  "2024": ["01","02","03","04","05","06","07","08","09","10","11","12"],
+  "2025": ["01","02","03","04","05","06","07","08","09","10","11","12"],
+  "2026": ["01","02","03","04"],
+};
+const MONTH_SHORT = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Agu","Sep","Okt","Nov","Des"];
+
 // ── Helpers ───────────────────────────────────────────────────
 function fmtNum(n: number): string {
   if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
@@ -193,6 +245,9 @@ export default function MediaKitPage() {
   const [showAllCities, setShowAllCities] = useState(false);
   const [topMonth, setTopMonth]           = useState(TOP_POSTS_MONTHS[0]);
   const [topSort, setTopSort]             = useState<"byViews" | "byReach">("byViews");
+  const [viewMode, setViewMode]           = useState<"summary" | "monthly">("summary");
+  const [selYear, setSelYear]             = useState("2026");
+  const [selMonth, setSelMonth]           = useState("04");
 
   const d    = PERIOD_DATA[period];
   const er   = ((d.interactions / d.reach) * 100).toFixed(1);
@@ -277,100 +332,204 @@ export default function MediaKitPage() {
             <h2 className="text-lg font-bold text-gray-900 dark:text-white">Insight Akun</h2>
           </div>
 
-          {/* Period filter — inline style for active state agar pasti klikable */}
-          <div className="flex gap-2 mb-8" style={{ overflowX: "auto", WebkitOverflowScrolling: "touch", paddingBottom: 4 }}>
-            {PERIODS.map((p) => (
+          {/* ── View mode toggle ── */}
+          <div className="flex gap-2 mb-6">
+            {(["summary","monthly"] as const).map((mode) => (
               <button
-                key={p}
+                key={mode}
                 type="button"
-                onClick={() => setPeriod(p)}
-                style={period === p
-                  ? { backgroundColor: "rgba(245,196,0,0.12)", borderColor: "#F5C400", color: "#F5C400", whiteSpace: "nowrap" }
-                  : { whiteSpace: "nowrap" }
-                }
-                className={`flex-shrink-0 text-xs font-semibold px-4 py-2 rounded-xl border transition-all cursor-pointer ${
-                  period === p
-                    ? "border-transparent"
-                    : "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600 bg-transparent"
+                onClick={() => setViewMode(mode)}
+                style={viewMode === mode
+                  ? { backgroundColor:"rgba(245,196,0,0.12)", borderColor:"#F5C400", color:"#F5C400" }
+                  : {}}
+                className={`text-xs font-semibold px-4 py-2 rounded-xl border transition-all cursor-pointer ${
+                  viewMode !== mode
+                    ? "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600"
+                    : "border-transparent"
                 }`}
               >
-                {p}
+                {mode === "summary" ? "Ringkasan" : "Per Bulan"}
               </button>
             ))}
           </div>
 
-          {/* ── Metric grid ── */}
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
-            {[
-              { label: "Accounts Reached",  value: fmtNum(d.reach),        sub: d.reachSub,                              green: d.reachGrowthPct > 0 },
-              { label: "Total Views",       value: fmtNum(d.views),        sub: "Reels 45.7% · Stories 38.6%",           green: false },
-              { label: "Total Interactions",value: fmtNum(d.interactions), sub: "Likes · Saves · Shares",                green: false },
-              { label: "Engagement Rate",   value: `${er}%`,               sub: "Interactions ÷ Reach",                  green: false },
-              { label: "Followers Growth",  value: `${d.netGrowth >= 0 ? "+" : ""}${d.netGrowth.toLocaleString("id-ID")}`,
-                sub: `${d.followsGained.toLocaleString("id-ID")} masuk · ${d.followsLost.toLocaleString("id-ID")} keluar`,
-                green: d.netGrowth >= 0 },
-              { label: "Total Followers",   value: fmtNum(METRICS.followers), sub: d.label,                              green: false },
-            ].map((m) => (
-              <div key={m.label} className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-4">
-                <p className="text-xl font-bold text-gray-900 dark:text-white">{m.value}</p>
-                <p className={`text-xs mt-0.5 leading-snug ${m.green ? "text-green-500 font-semibold" : "text-gray-400 dark:text-zinc-500"}`}>
-                  {m.sub}
-                </p>
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-600 mt-2">{m.label}</p>
-              </div>
-            ))}
-          </div>
+          {/* ── RINGKASAN mode ── */}
+          {viewMode === "summary" && (<>
+            {/* Period filter */}
+            <div className="flex gap-2 mb-8" style={{ overflowX:"auto", WebkitOverflowScrolling:"touch", paddingBottom:4 }}>
+              {PERIODS.map((p) => (
+                <button
+                  key={p}
+                  type="button"
+                  onClick={() => setPeriod(p)}
+                  style={period === p
+                    ? { backgroundColor:"rgba(245,196,0,0.12)", borderColor:"#F5C400", color:"#F5C400", whiteSpace:"nowrap" }
+                    : { whiteSpace:"nowrap" }
+                  }
+                  className={`flex-shrink-0 text-xs font-semibold px-4 py-2 rounded-xl border transition-all cursor-pointer ${
+                    period === p
+                      ? "border-transparent"
+                      : "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600 bg-transparent"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+            </div>
 
-          {/* ── Interaction bars ── */}
-          <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-5 mb-6">
-            <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-5">Breakdown Interaksi</p>
-            <div className="space-y-3.5">
+            {/* Metric grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-6">
               {[
-                { label: "Likes",    count: d.likes,    color: "#f87171" },
-                { label: "Shares",   count: d.shares,   color: "#60a5fa" },
-                { label: "Saves",    count: d.saves,    color: "#4ade80" },
-                { label: "Comments", count: d.comments, color: "#c084fc" },
-                { label: "Reposts",  count: d.reposts,  color: "#fb923c" },
-              ].map((item) => (
-                <div key={item.label} className="flex items-center gap-3">
-                  <span className="text-xs text-gray-500 dark:text-zinc-400 w-16 flex-shrink-0">{item.label}</span>
-                  <div className="flex-1">
-                    <Bar pct={parseFloat((item.count / Math.max(d.likes, 1) * 100).toFixed(1))} color={item.color} height={8} />
-                  </div>
-                  <span className="text-xs font-semibold text-gray-700 dark:text-zinc-300 w-14 text-right tabular-nums">
-                    {item.count.toLocaleString("id-ID")}
-                  </span>
+                { label: "Accounts Reached",  value: fmtNum(d.reach),        sub: d.reachSub,                              green: d.reachGrowthPct > 0 },
+                { label: "Total Views",       value: fmtNum(d.views),        sub: "Reels 45.7% · Stories 38.6%",           green: false },
+                { label: "Total Interactions",value: fmtNum(d.interactions), sub: "Likes · Saves · Shares",                green: false },
+                { label: "Engagement Rate",   value: `${er}%`,               sub: "Interactions ÷ Reach",                  green: false },
+                { label: "Followers Growth",  value: `${d.netGrowth >= 0 ? "+" : ""}${d.netGrowth.toLocaleString("id-ID")}`,
+                  sub: `${d.followsGained.toLocaleString("id-ID")} masuk · ${d.followsLost.toLocaleString("id-ID")} keluar`,
+                  green: d.netGrowth >= 0 },
+                { label: "Total Followers",   value: fmtNum(METRICS.followers), sub: d.label,                              green: false },
+              ].map((m) => (
+                <div key={m.label} className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-4">
+                  <p className="text-xl font-bold text-gray-900 dark:text-white">{m.value}</p>
+                  <p className={`text-xs mt-0.5 leading-snug ${m.green ? "text-green-500 font-semibold" : "text-gray-400 dark:text-zinc-500"}`}>
+                    {m.sub}
+                  </p>
+                  <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-600 mt-2">{m.label}</p>
                 </div>
               ))}
             </div>
-          </div>
 
-          {/* ── Growth charts ── */}
-          {isClient ? (
-            <GrowthCharts
-              followerDaily={d.followerTrend}
-              reachWeekly={d.reachTrend}
-              viewsWeekly={d.viewsTrend}
-              engageWeekly={d.engageTrend}
-              netGrowth={d.netGrowth}
-              reachGrowthPct={d.reachGrowthPct}
-              monthlyViews={d.views}
-              er={er}
-              period={d.label}
-              followerLabels={d.followerTrendLabels.length > 0 ? d.followerTrendLabels : undefined}
-              trendLabels={d.trendLabels}
-            />
-          ) : (
-            <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-5">
-              <div className="h-4 w-48 rounded bg-gray-200 dark:bg-zinc-800 animate-pulse mb-5" />
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {[0,1,2,3].map((i) => (
-                  <div key={i}>
-                    <div className="h-3 w-28 rounded bg-gray-200 dark:bg-zinc-800 animate-pulse mb-2" />
-                    <div className="h-[100px] w-full rounded-lg bg-gray-200 dark:bg-zinc-800 animate-pulse" />
+            {/* Interaction bars */}
+            <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-5 mb-6">
+              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400 mb-5">Breakdown Interaksi</p>
+              <div className="space-y-3.5">
+                {[
+                  { label: "Likes",    count: d.likes,    color: "#f87171" },
+                  { label: "Shares",   count: d.shares,   color: "#60a5fa" },
+                  { label: "Saves",    count: d.saves,    color: "#4ade80" },
+                  { label: "Comments", count: d.comments, color: "#c084fc" },
+                  { label: "Reposts",  count: d.reposts,  color: "#fb923c" },
+                ].map((item) => (
+                  <div key={item.label} className="flex items-center gap-3">
+                    <span className="text-xs text-gray-500 dark:text-zinc-400 w-16 flex-shrink-0">{item.label}</span>
+                    <div className="flex-1">
+                      <Bar pct={parseFloat((item.count / Math.max(d.likes, 1) * 100).toFixed(1))} color={item.color} height={8} />
+                    </div>
+                    <span className="text-xs font-semibold text-gray-700 dark:text-zinc-300 w-14 text-right tabular-nums">
+                      {item.count.toLocaleString("id-ID")}
+                    </span>
                   </div>
                 ))}
               </div>
+            </div>
+
+            {/* Growth charts */}
+            {isClient ? (
+              <GrowthCharts
+                followerDaily={d.followerTrend}
+                reachWeekly={d.reachTrend}
+                viewsWeekly={d.viewsTrend}
+                engageWeekly={d.engageTrend}
+                netGrowth={d.netGrowth}
+                reachGrowthPct={d.reachGrowthPct}
+                monthlyViews={d.views}
+                er={er}
+                period={d.label}
+                followerLabels={d.followerTrendLabels.length > 0 ? d.followerTrendLabels : undefined}
+                trendLabels={d.trendLabels}
+              />
+            ) : (
+              <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-5">
+                <div className="h-4 w-48 rounded bg-gray-200 dark:bg-zinc-800 animate-pulse mb-5" />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  {[0,1,2,3].map((i) => (
+                    <div key={i}>
+                      <div className="h-3 w-28 rounded bg-gray-200 dark:bg-zinc-800 animate-pulse mb-2" />
+                      <div className="h-[100px] w-full rounded-lg bg-gray-200 dark:bg-zinc-800 animate-pulse" />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>)}
+
+          {/* ── PER BULAN mode ── */}
+          {viewMode === "monthly" && (
+            <div>
+              {/* Year tabs */}
+              <div className="flex gap-2 mb-4">
+                {(["2024","2025","2026"] as const).map((y) => (
+                  <button
+                    key={y}
+                    type="button"
+                    onClick={() => {
+                      setSelYear(y);
+                      setSelMonth(YEAR_MONTHS[y][YEAR_MONTHS[y].length - 1]);
+                    }}
+                    style={selYear === y
+                      ? { backgroundColor:"rgba(245,196,0,0.12)", borderColor:"#F5C400", color:"#F5C400" }
+                      : {}}
+                    className={`text-sm font-bold px-5 py-2 rounded-xl border transition-all cursor-pointer ${
+                      selYear !== y
+                        ? "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600"
+                        : "border-transparent"
+                    }`}
+                  >{y}</button>
+                ))}
+              </div>
+
+              {/* Month chips */}
+              <div className="flex gap-2 flex-wrap mb-6">
+                {YEAR_MONTHS[selYear].map((m) => (
+                  <button
+                    key={m}
+                    type="button"
+                    onClick={() => setSelMonth(m)}
+                    style={selMonth === m
+                      ? { backgroundColor:"rgba(245,196,0,0.12)", borderColor:"#F5C400", color:"#F5C400" }
+                      : {}}
+                    className={`text-xs font-semibold px-3 py-1.5 rounded-xl border transition-all cursor-pointer ${
+                      selMonth !== m
+                        ? "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600"
+                        : "border-transparent"
+                    }`}
+                  >{MONTH_SHORT[parseInt(m) - 1]}</button>
+                ))}
+              </div>
+
+              {/* Monthly metrics */}
+              {(() => {
+                const md = MONTHLY_DATA[`${selYear}-${selMonth}`];
+                if (!md) return null;
+                const erM = md.reach > 0 ? ((md.interactions / md.reach) * 100).toFixed(1) : null;
+                const cards = [
+                  ...(md.views > 0 ? [{ label:"Total Views",         value:fmtNum(md.views),                          sub:"Semua format konten",      green:false }] : []),
+                  { label:"Akun Terjangkau",    value:fmtNum(md.reach),                          sub:"Unique accounts reached",  green:false },
+                  { label:"Total Interaksi",    value:fmtNum(md.interactions),                   sub:"Likes · Shares · Saves",   green:false },
+                  ...(erM ? [{ label:"Engagement Rate",  value:`${erM}%`,                        sub:"Interaksi ÷ Jangkauan",    green:false }] : []),
+                  { label:"Followers Baru",     value:`+${md.follows.toLocaleString("id-ID")}`,  sub:"Follows diperoleh",        green:true  },
+                  ...(md.posts != null ? [{ label:"Konten Diterbitkan", value:String(md.posts),  sub:"Post dipublish",           green:false }] : []),
+                ];
+                return (
+                  <>
+                    <p className="text-sm font-bold text-gray-900 dark:text-white mb-4">{md.label}</p>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mb-4">
+                      {cards.map((card) => (
+                        <div key={card.label} className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-950 p-4">
+                          <p className="text-xl font-bold text-gray-900 dark:text-white">{card.value}</p>
+                          <p className={`text-xs mt-0.5 leading-snug ${card.green ? "text-green-500 font-semibold" : "text-gray-400 dark:text-zinc-500"}`}>
+                            {card.sub}
+                          </p>
+                          <p className="text-[10px] font-semibold uppercase tracking-wide text-zinc-400 dark:text-zinc-600 mt-2">{card.label}</p>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="text-[10px] text-zinc-400 mt-2">
+                      ★ Jan 2024–Apr 2025: akumulasi lifetime per konten yang diterbitkan. Mei 2025–Apr 2026: insight akun bulanan.
+                    </p>
+                  </>
+                );
+              })()}
             </div>
           )}
         </div>
