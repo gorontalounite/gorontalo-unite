@@ -17,10 +17,14 @@ export const metadata: Metadata = {
 
 // ─── Constants ──────────────────────────────────────────────────────────────
 
-const LIMIT = 18;
+const LIMIT = 16; // articles per page in filtered view
 
 const CAT_LABEL_MAP: Record<string, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c.key, c.label]),
+);
+
+const LABEL_TO_KEY: Record<string, string> = Object.fromEntries(
+  CATEGORIES.map((c) => [c.label, c.key]),
 );
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
@@ -47,7 +51,7 @@ function getDateBound(key: string): string | null {
   return null;
 }
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// ─── Types ──────────────────────────────────────────────────────────────────
 
 type Article = {
   id: string; title: string; slug: string; excerpt: string | null;
@@ -55,9 +59,7 @@ type Article = {
   published_at: string | null; created_at: string; source_url: string | null; is_trending: boolean;
 };
 
-const LABEL_TO_KEY: Record<string, string> = Object.fromEntries(
-  CATEGORIES.map((c) => [c.label, c.key]),
-);
+// ─── Sub-components ──────────────────────────────────────────────────────────
 
 function CategoryBadges({ article }: { article: Article }) {
   const cats = article.categories?.length ? article.categories : [article.category];
@@ -122,6 +124,28 @@ function FeaturedCard({ article }: { article: Article }) {
 }
 
 function SideCard({ article }: { article: Article }) {
+  return (
+    <div className="relative group flex gap-3 py-3.5 border-b border-gray-100 dark:border-zinc-800 last:border-0">
+      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
+      {article.image_url && (
+        <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-zinc-800">
+          <Image src={article.image_url} alt={article.title} fill className="object-cover" unoptimized />
+        </div>
+      )}
+      <div className="flex-1 min-w-0 space-y-1">
+        <CategoryBadges article={article} />
+        <h3 className="relative z-[1] text-xs font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+          {article.title}
+        </h3>
+        <p className="text-[11px] text-gray-400 dark:text-gray-500">
+          {formatDate(article.published_at ?? article.created_at)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function HeroSideCard({ article }: { article: Article }) {
   return (
     <div className="relative group flex gap-4 py-4 border-b border-gray-100 dark:border-zinc-800 last:border-0">
       <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
@@ -188,23 +212,180 @@ function ArticleCard({ article }: { article: Article }) {
   );
 }
 
-function ListArticleCard({ article, index }: { article: Article; index: number }) {
+// ─── Category Section ─────────────────────────────────────────────────────────
+
+function CategorySection({
+  cat,
+  articles,
+  totalCount,
+}: {
+  cat: { key: string; label: string };
+  articles: Article[];
+  totalCount: number;
+}) {
+  const colors = COLORS[cat.label] ?? DEFAULT_COLOR;
+  if (articles.length === 0) return null;
+
   return (
-    <div className="relative group flex gap-4 py-5 border-b border-gray-100 dark:border-zinc-800 last:border-0">
-      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
-      <span className="font-display text-3xl font-bold text-gray-100 dark:text-zinc-800 w-10 flex-shrink-0 leading-none mt-1 select-none tabular-nums">
-        {String(index + 1).padStart(2, "0")}
-      </span>
-      <div className="flex-1 min-w-0 space-y-1.5">
-        <CategoryBadges article={article} />
-        <h3 className="relative z-[1] text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
-          {article.title}
-        </h3>
-        <p className="text-xs text-gray-400 dark:text-gray-500">
-          {formatDate(article.published_at ?? article.created_at)}
-        </p>
+    <section>
+      {/* Section header */}
+      <div className="flex items-center justify-between mb-5">
+        <div className="flex items-center gap-3">
+          <span className={`inline-block w-1 h-6 rounded-full ${colors.bg}`} />
+          <h2 className="font-display text-lg font-bold text-gray-900 dark:text-white">
+            {cat.label}
+          </h2>
+          {totalCount > 0 && (
+            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${colors.badge}`}>
+              {totalCount}
+            </span>
+          )}
+        </div>
+        <Link
+          href={`/berita/${cat.key}`}
+          className="inline-flex items-center gap-1 text-xs font-medium text-gray-400 dark:text-gray-500 hover:text-brand dark:hover:text-yellow-400 transition-colors"
+        >
+          Lihat semua
+          <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </Link>
       </div>
-    </div>
+
+      {/* Articles grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        {articles.slice(0, 4).map((a) => (
+          <ArticleCard key={a.id} article={a} />
+        ))}
+      </div>
+
+      {/* Show more */}
+      {totalCount > 4 && (
+        <div className="mt-5">
+          <Link
+            href={`/berita/${cat.key}`}
+            className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-zinc-700 hover:border-gray-400 dark:hover:border-zinc-500 px-4 py-2 rounded-xl transition-all"
+          >
+            <span>+{totalCount - 4} artikel lainnya</span>
+            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            </svg>
+          </Link>
+        </div>
+      )}
+    </section>
+  );
+}
+
+// ─── Sidebar ─────────────────────────────────────────────────────────────────
+
+function Sidebar({
+  trending,
+  catCounts,
+  activeSource,
+}: {
+  trending: Article[];
+  catCounts: Record<string, number>;
+  activeSource: string;
+}) {
+  return (
+    <aside className="space-y-6">
+
+      {/* Trending */}
+      {trending.length > 0 && (
+        <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-sm">🔥</span>
+            <h3 className="font-display text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+              Trending
+            </h3>
+          </div>
+          <div>
+            {trending.map((a) => (
+              <SideCard key={a.id} article={a} />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Categories */}
+      <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
+        <h3 className="font-display text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
+          Semua Kategori
+        </h3>
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIES.map((c) => {
+            const count = catCounts[c.label] ?? 0;
+            if (count === 0) return null;
+            const cls = (COLORS[c.label] ?? DEFAULT_COLOR).badge;
+            return (
+              <Link
+                key={c.key}
+                href={`/berita/${c.key}`}
+                className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full transition-opacity hover:opacity-75 ${cls}`}
+              >
+                {c.label}
+                <span className="opacity-50 font-normal">{count}</span>
+              </Link>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Sources */}
+      <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
+        <h3 className="font-display text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">
+          Sumber Berita
+        </h3>
+        <div className="space-y-2">
+          {[
+            { key: "pemprov", label: "Pemprov Gorontalo", icon: "🏛️" },
+            { key: "pemkab",  label: "Pemkab Gorontalo",  icon: "🏢" },
+            { key: "pemkot",  label: "Pemkot Gorontalo",  icon: "🏙️" },
+          ].map((s) => (
+            <Link
+              key={s.key}
+              href={`/berita?source=${s.key}`}
+              className={`flex items-center gap-2.5 text-sm px-3.5 py-2.5 rounded-xl border transition-all ${
+                activeSource === s.key
+                  ? "border-brand dark:border-yellow-400 bg-brand/5 dark:bg-yellow-400/5 text-brand dark:text-yellow-400 font-medium"
+                  : "border-gray-100 dark:border-zinc-700 text-gray-600 dark:text-gray-400 hover:border-gray-200 dark:hover:border-zinc-600 hover:bg-white dark:hover:bg-zinc-800"
+              }`}
+            >
+              <span className="text-base">{s.icon}</span>
+              {s.label}
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* Quick links */}
+      <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
+        <h3 className="font-display text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">
+          Tautan
+        </h3>
+        <ul className="space-y-2">
+          {[
+            { label: "Beranda", href: "/" },
+            { label: "Tentang Kami", href: "/about" },
+            { label: "Media Kit", href: "/media-kit" },
+          ].map((l) => (
+            <li key={l.href}>
+              <Link
+                href={l.href}
+                className="text-sm text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-yellow-400 transition-colors flex items-center gap-1.5"
+              >
+                <svg className="w-3 h-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+                {l.label}
+              </Link>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+    </aside>
   );
 }
 
@@ -231,7 +412,7 @@ export default async function BeritaPage({ searchParams }: PageProps) {
   const hasFilters = !!(catKey || source || date || search);
   const admin      = createAdminClient();
 
-  // ── Category counts (always, for filter pills) ──
+  // ── Category counts (always: sidebar + filter pills) ──
   const { data: allCats } = await admin
     .from("articles")
     .select("category, categories")
@@ -248,51 +429,9 @@ export default async function BeritaPage({ searchParams }: PageProps) {
     }
   }
 
-  // ── Hero articles (latest 4, only on page 1 with no filters) ──
-  let heroArticles: Article[] = [];
-  if (!hasFilters && page === 1) {
-    const { data } = await admin
-      .from("articles")
-      .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending")
-      .eq("published", true)
-      .neq("category", "Portfolio")
-      .order("published_at", { ascending: false })
-      .limit(4);
-    heroArticles = (data ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[];
-  }
-
-  // ── Build filtered grid query ──
-  const offset = (page - 1) * LIMIT;
-  const heroIds = heroArticles.map((a) => a.id);
-
-  // We fetch with a count to support pagination
-  // eslint-disable-next-line prefer-const
-  let q = admin
-    .from("articles")
-    .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending", { count: "exact" })
-    .eq("published", true)
-    .neq("category", "Portfolio")
-    .order("published_at", { ascending: false });
-
-  if (catKey && CAT_LABEL_MAP[catKey])    q = q.contains("categories", [CAT_LABEL_MAP[catKey]]);
-  if (source === "pemprov")               q = q.ilike("source_url", "%gorontaloprov%");
-  else if (source === "pemkab")           q = q.ilike("source_url", "%gorontalokab%");
-  else if (source === "pemkot")           q = q.ilike("source_url", "%gorontalokota%");
-  const dateBound = getDateBound(date);
-  if (dateBound)                          q = q.gte("published_at", dateBound);
-  if (search)                             q = q.ilike("title", `%${search}%`);
-  // On page 1 with no filters, grid starts after hero (offset by hero count)
-  const gridOffset = (!hasFilters && page === 1) ? heroArticles.length : 0;
-
-  q = q.range(offset + gridOffset, offset + gridOffset + LIMIT - 1);
-  const { data: gridData, count } = await q;
-  const gridArticles = (gridData ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[];
-  const totalCount   = count ?? 0;
-  const totalPages   = Math.ceil(totalCount / LIMIT);
-
-  // ── Trending sidebar (only no-filter page 1) ──
+  // ── Trending articles (always: sidebar) ──
   let trendingArticles: Article[] = [];
-  if (!hasFilters && page === 1) {
+  {
     const { data } = await admin
       .from("articles")
       .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending")
@@ -310,13 +449,85 @@ export default async function BeritaPage({ searchParams }: PageProps) {
         .neq("category", "Portfolio")
         .order("view_count", { ascending: false })
         .limit(5);
-      trendingArticles = [...trendingArticles, ...(fallback ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[]].slice(0, 5);
+      trendingArticles = [
+        ...trendingArticles,
+        ...(fallback ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[],
+      ].slice(0, 5);
     }
   }
 
-  const totalDisplay = hasFilters
-    ? `${totalCount} hasil ditemukan`
-    : `${totalCount + heroArticles.length}+ artikel`;
+  // ── Default view: hero + category buckets ──
+  let heroArticles: Article[] = [];
+  let catBuckets: Record<string, Article[]> = {};
+
+  if (!hasFilters) {
+    // Hero (latest 4)
+    const { data: heroData } = await admin
+      .from("articles")
+      .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending")
+      .eq("published", true)
+      .neq("category", "Portfolio")
+      .order("published_at", { ascending: false })
+      .limit(4);
+    heroArticles = (heroData ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[];
+
+    // Recent articles for category sections (top 4 per category)
+    const { data: allRecentData } = await admin
+      .from("articles")
+      .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending")
+      .eq("published", true)
+      .neq("category", "Portfolio")
+      .order("published_at", { ascending: false })
+      .limit(400);
+
+    const allRecent = (allRecentData ?? []).map((a) => ({
+      ...a,
+      categories: (a.categories as string[] | null) ?? [],
+    })) as Article[];
+
+    // Build per-category buckets (top 4 each, deduped by ID within bucket)
+    for (const art of allRecent) {
+      const cats = art.categories.length ? art.categories : [art.category];
+      for (const lbl of cats) {
+        if (lbl === "Portfolio") continue;
+        if (!catBuckets[lbl]) catBuckets[lbl] = [];
+        if (catBuckets[lbl].length < 4 && !catBuckets[lbl].some((x) => x.id === art.id)) {
+          catBuckets[lbl].push(art);
+        }
+      }
+    }
+  }
+
+  // ── Filtered view: paginated grid ──
+  let gridArticles: Article[] = [];
+  let totalCount    = 0;
+  let totalPages    = 1;
+
+  if (hasFilters) {
+    const offset = (page - 1) * LIMIT;
+
+    // eslint-disable-next-line prefer-const
+    let q = admin
+      .from("articles")
+      .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending", { count: "exact" })
+      .eq("published", true)
+      .neq("category", "Portfolio")
+      .order("published_at", { ascending: false });
+
+    if (catKey && CAT_LABEL_MAP[catKey])  q = q.contains("categories", [CAT_LABEL_MAP[catKey]]);
+    if (source === "pemprov")             q = q.ilike("source_url", "%gorontaloprov%");
+    else if (source === "pemkab")         q = q.ilike("source_url", "%gorontalokab%");
+    else if (source === "pemkot")         q = q.ilike("source_url", "%gorontalokota%");
+    const dateBound = getDateBound(date);
+    if (dateBound)                        q = q.gte("published_at", dateBound);
+    if (search)                           q = q.ilike("title", `%${search}%`);
+
+    q = q.range(offset, offset + LIMIT - 1);
+    const { data: gridData, count } = await q;
+    gridArticles = (gridData ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[];
+    totalCount   = count ?? 0;
+    totalPages   = Math.ceil(totalCount / LIMIT);
+  }
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950">
@@ -333,10 +544,11 @@ export default async function BeritaPage({ searchParams }: PageProps) {
                 Berita
               </h1>
               <p className="text-sm text-gray-500 dark:text-gray-400 mt-2">
-                Kabar terkini dari Bumi Serambi Madinah — {totalDisplay}
+                {hasFilters
+                  ? `${totalCount} hasil ditemukan`
+                  : "Kabar terkini dari Bumi Serambi Madinah"}
               </p>
             </div>
-            {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
               <Link href="/" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Beranda</Link>
               <span>/</span>
@@ -345,26 +557,24 @@ export default async function BeritaPage({ searchParams }: PageProps) {
           </div>
         </div>
 
-        {/* ── HERO SECTION (only page 1, no filters) ── */}
-        {!hasFilters && page === 1 && heroArticles.length > 0 && (
+        {/* ── HERO (default view only) ──────────────────── */}
+        {!hasFilters && heroArticles.length > 0 && (
           <section className="py-10 border-b border-gray-100 dark:border-zinc-800">
             <div className="grid grid-cols-1 lg:grid-cols-5 gap-8 lg:gap-10">
-              {/* Featured large card */}
               <div className="lg:col-span-3">
                 <FeaturedCard article={heroArticles[0]} />
               </div>
-              {/* Stacked side cards */}
               <div className="lg:col-span-2 flex flex-col divide-y divide-gray-100 dark:divide-zinc-800">
                 {heroArticles.slice(1).map((a) => (
-                  <SideCard key={a.id} article={a} />
+                  <HeroSideCard key={a.id} article={a} />
                 ))}
               </div>
             </div>
           </section>
         )}
 
-        {/* ── FILTER SECTION ──────────────────────────── */}
-        <div className="py-6 border-b border-gray-100 dark:border-zinc-800 sticky top-0 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm z-20">
+        {/* ── FILTER BAR (sticky) ──────────────────────── */}
+        <div className="py-5 border-b border-gray-100 dark:border-zinc-800 sticky top-0 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm z-20">
           <Suspense fallback={<div className="h-16 animate-pulse bg-gray-100 dark:bg-zinc-800 rounded-xl" />}>
             <BeritaFilters
               activeCategory={catKey}
@@ -376,139 +586,114 @@ export default async function BeritaPage({ searchParams }: PageProps) {
           </Suspense>
         </div>
 
-        {/* ── ACTIVE FILTER LABEL ─────────────────────── */}
-        {hasFilters && (
-          <div className="py-5 flex items-center gap-3">
-            <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
-            <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
-              {catKey ? `Kategori: ${CAT_LABEL_MAP[catKey] ?? catKey}` : ""}
-              {source ? ` · Sumber: ${source === "pemprov" ? "Pemprov" : source === "pemkab" ? "Pemkab" : "Pemkot"}` : ""}
-              {date ? ` · ${date === "today" ? "Hari ini" : date === "week" ? "7 hari" : date === "month" ? "Bulan ini" : "Tahun ini"}` : ""}
-              {search ? ` · "${search}"` : ""}
-              {` — ${totalCount} artikel`}
-            </span>
-            <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
+        {/* ── MAIN LAYOUT (content + sidebar) ─────────── */}
+        <div className="py-10 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-10 lg:gap-12 items-start">
+
+          {/* ── CONTENT AREA ── */}
+          <div>
+            {hasFilters ? (
+              /* ── Filtered results ── */
+              <>
+                {/* Active filter label */}
+                <div className="flex items-center gap-3 mb-8">
+                  <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
+                  <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                    {catKey ? `Kategori: ${CAT_LABEL_MAP[catKey] ?? catKey}` : ""}
+                    {source ? `${catKey ? " · " : ""}Sumber: ${source === "pemprov" ? "Pemprov" : source === "pemkab" ? "Pemkab" : "Pemkot"}` : ""}
+                    {date ? ` · ${date === "today" ? "Hari ini" : date === "week" ? "7 hari" : date === "month" ? "Bulan ini" : "Tahun ini"}` : ""}
+                    {search ? ` · "${search}"` : ""}
+                    {` — ${totalCount} artikel`}
+                  </span>
+                  <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
+                </div>
+
+                {gridArticles.length === 0 ? (
+                  <div className="flex flex-col items-center py-24 text-center">
+                    <div className="text-5xl mb-4">🔍</div>
+                    <h2 className="font-display text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                      Tidak ada artikel ditemukan
+                    </h2>
+                    <p className="text-sm text-gray-400 dark:text-gray-500 max-w-xs">
+                      Coba ubah filter atau kata kunci pencarian.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    {gridArticles.map((a) => (
+                      <ArticleCard key={a.id} article={a} />
+                    ))}
+                  </div>
+                )}
+
+                <Suspense>
+                  <BeritaPagination page={page} totalPages={totalPages} />
+                </Suspense>
+              </>
+            ) : (
+              /* ── Category sections ── */
+              <div className="space-y-12">
+                {CATEGORIES.map((cat) => {
+                  const articles = catBuckets[cat.label] ?? [];
+                  const total    = catCounts[cat.label]  ?? 0;
+                  if (articles.length === 0) return null;
+                  return (
+                    <CategorySection
+                      key={cat.key}
+                      cat={cat}
+                      articles={articles}
+                      totalCount={total}
+                    />
+                  );
+                })}
+
+                {/* Newsletter CTA */}
+                <section className="py-10 border-t border-gray-100 dark:border-zinc-800">
+                  <div className="max-w-md">
+                    <span className="text-xs font-semibold uppercase tracking-widest text-brand dark:text-yellow-400">
+                      Newsletter
+                    </span>
+                    <h2 className="font-display text-2xl font-bold text-gray-900 dark:text-white mt-2 mb-2">
+                      Jangan lewatkan berita terbaru
+                    </h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
+                      Rangkuman berita Gorontalo langsung di inbox Anda setiap minggu.
+                    </p>
+                    <form action="#" className="flex gap-2">
+                      <input
+                        type="email"
+                        placeholder="Masukkan email Anda"
+                        className="flex-1 px-4 py-2.5 text-sm bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 dark:focus:ring-yellow-400/30 placeholder:text-gray-400 dark:text-white"
+                      />
+                      <button
+                        type="submit"
+                        className="px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
+                      >
+                        Daftar
+                      </button>
+                    </form>
+                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
+                      Gratis. Bisa berhenti kapan saja.
+                    </p>
+                  </div>
+                </section>
+              </div>
+            )}
           </div>
-        )}
 
-        {/* ── MAIN ARTICLE GRID ───────────────────────── */}
-        <section className="py-10">
-          {gridArticles.length === 0 ? (
-            <div className="flex flex-col items-center py-24 text-center">
-              <div className="text-5xl mb-4">🔍</div>
-              <h2 className="font-display text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-                Tidak ada artikel ditemukan
-              </h2>
-              <p className="text-sm text-gray-400 dark:text-gray-500 max-w-xs">
-                Coba ubah filter atau kata kunci pencarian.
-              </p>
+          {/* ── SIDEBAR ── */}
+          <div className="hidden lg:block">
+            <div className="sticky top-24">
+              <Sidebar
+                trending={trendingArticles}
+                catCounts={catCounts}
+                activeSource={source}
+              />
             </div>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-              {gridArticles.map((a) => (
-                <ArticleCard key={a.id} article={a} />
-              ))}
-            </div>
-          )}
+          </div>
 
-          {/* Pagination */}
-          <Suspense>
-            <BeritaPagination page={page} totalPages={totalPages} />
-          </Suspense>
-        </section>
+        </div>
 
-        {/* ── TRENDING / EDITORIAL SECTION (only no-filter page 1) ── */}
-        {!hasFilters && page === 1 && trendingArticles.length > 0 && (
-          <section className="py-14 border-t border-gray-100 dark:border-zinc-800">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16">
-              {/* Left: numbered list */}
-              <div>
-                <div className="flex items-center gap-4 mb-8">
-                  <h2 className="font-display text-2xl font-bold text-gray-900 dark:text-white">
-                    Artikel Terpilih
-                  </h2>
-                  <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
-                </div>
-                <div>
-                  {trendingArticles.map((a, i) => (
-                    <ListArticleCard key={a.id} article={a} index={i} />
-                  ))}
-                </div>
-              </div>
-
-              {/* Right: 2 visual cards */}
-              <div className="space-y-5">
-                <div className="flex items-center gap-4 mb-8">
-                  <h2 className="font-display text-2xl font-bold text-gray-900 dark:text-white">
-                    Sorotan
-                  </h2>
-                  <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
-                </div>
-                {trendingArticles.slice(0, 2).map((a) => (
-                  <Link
-                    key={a.id}
-                    href={`/news/${a.slug}`}
-                    className="group flex gap-4 p-4 rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50/50 dark:bg-zinc-900/50 hover:border-gray-200 dark:hover:border-zinc-700 hover:shadow-md transition-all"
-                  >
-                    {a.image_url && (
-                      <div className="relative w-24 h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-zinc-700">
-                        <Image src={a.image_url} alt={a.title} fill className="object-cover" unoptimized />
-                      </div>
-                    )}
-                    <div className="relative flex-1 min-w-0 space-y-1.5">
-                      <Link href={`/news/${a.slug}`} className="absolute inset-0 z-[1]" aria-label={a.title} />
-                      <CategoryBadges article={a} />
-                      <h3 className="relative z-[1] text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-3 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
-                        {a.title}
-                      </h3>
-                      <p className="text-xs text-gray-400 dark:text-gray-500">
-                        {formatDate(a.published_at ?? a.created_at)}
-                      </p>
-                    </div>
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </section>
-        )}
-
-        {/* ── NEWSLETTER CTA (only no-filter page 1) ── */}
-        {!hasFilters && page === 1 && (
-          <section className="py-16 border-t border-gray-100 dark:border-zinc-800 mb-8">
-            <div className="max-w-xl mx-auto text-center">
-              <span className="text-xs font-semibold uppercase tracking-widest text-brand dark:text-yellow-400">
-                Newsletter
-              </span>
-              <h2 className="font-display text-3xl sm:text-4xl font-bold text-gray-900 dark:text-white mt-3 mb-3 leading-tight">
-                Jangan lewatkan<br />berita terbaru
-              </h2>
-              <p className="text-sm text-gray-500 dark:text-gray-400 mb-8">
-                Dapatkan rangkuman berita Gorontalo langsung di inbox Anda setiap minggu.
-              </p>
-              <form
-                action="#"
-                className="flex gap-2 max-w-sm mx-auto"
-              >
-                <input
-                  type="email"
-                  placeholder="Masukkan email Anda"
-                  className="flex-1 px-4 py-2.5 text-sm bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 dark:focus:ring-yellow-400/30 placeholder:text-gray-400 dark:text-white"
-                />
-                <button
-                  type="submit"
-                  className="px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
-                >
-                  Daftar
-                </button>
-              </form>
-              <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
-                Gratis. Bisa berhenti kapan saja.
-              </p>
-            </div>
-          </section>
-        )}
-
-        {/* ── FOOTER SECTION ─────────────────────────── */}
+        {/* ── FOOTER ─────────────────────────────────── */}
         <footer className="py-10 border-t border-gray-100 dark:border-zinc-800">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
             {/* Brand */}
