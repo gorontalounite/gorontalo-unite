@@ -152,9 +152,10 @@ function HeroSideCard({ article }: { article: Article }) {
 
 function CatFeaturedCard({ article }: { article: Article }) {
   return (
-    <div className="group relative h-full">
+    <div className="group relative flex flex-col h-full">
       <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
-      <div className="relative aspect-[4/3] sm:aspect-[3/2] rounded-2xl overflow-hidden bg-gray-100 dark:bg-zinc-800 mb-5">
+      {/* Shorter 16:9 image — leaves more room for text below */}
+      <div className="relative aspect-video rounded-2xl overflow-hidden bg-gray-100 dark:bg-zinc-800 mb-5 flex-shrink-0">
         {article.image_url ? (
           <Image
             src={article.image_url} alt={article.title} fill
@@ -170,17 +171,18 @@ function CatFeaturedCard({ article }: { article: Article }) {
           </span>
         )}
       </div>
-      <div className="space-y-2.5">
+      {/* Text fills remaining height */}
+      <div className="flex flex-col gap-2.5 flex-1">
         <CategoryBadges article={article} />
         <h3 className="relative z-[1] font-display text-xl font-semibold text-gray-900 dark:text-white leading-tight group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors line-clamp-3">
           {article.title}
         </h3>
         {article.excerpt && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3 sm:line-clamp-5">
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-4 flex-1">
             {article.excerpt}
           </p>
         )}
-        <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
+        <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 mt-auto pt-1">
           <span>{formatDate(article.published_at ?? article.created_at)}</span>
           {sourceLabel(article.source_url) && (
             <>
