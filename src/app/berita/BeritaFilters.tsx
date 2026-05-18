@@ -4,21 +4,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useTransition, useRef, useEffect } from "react";
 import { CATEGORIES } from "./categories";
 
-const SOURCES = [
-  { key: "",        label: "Semua Sumber"     },
-  { key: "pemprov", label: "Pemprov Gorontalo" },
-  { key: "pemkab",  label: "Pemkab Gorontalo"  },
-  { key: "pemkot",  label: "Pemkot Gorontalo"  },
-];
-
-const DATES = [
-  { key: "",      label: "Semua Waktu"    },
-  { key: "today", label: "Hari Ini"       },
-  { key: "week",  label: "7 Hari Terakhir"},
-  { key: "month", label: "Bulan Ini"      },
-  { key: "year",  label: "Tahun Ini"      },
-];
-
 interface Props {
   activeCategory: string;
   activeSource:   string;
@@ -49,7 +34,6 @@ export default function BeritaFilters({
     [router, sp],
   );
 
-  // Debounce search
   useEffect(() => {
     if (searchRef.current) searchRef.current.value = activeSearch;
   }, [activeSearch]);
@@ -66,11 +50,10 @@ export default function BeritaFilters({
   const hasFilters = !!(activeCategory || activeSource || activeDate || activeSearch);
 
   return (
-    <div className="space-y-4">
-      {/* Search + dropdowns row */}
-      <div className="flex flex-wrap gap-3 items-center">
-        {/* Search */}
-        <div className="relative flex-1 min-w-[200px]">
+    <div className="space-y-3">
+      {/* Search row */}
+      <div className="flex gap-2 items-center">
+        <div className="relative flex-1">
           <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none"
             fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
@@ -85,41 +68,17 @@ export default function BeritaFilters({
             className="w-full pl-9 pr-4 py-2 text-sm bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 dark:focus:ring-yellow-400/30 focus:border-brand dark:focus:border-yellow-400 transition-all placeholder:text-gray-400 dark:text-white"
           />
         </div>
-
-        {/* Source dropdown */}
-        <select
-          value={activeSource}
-          onChange={(e) => update("source", e.target.value)}
-          className="text-sm px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 dark:focus:ring-yellow-400/30 text-gray-700 dark:text-gray-200 cursor-pointer transition-all"
-        >
-          {SOURCES.map((s) => (
-            <option key={s.key} value={s.key}>{s.label}</option>
-          ))}
-        </select>
-
-        {/* Date dropdown */}
-        <select
-          value={activeDate}
-          onChange={(e) => update("date", e.target.value)}
-          className="text-sm px-3 py-2 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 dark:focus:ring-yellow-400/30 text-gray-700 dark:text-gray-200 cursor-pointer transition-all"
-        >
-          {DATES.map((d) => (
-            <option key={d.key} value={d.key}>{d.label}</option>
-          ))}
-        </select>
-
-        {/* Clear all */}
         {hasFilters && (
           <button
             onClick={() => { startT(() => router.push("/berita", { scroll: false })); }}
-            className="text-sm px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-zinc-700 rounded-xl transition-colors"
+            className="text-sm px-3 py-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-zinc-700 rounded-xl transition-colors flex-shrink-0"
           >
-            ✕ Hapus filter
+            ✕ Hapus
           </button>
         )}
       </div>
 
-      {/* Category pills - horizontal scroll */}
+      {/* Category pills */}
       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
         <button
           onClick={() => update("category", "")}
@@ -132,7 +91,7 @@ export default function BeritaFilters({
           Semua
         </button>
         {CATEGORIES.map((c) => {
-          const count = catCounts[c.label] ?? 0;
+          const count  = catCounts[c.label] ?? 0;
           const active = activeCategory === c.key;
           return (
             <button

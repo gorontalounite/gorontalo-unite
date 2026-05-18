@@ -15,9 +15,10 @@ export const metadata: Metadata = {
   openGraph: { title: "Berita Gorontalo | Gorontalo Unite", type: "website" },
 };
 
-// ─── Constants ──────────────────────────────────────────────────────────────
+// ─── Constants ───────────────────────────────────────────────────────────────
 
-const LIMIT = 16; // articles per page in filtered view
+const LIMIT     = 16; // articles per page in filtered view
+const CAT_LIMIT = 4;  // articles shown per category section
 
 const CAT_LABEL_MAP: Record<string, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c.key, c.label]),
@@ -27,7 +28,7 @@ const LABEL_TO_KEY: Record<string, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c.label, c.key]),
 );
 
-// ─── Helpers ────────────────────────────────────────────────────────────────
+// ─── Helpers ─────────────────────────────────────────────────────────────────
 
 function formatDate(d: string | null) {
   if (!d) return "";
@@ -36,9 +37,9 @@ function formatDate(d: string | null) {
 
 function sourceLabel(url: string | null) {
   if (!url) return null;
-  if (url.includes("gorontalokab"))  return "Pemkab Gorontalo";
-  if (url.includes("gorontalokota")) return "Pemkot Gorontalo";
-  if (url.includes("gorontaloprov")) return "Pemprov Gorontalo";
+  if (url.includes("gorontalokab"))  return "Pemkab";
+  if (url.includes("gorontalokota")) return "Pemkot";
+  if (url.includes("gorontaloprov")) return "Pemprov";
   return null;
 }
 
@@ -51,7 +52,7 @@ function getDateBound(key: string): string | null {
   return null;
 }
 
-// ─── Types ──────────────────────────────────────────────────────────────────
+// ─── Types ───────────────────────────────────────────────────────────────────
 
 type Article = {
   id: string; title: string; slug: string; excerpt: string | null;
@@ -59,7 +60,7 @@ type Article = {
   published_at: string | null; created_at: string; source_url: string | null; is_trending: boolean;
 };
 
-// ─── Sub-components ──────────────────────────────────────────────────────────
+// ─── Shared sub-components ───────────────────────────────────────────────────
 
 function CategoryBadges({ article }: { article: Article }) {
   const cats = article.categories?.length ? article.categories : [article.category];
@@ -78,6 +79,8 @@ function CategoryBadges({ article }: { article: Article }) {
     </div>
   );
 }
+
+// ─── Hero section components ─────────────────────────────────────────────────
 
 function FeaturedCard({ article }: { article: Article }) {
   return (
@@ -123,28 +126,6 @@ function FeaturedCard({ article }: { article: Article }) {
   );
 }
 
-function SideCard({ article }: { article: Article }) {
-  return (
-    <div className="relative group flex gap-3 py-3.5 border-b border-gray-100 dark:border-zinc-800 last:border-0">
-      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
-      {article.image_url && (
-        <div className="relative w-16 h-16 rounded-xl overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-zinc-800">
-          <Image src={article.image_url} alt={article.title} fill className="object-cover" unoptimized />
-        </div>
-      )}
-      <div className="flex-1 min-w-0 space-y-1">
-        <CategoryBadges article={article} />
-        <h3 className="relative z-[1] text-xs font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
-          {article.title}
-        </h3>
-        <p className="text-[11px] text-gray-400 dark:text-gray-500">
-          {formatDate(article.published_at ?? article.created_at)}
-        </p>
-      </div>
-    </div>
-  );
-}
-
 function HeroSideCard({ article }: { article: Article }) {
   return (
     <div className="relative group flex gap-4 py-4 border-b border-gray-100 dark:border-zinc-800 last:border-0">
@@ -166,6 +147,79 @@ function HeroSideCard({ article }: { article: Article }) {
     </div>
   );
 }
+
+// ─── Magazine category section components ────────────────────────────────────
+
+/** Large left card inside a category section */
+function MagazineFeatured({ article }: { article: Article }) {
+  return (
+    <div className="group relative flex flex-col h-full">
+      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
+      <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 mb-4 flex-shrink-0">
+        {article.image_url ? (
+          <Image
+            src={article.image_url} alt={article.title} fill
+            className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
+            unoptimized
+          />
+        ) : (
+          <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700" />
+        )}
+        {article.is_trending && (
+          <span className="absolute top-2.5 left-2.5 text-[10px] font-semibold bg-orange-500 text-white px-2 py-0.5 rounded-full">
+            Trending
+          </span>
+        )}
+      </div>
+      <div className="space-y-2 flex-1">
+        <CategoryBadges article={article} />
+        <h3 className="relative z-[1] font-display text-base sm:text-lg font-semibold text-gray-900 dark:text-white leading-snug line-clamp-3 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+          {article.title}
+        </h3>
+        {article.excerpt && (
+          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
+            {article.excerpt}
+          </p>
+        )}
+        <div className="flex items-center gap-2 text-[11px] text-gray-400 dark:text-gray-500">
+          <span>{formatDate(article.published_at ?? article.created_at)}</span>
+          {sourceLabel(article.source_url) && (
+            <>
+              <span className="w-0.5 h-0.5 rounded-full bg-gray-300 dark:bg-zinc-600" />
+              <span>{sourceLabel(article.source_url)}</span>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** Compact right-side card (thumbnail + title + date) */
+function MagazineCompact({ article }: { article: Article }) {
+  return (
+    <div className="relative group flex gap-3 py-3 border-b border-gray-100 dark:border-zinc-800 last:border-0">
+      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
+      {article.image_url ? (
+        <div className="relative w-[72px] h-[72px] rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-zinc-800">
+          <Image src={article.image_url} alt={article.title} fill className="object-cover" unoptimized />
+        </div>
+      ) : (
+        <div className="w-[72px] h-[72px] rounded-lg flex-shrink-0 bg-gray-100 dark:bg-zinc-800" />
+      )}
+      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
+        <h4 className="relative z-[1] text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+          {article.title}
+        </h4>
+        <p className="text-[11px] text-gray-400 dark:text-gray-500">
+          {formatDate(article.published_at ?? article.created_at)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+// ─── Grid card (filtered view) ───────────────────────────────────────────────
 
 function ArticleCard({ article }: { article: Article }) {
   return (
@@ -212,7 +266,7 @@ function ArticleCard({ article }: { article: Article }) {
   );
 }
 
-// ─── Category Section ─────────────────────────────────────────────────────────
+// ─── Category Section (magazine layout) ──────────────────────────────────────
 
 function CategorySection({
   cat,
@@ -223,23 +277,25 @@ function CategorySection({
   articles: Article[];
   totalCount: number;
 }) {
-  const colors = COLORS[cat.label] ?? DEFAULT_COLOR;
+  const colors     = COLORS[cat.label] ?? DEFAULT_COLOR;
   if (articles.length === 0) return null;
+
+  const totalPages = Math.ceil(totalCount / CAT_LIMIT);
+  const featured   = articles[0];
+  const rest       = articles.slice(1, 4);
 
   return (
     <section>
-      {/* Section header */}
+      {/* ── Section header ── */}
       <div className="flex items-center justify-between mb-5">
         <div className="flex items-center gap-3">
           <span className={`inline-block w-1 h-6 rounded-full ${colors.bg}`} />
-          <h2 className="font-display text-lg font-bold text-gray-900 dark:text-white">
+          <h2 className="font-display text-lg font-bold text-gray-900 dark:text-white tracking-tight">
             {cat.label}
           </h2>
-          {totalCount > 0 && (
-            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${colors.badge}`}>
-              {totalCount}
-            </span>
-          )}
+          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${colors.badge}`}>
+            {totalCount}
+          </span>
         </div>
         <Link
           href={`/berita/${cat.key}`}
@@ -252,25 +308,49 @@ function CategorySection({
         </Link>
       </div>
 
-      {/* Articles grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {articles.slice(0, 4).map((a) => (
-          <ArticleCard key={a.id} article={a} />
-        ))}
+      {/* ── Magazine grid ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-[3fr_2fr] gap-5">
+        {/* Left: featured */}
+        <MagazineFeatured article={featured} />
+
+        {/* Right: compact list */}
+        {rest.length > 0 && (
+          <div className="flex flex-col justify-between divide-y divide-gray-100 dark:divide-zinc-800">
+            {rest.map((a) => (
+              <MagazineCompact key={a.id} article={a} />
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Show more */}
-      {totalCount > 4 && (
-        <div className="mt-5">
-          <Link
-            href={`/berita/${cat.key}`}
-            className="inline-flex items-center gap-2 text-sm font-medium text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-200 dark:border-zinc-700 hover:border-gray-400 dark:hover:border-zinc-500 px-4 py-2 rounded-xl transition-all"
-          >
-            <span>+{totalCount - 4} artikel lainnya</span>
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
+      {/* ── Pagination ── */}
+      {totalPages > 1 && (
+        <div className="flex items-center gap-1.5 mt-5 pt-4 border-t border-gray-100 dark:border-zinc-800">
+          {/* Page 1 = current (active, not a link) */}
+          <span className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-semibold bg-gray-900 dark:bg-white text-white dark:text-gray-900 select-none">
+            1
+          </span>
+          {/* Pages 2 → min(totalPages, 5) */}
+          {Array.from({ length: Math.min(totalPages - 1, 4) }, (_, i) => i + 2).map((p) => (
+            <Link
+              key={p}
+              href={`/berita/${cat.key}?page=${p}`}
+              className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-700 hover:border-gray-400 dark:hover:border-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              {p}
+            </Link>
+          ))}
+          {totalPages > 5 && (
+            <>
+              <span className="text-xs text-gray-400 dark:text-gray-500 px-1">…</span>
+              <Link
+                href={`/berita/${cat.key}?page=${totalPages}`}
+                className="inline-flex items-center justify-center w-8 h-8 rounded-lg text-xs font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-700 hover:border-gray-400 dark:hover:border-zinc-500 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                {totalPages}
+              </Link>
+            </>
+          )}
         </div>
       )}
     </section>
@@ -278,6 +358,29 @@ function CategorySection({
 }
 
 // ─── Sidebar ─────────────────────────────────────────────────────────────────
+
+function SideCard({ article }: { article: Article }) {
+  return (
+    <div className="relative group flex gap-3 py-3 border-b border-gray-100 dark:border-zinc-800 last:border-0">
+      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
+      {article.image_url ? (
+        <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-zinc-800">
+          <Image src={article.image_url} alt={article.title} fill className="object-cover" unoptimized />
+        </div>
+      ) : (
+        <div className="w-14 h-14 rounded-lg flex-shrink-0 bg-gray-100 dark:bg-zinc-800" />
+      )}
+      <div className="flex-1 min-w-0">
+        <h4 className="relative z-[1] text-xs font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors mb-1">
+          {article.title}
+        </h4>
+        <p className="text-[11px] text-gray-400 dark:text-gray-500">
+          {formatDate(article.published_at ?? article.created_at)}
+        </p>
+      </div>
+    </div>
+  );
+}
 
 function Sidebar({
   trending,
@@ -296,22 +399,20 @@ function Sidebar({
         <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
           <div className="flex items-center gap-2 mb-1">
             <span className="text-sm">🔥</span>
-            <h3 className="font-display text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider">
+            <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest">
               Trending
             </h3>
           </div>
-          <div>
-            {trending.map((a) => (
-              <SideCard key={a.id} article={a} />
-            ))}
-          </div>
+          {trending.map((a) => (
+            <SideCard key={a.id} article={a} />
+          ))}
         </div>
       )}
 
       {/* Categories */}
       <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
-        <h3 className="font-display text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-4">
-          Semua Kategori
+        <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest mb-4">
+          Kategori
         </h3>
         <div className="flex flex-wrap gap-2">
           {CATEGORIES.map((c) => {
@@ -334,8 +435,8 @@ function Sidebar({
 
       {/* Sources */}
       <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
-        <h3 className="font-display text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">
-          Sumber Berita
+        <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest mb-3">
+          Sumber
         </h3>
         <div className="space-y-2">
           {[
@@ -352,7 +453,7 @@ function Sidebar({
                   : "border-gray-100 dark:border-zinc-700 text-gray-600 dark:text-gray-400 hover:border-gray-200 dark:hover:border-zinc-600 hover:bg-white dark:hover:bg-zinc-800"
               }`}
             >
-              <span className="text-base">{s.icon}</span>
+              <span>{s.icon}</span>
               {s.label}
             </Link>
           ))}
@@ -361,14 +462,14 @@ function Sidebar({
 
       {/* Quick links */}
       <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
-        <h3 className="font-display text-sm font-bold text-gray-900 dark:text-white uppercase tracking-wider mb-3">
+        <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest mb-3">
           Tautan
         </h3>
         <ul className="space-y-2">
           {[
-            { label: "Beranda", href: "/" },
-            { label: "Tentang Kami", href: "/about" },
-            { label: "Media Kit", href: "/media-kit" },
+            { label: "Beranda",    href: "/"          },
+            { label: "Tentang Kami", href: "/about"   },
+            { label: "Media Kit",  href: "/media-kit" },
           ].map((l) => (
             <li key={l.href}>
               <Link
@@ -389,7 +490,7 @@ function Sidebar({
   );
 }
 
-// ─── Page ────────────────────────────────────────────────────────────────────
+// ─── Page ─────────────────────────────────────────────────────────────────────
 
 interface PageProps {
   searchParams: Promise<{
@@ -429,7 +530,7 @@ export default async function BeritaPage({ searchParams }: PageProps) {
     }
   }
 
-  // ── Trending articles (always: sidebar) ──
+  // ── Trending (always: sidebar) ──
   let trendingArticles: Article[] = [];
   {
     const { data } = await admin
@@ -457,11 +558,10 @@ export default async function BeritaPage({ searchParams }: PageProps) {
   }
 
   // ── Default view: hero + category buckets ──
-  let heroArticles: Article[] = [];
-  let catBuckets: Record<string, Article[]> = {};
+  let heroArticles: Article[]                   = [];
+  let catBuckets: Record<string, Article[]>     = {};
 
   if (!hasFilters) {
-    // Hero (latest 4)
     const { data: heroData } = await admin
       .from("articles")
       .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending")
@@ -471,7 +571,6 @@ export default async function BeritaPage({ searchParams }: PageProps) {
       .limit(4);
     heroArticles = (heroData ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[];
 
-    // Recent articles for category sections (top 4 per category)
     const { data: allRecentData } = await admin
       .from("articles")
       .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending")
@@ -485,13 +584,12 @@ export default async function BeritaPage({ searchParams }: PageProps) {
       categories: (a.categories as string[] | null) ?? [],
     })) as Article[];
 
-    // Build per-category buckets (top 4 each, deduped by ID within bucket)
     for (const art of allRecent) {
       const cats = art.categories.length ? art.categories : [art.category];
       for (const lbl of cats) {
         if (lbl === "Portfolio") continue;
         if (!catBuckets[lbl]) catBuckets[lbl] = [];
-        if (catBuckets[lbl].length < 4 && !catBuckets[lbl].some((x) => x.id === art.id)) {
+        if (catBuckets[lbl].length < CAT_LIMIT && !catBuckets[lbl].some((x) => x.id === art.id)) {
           catBuckets[lbl].push(art);
         }
       }
@@ -500,8 +598,8 @@ export default async function BeritaPage({ searchParams }: PageProps) {
 
   // ── Filtered view: paginated grid ──
   let gridArticles: Article[] = [];
-  let totalCount    = 0;
-  let totalPages    = 1;
+  let totalCount               = 0;
+  let totalPages               = 1;
 
   if (hasFilters) {
     const offset = (page - 1) * LIMIT;
@@ -534,7 +632,7 @@ export default async function BeritaPage({ searchParams }: PageProps) {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         {/* ── PAGE HEADER ─────────────────────────────── */}
-        <div className="pt-10 pb-8 border-b border-gray-100 dark:border-zinc-800">
+        <div className="pt-10 pb-6 border-b border-gray-100 dark:border-zinc-800">
           <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
             <div>
               <span className="text-xs font-semibold uppercase tracking-widest text-brand dark:text-yellow-400">
@@ -557,6 +655,19 @@ export default async function BeritaPage({ searchParams }: PageProps) {
           </div>
         </div>
 
+        {/* ── FILTER BAR — sticky, right below header ── */}
+        <div className="py-4 border-b border-gray-100 dark:border-zinc-800 sticky top-0 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm z-20">
+          <Suspense fallback={<div className="h-14 animate-pulse bg-gray-100 dark:bg-zinc-800 rounded-xl" />}>
+            <BeritaFilters
+              activeCategory={catKey}
+              activeSource={source}
+              activeDate={date}
+              activeSearch={search}
+              catCounts={catCounts}
+            />
+          </Suspense>
+        </div>
+
         {/* ── HERO (default view only) ──────────────────── */}
         {!hasFilters && heroArticles.length > 0 && (
           <section className="py-10 border-b border-gray-100 dark:border-zinc-800">
@@ -573,20 +684,7 @@ export default async function BeritaPage({ searchParams }: PageProps) {
           </section>
         )}
 
-        {/* ── FILTER BAR (sticky) ──────────────────────── */}
-        <div className="py-5 border-b border-gray-100 dark:border-zinc-800 sticky top-0 bg-white/95 dark:bg-zinc-950/95 backdrop-blur-sm z-20">
-          <Suspense fallback={<div className="h-16 animate-pulse bg-gray-100 dark:bg-zinc-800 rounded-xl" />}>
-            <BeritaFilters
-              activeCategory={catKey}
-              activeSource={source}
-              activeDate={date}
-              activeSearch={search}
-              catCounts={catCounts}
-            />
-          </Suspense>
-        </div>
-
-        {/* ── MAIN LAYOUT (content + sidebar) ─────────── */}
+        {/* ── MAIN LAYOUT ─────────────────────────────── */}
         <div className="py-10 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-10 lg:gap-12 items-start">
 
           {/* ── CONTENT AREA ── */}
@@ -594,7 +692,6 @@ export default async function BeritaPage({ searchParams }: PageProps) {
             {hasFilters ? (
               /* ── Filtered results ── */
               <>
-                {/* Active filter label */}
                 <div className="flex items-center gap-3 mb-8">
                   <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
                   <span className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
@@ -631,51 +728,21 @@ export default async function BeritaPage({ searchParams }: PageProps) {
               </>
             ) : (
               /* ── Category sections ── */
-              <div className="space-y-12">
+              <div className="space-y-10 divide-y divide-gray-100 dark:divide-zinc-800">
                 {CATEGORIES.map((cat) => {
                   const articles = catBuckets[cat.label] ?? [];
                   const total    = catCounts[cat.label]  ?? 0;
                   if (articles.length === 0) return null;
                   return (
-                    <CategorySection
-                      key={cat.key}
-                      cat={cat}
-                      articles={articles}
-                      totalCount={total}
-                    />
+                    <div key={cat.key} className="pt-10 first:pt-0">
+                      <CategorySection
+                        cat={cat}
+                        articles={articles}
+                        totalCount={total}
+                      />
+                    </div>
                   );
                 })}
-
-                {/* Newsletter CTA */}
-                <section className="py-10 border-t border-gray-100 dark:border-zinc-800">
-                  <div className="max-w-md">
-                    <span className="text-xs font-semibold uppercase tracking-widest text-brand dark:text-yellow-400">
-                      Newsletter
-                    </span>
-                    <h2 className="font-display text-2xl font-bold text-gray-900 dark:text-white mt-2 mb-2">
-                      Jangan lewatkan berita terbaru
-                    </h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
-                      Rangkuman berita Gorontalo langsung di inbox Anda setiap minggu.
-                    </p>
-                    <form action="#" className="flex gap-2">
-                      <input
-                        type="email"
-                        placeholder="Masukkan email Anda"
-                        className="flex-1 px-4 py-2.5 text-sm bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand/30 dark:focus:ring-yellow-400/30 placeholder:text-gray-400 dark:text-white"
-                      />
-                      <button
-                        type="submit"
-                        className="px-5 py-2.5 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-medium rounded-xl hover:opacity-90 transition-opacity flex-shrink-0"
-                      >
-                        Daftar
-                      </button>
-                    </form>
-                    <p className="text-xs text-gray-400 dark:text-gray-500 mt-3">
-                      Gratis. Bisa berhenti kapan saja.
-                    </p>
-                  </div>
-                </section>
               </div>
             )}
           </div>
@@ -696,7 +763,6 @@ export default async function BeritaPage({ searchParams }: PageProps) {
         {/* ── FOOTER ─────────────────────────────────── */}
         <footer className="py-10 border-t border-gray-100 dark:border-zinc-800">
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-8 mb-10">
-            {/* Brand */}
             <div className="col-span-2 sm:col-span-1">
               <div className="font-display font-bold text-gray-900 dark:text-white mb-3 text-lg">
                 Gorontalo<br />Unite
@@ -706,7 +772,6 @@ export default async function BeritaPage({ searchParams }: PageProps) {
               </p>
             </div>
 
-            {/* Kategori */}
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">
                 Kategori
@@ -714,10 +779,8 @@ export default async function BeritaPage({ searchParams }: PageProps) {
               <ul className="space-y-2.5">
                 {CATEGORIES.slice(0, 5).map((c) => (
                   <li key={c.key}>
-                    <Link
-                      href={`/berita/${c.key}`}
-                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-yellow-400 transition-colors"
-                    >
+                    <Link href={`/berita/${c.key}`}
+                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-yellow-400 transition-colors">
                       {c.label}
                     </Link>
                   </li>
@@ -725,7 +788,6 @@ export default async function BeritaPage({ searchParams }: PageProps) {
               </ul>
             </div>
 
-            {/* More Kategori */}
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">
                 &nbsp;
@@ -733,10 +795,8 @@ export default async function BeritaPage({ searchParams }: PageProps) {
               <ul className="space-y-2.5">
                 {CATEGORIES.slice(5, 10).map((c) => (
                   <li key={c.key}>
-                    <Link
-                      href={`/berita/${c.key}`}
-                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-yellow-400 transition-colors"
-                    >
+                    <Link href={`/berita/${c.key}`}
+                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-yellow-400 transition-colors">
                       {c.label}
                     </Link>
                   </li>
@@ -744,7 +804,6 @@ export default async function BeritaPage({ searchParams }: PageProps) {
               </ul>
             </div>
 
-            {/* Links */}
             <div>
               <h4 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 mb-4">
                 Sumber
@@ -757,10 +816,8 @@ export default async function BeritaPage({ searchParams }: PageProps) {
                   { label: "Tentang Kami",      href: "/about"                 },
                 ].map((l) => (
                   <li key={l.href}>
-                    <Link
-                      href={l.href}
-                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-yellow-400 transition-colors"
-                    >
+                    <Link href={l.href}
+                      className="text-xs text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-yellow-400 transition-colors">
                       {l.label}
                     </Link>
                   </li>
@@ -769,21 +826,17 @@ export default async function BeritaPage({ searchParams }: PageProps) {
             </div>
           </div>
 
-          {/* Bottom bar */}
           <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-6 border-t border-gray-100 dark:border-zinc-800">
             <p className="text-xs text-gray-400 dark:text-gray-500">
               © {new Date().getFullYear()} Gorontalo Unite. Hak cipta dilindungi.
             </p>
             <div className="flex gap-4">
               {[
-                { label: "Kebijakan Privasi", href: "/privacy-policy" },
-                { label: "Syarat & Ketentuan", href: "/terms" },
+                { label: "Kebijakan Privasi",  href: "/privacy-policy" },
+                { label: "Syarat & Ketentuan", href: "/terms"           },
               ].map((l) => (
-                <Link
-                  key={l.href}
-                  href={l.href}
-                  className="text-xs text-gray-400 dark:text-gray-500 hover:text-brand dark:hover:text-yellow-400 transition-colors"
-                >
+                <Link key={l.href} href={l.href}
+                  className="text-xs text-gray-400 dark:text-gray-500 hover:text-brand dark:hover:text-yellow-400 transition-colors">
                   {l.label}
                 </Link>
               ))}
