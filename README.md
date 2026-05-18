@@ -86,7 +86,8 @@ gorontalo-unite/
 │   │   ├── media-kit/
 │   │   │   ├── page.tsx              # /media-kit — route + metadata
 │   │   │   ├── MediaKitPage.tsx      # Interactive Instagram media kit (client)
-│   │   │   └── GrowthCharts.tsx      # Pure SVG area charts (no SSR mismatch)
+│   │   │   ├── GrowthCharts.tsx      # Pure SVG area charts (no SSR mismatch)
+│   │   │   └── topPostsData.ts       # Top 10 posts per bulan (442 posts, dari CSV)
 │   │   ├── myrag/page.tsx            # RAG upload tool
 │   │   ├── offline/page.tsx          # PWA offline fallback
 │   │   │
@@ -321,11 +322,13 @@ Role-gated — hanya `admin` dan `editor`
 - Breakdown interaksi (Likes, Shares, Saves, Comments, Reposts) dengan bar chart
 - **SVG area charts** (`GrowthCharts`) — pure SVG tanpa library, no SSR/hydration mismatch
 - **Top konten — bento linktree style**: rank badge, title, stats (views/reach/likes), link ↗ ke Instagram
+  - Top 10 per bulan berdasarkan Views atau Reach — filter bulan (Mei 2025 – Mar 2026) via dropdown
+  - Data real dari CSV export Instagram (442 posts, 11 bulan) — judul asli caption, URL Instagram asli
 - **Rata-rata performa** — 3-card grid (Reels/Story/Feed Post) dengan highlight Reels sebagai top performer
 - **Audience demografi**: gender split, rentang usia, top 10 kota (collapsible — tampil 5 dulu), heatmap waktu aktif (7 hari × 6 slot jam)
-- **Audience interests** — tag berdasarkan pola konsumsi konten
-- **Rate card** — 4 paket endorsement (Story / Feed Post / Reel / Full Campaign) dengan harga dan deskripsi
+- **Audience interests** — 8 topik tag berdasarkan pola konsumsi konten
 - **Trust section** — 3 USP: hyperlocal reach, engagement rate, total views/tahun
+- **Brand Partner grid** — 33 logo klien (ACE Hardware s.d. Wulling Motor), diurutkan abjad, logo via Clearbit API, fallback initials berwarna jika logo tidak tersedia
 - **CTA** — WhatsApp booking + link ke Services
 
 ### 🎨 UI/UX
@@ -517,7 +520,8 @@ Lihat `.env.example` untuk detail lengkap.
 | v0.5 | Sistem komentar + moderasi, auth polish (magic link, profile), Schema.org JSON-LD, SEO (sitemap/robots/canonical), `/good-news` upgrade, PWA penuh, sign-up dark mode |
 | v0.6 | **Affiliate upgrade** (30 produk, search/filter/sort, click tracking, admin stats) · **AI streaming** (SSE, voice input, share, model fallback) · **Block editor lanjutan** (drag&drop, undo/redo, autosave, table block, callout block, paste cleanup, fullscreen) |
 | v0.7 | **Portal `/berita` redesign** (22 kategori selalu tampil, overlay link pattern, semua badge kategori clickable) · **Multi-kategori per artikel** (kolom `categories text[]`, backfill, editor multi-select checkbox, `contains()` filter) · **Admin pagination server-side** (semua 9.300+ artikel accessible, filter/sort/paginasi via URL params) · **Hapus 1.561 artikel Pemkab** (konten singkat & tidak relevan) · **`SidebarNews` + `LandingPage` kategori linkable** |
-| v0.8 | **Media Kit halaman `/media-kit`** — interactive Instagram insight page untuk keperluan endorsement: hero + follower/reach/views stats, period selector (7 hari/30 hari/3 bln/6 bln/1 tahun), metric grid reaktif, breakdown interaksi, SVG area charts (GrowthCharts), content performance bento-style, top konten linktree cards dengan link Instagram, rata-rata performa 3-card grid, audience demografi (gender/usia/kota collapsible/heatmap waktu aktif), rate card 4 paket endorsement, trust section, CTA WhatsApp |
+| v0.8 | **Media Kit halaman `/media-kit`** — interactive Instagram insight page untuk keperluan endorsement: hero + follower/reach/views stats, period selector (7 hari/30 hari/3 bln/6 bln/1 tahun), metric grid reaktif, breakdown interaksi, SVG area charts (GrowthCharts), content performance bento-style, top konten linktree cards dengan link Instagram, rata-rata performa 3-card grid, audience demografi (gender/usia/kota collapsible/heatmap waktu aktif), trust section, CTA WhatsApp |
+| v0.9 | **Media Kit polish** — ganti "GU" text dengan logo resmi Gorontalo Unite · **top 10 konten dari data real** (442 posts CSV Mei 2025–Mar 2026, title dari caption asli, link ke Instagram, filter bulan + Views/Reach sort) · **hapus Rate Card** (section tidak diperlukan) · **brand partner grid** — 33 logo klien diurutkan abjad dengan Clearbit Logo API + fallback initials · period selector bug fix (Tailwind v4 opacity issue → inline style) |
 
 ---
 
@@ -636,4 +640,4 @@ Lihat juga: [docs/COMMUNITY.md](./docs/COMMUNITY.md)
 
 ---
 
-*Diperbarui: Mei 2026 · v0.8*
+*Diperbarui: Mei 2026 · v0.9*
