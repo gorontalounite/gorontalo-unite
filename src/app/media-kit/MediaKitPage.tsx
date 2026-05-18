@@ -169,63 +169,6 @@ const AUDIENCE_INTERESTS = [
 ];
 
 
-// ── Client list (sorted alphabetically) ──────────────────────
-const CLIENTS = [
-  { name: "ACE Hardware",         short: "ACE",      domain: "acehardware.co.id"    },
-  { name: "Alfamidi",             short: "Alfamidi", domain: "alfamidi.co.id"       },
-  { name: "AZKO",                 short: "AZKO",     domain: "azkopaints.com"       },
-  { name: "Bank Indonesia",       short: "BI",       domain: "bi.go.id"             },
-  { name: "Celcius",              short: "Celcius",  domain: "celcius.co.id"        },
-  { name: "Daihatsu",             short: "Daihatsu", domain: "daihatsu.com"         },
-  { name: "Digiplus",             short: "Digi+",    domain: "digiplus.co.id"       },
-  { name: "ERHA Skincare",        short: "ERHA",     domain: "erha.com"             },
-  { name: "Erigo",                short: "Erigo",    domain: "erigostore.com"       },
-  { name: "Erafone",              short: "Erafone",  domain: "erafone.com"          },
-  { name: "Es Teh",               short: "Es Teh",   domain: "esteh.id"             },
-  { name: "Fore",                 short: "Fore",     domain: "fore.coffee"          },
-  { name: "Garuda Indonesia",     short: "Garuda",   domain: "garuda-indonesia.com" },
-  { name: "Gojek",                short: "Gojek",    domain: "gojek.com"            },
-  { name: "Gramedia",             short: "Gramedia", domain: "gramedia.com"         },
-  { name: "Honda Prospect Motor", short: "Honda",    domain: "honda.com"            },
-  { name: "iBox",                 short: "iBox",     domain: "ibox.co.id"           },
-  { name: "Indogrosir",           short: "Indogr.",  domain: "indogrosir.co.id"     },
-  { name: "Informa",              short: "Informa",  domain: "informa.co.id"        },
-  { name: "KFC",                  short: "KFC",      domain: "kfc.com"              },
-  { name: "Modena Home Center",   short: "Modena",   domain: "modena.id"            },
-  { name: "MR DIY",               short: "MR DIY",   domain: "mrdiy.com"            },
-  { name: "Nissan",               short: "Nissan",   domain: "nissan.com"           },
-  { name: "Olymplast",            short: "Olympl.",  domain: "olymplast.com"        },
-  { name: "Panasonic",            short: "Panason.", domain: "panasonic.com"        },
-  { name: "Pertamina",            short: "Pertam.",  domain: "pertamina.com"        },
-  { name: "Samsung",              short: "Samsung",  domain: "samsung.com"          },
-  { name: "Shell",                short: "Shell",    domain: "shell.com"            },
-  { name: "Toyota Hasjrat Abadi", short: "Toyota",   domain: "toyota.co.id"         },
-  { name: "Traveloka",            short: "Traveloka",domain: "traveloka.com"        },
-  { name: "Wardah",               short: "Wardah",   domain: "wardahbeauty.com"     },
-  { name: "Watch Club",           short: "Watch Cl.",domain: "watchclub.co.id"      },
-  { name: "Wulling Motor",        short: "Wulling",  domain: "wuling.id"            },
-];
-
-// ── ClientLogo sub-component ──────────────────────────────────
-function ClientLogo({ name, short }: { name: string; short: string }) {
-  const palette = ["#F5C400","#4ade80","#60a5fa","#c084fc","#fb923c","#f87171","#34d399","#38bdf8","#a78bfa","#fbbf24"];
-  const accent  = palette[name.charCodeAt(0) % palette.length];
-  return (
-    <div className="flex flex-col items-center gap-1.5">
-      <div
-        className="w-14 h-14 rounded-2xl border flex items-center justify-center"
-        style={{ backgroundColor: accent + "18", borderColor: accent + "40" }}
-      >
-        <span className="text-[11px] font-bold text-center leading-tight px-1" style={{ color: accent }}>
-          {short}
-        </span>
-      </div>
-      <p className="text-[10px] text-center text-gray-500 dark:text-zinc-400 leading-tight w-14 truncate">
-        {name.split(" ")[0]}
-      </p>
-    </div>
-  );
-}
 
 // ── Helpers ───────────────────────────────────────────────────
 function fmtNum(n: number): string {
@@ -777,22 +720,6 @@ export default function MediaKitPage() {
             ))}
           </div>
 
-          <div className="rounded-2xl border border-gray-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6">
-            <div className="flex items-center justify-between mb-5">
-              <p className="text-xs font-semibold uppercase tracking-widest text-zinc-400">Brand Partner</p>
-              <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full" style={{ backgroundColor: "#F5C40018", color: "#ca8a04" }}>
-                {CLIENTS.length} brands
-              </span>
-            </div>
-            <div className="grid grid-cols-6 sm:grid-cols-8 gap-3">
-              {CLIENTS.map((c) => (
-                <ClientLogo key={c.name} name={c.name} short={c.short} />
-              ))}
-            </div>
-            <p className="text-[10px] text-zinc-400 dark:text-zinc-600 mt-5 text-center">
-              Brand lokal &amp; nasional yang pernah berkolaborasi dengan Gorontalo Unite
-            </p>
-          </div>
         </div>
       </section>
 
