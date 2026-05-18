@@ -83,6 +83,10 @@ gorontalo-unite/
 │   │   ├── shop/page.tsx
 │   │   ├── privacy-policy/page.tsx
 │   │   ├── terms/page.tsx
+│   │   ├── media-kit/
+│   │   │   ├── page.tsx              # /media-kit — route + metadata
+│   │   │   ├── MediaKitPage.tsx      # Interactive Instagram media kit (client)
+│   │   │   └── GrowthCharts.tsx      # Pure SVG area charts (no SSR mismatch)
 │   │   ├── myrag/page.tsx            # RAG upload tool
 │   │   ├── offline/page.tsx          # PWA offline fallback
 │   │   │
@@ -310,6 +314,20 @@ Role-gated — hanya `admin` dan `editor`
 - **Portfolio section tabs:** 5 section masing-masing punya BlockCanvas sendiri
 - Live preview, auto-save indikator
 
+### 📊 Media Kit (`/media-kit`)
+- **Interactive Instagram insight page** — dirancang untuk pitch endorsement ke brand
+- **Period selector** reaktif: 7 hari / 30 hari / 3 bulan / 6 bulan / 1 tahun
+- Metric grid: Accounts Reached, Total Views, Interaksi, ER, Follower Growth — semua update per periode
+- Breakdown interaksi (Likes, Shares, Saves, Comments, Reposts) dengan bar chart
+- **SVG area charts** (`GrowthCharts`) — pure SVG tanpa library, no SSR/hydration mismatch
+- **Top konten — bento linktree style**: rank badge, title, stats (views/reach/likes), link ↗ ke Instagram
+- **Rata-rata performa** — 3-card grid (Reels/Story/Feed Post) dengan highlight Reels sebagai top performer
+- **Audience demografi**: gender split, rentang usia, top 10 kota (collapsible — tampil 5 dulu), heatmap waktu aktif (7 hari × 6 slot jam)
+- **Audience interests** — tag berdasarkan pola konsumsi konten
+- **Rate card** — 4 paket endorsement (Story / Feed Post / Reel / Full Campaign) dengan harga dan deskripsi
+- **Trust section** — 3 USP: hyperlocal reach, engagement rate, total views/tahun
+- **CTA** — WhatsApp booking + link ke Services
+
 ### 🎨 UI/UX
 - Dark mode penuh (class-based `dark:`)
 - Admin dashboard `force-light` (selalu terang)
@@ -499,6 +517,7 @@ Lihat `.env.example` untuk detail lengkap.
 | v0.5 | Sistem komentar + moderasi, auth polish (magic link, profile), Schema.org JSON-LD, SEO (sitemap/robots/canonical), `/good-news` upgrade, PWA penuh, sign-up dark mode |
 | v0.6 | **Affiliate upgrade** (30 produk, search/filter/sort, click tracking, admin stats) · **AI streaming** (SSE, voice input, share, model fallback) · **Block editor lanjutan** (drag&drop, undo/redo, autosave, table block, callout block, paste cleanup, fullscreen) |
 | v0.7 | **Portal `/berita` redesign** (22 kategori selalu tampil, overlay link pattern, semua badge kategori clickable) · **Multi-kategori per artikel** (kolom `categories text[]`, backfill, editor multi-select checkbox, `contains()` filter) · **Admin pagination server-side** (semua 9.300+ artikel accessible, filter/sort/paginasi via URL params) · **Hapus 1.561 artikel Pemkab** (konten singkat & tidak relevan) · **`SidebarNews` + `LandingPage` kategori linkable** |
+| v0.8 | **Media Kit halaman `/media-kit`** — interactive Instagram insight page untuk keperluan endorsement: hero + follower/reach/views stats, period selector (7 hari/30 hari/3 bln/6 bln/1 tahun), metric grid reaktif, breakdown interaksi, SVG area charts (GrowthCharts), content performance bento-style, top konten linktree cards dengan link Instagram, rata-rata performa 3-card grid, audience demografi (gender/usia/kota collapsible/heatmap waktu aktif), rate card 4 paket endorsement, trust section, CTA WhatsApp |
 
 ---
 
@@ -617,4 +636,4 @@ Lihat juga: [docs/COMMUNITY.md](./docs/COMMUNITY.md)
 
 ---
 
-*Diperbarui: Mei 2026 · v0.7*
+*Diperbarui: Mei 2026 · v0.8*

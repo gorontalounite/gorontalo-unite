@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
       const adminClient = createAdminClient();
       let kbChunks: { id: string; title: string; content: string; category: string }[] = [];
 
-      // Try vector search first, fall back to full-text
+      // Try hybrid search first (vector + BM25 RRF), fall back to FTS-only
       try {
         const embRes = await fetch(
           `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`,
@@ -95,18 +95,19 @@ export async function POST(req: NextRequest) {
         const embJson = embRes.ok ? (await embRes.json() as { embedding?: number[] }) : null;
         const queryVec = embJson?.embedding;
         if (queryVec) {
-          const { data } = await adminClient.rpc("match_knowledge_base", {
+          const { data } = await adminClient.rpc("search_knowledge_base_hybrid", {
             query_embedding: JSON.stringify(queryVec),
-            match_count: 4,
-            min_similarity: 0.45,
+            search_query: message,
+            match_count: 8,
+            min_similarity: 0.35,
           });
           kbChunks = (data ?? []) as typeof kbChunks;
         } else throw new Error("no embedding");
       } catch {
-        // Vector search failed, fall back to full-text
+        // Hybrid search failed, fall back to full-text
         const { data } = await adminClient.rpc("search_knowledge_base_fts", {
           search_query: message,
-          match_count: 4,
+          match_count: 8,
         });
         kbChunks = (data ?? []) as typeof kbChunks;
       }

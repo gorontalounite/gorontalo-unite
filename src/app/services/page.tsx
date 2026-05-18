@@ -90,6 +90,27 @@ export default async function ServicesPage() {
         </p>
       </div>
 
+      {/* Media Kit banner */}
+      <Link
+        href="/media-kit"
+        className="flex items-center gap-4 p-5 rounded-2xl border border-yellow-200 dark:border-yellow-500/30 bg-yellow-50 dark:bg-yellow-950/20 hover:shadow-sm transition-all group mb-6"
+      >
+        <div className="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 bg-yellow-400 text-black font-bold text-sm">
+          MK
+        </div>
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-gray-900 dark:text-yellow-300 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+            Media Kit &amp; Rate Card
+          </p>
+          <p className="text-xs text-gray-500 dark:text-zinc-400 mt-0.5 leading-relaxed">
+            Insight Instagram @gorontalo.unite · 63K followers · Rate card endorse otomatis
+          </p>
+        </div>
+        <svg className="w-4 h-4 text-yellow-500 dark:text-yellow-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+        </svg>
+      </Link>
+
       {/* Services list */}
       <div className="space-y-3">
         {services.map((s) => (
