@@ -210,13 +210,15 @@ gorontalo-unite/
 - **Model fallback** — jika `llama-3.3-70b-versatile` gagal, retry otomatis dengan `mixtral-8x7b-32768`
 - Riwayat chat tersimpan di DB per user (tabel `conversations`)
 
-### 📰 Portal Berita (`/good-news`)
-- **Featured hero** — artikel trending / artikel terbaru tampil sebagai hero card besar
-- **Search real-time** — filter judul saat mengetik
-- **Filter kategori** — chip interaktif (Wisata, Budaya, Kuliner, dll)
-- **Sort** — Terbaru / Terpopuler (by `view_count`)
-- **Pagination** — 12 artikel/halaman dengan ellipsis cerdas
-- Thumbnail, kategori badge, tanggal, view count di setiap card
+### 📰 Portal Berita (`/berita` + `/good-news`)
+- **`/berita`** — portal utama dengan redesign lengkap:
+  - **22 kategori** selalu tampil di filter bar (Politik, Pemerintahan, Wisata, Budaya, Ekonomi, Bisnis, Pendidikan, Sosial, Kemasyarakatan, Kesehatan, Pertanian, Perikanan, Teknologi, Digital, Infrastruktur, Pembangunan, Hukum, Keamanan, Agama, Lingkungan, Alam, Olahraga)
+  - **Multi-kategori per artikel** — satu artikel bisa masuk beberapa kategori sekaligus
+  - **Kategori badge klik** — setiap badge kategori di card (featured, thumbnail, list, landing) adalah link langsung ke halaman kategori `/berita/[key]`
+  - **Overlay link pattern** — seluruh card klik ke artikel (via absolute link z-1), badge kategori di atas (z-2); valid HTML tanpa nested `<a>`
+  - **`/berita/[key]`** — halaman tiap kategori dengan filter `categories @> [label]` (Supabase `contains`)
+- **`/good-news`** — versi lama portal berita (tetap aktif):
+  - Featured hero, search real-time, filter kategori, sort Terbaru/Terpopuler, pagination 12/halaman
 
 ### 📄 Detail Artikel (`/news/:slug`)
 - Block content (JSON) atau Markdown fallback (legacy)
@@ -284,7 +286,7 @@ Role-gated — hanya `admin` dan `editor`
 
 | Halaman | Fitur |
 |---|---|
-| `/admin/news` | Tabel: global search, filter kategori/status, sort kolom, paginasi 10/25/50 |
+| `/admin/news` | **Server-side pagination** — akses semua artikel (9.300+), global search, filter kategori/status, sort kolom, paginasi 10/25/50 via URL params |
 | `/admin/news/new` | Block editor lengkap |
 | `/admin/news/edit/:id` | Edit artikel + **CommentModerator** panel (approve/reject/delete) |
 | `/admin/portfolio` | Card grid portofolio |
@@ -304,7 +306,7 @@ Role-gated — hanya `admin` dan `editor`
 - **Fullscreen mode** — tombol ⛶ di TopBar, `document.requestFullscreen()` + CSS overlay fallback
 - **Block Table** — editable cells (contentEditable), +/- baris/kolom, toggle header row
 - **Block Callout** — 4 varian: info (biru) / warning (amber) / success (hijau) / error (merah), icon selector
-- **Sidebar:** Status & Visibilitas, Permalink (auto-fill + override), Kategori (preset + custom), Tags, Gambar Unggulan, SEO panel, Diskusi
+- **Sidebar:** Status & Visibilitas, Permalink (auto-fill + override), **Kategori multi-select** (22 preset, checkbox, simpan ke `categories[]` + `category` pertama untuk backward compat), Tags, Gambar Unggulan, SEO panel, Diskusi
 - **Portfolio section tabs:** 5 section masing-masing punya BlockCanvas sendiri
 - Live preview, auto-save indikator
 
@@ -324,7 +326,8 @@ Role-gated — hanya `admin` dan `editor`
 | `id` | uuid PK | |
 | `title` | text | |
 | `slug` | text unique | URL identifier |
-| `category` | text | Wisata, Budaya, Kuliner, dll |
+| `category` | text | Kategori utama (backward compat, selalu = `categories[0]`) |
+| `categories` | text[] | Multi-kategori (backfilled dari `category`; query via `@>` contains) |
 | `content` | text | Legacy Markdown |
 | `blocks` | jsonb | Block editor content (JSON array) |
 | `excerpt` | text | Ringkasan |
@@ -339,6 +342,8 @@ Role-gated — hanya `admin` dan `editor`
 | `seo_description` | text | |
 | `focus_keyword` | text | |
 | `schema_type` | text | `Article` / `NewsArticle` / `BlogPosting` / `CreativeWork` |
+| `source_url` | text | URL sumber scrape asli (Pemprov, Pemkot, dll) |
+| `extra_images` | text[] | Galeri gambar tambahan (legacy scrape) |
 | `project_url` | text | CPT: live demo URL |
 | `client_name` | text | CPT: nama klien |
 | `project_date` | date | CPT: tanggal proyek |
@@ -493,30 +498,41 @@ Lihat `.env.example` untuk detail lengkap.
 | v0.4 | Rich text editor, slug auto-fill, custom category, SEO panel, portfolio sections |
 | v0.5 | Sistem komentar + moderasi, auth polish (magic link, profile), Schema.org JSON-LD, SEO (sitemap/robots/canonical), `/good-news` upgrade, PWA penuh, sign-up dark mode |
 | v0.6 | **Affiliate upgrade** (30 produk, search/filter/sort, click tracking, admin stats) · **AI streaming** (SSE, voice input, share, model fallback) · **Block editor lanjutan** (drag&drop, undo/redo, autosave, table block, callout block, paste cleanup, fullscreen) |
+| v0.7 | **Portal `/berita` redesign** (22 kategori selalu tampil, overlay link pattern, semua badge kategori clickable) · **Multi-kategori per artikel** (kolom `categories text[]`, backfill, editor multi-select checkbox, `contains()` filter) · **Admin pagination server-side** (semua 9.300+ artikel accessible, filter/sort/paginasi via URL params) · **Hapus 1.561 artikel Pemkab** (konten singkat & tidak relevan) · **`SidebarNews` + `LandingPage` kategori linkable** |
 
 ---
 
 ### 🔴 PRIORITAS TINGGI
 
-#### 1. Halaman `/portfolio` Upgrade
+#### 1. LeftDrawer Dark Mode Fix
+- Background container belum dark mode pada mobile drawer
+- Klik avatar/nama profile belum navigasi ke `/profile`
+
+#### 2. Halaman `/portfolio` Upgrade
 - Filter by stack (`web-design`, `programming`, `data`, dll)
 - Animasi masuk card (fade in / slide up)
 - Lightbox untuk galeri gambar
 - Statistik di hero section (jumlah proyek, klien, total stack)
 
-#### 2. Analytics Dashboard Admin
+#### 2. Re-scrape Artikel Berita
+- 1.786 artikel mengandung konten navigasi sidebar dari scraper lama (~2.000 char limit)
+- 149 artikel dengan judul = tanggal (scraper bug)
+- Perlu scraper baru dengan CSS selector spesifik ke body artikel, tanpa batas karakter
+- Kolom `source_url` tersedia di semua artikel hasil scrape lama (Pemprov, Pemkot Gorontalo)
+
+#### 3. Analytics Dashboard Admin
 - Halaman `/admin/analytics`
 - Grafik view count per artikel (7 / 30 hari) dengan chart
 - Artikel terpopuler & konten trending
 - Statistik chat AI (jumlah pertanyaan per hari)
 - Sumber traffic / referrer
 
-#### 3. Notifikasi Real-time
+#### 4. Notifikasi Real-time
 - Toast notification setelah simpan artikel (admin)
 - Email notifikasi ke admin saat ada komentar baru (Supabase Edge Function)
 - Real-time counter view (Supabase Realtime subscription)
 
-#### 4. Rate Limiting & API Security
+#### 5. Rate Limiting & API Security
 - `/api/chat` — rate limit per IP (Vercel Edge Middleware atau Upstash Redis)
 - `/api/articles/[slug]/comments` POST — anti-spam (min interval antar submit)
 - CSRF protection untuk mutation endpoints
@@ -576,6 +592,8 @@ Lihat `.env.example` untuk detail lengkap.
 | **Error boundaries** | Belum ada React Error Boundary untuk blok editor |
 | **API auth middleware** | `/api/admin/*` validasi role masih per-route, belum terpusat |
 | **Test coverage** | Belum ada unit test / integration test |
+| **Konten artikel scrape** | 1.786 artikel berisi konten navigasi sidebar, 149 artikel berjudul tanggal — perlu re-scrape dari `source_url` |
+| **`categories` backfill** | Artikel lama di-backfill `categories = [category]` (single item) — perlu update manual jika ingin multi-kategori |
 | **Stale files** | `GoodNewsClient.tsx`, `PortfolioAdminClient.tsx` mungkin sudah tidak dipakai — perlu audit |
 | **SW update flow** | Service worker update (skipWaiting) belum ada UI "versi baru tersedia, reload?" |
 | **Comment pagination** | Komentar load semua sekaligus, belum ada pagination |
@@ -599,4 +617,4 @@ Lihat juga: [docs/COMMUNITY.md](./docs/COMMUNITY.md)
 
 ---
 
-*Diperbarui: Mei 2026 · v0.7**
+*Diperbarui: Mei 2026 · v0.7*
