@@ -357,139 +357,6 @@ function CategorySection({
   );
 }
 
-// ─── Sidebar ─────────────────────────────────────────────────────────────────
-
-function SideCard({ article }: { article: Article }) {
-  return (
-    <div className="relative group flex gap-3 py-3 border-b border-gray-100 dark:border-zinc-800 last:border-0">
-      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
-      {article.image_url ? (
-        <div className="relative w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-zinc-800">
-          <Image src={article.image_url} alt={article.title} fill className="object-cover" unoptimized />
-        </div>
-      ) : (
-        <div className="w-14 h-14 rounded-lg flex-shrink-0 bg-gray-100 dark:bg-zinc-800" />
-      )}
-      <div className="flex-1 min-w-0">
-        <h4 className="relative z-[1] text-xs font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors mb-1">
-          {article.title}
-        </h4>
-        <p className="text-[11px] text-gray-400 dark:text-gray-500">
-          {formatDate(article.published_at ?? article.created_at)}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function Sidebar({
-  trending,
-  catCounts,
-  activeSource,
-}: {
-  trending: Article[];
-  catCounts: Record<string, number>;
-  activeSource: string;
-}) {
-  return (
-    <aside className="space-y-6">
-
-      {/* Trending */}
-      {trending.length > 0 && (
-        <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-sm">🔥</span>
-            <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest">
-              Trending
-            </h3>
-          </div>
-          {trending.map((a) => (
-            <SideCard key={a.id} article={a} />
-          ))}
-        </div>
-      )}
-
-      {/* Categories */}
-      <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
-        <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest mb-4">
-          Kategori
-        </h3>
-        <div className="flex flex-wrap gap-2">
-          {CATEGORIES.map((c) => {
-            const count = catCounts[c.label] ?? 0;
-            if (count === 0) return null;
-            const cls = (COLORS[c.label] ?? DEFAULT_COLOR).badge;
-            return (
-              <Link
-                key={c.key}
-                href={`/berita/${c.key}`}
-                className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2.5 py-1 rounded-full transition-opacity hover:opacity-75 ${cls}`}
-              >
-                {c.label}
-                <span className="opacity-50 font-normal">{count}</span>
-              </Link>
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Sources */}
-      <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
-        <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest mb-3">
-          Sumber
-        </h3>
-        <div className="space-y-2">
-          {[
-            { key: "pemprov", label: "Pemprov Gorontalo", icon: "🏛️" },
-            { key: "pemkab",  label: "Pemkab Gorontalo",  icon: "🏢" },
-            { key: "pemkot",  label: "Pemkot Gorontalo",  icon: "🏙️" },
-          ].map((s) => (
-            <Link
-              key={s.key}
-              href={`/berita?source=${s.key}`}
-              className={`flex items-center gap-2.5 text-sm px-3.5 py-2.5 rounded-xl border transition-all ${
-                activeSource === s.key
-                  ? "border-brand dark:border-yellow-400 bg-brand/5 dark:bg-yellow-400/5 text-brand dark:text-yellow-400 font-medium"
-                  : "border-gray-100 dark:border-zinc-700 text-gray-600 dark:text-gray-400 hover:border-gray-200 dark:hover:border-zinc-600 hover:bg-white dark:hover:bg-zinc-800"
-              }`}
-            >
-              <span>{s.icon}</span>
-              {s.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-
-      {/* Quick links */}
-      <div className="rounded-2xl border border-gray-100 dark:border-zinc-800 bg-gray-50 dark:bg-zinc-900/50 p-5">
-        <h3 className="text-xs font-bold text-gray-900 dark:text-white uppercase tracking-widest mb-3">
-          Tautan
-        </h3>
-        <ul className="space-y-2">
-          {[
-            { label: "Beranda",    href: "/"          },
-            { label: "Tentang Kami", href: "/about"   },
-            { label: "Media Kit",  href: "/media-kit" },
-          ].map((l) => (
-            <li key={l.href}>
-              <Link
-                href={l.href}
-                className="text-sm text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-yellow-400 transition-colors flex items-center gap-1.5"
-              >
-                <svg className="w-3 h-3 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-                {l.label}
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </div>
-
-    </aside>
-  );
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 interface PageProps {
@@ -527,33 +394,6 @@ export default async function BeritaPage({ searchParams }: PageProps) {
       : [row.category as string];
     for (const lbl of cats) {
       if (lbl && lbl !== "Portfolio") catCounts[lbl] = (catCounts[lbl] ?? 0) + 1;
-    }
-  }
-
-  // ── Trending (always: sidebar) ──
-  let trendingArticles: Article[] = [];
-  {
-    const { data } = await admin
-      .from("articles")
-      .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending")
-      .eq("published", true)
-      .neq("category", "Portfolio")
-      .eq("is_trending", true)
-      .order("published_at", { ascending: false })
-      .limit(5);
-    trendingArticles = (data ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[];
-    if (trendingArticles.length < 3) {
-      const { data: fallback } = await admin
-        .from("articles")
-        .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending")
-        .eq("published", true)
-        .neq("category", "Portfolio")
-        .order("view_count", { ascending: false })
-        .limit(5);
-      trendingArticles = [
-        ...trendingArticles,
-        ...(fallback ?? []).map((a) => ({ ...a, categories: (a.categories as string[] | null) ?? [] })) as Article[],
-      ].slice(0, 5);
     }
   }
 
@@ -685,7 +525,7 @@ export default async function BeritaPage({ searchParams }: PageProps) {
         )}
 
         {/* ── MAIN LAYOUT ─────────────────────────────── */}
-        <div className="py-10 grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-10 lg:gap-12 items-start">
+        <div className="py-10">
 
           {/* ── CONTENT AREA ── */}
           <div>
@@ -745,17 +585,6 @@ export default async function BeritaPage({ searchParams }: PageProps) {
                 })}
               </div>
             )}
-          </div>
-
-          {/* ── SIDEBAR ── */}
-          <div className="hidden lg:block">
-            <div className="sticky top-24">
-              <Sidebar
-                trending={trendingArticles}
-                catCounts={catCounts}
-                activeSource={source}
-              />
-            </div>
           </div>
 
         </div>
