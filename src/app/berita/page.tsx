@@ -148,14 +148,13 @@ function HeroSideCard({ article }: { article: Article }) {
   );
 }
 
-// ─── Magazine category section components ────────────────────────────────────
+// ─── Category section featured card (mirrors hero FeaturedCard) ───────────────
 
-/** Large left card inside a category section */
-function MagazineFeatured({ article }: { article: Article }) {
+function CatFeaturedCard({ article }: { article: Article }) {
   return (
-    <div className="group relative flex flex-col h-full">
+    <div className="group relative h-full">
       <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
-      <div className="relative aspect-[4/3] rounded-xl overflow-hidden bg-gray-100 dark:bg-zinc-800 mb-4 flex-shrink-0">
+      <div className="relative aspect-[4/3] sm:aspect-[3/2] rounded-2xl overflow-hidden bg-gray-100 dark:bg-zinc-800 mb-5">
         {article.image_url ? (
           <Image
             src={article.image_url} alt={article.title} fill
@@ -166,54 +165,30 @@ function MagazineFeatured({ article }: { article: Article }) {
           <div className="w-full h-full bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700" />
         )}
         {article.is_trending && (
-          <span className="absolute top-2.5 left-2.5 text-[10px] font-semibold bg-orange-500 text-white px-2 py-0.5 rounded-full">
+          <span className="absolute top-3 left-3 text-xs font-semibold bg-orange-500 text-white px-2.5 py-1 rounded-full">
             Trending
           </span>
         )}
       </div>
-      <div className="space-y-2 flex-1">
+      <div className="space-y-2.5">
         <CategoryBadges article={article} />
-        <h3 className="relative z-[1] font-display text-base sm:text-lg font-semibold text-gray-900 dark:text-white leading-snug line-clamp-3 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+        <h3 className="relative z-[1] font-display text-xl font-semibold text-gray-900 dark:text-white leading-tight group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors line-clamp-3">
           {article.title}
         </h3>
         {article.excerpt && (
-          <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
             {article.excerpt}
           </p>
         )}
-        <div className="flex items-center gap-2 text-[11px] text-gray-400 dark:text-gray-500">
+        <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500">
           <span>{formatDate(article.published_at ?? article.created_at)}</span>
           {sourceLabel(article.source_url) && (
             <>
-              <span className="w-0.5 h-0.5 rounded-full bg-gray-300 dark:bg-zinc-600" />
+              <span className="w-1 h-1 rounded-full bg-gray-300 dark:bg-zinc-600" />
               <span>{sourceLabel(article.source_url)}</span>
             </>
           )}
         </div>
-      </div>
-    </div>
-  );
-}
-
-/** Compact right-side card (thumbnail + title + date) */
-function MagazineCompact({ article }: { article: Article }) {
-  return (
-    <div className="relative group flex gap-3 py-3 border-b border-gray-100 dark:border-zinc-800 last:border-0">
-      <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
-      {article.image_url ? (
-        <div className="relative w-[72px] h-[72px] rounded-lg overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-zinc-800">
-          <Image src={article.image_url} alt={article.title} fill className="object-cover" unoptimized />
-        </div>
-      ) : (
-        <div className="w-[72px] h-[72px] rounded-lg flex-shrink-0 bg-gray-100 dark:bg-zinc-800" />
-      )}
-      <div className="flex-1 min-w-0 flex flex-col justify-center gap-1">
-        <h4 className="relative z-[1] text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
-          {article.title}
-        </h4>
-        <p className="text-[11px] text-gray-400 dark:text-gray-500">
-          {formatDate(article.published_at ?? article.created_at)}
-        </p>
       </div>
     </div>
   );
@@ -308,16 +283,15 @@ function CategorySection({
         </Link>
       </div>
 
-      {/* ── Magazine grid ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-[3fr_2fr] gap-5">
-        {/* Left: featured */}
-        <MagazineFeatured article={featured} />
-
-        {/* Right: compact list */}
+      {/* ── Hero-style grid (mirrors the top hero section) ── */}
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+        <div className="lg:col-span-3">
+          <CatFeaturedCard article={featured} />
+        </div>
         {rest.length > 0 && (
-          <div className="flex flex-col justify-between divide-y divide-gray-100 dark:divide-zinc-800">
+          <div className="lg:col-span-2 flex flex-col divide-y divide-gray-100 dark:divide-zinc-800">
             {rest.map((a) => (
-              <MagazineCompact key={a.id} article={a} />
+              <HeroSideCard key={a.id} article={a} />
             ))}
           </div>
         )}
