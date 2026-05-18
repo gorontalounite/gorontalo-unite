@@ -207,32 +207,18 @@ const CLIENTS = [
 ];
 
 // ── ClientLogo sub-component ──────────────────────────────────
-function ClientLogo({ name, short, domain }: { name: string; short: string; domain: string }) {
-  const [err, setErr] = useState(false);
-  // deterministic accent colour from name
+function ClientLogo({ name, short }: { name: string; short: string }) {
   const palette = ["#F5C400","#4ade80","#60a5fa","#c084fc","#fb923c","#f87171","#34d399","#38bdf8","#a78bfa","#fbbf24"];
   const accent  = palette[name.charCodeAt(0) % palette.length];
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <div className="w-14 h-14 rounded-2xl bg-white dark:bg-zinc-800 border border-gray-100 dark:border-zinc-700 flex items-center justify-center overflow-hidden">
-        {!err ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={`https://logo.clearbit.com/${domain}?size=80`}
-            alt={name}
-            width={40}
-            height={40}
-            className="w-9 h-9 object-contain"
-            onError={() => setErr(true)}
-          />
-        ) : (
-          <span
-            className="text-[11px] font-bold text-center leading-tight px-1"
-            style={{ color: accent }}
-          >
-            {short}
-          </span>
-        )}
+      <div
+        className="w-14 h-14 rounded-2xl border flex items-center justify-center"
+        style={{ backgroundColor: accent + "18", borderColor: accent + "40" }}
+      >
+        <span className="text-[11px] font-bold text-center leading-tight px-1" style={{ color: accent }}>
+          {short}
+        </span>
       </div>
       <p className="text-[10px] text-center text-gray-500 dark:text-zinc-400 leading-tight w-14 truncate">
         {name.split(" ")[0]}
@@ -800,7 +786,7 @@ export default function MediaKitPage() {
             </div>
             <div className="grid grid-cols-6 sm:grid-cols-8 gap-3">
               {CLIENTS.map((c) => (
-                <ClientLogo key={c.name} name={c.name} short={c.short} domain={c.domain} />
+                <ClientLogo key={c.name} name={c.name} short={c.short} />
               ))}
             </div>
             <p className="text-[10px] text-zinc-400 dark:text-zinc-600 mt-5 text-center">
