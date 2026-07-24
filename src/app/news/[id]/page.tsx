@@ -308,7 +308,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
 function PreviewNewsDetail({ article }: { article: PreviewArticle }) {
   const publishedDate = new Intl.DateTimeFormat("id-ID", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric",
+    weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Makassar",
   }).format(new Date(article.source_published_at));
 
   return (

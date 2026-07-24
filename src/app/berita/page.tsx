@@ -38,7 +38,7 @@ type Article = {
 
 function formatDate(value: string | null) {
   if (!value) return "";
-  return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(value));
+  return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" }).format(new Date(value));
 }
 
 function sourceName(url: string | null) {
