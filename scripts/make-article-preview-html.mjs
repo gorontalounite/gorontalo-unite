@@ -1,0 +1,9 @@
+import fs from "node:fs";
+import path from "node:path";
+
+const drafts = JSON.parse(fs.readFileSync("article-previews/article-drafts.json", "utf8"));
+const out = path.resolve("article-previews/preview-sample.html");
+const escape = (value = "") => String(value).replace(/[&<>'"]/g, (char) => ({ "&":"&amp;", "<":"&lt;", ">":"&gt;", "'":"&#39;", '"':"&quot;" })[char]);
+const cards = drafts.slice(0, 250).map((item, index) => `<article><small>#${index + 1} · ${escape(item.source)} · ${escape(item.suggested_category)}</small><p class="date"><strong>Tanggal sumber:</strong> ${escape(item.published_at || "Belum tersedia")}</p><h2>${escape(item.title)}</h2><b>${escape(item.label)}</b><ul>${item.bullets.map((bullet) => `<li>${escape(bullet)}</li>`).join("")}</ul>${item.summary_paragraphs.map((paragraph) => `<p>${escape(paragraph)}</p>`).join("")}<details><summary>Prompt gambar</summary><pre>${escape(item.image_prompt)}</pre></details>${item.source_url ? `<p><a href="${escape(item.source_url)}">Sumber asli</a></p>` : ""}</article>`).join("");
+fs.writeFileSync(out, `<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preview Draft Gorontalo Unite</title><style>body{max-width:900px;margin:auto;padding:24px;background:#f6f6f4;font:16px system-ui;color:#151515}article{background:white;border:1px solid #ddd;border-radius:12px;padding:20px;margin:16px 0}h2{font-size:20px;margin:8px 0}small,b{color:#765b00}.date{margin:8px 0;color:#4b5563}p,li{line-height:1.55}pre{white-space:pre-wrap;background:#111;color:#eee;padding:12px;border-radius:8px}</style><h1>Preview draft artikel</h1><p>Menampilkan 250 draft pertama dari ${drafts.length.toLocaleString("id-ID")} record. Tanggal sumber dipertahankan sebagai acuan urutan awal; tanggal tayang Gorontalo Unite akan ditetapkan saat editorial menyetujui artikel.</p>${cards}`);
+console.log(out);

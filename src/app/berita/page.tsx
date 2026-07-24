@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { previewArticles } from "@/data/newsPreview";
 import BeritaFilters from "./BeritaFilters";
 import BeritaPagination from "./BeritaPagination";
 import { CAT_COLOR, CATEGORIES, DEFAULT_COLOR } from "./categories";
@@ -32,6 +33,7 @@ type Article = {
   created_at: string;
   source_url: string | null;
   is_trending: boolean | null;
+  is_preview?: boolean;
 };
 
 function formatDate(value: string | null) {
@@ -95,7 +97,7 @@ export default async function BeritaPage({ searchParams }: PageProps) {
   let categoryRows: { category: string; categories: string[] | null }[] = [];
   let articles: Article[] = [];
   let totalCount = 0;
-  let loadError = false;
+  let usingLocalPreview = false;
 
   if (hasSupabaseConfig) {
     try {
@@ -121,12 +123,33 @@ export default async function BeritaPage({ searchParams }: PageProps) {
       const { data, count, error } = await query.range(offset, offset + PAGE_SIZE - 1);
       articles = (data ?? []) as Article[];
       totalCount = count ?? 0;
-      loadError = Boolean(error);
+      if (error) articles = [];
     } catch {
-      loadError = true;
+      articles = [];
     }
-  } else {
-    loadError = true;
+  }
+
+  // Until editorial content has been imported into Supabase, show ten real,
+  // locally reviewed source examples so the public interface can be approved.
+  // Supabase always takes precedence once it contains published articles.
+  if (articles.length === 0) {
+    usingLocalPreview = true;
+    const categoryLabel = categoryKey ? CATEGORY_BY_KEY[categoryKey] : undefined;
+    const query = search.toLocaleLowerCase("id-ID");
+    const local = previewArticles.filter((article) => {
+      const matchesCategory = !categoryLabel || article.categories.includes(categoryLabel);
+      const searchable = `${article.title} ${article.excerpt} ${article.tags.join(" ")}`.toLocaleLowerCase("id-ID");
+      return matchesCategory && (!query || searchable.includes(query));
+    });
+    totalCount = local.length;
+    articles = local.slice(offset, offset + PAGE_SIZE).map((article) => ({
+      ...article,
+      published_at: article.source_published_at,
+      created_at: article.source_published_at,
+      source_url: article.source_url,
+      is_trending: false,
+    }));
+    categoryRows = previewArticles.map((article) => ({ category: article.category, categories: article.categories }));
   }
 
   const categoryCounts: Record<string, number> = {};
@@ -162,9 +185,13 @@ export default async function BeritaPage({ searchParams }: PageProps) {
             {search && <p className="truncate text-sm text-gray-400 dark:text-gray-500">Hasil untuk “{search}”</p>}
           </div>
 
-          {loadError ? (
-            <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">Daftar berita belum dapat dimuat. Silakan coba kembali.</div>
-          ) : articles.length === 0 ? (
+          {usingLocalPreview && (
+            <div className="mb-6 rounded-2xl border border-yellow-200 bg-yellow-50 px-4 py-3 text-sm text-yellow-900 dark:border-yellow-900/50 dark:bg-yellow-950/30 dark:text-yellow-100">
+              Menampilkan 10 contoh artikel sumber yang telah diringkas untuk meninjau tampilan. Artikel ini belum diimpor atau dipublikasikan dari Supabase.
+            </div>
+          )}
+
+          {articles.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-gray-200 px-6 py-20 text-center dark:border-zinc-700">
               <h2 className="font-display text-xl font-semibold text-gray-800 dark:text-gray-100">Belum ada artikel yang cocok</h2>
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Ubah kata kunci atau kategori untuk melihat artikel lain.</p>
