@@ -4,8 +4,21 @@ import { tavily } from "@tavily/core";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { createClient } from "@/lib/supabase/server";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY! });
+let _groq: Groq | null = null;
+function getGroq() {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error("GROQ_API_KEY is not configured");
+  _groq ??= new Groq({ apiKey });
+  return _groq;
+}
+
+let _tavilyClient: ReturnType<typeof tavily> | null = null;
+function getTavilyClient() {
+  const apiKey = process.env.TAVILY_API_KEY;
+  if (!apiKey) throw new Error("TAVILY_API_KEY is not configured");
+  _tavilyClient ??= tavily({ apiKey });
+  return _tavilyClient;
+}
 
 // Lazy-init Pinecone so build-time module evaluation doesn't throw when
 // PINECONE_API_KEY is absent from the build environment.
@@ -131,7 +144,7 @@ export async function POST(req: NextRequest) {
           ? `${message} Gorontalo`
           : message;
 
-      const tavilyRes = await tavilyClient.search(searchQuery, {
+      const tavilyRes = await getTavilyClient().search(searchQuery, {
         searchDepth: "basic",
         maxResults: 7,
         includeAnswer: false,
@@ -211,13 +224,13 @@ ${hasContext ? "## HASIL PENCARIAN WEB:\n\n" + contextBlock : ""}`;
     // Try primary model, fall back to mixtral on error
     let streamIterable: AsyncIterable<Groq.Chat.ChatCompletionChunk>;
     try {
-      streamIterable = await groq.chat.completions.create({
+      streamIterable = await getGroq().chat.completions.create({
         model: PRIMARY_MODEL,
         ...groqParams,
       });
     } catch (primaryErr) {
       console.error("[/api/chat] Primary model error, retrying with fallback:", primaryErr);
-      streamIterable = await groq.chat.completions.create({
+      streamIterable = await getGroq().chat.completions.create({
         model: FALLBACK_MODEL,
         ...groqParams,
       });
