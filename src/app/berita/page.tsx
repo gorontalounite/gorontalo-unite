@@ -91,34 +91,51 @@ export default async function BeritaPage({ searchParams }: PageProps) {
   const search = (params.q ?? "").trim();
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
   const offset = (page - 1) * PAGE_SIZE;
-  const admin = createAdminClient();
+  const hasSupabaseConfig = Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
+  let categoryRows: { category: string; categories: string[] | null }[] = [];
+  let articles: Article[] = [];
+  let totalCount = 0;
+  let loadError = false;
 
-  const { data: categoryRows } = await admin
-    .from("articles")
-    .select("category, categories")
-    .eq("published", true)
-    .neq("category", "Portfolio");
+  if (hasSupabaseConfig) {
+    try {
+      const admin = createAdminClient();
+      const { data: categoryData } = await admin
+        .from("articles")
+        .select("category, categories")
+        .eq("published", true)
+        .neq("category", "Portfolio");
+      categoryRows = (categoryData ?? []) as { category: string; categories: string[] | null }[];
+
+      let query = admin
+        .from("articles")
+        .select("id, title, slug, excerpt, image_url, category, categories, tags, published_at, created_at, source_url, is_trending", { count: "exact" })
+        .eq("published", true)
+        .neq("category", "Portfolio")
+        .order("published_at", { ascending: false, nullsFirst: false });
+
+      const categoryLabel = categoryKey ? CATEGORY_BY_KEY[categoryKey] : undefined;
+      if (categoryLabel) query = query.contains("categories", [categoryLabel]);
+      if (search) query = query.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`);
+
+      const { data, count, error } = await query.range(offset, offset + PAGE_SIZE - 1);
+      articles = (data ?? []) as Article[];
+      totalCount = count ?? 0;
+      loadError = Boolean(error);
+    } catch {
+      loadError = true;
+    }
+  } else {
+    loadError = true;
+  }
 
   const categoryCounts: Record<string, number> = {};
-  for (const row of categoryRows ?? []) {
+  for (const row of categoryRows) {
     const labels = Array.isArray(row.categories) && row.categories.length ? row.categories : [row.category];
     for (const label of labels) if (typeof label === "string" && label !== "Portfolio") categoryCounts[label] = (categoryCounts[label] ?? 0) + 1;
   }
 
-  let query = admin
-    .from("articles")
-    .select("id, title, slug, excerpt, image_url, category, categories, tags, published_at, created_at, source_url, is_trending", { count: "exact" })
-    .eq("published", true)
-    .neq("category", "Portfolio")
-    .order("published_at", { ascending: false, nullsFirst: false });
-
   const categoryLabel = categoryKey ? CATEGORY_BY_KEY[categoryKey] : undefined;
-  if (categoryLabel) query = query.contains("categories", [categoryLabel]);
-  if (search) query = query.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`);
-
-  const { data, count, error } = await query.range(offset, offset + PAGE_SIZE - 1);
-  const articles = (data ?? []) as Article[];
-  const totalCount = count ?? 0;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
 
   return (
@@ -145,7 +162,7 @@ export default async function BeritaPage({ searchParams }: PageProps) {
             {search && <p className="truncate text-sm text-gray-400 dark:text-gray-500">Hasil untuk “{search}”</p>}
           </div>
 
-          {error ? (
+          {loadError ? (
             <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/30 dark:text-amber-100">Daftar berita belum dapat dimuat. Silakan coba kembali.</div>
           ) : articles.length === 0 ? (
             <div className="rounded-2xl border border-dashed border-gray-200 px-6 py-20 text-center dark:border-zinc-700">
