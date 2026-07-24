@@ -3,6 +3,27 @@ import Groq from "groq-sdk";
 import { tavily } from "@tavily/core";
 import { Pinecone } from "@pinecone-database/pinecone";
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
+
+type Source = { title: string; url: string | null; category: string };
+const RATE_WINDOW_MS = 15 * 60 * 1000;
+const RATE_LIMIT = 20;
+const requestBuckets = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(key: string) {
+  const now = Date.now();
+  const bucket = requestBuckets.get(key);
+  if (!bucket || bucket.resetAt <= now) {
+    requestBuckets.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return false;
+  }
+  bucket.count += 1;
+  return bucket.count > RATE_LIMIT;
+}
+
+function needsFreshSearch(message: string) {
+  return /\b(terbaru|terkini|hari ini|saat ini|update|updates|minggu ini|bulan ini|jadwal|cuaca)\b/i.test(message);
+}
 
 let _groq: Groq | null = null;
 function getGroq() {
@@ -85,16 +106,23 @@ export async function POST(req: NextRequest) {
       conversationHistory?: { role: "user" | "assistant"; content: string }[];
     };
 
-    if (!message?.trim()) {
+    if (!message?.trim() || message.length > 2_000 || conversationHistory.length > 12) {
       return new Response(JSON.stringify({ error: "Message is required" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anonymous";
+    if (isRateLimited(clientIp)) {
+      return new Response(JSON.stringify({ error: "Terlalu banyak permintaan. Coba lagi beberapa menit lagi." }), {
+        status: 429, headers: { "Content-Type": "application/json", "Retry-After": "900" },
+      });
+    }
+
     const gorontalo = isGorontaloContext(message, conversationHistory);
     let contextBlock = "";
-    let sources: { title: string; url: string | null; category: string }[] = [];
+    let sources: Source[] = [];
     let hasContext = false;
 
     // KB semantic search via Pinecone
@@ -131,14 +159,44 @@ export async function POST(req: NextRequest) {
               const meta = m.metadata as Record<string, string> ?? {};
               return `[KB${i + 1}] ${meta.title ?? ""}\n${meta.content ?? ""}`;
             }).join("\n\n---\n\n");
+          sources.push(...matches.slice(0, 4).map((match, index) => {
+            const meta = match.metadata as Record<string, string> ?? {};
+            return { title: meta.title || `Dokumen internal ${index + 1}`, url: meta.source_url || meta.url || null, category: "Basis pengetahuan" };
+          }));
         }
       }
     } catch (err) {
       console.error("[/api/chat] KB retrieval error:", err);
     }
 
-    // Tavily search (non-streaming, awaited before Groq stream starts)
+    // Published summaries are always first-class sources, even before they are embedded.
     try {
+      const admin = createAdminClient();
+      const { data: published } = await admin
+        .from("articles")
+        .select("title, slug, excerpt, content, source_url, category")
+        .eq("published", true)
+        .neq("category", "Portfolio")
+        .or(`title.ilike.%${message.slice(0, 120)}%,excerpt.ilike.%${message.slice(0, 120)}%`)
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .limit(3);
+      if (published?.length) {
+        const articleBlock = published.map((article, index) =>
+          `[ARTIKEL ${index + 1}] ${article.title}\n${article.excerpt || article.content || ""}`
+        ).join("\n\n---\n\n");
+        kbBlock = `${kbBlock}${kbBlock ? "\n\n" : ""}## ARTIKEL TERBIT (prioritaskan):\n\n${articleBlock}`;
+        sources.push(...published.map((article) => ({
+          title: article.title,
+          url: `/news/${article.slug}`,
+          category: article.category || "Artikel",
+        })));
+      }
+    } catch (err) {
+      console.error("[/api/chat] Published article retrieval error:", err);
+    }
+
+    // Tavily is a fallback: only for fresh questions or insufficient local context.
+    if (needsFreshSearch(message) || !kbBlock) try {
       const searchQuery =
         gorontalo && !message.toLowerCase().includes("gorontalo")
           ? `${message} Gorontalo`
@@ -162,14 +220,18 @@ export async function POST(req: NextRequest) {
         .map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.content}`)
         .join("\n\n---\n\n");
 
-      sources = results.map((r) => ({
+      sources.push(...results.map((r) => ({
         title: r.title,
         url: r.url,
         category: "Web",
-      }));
+      })));
     } catch (err) {
       console.error("[/api/chat] Tavily error:", err);
     }
+
+    sources = sources.filter((source, index, all) =>
+      Boolean(source.title) && all.findIndex((candidate) => candidate.title === source.title && candidate.url === source.url) === index
+    ).slice(0, 8);
 
     // Build system prompt
     let systemPrompt: string;
@@ -181,7 +243,7 @@ export async function POST(req: NextRequest) {
 
 1. **Jika ada DOKUMEN INTERNAL**, utamakan informasi dari sana — itu adalah data resmi yang sudah diverifikasi.
 2. **Jika ada HASIL PENCARIAN yang relevan**, gunakan sebagai pelengkap.
-3. **Jika tidak ada keduanya**, jawab berdasarkan pengetahuanmu. Jangan katakan "hubungi Dinas" kecuali soal prosedur administrasi resmi.
+3. **Jika tidak ada keduanya**, katakan informasi belum cukup. Jangan mengisi kekosongan dengan pengetahuan umum yang tidak dapat disitasi.
 4. **Jika benar-benar tidak tahu**, katakan: "Saya tidak memiliki informasi yang cukup tentang hal ini."
 
 ${SHARED_RULES}
@@ -195,7 +257,7 @@ ${hasContext ? "## HASIL PENCARIAN WEB (gunakan jika relevan):\n\n" + contextBlo
 ## ATURAN:
 1. **Utamakan DOKUMEN INTERNAL** jika tersedia dan relevan.
 2. **Gunakan HASIL PENCARIAN WEB** sebagai pelengkap.
-3. Jika tidak ada keduanya, jawab berdasarkan pengetahuanmu.
+3. Jika tidak ada keduanya, katakan informasi belum cukup; jangan mengarang.
 4. Jika benar-benar tidak tahu: "Saya tidak memiliki informasi yang cukup tentang ini."
 
 ${SHARED_RULES}
