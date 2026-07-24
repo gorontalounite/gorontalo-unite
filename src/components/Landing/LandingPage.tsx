@@ -31,6 +31,9 @@ export interface NewsItem {
 interface LandingPageProps {
   portfolioItems: PortfolioItem[];
   newsItems: NewsItem[];
+  newsTotalCount: number;
+  eventItems: NewsItem[];
+  newsUnavailable: boolean;
 }
 
 /* ─── Stack / category metadata ─────────────────────────────────────── */
@@ -81,6 +84,7 @@ const CATEGORY_BADGE: Record<string, string> = {
   Lingkungan:     "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-200",
   Alam:           "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-200",
   Olahraga:       "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/40 dark:text-indigo-300",
+  Event:          "bg-[#F5C400]/20 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
 };
 
 const CAT_KEY_MAP: Record<string, string> = {
@@ -89,7 +93,8 @@ const CAT_KEY_MAP: Record<string, string> = {
   Kemasyarakatan:"kemasyarakatan", Kesehatan:"kesehatan", Pertanian:"pertanian",
   Perikanan:"perikanan", Teknologi:"teknologi", Digital:"digital",
   Infrastruktur:"infrastruktur", Pembangunan:"pembangunan", Hukum:"hukum",
-  Keamanan:"keamanan", Agama:"agama", Lingkungan:"lingkungan", Alam:"alam", Olahraga:"olahraga",
+  Keamanan:"keamanan", Agama:"agama", Lingkungan:"lingkungan", Alam:"alam",
+  Olahraga:"olahraga", Event:"event",
 };
 
 /* ─── Helpers ───────────────────────────────────────────────────────── */
@@ -102,13 +107,39 @@ function formatDate(dateStr: string | null): string {
   });
 }
 
+/* ─── Prompt pool ───────────────────────────────────────────────────── */
+const PROMPT_POOL = [
+  "Wisata terbaik di Gorontalo?",
+  "Kuliner khas apa yang wajib dicoba?",
+  "Apa itu Festival Karawo?",
+  "Di mana lokasi Pantai Olele?",
+  "Ceritakan tentang Danau Limboto",
+  "Rekomendasi tempat makan enak Gorontalo",
+  "Apa kerajinan khas Gorontalo?",
+  "Berita terbaru Gorontalo hari ini",
+  "UMKM unggulan di Gorontalo",
+  "Tradisi adat istiadat Gorontalo",
+  "Perkembangan ekonomi Gorontalo 2026",
+  "Tempat wisata alam terbaik Gorontalo",
+  "Bagaimana cara ke Gorontalo?",
+  "Apa itu Binte Biluhuta?",
+  "Prestasi terbaru daerah Gorontalo",
+  "Budaya dan seni di Gorontalo",
+  "Siapa tokoh terkenal dari Gorontalo?",
+  "Sejarah Kota Gorontalo",
+  "Produk pertanian unggulan Gorontalo",
+  "Perikanan dan kelautan Gorontalo",
+];
+
 /* ─── Hero with chat-first ──────────────────────────────────────────── */
 function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  // Keep the server and client render deterministic to avoid hydration drift.
+  const prompts = PROMPT_POOL.slice(0, 4);
 
-  const handleSend = () => {
-    const trimmed = value.trim();
+  const handleSend = (msg?: string) => {
+    const trimmed = (msg ?? value).trim();
     if (!trimmed) return;
     onSend(trimmed);
     setValue("");
@@ -137,7 +168,7 @@ function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
           Chatbot AI lokal yang memahami wisata, budaya, kuliner, dan layanan publik Gorontalo.
         </p>
 
-        {/* Large chat box */}
+        {/* Chat box */}
         <div className="bg-gray-100 dark:bg-zinc-800 rounded-2xl overflow-hidden shadow-lg shadow-yellow-900/10 dark:shadow-black/40">
           <textarea
             ref={textareaRef}
@@ -159,7 +190,7 @@ function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
               </svg>
             </button>
             <button
-              onClick={handleSend}
+              onClick={() => handleSend()}
               disabled={!value.trim()}
               className="flex items-center gap-2 px-5 py-2 bg-gray-900 dark:bg-white text-white dark:text-gray-900 text-sm font-semibold rounded-xl hover:bg-gray-700 dark:hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
             >
@@ -171,6 +202,18 @@ function ChatHero({ onSend }: { onSend: (msg: string) => void }) {
           </div>
         </div>
 
+        {/* Suggested prompt chips */}
+        <div className="flex flex-wrap justify-center gap-2 mt-4">
+          {prompts.map((prompt) => (
+            <button
+              key={prompt}
+              onClick={() => handleSend(prompt)}
+              className="px-3.5 py-2 text-sm text-gray-600 dark:text-gray-400 bg-white dark:bg-zinc-900 border border-gray-200 dark:border-zinc-700 rounded-full hover:border-[#F5C400]/60 dark:hover:border-yellow-500/60 hover:text-gray-900 dark:hover:text-gray-100 hover:bg-yellow-50/50 dark:hover:bg-yellow-950/20 transition-all whitespace-nowrap"
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -206,7 +249,524 @@ function SectionHeading({
   );
 }
 
-/* ─── Portfolio card ────────────────────────────────────────────────── */
+/* ─── News card — Featured (large left) ─────────────────────────────── */
+function NewsCardFeatured({ item }: { item: NewsItem }) {
+  const catKey = CAT_KEY_MAP[item.category ?? ""] ?? (item.category ?? "").toLowerCase();
+  return (
+    <div className="group relative flex flex-col">
+      <Link href={`/news/${item.slug}`} className="absolute inset-0 z-[1]" aria-label={item.title} />
+      <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700 mb-4 flex-shrink-0">
+        {item.image_url && (
+          <img
+            src={item.image_url}
+            alt={item.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            onError={(e) => { e.currentTarget.style.display = "none"; }}
+          />
+        )}
+      </div>
+      <div className="flex flex-col gap-2">
+        <Link
+          href={`/berita/${catKey}`}
+          className={`relative z-[2] self-start text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+            CATEGORY_BADGE[item.category ?? ""] ?? "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300"
+          }`}
+        >
+          {item.category}
+        </Link>
+        <h3 className="relative z-[1] text-xl lg:text-2xl font-bold text-gray-900 dark:text-white leading-tight group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors line-clamp-2">
+          {item.title}
+        </h3>
+        {item.excerpt && (
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2">
+            {item.excerpt}
+          </p>
+        )}
+        <p className="text-xs text-gray-400 dark:text-gray-500">
+          {formatDate(item.published_at ?? item.created_at)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── News card — Side (small right column) ─────────────────────────── */
+function NewsCardSide({ item }: { item: NewsItem }) {
+  const catKey = CAT_KEY_MAP[item.category ?? ""] ?? (item.category ?? "").toLowerCase();
+  return (
+    <div className="relative group flex gap-4 py-3.5 border-b border-gray-100 dark:border-zinc-800 last:border-0">
+      <Link href={`/news/${item.slug}`} className="absolute inset-0 z-[1]" aria-label={item.title} />
+      <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700">
+        {item.image_url && (
+          <img
+            src={item.image_url}
+            alt={item.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+            onError={(e) => { e.currentTarget.style.display = "none"; }}
+          />
+        )}
+      </div>
+      <div className="flex-1 min-w-0 space-y-1.5">
+        <Link
+          href={`/berita/${catKey}`}
+          className={`relative z-[2] inline-block text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
+            CATEGORY_BADGE[item.category ?? ""] ?? "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300"
+          }`}
+        >
+          {item.category}
+        </Link>
+        <h3 className="relative z-[1] text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+          {item.title}
+        </h3>
+        <p className="text-xs text-gray-400 dark:text-gray-500">
+          {formatDate(item.published_at ?? item.created_at)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── News card — Mobile (card style) ──────────────────────────────── */
+function NewsCardMobile({ item }: { item: NewsItem }) {
+  const catKey = CAT_KEY_MAP[item.category ?? ""] ?? (item.category ?? "").toLowerCase();
+  return (
+    <div className="relative group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40 hover:shadow-lg transition-all flex flex-col">
+      <Link href={`/news/${item.slug}`} className="absolute inset-0 z-[1]" aria-label={item.title} />
+      <div className="aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700 overflow-hidden">
+        {item.image_url && (
+          <img
+            src={item.image_url}
+            alt={item.title}
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            loading="lazy"
+            onError={(e) => { e.currentTarget.style.display = "none"; }}
+          />
+        )}
+      </div>
+      <div className="p-4 space-y-2 flex-1 flex flex-col">
+        <Link
+          href={`/berita/${catKey}`}
+          className={`relative z-[2] self-start text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
+            CATEGORY_BADGE[item.category ?? ""] ?? "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300"
+          }`}
+        >
+          {item.category}
+        </Link>
+        <h3 className="relative z-[1] text-sm font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors flex-1">
+          {item.title}
+        </h3>
+        <p className="text-xs text-gray-400 dark:text-gray-500 pt-1">
+          {formatDate(item.published_at ?? item.created_at)}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ─── News Section with pagination / load-more ──────────────────────── */
+const NEWS_PER_PAGE = 6;
+
+function NewsSectionPaginated({
+  initialItems,
+  totalCount,
+  newsUnavailable,
+}: {
+  initialItems: NewsItem[];
+  totalCount: number;
+  newsUnavailable: boolean;
+}) {
+  const totalPages = Math.max(1, Math.ceil(totalCount / NEWS_PER_PAGE));
+
+  // Desktop state — replace items on page change
+  const [desktopPage, setDesktopPage] = useState(1);
+  const [desktopItems, setDesktopItems] = useState<NewsItem[]>(initialItems);
+  const [isDesktopLoading, setIsDesktopLoading] = useState(false);
+  const [newsError, setNewsError] = useState(newsUnavailable);
+
+  // Mobile state — accumulate items on load-more
+  const [mobileItems, setMobileItems] = useState<NewsItem[]>(initialItems);
+  const [isMobileLoading, setIsMobileLoading] = useState(false);
+  const mobileHasMore = mobileItems.length < totalCount;
+
+  const fetchPage = async (page: number): Promise<NewsItem[]> => {
+    const res = await fetch(`/api/news/paginate?page=${page}`);
+    if (!res.ok) throw new Error("News request failed");
+    const json = await res.json();
+    return (json.data ?? []) as NewsItem[];
+  };
+
+  const handleDesktopPageChange = async (page: number) => {
+    if (page === desktopPage || isDesktopLoading) return;
+    setIsDesktopLoading(true);
+    try {
+      const items = page === 1 ? initialItems : await fetchPage(page);
+      setDesktopItems(items);
+      setDesktopPage(page);
+      setNewsError(false);
+    } catch {
+      setNewsError(true);
+    } finally {
+      setIsDesktopLoading(false);
+    }
+  };
+
+  const handleMobileLoadMore = async () => {
+    if (isMobileLoading) return;
+    setIsMobileLoading(true);
+    try {
+      const res = await fetch(`/api/news/paginate?offset=${mobileItems.length}`);
+      if (!res.ok) throw new Error("News request failed");
+      const json = await res.json();
+      setMobileItems((prev) => [...prev, ...((json.data ?? []) as NewsItem[])]);
+      setNewsError(false);
+    } catch {
+      setNewsError(true);
+    } finally {
+      setIsMobileLoading(false);
+    }
+  };
+
+  // Build pagination page numbers with ellipsis
+  const pageNumbers = (() => {
+    const delta = 2;
+    const start = Math.max(1, desktopPage - delta);
+    const end = Math.min(totalPages, desktopPage + delta);
+    return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+  })();
+
+  const featured = desktopItems[0];
+  const sideItems = desktopItems.slice(1, 6);
+
+  return (
+    <section id="berita" className="px-4 sm:px-6 py-16 sm:py-24 bg-gray-50/60 dark:bg-zinc-950/60 border-y border-gray-100 dark:border-zinc-800">
+      <div className="max-w-6xl mx-auto">
+        <SectionHeading
+          eyebrow="Update News"
+          title="Kabar terbaru dari Gorontalo"
+          description="Liputan harian seputar wisata, ekonomi, pendidikan, dan budaya Gorontalo."
+          action={
+            <Link
+              href="/berita"
+              className="text-sm font-semibold text-brand dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
+            >
+              Semua berita
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          }
+        />
+
+        {/* ── Desktop layout (sm and up) ── */}
+        <div className={`hidden sm:block transition-opacity duration-200 ${isDesktopLoading ? "opacity-50 pointer-events-none" : "opacity-100"}`}>
+          {featured ? (
+            <div className="grid grid-cols-5 gap-6 lg:gap-8 items-start">
+              <div className="col-span-3">
+                <NewsCardFeatured item={featured} />
+              </div>
+              <div className="col-span-2 border-l border-gray-100 dark:border-zinc-800 pl-6 lg:pl-8 divide-y divide-gray-100 dark:divide-zinc-800">
+                {sideItems.map((item) => (
+                  <NewsCardSide key={item.id} item={item} />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-16">
+              <p className="text-sm text-gray-400 dark:text-gray-500">
+                {newsError ? "Berita belum dapat dimuat. Silakan coba lagi nanti." : "Belum ada berita yang dipublikasikan."}
+              </p>
+            </div>
+          )}
+
+          {/* Desktop pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center gap-1.5 mt-8 pt-6 border-t border-gray-100 dark:border-zinc-800">
+              {/* Prev */}
+              <button
+                onClick={() => handleDesktopPageChange(desktopPage - 1)}
+                disabled={desktopPage === 1 || isDesktopLoading}
+                className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                aria-label="Sebelumnya"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+              </button>
+
+              {/* First page + ellipsis */}
+              {pageNumbers[0] > 1 && (
+                <>
+                  <button
+                    onClick={() => handleDesktopPageChange(1)}
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-700 hover:border-gray-400 dark:hover:border-zinc-500 transition-all"
+                  >
+                    1
+                  </button>
+                  {pageNumbers[0] > 2 && (
+                    <span className="text-xs text-gray-400 dark:text-gray-500 px-1">…</span>
+                  )}
+                </>
+              )}
+
+              {/* Page numbers */}
+              {pageNumbers.map((p) => (
+                <button
+                  key={p}
+                  onClick={() => handleDesktopPageChange(p)}
+                  disabled={isDesktopLoading}
+                  className={`inline-flex items-center justify-center w-9 h-9 rounded-xl text-sm font-medium transition-all ${
+                    p === desktopPage
+                      ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border border-transparent"
+                      : "text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-700 hover:border-gray-400 dark:hover:border-zinc-500"
+                  }`}
+                >
+                  {p}
+                </button>
+              ))}
+
+              {/* Last page + ellipsis */}
+              {pageNumbers[pageNumbers.length - 1] < totalPages && (
+                <>
+                  {pageNumbers[pageNumbers.length - 1] < totalPages - 1 && (
+                    <span className="text-xs text-gray-400 dark:text-gray-500 px-1">…</span>
+                  )}
+                  <button
+                    onClick={() => handleDesktopPageChange(totalPages)}
+                    className="inline-flex items-center justify-center w-9 h-9 rounded-xl text-sm font-medium text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-zinc-700 hover:border-gray-400 dark:hover:border-zinc-500 transition-all"
+                  >
+                    {totalPages}
+                  </button>
+                </>
+              )}
+
+              {/* Next */}
+              <button
+                onClick={() => handleDesktopPageChange(desktopPage + 1)}
+                disabled={desktopPage === totalPages || isDesktopLoading}
+                className="inline-flex items-center justify-center w-9 h-9 rounded-xl border border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-zinc-500 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                aria-label="Berikutnya"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </button>
+
+              <span className="ml-auto text-xs text-gray-400 dark:text-gray-500">
+                Halaman {desktopPage} dari {totalPages}
+              </span>
+            </div>
+          )}
+        </div>
+
+        {/* ── Mobile layout ── */}
+        <div className="sm:hidden">
+          {/* First item: featured card */}
+          {mobileItems[0] && (
+            <div className="mb-4">
+              <NewsCardMobile item={mobileItems[0]} />
+            </div>
+          )}
+          {/* Remaining items: compact horizontal rows */}
+          {mobileItems.length > 1 && (
+            <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-200 dark:border-zinc-800 px-4 divide-y divide-gray-100 dark:divide-zinc-800 mb-4">
+              {mobileItems.slice(1).map((item) => (
+                <NewsCardSide key={item.id} item={item} />
+              ))}
+            </div>
+          )}
+
+          {mobileHasMore && (
+            <button
+              onClick={handleMobileLoadMore}
+              disabled={isMobileLoading}
+              className="w-full py-3.5 rounded-2xl border border-gray-200 dark:border-zinc-800 text-sm font-semibold text-gray-700 dark:text-gray-300 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40 hover:text-brand dark:hover:text-yellow-400 disabled:opacity-50 transition-all flex items-center justify-center gap-2"
+            >
+              {isMobileLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                  Memuat...
+                </>
+              ) : (
+                <>
+                  Muat Lebih
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </>
+              )}
+            </button>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Event bento card ──────────────────────────────────────────────── */
+function EventBentoCard({
+  item,
+  isFirst,
+  isSelected,
+  onClick,
+}: {
+  item: NewsItem;
+  isFirst: boolean;
+  isSelected: boolean;
+  onClick: () => void;
+}) {
+  const catBadge = CATEGORY_BADGE[item.category ?? ""] ?? "bg-white/90 text-gray-700";
+  return (
+    <button
+      onClick={onClick}
+      className={`relative group rounded-2xl overflow-hidden text-left cursor-pointer transition-all duration-200 ${
+        isFirst ? "sm:col-span-2 lg:col-span-2 h-64 lg:h-80" : "h-44 lg:h-52"
+      } ${
+        isSelected
+          ? "ring-2 ring-[#F5C400] dark:ring-yellow-400 shadow-lg shadow-yellow-900/20"
+          : "ring-1 ring-gray-200 dark:ring-zinc-800 hover:ring-[#F5C400]/50 dark:hover:ring-yellow-500/50 hover:shadow-md"
+      }`}
+    >
+      {/* Background */}
+      {item.image_url ? (
+        <img
+          src={item.image_url}
+          alt={item.title}
+          className="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+          loading="lazy"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-gradient-to-br from-[#F5C400]/30 via-yellow-50 to-yellow-100 dark:from-yellow-900/30 dark:via-zinc-900 dark:to-zinc-800" />
+      )}
+
+      {/* Gradient overlay */}
+      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+      {/* Content */}
+      <div className="absolute inset-0 p-4 sm:p-5 flex flex-col justify-end">
+        <span className={`self-start text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full mb-2 ${catBadge}`}>
+          {item.category}
+        </span>
+        <h3 className={`text-white font-bold leading-tight line-clamp-2 ${isFirst ? "text-lg sm:text-xl" : "text-sm sm:text-base"}`}>
+          {item.title}
+        </h3>
+        <p className="text-white/60 text-xs mt-1.5">
+          📅 {formatDate(item.published_at ?? item.created_at)}
+        </p>
+      </div>
+
+      {/* Selected indicator */}
+      {isSelected && (
+        <div className="absolute top-3 right-3 w-6 h-6 rounded-full bg-[#F5C400] dark:bg-yellow-400 flex items-center justify-center shadow-sm">
+          <svg className="w-3.5 h-3.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+      )}
+    </button>
+  );
+}
+
+/* ─── Event Section (Bento grid) ────────────────────────────────────── */
+function EventSection({ items }: { items: NewsItem[] }) {
+  const [selectedIdx, setSelectedIdx] = useState(0);
+
+  if (items.length === 0) return null;
+
+  const selected = items[Math.min(selectedIdx, items.length - 1)];
+  const catKey = CAT_KEY_MAP[selected.category ?? ""] ?? (selected.category ?? "").toLowerCase();
+
+  const now = new Date();
+  const monthName = now.toLocaleDateString("id-ID", { month: "long", year: "numeric" });
+
+  return (
+    <section id="event" className="px-4 sm:px-6 py-16 sm:py-24 bg-white dark:bg-zinc-950">
+      <div className="max-w-6xl mx-auto">
+        <SectionHeading
+          eyebrow="Agenda"
+          title={`Event bulan ${monthName}`}
+          description="Acara, festival, dan agenda penting di Gorontalo bulan ini."
+          action={
+            <Link
+              href="/berita/event"
+              className="text-sm font-semibold text-brand dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
+            >
+              Lihat semua event
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          }
+        />
+
+        {/* Bento grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {items.map((item, idx) => (
+            <EventBentoCard
+              key={item.id}
+              item={item}
+              isFirst={idx === 0}
+              isSelected={selectedIdx === idx}
+              onClick={() => setSelectedIdx(idx)}
+            />
+          ))}
+        </div>
+
+        {/* Selected event detail panel */}
+        <div className="mt-4 p-5 sm:p-6 bg-gray-50 dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 transition-all duration-200">
+          <div className="flex flex-col sm:flex-row gap-5 sm:gap-6 items-start">
+            {selected.image_url && (
+              <div className="relative w-full sm:w-44 h-32 sm:h-36 rounded-xl overflow-hidden flex-shrink-0 bg-gray-200 dark:bg-zinc-800">
+                <img
+                  src={selected.image_url}
+                  alt={selected.title}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            )}
+            <div className="flex-1 min-w-0">
+              <Link
+                href={`/berita/${catKey}`}
+                className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full mb-3 ${
+                  CATEGORY_BADGE[selected.category ?? ""] ?? "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300"
+                }`}
+              >
+                {selected.category}
+              </Link>
+              <h3 className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white leading-tight mb-2">
+                {selected.title}
+              </h3>
+              {selected.excerpt && (
+                <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 mb-3">
+                  {selected.excerpt}
+                </p>
+              )}
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <span className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1.5">
+                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  {formatDate(selected.published_at ?? selected.created_at)}
+                </span>
+                <Link
+                  href={`/news/${selected.slug}`}
+                  className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand dark:text-yellow-400 hover:underline"
+                >
+                  Detail event
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ─── Portfolio card (kept, not shown on landing) ───────────────────── */
 function PortfolioCard({ item }: { item: PortfolioItem }) {
   const stack = getStack(item);
   const stackLabel = stack ? STACK_META[stack].label : "Portfolio";
@@ -262,31 +822,23 @@ const STACK_TABS: { key: StackFilter; label: string }[] = [
   { key: "videography", label: "Videography" },
 ];
 
-/* ─── Portfolio Section ─────────────────────────────────────────────── */
 function PortfolioSection({ items }: { items: PortfolioItem[] }) {
   const [activeTab, setActiveTab] = useState<StackFilter>("all");
-
-  // Only show tabs that actually have items (plus "all")
   const tabsWithItems = new Set(items.map((i) => getStack(i)).filter(Boolean));
   const visibleTabs = STACK_TABS.filter((t) => t.key === "all" || tabsWithItems.has(t.key));
-
   const filtered = items.filter((item) => {
     if (activeTab === "all") return true;
     return getStack(item) === activeTab;
   });
-
   return (
     <section id="portofolio" className="px-4 sm:px-6 py-16 sm:py-24 bg-gray-50/60 dark:bg-zinc-950/60 border-y border-gray-100 dark:border-zinc-800">
       <div className="max-w-6xl mx-auto">
         <SectionHeading
           eyebrow="Portofolio"
           title="Karya digital & multimedia kami"
-          description="Web design, programming, data analytics, video editing, carousel desain, dan videografi untuk klien Gorontalo dan sekitarnya."
+          description="Web design, programming, data analytics, video editing, carousel desain, dan videografi."
           action={
-            <Link
-              href="/portfolio"
-              className="text-sm font-semibold text-brand dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
-            >
+            <Link href="/portfolio" className="text-sm font-semibold text-brand dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5">
               Lihat semua
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -294,8 +846,6 @@ function PortfolioSection({ items }: { items: PortfolioItem[] }) {
             </Link>
           }
         />
-
-        {/* Tabs — only rendered when we have items */}
         {visibleTabs.length > 1 && (
           <div className="flex flex-wrap gap-2 mb-8">
             {visibleTabs.map((tab) => (
@@ -313,7 +863,6 @@ function PortfolioSection({ items }: { items: PortfolioItem[] }) {
             ))}
           </div>
         )}
-
         {filtered.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
             {filtered.slice(0, 6).map((item) => (
@@ -323,11 +872,7 @@ function PortfolioSection({ items }: { items: PortfolioItem[] }) {
         ) : (
           <div className="text-center py-16 bg-white dark:bg-zinc-900 rounded-2xl border border-dashed border-gray-200 dark:border-zinc-800">
             <span className="text-4xl">🌿</span>
-            <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">
-              {activeTab === "all"
-                ? "Belum ada karya yang dipublikasikan."
-                : `Belum ada karya ${STACK_META[activeTab as StackKey]?.label ?? activeTab} dipublikasikan.`}
-            </p>
+            <p className="text-sm text-gray-500 dark:text-gray-400 mt-3">Belum ada karya yang dipublikasikan.</p>
           </div>
         )}
       </div>
@@ -335,154 +880,28 @@ function PortfolioSection({ items }: { items: PortfolioItem[] }) {
   );
 }
 
-/* ─── Dummy news data (will be replaced by DB fetch) ────────────────── */
-const DUMMY_NEWS = [
-  {
-    id: "1", slug: "pantai-olele-surga-bawah-laut",
-    title: "Pantai Olele: Surga Bawah Laut yang Menakjubkan di Gorontalo",
-    excerpt: "Keindahan terumbu karang dan biota laut Pantai Olele menjadi daya tarik wisatawan mancanegara.",
-    category: "Wisata", published_at: "2026-04-28", image_seed: 10,
-  },
-  {
-    id: "2", slug: "festival-karawo-2026",
-    title: "Festival Karawo 2026 Resmi Dibuka, Ribuan Pengunjung Memadati Venue",
-    excerpt: "Kerajinan sulam khas Gorontalo tampil memukau dalam festival tahunan yang semakin berkelas.",
-    category: "Budaya", published_at: "2026-04-25", image_seed: 20,
-  },
-  {
-    id: "3", slug: "binte-biluhuta-kuliner-wajib",
-    title: "Binte Biluhuta: Kuliner Wajib yang Memikat Lidah Wisatawan",
-    excerpt: "Sup jagung khas Gorontalo ini kini hadir di berbagai restoran modern dengan cita rasa otentik.",
-    category: "Kuliner", published_at: "2026-04-22", image_seed: 30,
-  },
-  {
-    id: "4", slug: "beasiswa-daerah-gorontalo-2026",
-    title: "Pemprov Gorontalo Buka 500 Beasiswa Daerah untuk Mahasiswa Berprestasi",
-    excerpt: "Program beasiswa ini menyasar pelajar kurang mampu namun berprestasi tinggi di seluruh Gorontalo.",
-    category: "Pendidikan", published_at: "2026-04-20", image_seed: 40,
-  },
-  {
-    id: "5", slug: "ekspor-jagung-gorontalo-meningkat",
-    title: "Ekspor Jagung Gorontalo Meningkat 30% di Kuartal Pertama 2026",
-    excerpt: "Tren positif ekspor jagung didukung oleh modernisasi pertanian dan akses pasar yang lebih luas.",
-    category: "Ekonomi", published_at: "2026-04-18", image_seed: 50,
-  },
-  {
-    id: "6", slug: "danau-limboto-revitalisasi",
-    title: "Revitalisasi Danau Limboto Dimulai, Target Selesai Akhir 2026",
-    excerpt: "Proyek besar revitalisasi Danau Limboto diharapkan mengembalikan kejayaan ekosistem danau ikonik ini.",
-    category: "Wisata", published_at: "2026-04-15", image_seed: 60,
-  },
-  {
-    id: "7", slug: "seni-tari-dana-dana",
-    title: "Tari Dana-Dana Gorontalo Tampil di Pentas Seni Internasional Jakarta",
-    excerpt: "Delegasi Gorontalo membawa kebanggaan lewat penampilan Tari Dana-Dana yang memukau penonton internasional.",
-    category: "Budaya", published_at: "2026-04-12", image_seed: 70,
-  },
-  {
-    id: "8", slug: "startup-teknologi-gorontalo",
-    title: "Startup Teknologi Lokal Gorontalo Raih Pendanaan Seri A Rp 15 Miliar",
-    excerpt: "Inovasi digital dari Gorontalo kini mendapat kepercayaan investor nasional untuk berkembang lebih jauh.",
-    category: "Ekonomi", published_at: "2026-04-10", image_seed: 80,
-  },
-];
-
-/* ─── News Section (4×2 grid) ───────────────────────────────────────── */
-function NewsSection({ items }: { items: NewsItem[] }) {
-  return (
-    <section id="berita" className="px-4 sm:px-6 py-16 sm:py-24 bg-gray-50/60 dark:bg-zinc-950/60 border-y border-gray-100 dark:border-zinc-800">
-      <div className="max-w-6xl mx-auto">
-        <SectionHeading
-          eyebrow="Update News"
-          title="Kabar terbaru dari Gorontalo"
-          description="Liputan harian seputar wisata, ekonomi, pendidikan, dan budaya Gorontalo."
-          action={
-            <Link
-              href="/berita"
-              className="text-sm font-semibold text-brand dark:text-yellow-400 hover:underline inline-flex items-center gap-1.5"
-            >
-              Semua berita
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </Link>
-          }
-        />
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
-          {items.map((item) => {
-            const catKey = CAT_KEY_MAP[item.category ?? ""] ?? (item.category ?? "").toLowerCase();
-            return (
-              <div
-                key={item.id}
-                className="relative group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40 hover:shadow-lg dark:hover:shadow-black/40 transition-all flex flex-col"
-              >
-                <Link href={`/news/${item.slug}`} className="absolute inset-0 z-[1]" aria-label={item.title} />
-                <div className="aspect-[16/10] bg-gray-100 dark:bg-zinc-800 relative overflow-hidden">
-                  {item.image_url ? (
-                    <img
-                      src={item.image_url}
-                      alt={item.title}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                      loading="lazy"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300 dark:text-zinc-700">
-                      <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                      </svg>
-                    </div>
-                  )}
-                </div>
-                <div className="p-4 flex-1 flex flex-col">
-                  <Link
-                    href={`/berita/${catKey}`}
-                    className={`relative z-[2] self-start text-[10px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full ${
-                      CATEGORY_BADGE[item.category ?? ""] ??
-                      "bg-gray-100 text-gray-700 dark:bg-zinc-800 dark:text-gray-300"
-                    }`}
-                  >
-                    {item.category}
-                  </Link>
-                  <h3 className="relative z-[1] text-sm font-semibold text-gray-900 dark:text-white mt-2.5 line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors leading-snug flex-1">
-                    {item.title}
-                  </h3>
-                  <p className="text-xs text-gray-400 dark:text-gray-500 mt-2.5">
-                    {formatDate(item.published_at ?? item.created_at)}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    </section>
-  );
-}
-
 /* ─── Tech stack icons ───────────────────────────────────────────────── */
 const TECH_STACK = [
-  { name: "Next.js",     icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
-  { name: "React",       icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
-  { name: "TypeScript",  icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
-  { name: "Python",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
-  { name: "TailwindCSS", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" },
-  { name: "Supabase",    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/supabase/supabase-original.svg" },
-  { name: "PostgreSQL",  icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
-  { name: "Figma",       icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg" },
-  { name: "Premiere Pro",icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/premierepro/premierepro-original.svg" },
-  { name: "After Effects",icon:"https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/aftereffects/aftereffects-original.svg" },
-  { name: "Photoshop",   icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/photoshop/photoshop-original.svg" },
-  { name: "Vercel",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vercel/vercel-original.svg" },
+  { name: "Next.js",      icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/nextjs/nextjs-original.svg" },
+  { name: "React",        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/react/react-original.svg" },
+  { name: "TypeScript",   icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/typescript/typescript-original.svg" },
+  { name: "Python",       icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/python/python-original.svg" },
+  { name: "TailwindCSS",  icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/tailwindcss/tailwindcss-original.svg" },
+  { name: "Supabase",     icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/supabase/supabase-original.svg" },
+  { name: "PostgreSQL",   icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/postgresql/postgresql-original.svg" },
+  { name: "Figma",        icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/figma/figma-original.svg" },
+  { name: "Premiere Pro", icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/premierepro/premierepro-original.svg" },
+  { name: "After Effects",icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/aftereffects/aftereffects-original.svg" },
+  { name: "Photoshop",    icon: "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/photoshop/photoshop-original.svg" },
+  { name: "Vercel",       icon: "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/vercel/vercel-original.svg" },
 ];
 
-/* ─── About Section ─────────────────────────────────────────────────── */
+/* ─── About Section (kept, not shown on landing) ────────────────────── */
 function AboutSection() {
   return (
     <section id="tentang" className="px-4 sm:px-6 py-16 sm:py-24 bg-gray-50/60 dark:bg-zinc-950/60 border-y border-gray-100 dark:border-zinc-800">
       <div className="max-w-6xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-          {/* Left: text */}
           <div>
             <span className="text-xs font-semibold text-brand dark:text-yellow-400 uppercase tracking-widest">
               Tentang Kami
@@ -517,8 +936,6 @@ function AboutSection() {
               </Link>
             </div>
           </div>
-
-          {/* Right: tech stack grid */}
           <div>
             <p className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">
               Tech & Tools
@@ -536,9 +953,7 @@ function AboutSection() {
                     alt={tech.name}
                     className="w-8 h-8 object-contain"
                     loading="lazy"
-                    onError={(e) => {
-                      e.currentTarget.style.display = "none";
-                    }}
+                    onError={(e) => { e.currentTarget.style.display = "none"; }}
                   />
                   <span className="text-[10px] font-medium text-gray-500 dark:text-gray-400 text-center leading-tight group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
                     {tech.name}
@@ -571,9 +986,9 @@ function Footer() {
             title="Platform"
             links={[
               ["Beranda", "/"],
-              ["Portofolio", "/portfolio"],
-              ["Berita", "/good-news"],
+              ["Berita", "/berita"],
               ["Affiliate", "/affiliate"],
+              ["Portofolio", "/portfolio"],
             ]}
           />
           <FooterCol
@@ -581,6 +996,7 @@ function Footer() {
             links={[
               ["Tentang", "/about"],
               ["Kontak", "/about#kontak"],
+              ["Media Kit", "/media-kit"],
             ]}
           />
           <FooterCol
@@ -588,6 +1004,7 @@ function Footer() {
             links={[
               ["Privacy", "/privacy-policy"],
               ["Terms", "/terms"],
+              ["Pedoman Media", "/pedoman-media-siber"],
             ]}
           />
         </div>
@@ -600,13 +1017,7 @@ function Footer() {
   );
 }
 
-function FooterCol({
-  title,
-  links,
-}: {
-  title: string;
-  links: [string, string][];
-}) {
+function FooterCol({ title, links }: { title: string; links: [string, string][] }) {
   return (
     <div>
       <p className="text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-widest mb-3">
@@ -629,7 +1040,7 @@ function FooterCol({
 }
 
 /* ─── Main landing page ─────────────────────────────────────────────── */
-export default function LandingPage({ portfolioItems, newsItems }: LandingPageProps) {
+export default function LandingPage({ portfolioItems, newsItems, newsTotalCount, eventItems, newsUnavailable }: LandingPageProps) {
   const [chatActive, setChatActive] = useState(false);
   const [initialMessage, setInitialMessage] = useState<string | undefined>();
   const [chatToLoad, setChatToLoad] = useState<LiveConversation | null>(null);
@@ -671,8 +1082,9 @@ export default function LandingPage({ portfolioItems, newsItems }: LandingPagePr
   return (
     <div className="flex-1 overflow-y-auto bg-white dark:bg-zinc-950">
       <ChatHero onSend={handleSend} />
+      <NewsSectionPaginated initialItems={newsItems} totalCount={newsTotalCount} newsUnavailable={newsUnavailable} />
+      {eventItems.length > 0 && <EventSection items={eventItems} />}
       {false && <PortfolioSection items={portfolioItems} />}
-      <NewsSection items={newsItems} />
       {false && <AboutSection />}
       <Footer />
     </div>

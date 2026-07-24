@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { CATEGORIES, CAT_COLOR, DEFAULT_COLOR } from "../categories";
+import BeritaPagination from "../BeritaPagination";
 
 export const dynamic = "force-dynamic";
+
+const LIMIT = 9;
 
 const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]));
 const LABEL_TO_KEY: Record<string, string> = Object.fromEntries(CATEGORIES.map((c) => [c.label, c.key]));
@@ -17,7 +21,10 @@ interface Article {
   is_trending: boolean; view_count: number;
 }
 
-interface Props { params: Promise<{ key: string }> }
+interface Props {
+  params:       Promise<{ key: string }>;
+  searchParams: Promise<{ page?: string }>;
+}
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { key } = await params;
@@ -35,21 +42,27 @@ function formatDate(d: string | null) {
   return new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export default async function BeritaCategoryPage({ params }: Props) {
-  const { key } = await params;
+export default async function BeritaCategoryPage({ params, searchParams }: Props) {
+  const { key }  = await params;
+  const { page: pageParam } = await searchParams;
   const cat = CAT_MAP[key];
   if (!cat) notFound();
 
+  const page   = Math.max(1, parseInt(pageParam ?? "1"));
+  const offset = (page - 1) * LIMIT;
   const colors = CAT_COLOR[cat.label] ?? DEFAULT_COLOR;
+  const admin  = createAdminClient();
 
-  const admin = createAdminClient();
-  const { data: raw } = await admin
+  const { data: raw, count } = await admin
     .from("articles")
-    .select("id, title, slug, category, categories, excerpt, image_url, published_at, created_at, is_trending, view_count")
+    .select("id, title, slug, category, categories, excerpt, image_url, published_at, created_at, is_trending, view_count", { count: "exact" })
     .eq("published", true)
     .contains("categories", [cat.label])
     .order("published_at", { ascending: false, nullsFirst: false })
-    .limit(60);
+    .range(offset, offset + LIMIT - 1);
+
+  const totalCount = count ?? 0;
+  const totalPages = Math.ceil(totalCount / LIMIT);
 
   const articles: Article[] = (raw ?? []).map((a) => ({
     id:           a.id as string,
@@ -65,8 +78,7 @@ export default async function BeritaCategoryPage({ params }: Props) {
     view_count:   (a.view_count as number) ?? 0,
   }));
 
-  const featured = articles.find((a) => a.is_trending) ?? articles[0] ?? null;
-  const rest = featured ? articles.filter((a) => a.id !== featured.id) : articles;
+  const grid = articles;
 
   return (
     <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
@@ -86,11 +98,13 @@ export default async function BeritaCategoryPage({ params }: Props) {
           {cat.label}
         </h1>
         <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-          {articles.length > 0 ? `${articles.length} artikel tersedia` : "Belum ada artikel"}
+          {totalCount > 0
+            ? `${totalCount} artikel · halaman ${page} dari ${totalPages}`
+            : "Belum ada artikel"}
         </p>
       </div>
 
-      {/* All category chips (sibling categories) */}
+      {/* Category chips */}
       <div className="flex flex-wrap gap-2 mb-10">
         {CATEGORIES.map((c) => (
           <Link
@@ -124,108 +138,71 @@ export default async function BeritaCategoryPage({ params }: Props) {
 
       {articles.length > 0 && (
         <>
-          {/* Featured hero */}
-          {featured && (
-            <div className="relative group mb-10">
-              <Link href={`/news/${featured.slug}`} className="absolute inset-0 z-[1]" aria-label={featured.title} />
-              <div className="relative rounded-2xl overflow-hidden aspect-[16/8] sm:aspect-[16/7] bg-gray-100 dark:bg-zinc-800">
-                {featured.image_url ? (
-                  <Image
-                    src={featured.image_url} alt={featured.title} fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out"
-                    priority unoptimized
-                  />
-                ) : (
-                  <div className={`w-full h-full ${colors.bg}`} />
-                )}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute bottom-0 left-0 right-0 p-6 sm:p-8">
-                  {featured.is_trending && (
-                    <span className="text-xs font-semibold bg-orange-500 text-white px-2.5 py-1 rounded-full mb-3 inline-block">
-                      Trending
-                    </span>
-                  )}
-                  <div className="relative z-[2] flex flex-wrap gap-1 mb-2">
-                    {featured.categories.map((c) => {
-                      const k = LABEL_TO_KEY[c] ?? c.toLowerCase();
-                      const bc = CAT_COLOR[c] ?? DEFAULT_COLOR;
-                      return <Link key={c} href={`/berita/${k}`} className={`text-xs font-semibold px-2.5 py-0.5 rounded-full ${bc.badge}`}>{c}</Link>;
-                    })}
+          {/* Grid 3×3 */}
+          {grid.length > 0 && (
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+                {grid.map((article) => (
+                  <div
+                    key={article.id}
+                    className="relative group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-lg transition-all duration-300"
+                  >
+                    <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
+                    <div className="relative aspect-[16/10] bg-gray-100 dark:bg-zinc-800 overflow-hidden">
+                      {article.image_url ? (
+                        <Image src={article.image_url} alt={article.title} fill
+                          className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
+                      ) : (
+                        <div className={`w-full h-full ${colors.bg} opacity-60`} />
+                      )}
+                      {article.is_trending && (
+                        <span className="absolute top-2.5 left-2.5 text-[10px] font-semibold bg-orange-500 text-white px-2 py-0.5 rounded-full">
+                          Trending
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex flex-col flex-1 p-4 sm:p-5 space-y-2.5">
+                      <div className="relative z-[2] flex flex-wrap gap-1">
+                        {article.categories.map((c) => {
+                          const k = LABEL_TO_KEY[c] ?? c.toLowerCase();
+                          const bc = CAT_COLOR[c] ?? DEFAULT_COLOR;
+                          return (
+                            <Link key={c} href={`/berita/${k}`}
+                              className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${bc.badge}`}>
+                              {c}
+                            </Link>
+                          );
+                        })}
+                      </div>
+                      <h3 className="relative z-[1] font-display text-sm sm:text-base font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+                        {article.title}
+                      </h3>
+                      {article.excerpt && (
+                        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 flex-1">
+                          {article.excerpt}
+                        </p>
+                      )}
+                      <p className="text-xs text-gray-400 dark:text-gray-500 pt-1">
+                        {formatDate(article.published_at ?? article.created_at)}
+                      </p>
+                    </div>
                   </div>
-                  <h2 className="relative z-[1] font-display text-2xl sm:text-3xl font-bold text-white leading-tight mb-2 line-clamp-2 group-hover:underline">
-                    {featured.title}
-                  </h2>
-                  {featured.excerpt && (
-                    <p className="text-sm text-white/75 line-clamp-2 hidden sm:block mb-2">{featured.excerpt}</p>
-                  )}
-                  <p className="text-xs text-white/60">{formatDate(featured.published_at ?? featured.created_at)}</p>
-                </div>
+                ))}
               </div>
-            </div>
+            </>
           )}
 
-          {/* Divider */}
-          {rest.length > 0 && (
-            <div className="flex items-center gap-4 mb-8">
-              <h2 className="text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-gray-500 whitespace-nowrap">
-                Artikel Lainnya
-              </h2>
-              <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
-            </div>
-          )}
-
-          {/* Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-            {rest.map((article) => (
-              <div
-                key={article.id}
-                className="relative group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-lg transition-all duration-300"
-              >
-                <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
-                <div className="relative aspect-[16/10] bg-gray-100 dark:bg-zinc-800 overflow-hidden">
-                  {article.image_url ? (
-                    <Image src={article.image_url} alt={article.title} fill
-                      className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
-                  ) : (
-                    <div className={`w-full h-full ${colors.bg} opacity-60`} />
-                  )}
-                  {article.is_trending && (
-                    <span className="absolute top-2.5 left-2.5 text-[10px] font-semibold bg-orange-500 text-white px-2 py-0.5 rounded-full">
-                      Trending
-                    </span>
-                  )}
-                </div>
-                <div className="flex flex-col flex-1 p-4 sm:p-5 space-y-2.5">
-                  <div className="relative z-[2] flex flex-wrap gap-1">
-                    {article.categories.map((c) => {
-                      const k = LABEL_TO_KEY[c] ?? c.toLowerCase();
-                      const bc = CAT_COLOR[c] ?? DEFAULT_COLOR;
-                      return (
-                        <Link key={c} href={`/berita/${k}`}
-                          className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${bc.badge}`}>
-                          {c}
-                        </Link>
-                      );
-                    })}
-                  </div>
-                  <h3 className="relative z-[1] font-display text-sm sm:text-base font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
-                    {article.title}
-                  </h3>
-                  {article.excerpt && (
-                    <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 flex-1">
-                      {article.excerpt}
-                    </p>
-                  )}
-                  <p className="text-xs text-gray-400 dark:text-gray-500 pt-1">
-                    {formatDate(article.published_at ?? article.created_at)}
-                  </p>
-                </div>
-              </div>
-            ))}
-          </div>
+          {/* Pagination */}
+          <Suspense>
+            <BeritaPagination
+              page={page}
+              totalPages={totalPages}
+              basePath={`/berita/${key}`}
+            />
+          </Suspense>
 
           {/* Back link */}
-          <div className="mt-12 pt-8 border-t border-gray-100 dark:border-zinc-800 flex items-center gap-4">
+          <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center gap-4">
             <Link href="/berita" className="text-sm text-brand dark:text-yellow-400 font-medium hover:underline">
               ← Semua berita
             </Link>

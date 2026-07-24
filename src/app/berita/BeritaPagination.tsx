@@ -6,9 +6,10 @@ import { useTransition } from "react";
 interface Props {
   page:       number;
   totalPages: number;
+  basePath?:  string;
 }
 
-export default function BeritaPagination({ page, totalPages }: Props) {
+export default function BeritaPagination({ page, totalPages, basePath = "/berita" }: Props) {
   const router     = useRouter();
   const sp         = useSearchParams();
   const [, startT] = useTransition();
@@ -18,7 +19,8 @@ export default function BeritaPagination({ page, totalPages }: Props) {
   const go = (p: number) => {
     const params = new URLSearchParams(sp.toString());
     if (p === 1) params.delete("page"); else params.set("page", String(p));
-    startT(() => router.push("/berita?" + params.toString(), { scroll: true }));
+    const qs = params.toString();
+    startT(() => router.push(basePath + (qs ? "?" + qs : ""), { scroll: true }));
   };
 
   // Build page range with ellipsis

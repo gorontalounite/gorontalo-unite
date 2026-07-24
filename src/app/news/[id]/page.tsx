@@ -5,13 +5,14 @@ import { notFound } from "next/navigation";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient }      from "@/lib/supabase/server";
 import { CATEGORIES }        from "@/app/berita/categories";
-import MarkdownContent from "@/components/ui/MarkdownContent";
-import BlockRenderer   from "@/components/ui/BlockRenderer";
-import ShareButtons    from "@/components/ui/ShareButtons";
+import MarkdownContent    from "@/components/ui/MarkdownContent";
+import BlockRenderer      from "@/components/ui/BlockRenderer";
+import ShareButtons       from "@/components/ui/ShareButtons";
 import RelatedPosts, { type RelatedItem } from "@/components/ui/RelatedPosts";
-import ViewTracker     from "@/components/ui/ViewTracker";
-import CommentSection  from "@/components/ui/CommentSection";
-import type { Block }  from "@/components/editor/types";
+import ViewTracker        from "@/components/ui/ViewTracker";
+import CommentSection     from "@/components/ui/CommentSection";
+import ArticleHeroImage   from "@/components/ui/ArticleHeroImage";
+import type { Block }     from "@/components/editor/types";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -153,7 +154,6 @@ export default async function NewsDetailPage({ params }: Props) {
       {/* Schema.org */}
       <script
         type="application/ld+json"
-        // eslint-disable-next-line react/no-danger
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
 
@@ -214,9 +214,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
         {/* Hero image */}
         {article.image_url && (
-          <div className="aspect-video relative rounded-2xl overflow-hidden mb-8">
-            <Image src={article.image_url} alt={article.title} fill className="object-cover" priority />
-          </div>
+          <ArticleHeroImage src={article.image_url} alt={article.title} />
         )}
 
         {/* Content */}

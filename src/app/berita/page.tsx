@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 // ─── Constants ───────────────────────────────────────────────────────────────
 
 const LIMIT     = 16; // articles per page in filtered view
-const CAT_LIMIT = 4;  // articles shown per category section
+const CAT_LIMIT = 6;  // articles shown per category section (1 featured + 5 side)
 
 const CAT_LABEL_MAP: Record<string, string> = Object.fromEntries(
   CATEGORIES.map((c) => [c.key, c.label]),
@@ -178,11 +178,13 @@ function CatFeaturedCard({ article }: { article: Article }) {
           {article.title}
         </h3>
         {article.excerpt && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-4 flex-1">
+          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-5">
             {article.excerpt}
           </p>
         )}
-        <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 mt-auto pt-1">
+        {/* Spacer — grows without conflicting with line-clamp's -webkit-box */}
+        <span className="flex-1" />
+        <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-gray-500 pt-1">
           <span>{formatDate(article.published_at ?? article.created_at)}</span>
           {sourceLabel(article.source_url) && (
             <>
@@ -259,7 +261,7 @@ function CategorySection({
 
   const totalPages = Math.ceil(totalCount / CAT_LIMIT);
   const featured   = articles[0];
-  const rest       = articles.slice(1, 4);
+  const rest       = articles.slice(1, 6);
 
   return (
     <section>
@@ -286,8 +288,8 @@ function CategorySection({
       </div>
 
       {/* ── Hero-style grid (mirrors the top hero section) ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
-        <div className="lg:col-span-3">
+      <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8 lg:items-stretch">
+        <div className="lg:col-span-3 lg:h-full">
           <CatFeaturedCard article={featured} />
         </div>
         {rest.length > 0 && (
@@ -375,7 +377,7 @@ export default async function BeritaPage({ searchParams }: PageProps) {
 
   // ── Default view: hero + category buckets ──
   let heroArticles: Article[]                   = [];
-  let catBuckets: Record<string, Article[]>     = {};
+  const catBuckets: Record<string, Article[]>   = {};
 
   if (!hasFilters) {
     const { data: heroData } = await admin
@@ -420,7 +422,6 @@ export default async function BeritaPage({ searchParams }: PageProps) {
   if (hasFilters) {
     const offset = (page - 1) * LIMIT;
 
-    // eslint-disable-next-line prefer-const
     let q = admin
       .from("articles")
       .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, source_url, is_trending", { count: "exact" })
