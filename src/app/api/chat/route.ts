@@ -1,11 +1,22 @@
 import { NextRequest } from "next/server";
 import Groq from "groq-sdk";
 import { tavily } from "@tavily/core";
+import { Pinecone } from "@pinecone-database/pinecone";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY! });
+
+// Lazy-init Pinecone so build-time module evaluation doesn't throw when
+// PINECONE_API_KEY is absent from the build environment.
+let _pineconeIndex: ReturnType<InstanceType<typeof Pinecone>["Index"]> | null = null;
+function getPineconeIndex() {
+  if (!_pineconeIndex) {
+    const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! });
+    _pineconeIndex = pc.Index("gorontalo-kb");
+  }
+  return _pineconeIndex;
+}
 
 // Keywords that indicate a Gorontalo-specific question
 const GORONTALO_KEYWORDS = [
@@ -73,48 +84,41 @@ export async function POST(req: NextRequest) {
     let sources: { title: string; url: string | null; category: string }[] = [];
     let hasContext = false;
 
-    // KB semantic search — runs in parallel with Tavily
+    // KB semantic search via Pinecone
     let kbBlock = "";
     try {
-      const adminClient = createAdminClient();
-      let kbChunks: { id: string; title: string; content: string; category: string }[] = [];
+      // 1. Embed query via Supabase Edge Function
+      const embRes = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          },
+          body: JSON.stringify({ text: message }),
+        }
+      );
+      const embJson = embRes.ok ? (await embRes.json() as { embedding?: number[] }) : null;
+      const queryVec = embJson?.embedding;
 
-      // Try hybrid search first (vector + BM25 RRF), fall back to FTS-only
-      try {
-        const embRes = await fetch(
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-            },
-            body: JSON.stringify({ text: message }),
-          }
-        );
-        const embJson = embRes.ok ? (await embRes.json() as { embedding?: number[] }) : null;
-        const queryVec = embJson?.embedding;
-        if (queryVec) {
-          const { data } = await adminClient.rpc("search_knowledge_base_hybrid", {
-            query_embedding: JSON.stringify(queryVec),
-            search_query: message,
-            match_count: 8,
-            min_similarity: 0.35,
-          });
-          kbChunks = (data ?? []) as typeof kbChunks;
-        } else throw new Error("no embedding");
-      } catch {
-        // Hybrid search failed, fall back to full-text
-        const { data } = await adminClient.rpc("search_knowledge_base_fts", {
-          search_query: message,
-          match_count: 8,
+      if (queryVec) {
+        // 2. Query Pinecone
+        const result = await getPineconeIndex().query({
+          vector: queryVec,
+          topK: 8,
+          includeMetadata: true,
         });
-        kbChunks = (data ?? []) as typeof kbChunks;
-      }
 
-      if (kbChunks.length > 0) {
-        kbBlock = "## DOKUMEN INTERNAL (gunakan jika relevan):\n\n" +
-          kbChunks.map((c, i) => `[KB${i + 1}] ${c.title}\n${c.content}`).join("\n\n---\n\n");
+        const matches = (result.matches ?? []).filter(m => (m.score ?? 0) >= 0.35);
+
+        if (matches.length > 0) {
+          kbBlock = "## DOKUMEN INTERNAL (gunakan jika relevan):\n\n" +
+            matches.map((m, i) => {
+              const meta = m.metadata as Record<string, string> ?? {};
+              return `[KB${i + 1}] ${meta.title ?? ""}\n${meta.content ?? ""}`;
+            }).join("\n\n---\n\n");
+        }
       }
     } catch (err) {
       console.error("[/api/chat] KB retrieval error:", err);
