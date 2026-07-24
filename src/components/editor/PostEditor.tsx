@@ -391,16 +391,20 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
 
   /* ─── Check for draft on mount ──────────────────────────── */
   useEffect(() => {
+    let bannerTimer: ReturnType<typeof setTimeout> | undefined;
     try {
       const raw = localStorage.getItem(draftKey);
       if (!raw) return;
       const draft = JSON.parse(raw) as { blocks: Block[]; meta: PostMeta; savedAt: number };
       if (draft.blocks && Array.isArray(draft.blocks)) {
-        setDraftBanner(new Date(draft.savedAt).toLocaleString("id-ID"));
+        bannerTimer = setTimeout(() => setDraftBanner(new Date(draft.savedAt).toLocaleString("id-ID")), 0);
       }
     } catch {
       // ignore
     }
+    return () => {
+      if (bannerTimer) clearTimeout(bannerTimer);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -480,6 +484,7 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
       focus_keyword:    meta.focus_keyword    || null,
       schema_type:      meta.schema_type      || "Article",
       allow_comments:   meta.allow_comments   ?? false,
+      source_url:       postType === "portfolio" ? meta.project_url || null : meta.source_url || null,
       ...(postType === "portfolio" ? {
         project_url:      meta.project_url  || null,
         client_name:      meta.client_name  || null,
@@ -488,7 +493,6 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
         repo_url:         meta.repo_url     || null,
         duration:         meta.duration     || null,
         tech_stack:       meta.tech_stack?.length ? meta.tech_stack : null,
-        source_url:       meta.project_url  || null,
         section_problem:  sectionBlocks.problem,
         section_solution: sectionBlocks.solution,
         section_process:  sectionBlocks.process,
