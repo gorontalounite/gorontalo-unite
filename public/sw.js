@@ -6,7 +6,7 @@
  *   - Offline fallback page untuk navigasi
  */
 
-const CACHE_NAME    = "gu-v1";
+const CACHE_NAME    = "gu-v2";
 const OFFLINE_URL   = "/offline";
 const STATIC_ASSETS = [
   "/",

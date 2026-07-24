@@ -2,6 +2,9 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 
+const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp", "image/avif"]);
+
 export async function POST(req: NextRequest) {
   const supabase = await createClient();
   const {
@@ -23,9 +26,15 @@ export async function POST(req: NextRequest) {
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
+  if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
+    return NextResponse.json({ error: "Gunakan gambar JPEG, PNG, WebP, atau AVIF" }, { status: 400 });
+  }
+  if (file.size === 0 || file.size > MAX_IMAGE_BYTES) {
+    return NextResponse.json({ error: "Ukuran gambar maksimal 5 MB" }, { status: 400 });
+  }
 
-  const ext = file.name.split(".").pop() ?? "jpg";
-  const filename = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+  const extension = file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
+  const filename = `articles/${Date.now()}-${crypto.randomUUID()}.${extension}`;
   const buffer = await file.arrayBuffer();
 
   const { data, error } = await admin.storage

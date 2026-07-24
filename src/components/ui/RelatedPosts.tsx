@@ -1,5 +1,6 @@
-import Link  from "next/link";
-import Image from "next/image";
+"use client";
+
+import Link from "next/link";
 
 export interface RelatedItem {
   id:           string;
@@ -13,7 +14,7 @@ export interface RelatedItem {
 
 interface Props {
   items:    RelatedItem[];
-  basePath: string; // "/news" or "/portfolio"
+  basePath: string;
 }
 
 export default function RelatedPosts({ items, basePath }: Props) {
@@ -33,18 +34,15 @@ export default function RelatedPosts({ items, basePath }: Props) {
             className="group flex flex-col"
           >
             {/* Thumbnail */}
-            <div className="aspect-video relative rounded-xl overflow-hidden mb-3 bg-gray-100 dark:bg-zinc-800 shrink-0">
-              {item.image_url ? (
-                <Image
+            <div className="aspect-video relative rounded-xl overflow-hidden mb-3 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700 shrink-0">
+              {item.image_url && (
+                <img
                   src={item.image_url}
                   alt={item.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-300"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                  loading="lazy"
+                  onError={(e) => { e.currentTarget.style.display = "none"; }}
                 />
-              ) : (
-                <div className="w-full h-full flex items-center justify-center text-2xl">
-                  📰
-                </div>
               )}
             </div>
 

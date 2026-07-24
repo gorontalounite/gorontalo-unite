@@ -40,3 +40,5 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 .vercel
+# Generated local editorial previews; source scrape data and drafts are never committed.
+/article-previews/

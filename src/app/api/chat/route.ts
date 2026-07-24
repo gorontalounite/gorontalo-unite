@@ -1,11 +1,56 @@
 import { NextRequest } from "next/server";
 import Groq from "groq-sdk";
 import { tavily } from "@tavily/core";
+import { Pinecone } from "@pinecone-database/pinecone";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
-const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY! });
+type Source = { title: string; url: string | null; category: string };
+const RATE_WINDOW_MS = 15 * 60 * 1000;
+const RATE_LIMIT = 20;
+const requestBuckets = new Map<string, { count: number; resetAt: number }>();
+
+function isRateLimited(key: string) {
+  const now = Date.now();
+  const bucket = requestBuckets.get(key);
+  if (!bucket || bucket.resetAt <= now) {
+    requestBuckets.set(key, { count: 1, resetAt: now + RATE_WINDOW_MS });
+    return false;
+  }
+  bucket.count += 1;
+  return bucket.count > RATE_LIMIT;
+}
+
+function needsFreshSearch(message: string) {
+  return /\b(terbaru|terkini|hari ini|saat ini|update|updates|minggu ini|bulan ini|jadwal|cuaca)\b/i.test(message);
+}
+
+let _groq: Groq | null = null;
+function getGroq() {
+  const apiKey = process.env.GROQ_API_KEY;
+  if (!apiKey) throw new Error("GROQ_API_KEY is not configured");
+  _groq ??= new Groq({ apiKey });
+  return _groq;
+}
+
+let _tavilyClient: ReturnType<typeof tavily> | null = null;
+function getTavilyClient() {
+  const apiKey = process.env.TAVILY_API_KEY;
+  if (!apiKey) throw new Error("TAVILY_API_KEY is not configured");
+  _tavilyClient ??= tavily({ apiKey });
+  return _tavilyClient;
+}
+
+// Lazy-init Pinecone so build-time module evaluation doesn't throw when
+// PINECONE_API_KEY is absent from the build environment.
+let _pineconeIndex: ReturnType<InstanceType<typeof Pinecone>["Index"]> | null = null;
+function getPineconeIndex() {
+  if (!_pineconeIndex) {
+    const pc = new Pinecone({ apiKey: process.env.PINECONE_API_KEY! });
+    _pineconeIndex = pc.Index("gorontalo-kb");
+  }
+  return _pineconeIndex;
+}
 
 // Keywords that indicate a Gorontalo-specific question
 const GORONTALO_KEYWORDS = [
@@ -61,73 +106,103 @@ export async function POST(req: NextRequest) {
       conversationHistory?: { role: "user" | "assistant"; content: string }[];
     };
 
-    if (!message?.trim()) {
+    if (!message?.trim() || message.length > 2_000 || conversationHistory.length > 12) {
       return new Response(JSON.stringify({ error: "Message is required" }), {
         status: 400,
         headers: { "Content-Type": "application/json" },
       });
     }
 
+    const clientIp = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "anonymous";
+    if (isRateLimited(clientIp)) {
+      return new Response(JSON.stringify({ error: "Terlalu banyak permintaan. Coba lagi beberapa menit lagi." }), {
+        status: 429, headers: { "Content-Type": "application/json", "Retry-After": "900" },
+      });
+    }
+
     const gorontalo = isGorontaloContext(message, conversationHistory);
     let contextBlock = "";
-    let sources: { title: string; url: string | null; category: string }[] = [];
+    let sources: Source[] = [];
     let hasContext = false;
 
-    // KB semantic search — runs in parallel with Tavily
+    // KB semantic search via Pinecone
     let kbBlock = "";
     try {
-      const adminClient = createAdminClient();
-      let kbChunks: { id: string; title: string; content: string; category: string }[] = [];
+      // 1. Embed query via Supabase Edge Function
+      const embRes = await fetch(
+        `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
+          },
+          body: JSON.stringify({ text: message }),
+        }
+      );
+      const embJson = embRes.ok ? (await embRes.json() as { embedding?: number[] }) : null;
+      const queryVec = embJson?.embedding;
 
-      // Try hybrid search first (vector + BM25 RRF), fall back to FTS-only
-      try {
-        const embRes = await fetch(
-          `${process.env.NEXT_PUBLIC_SUPABASE_URL}/functions/v1/embed`,
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `Bearer ${process.env.SUPABASE_SERVICE_ROLE_KEY}`,
-            },
-            body: JSON.stringify({ text: message }),
-          }
-        );
-        const embJson = embRes.ok ? (await embRes.json() as { embedding?: number[] }) : null;
-        const queryVec = embJson?.embedding;
-        if (queryVec) {
-          const { data } = await adminClient.rpc("search_knowledge_base_hybrid", {
-            query_embedding: JSON.stringify(queryVec),
-            search_query: message,
-            match_count: 8,
-            min_similarity: 0.35,
-          });
-          kbChunks = (data ?? []) as typeof kbChunks;
-        } else throw new Error("no embedding");
-      } catch {
-        // Hybrid search failed, fall back to full-text
-        const { data } = await adminClient.rpc("search_knowledge_base_fts", {
-          search_query: message,
-          match_count: 8,
+      if (queryVec) {
+        // 2. Query Pinecone
+        const result = await getPineconeIndex().query({
+          vector: queryVec,
+          topK: 8,
+          includeMetadata: true,
         });
-        kbChunks = (data ?? []) as typeof kbChunks;
-      }
 
-      if (kbChunks.length > 0) {
-        kbBlock = "## DOKUMEN INTERNAL (gunakan jika relevan):\n\n" +
-          kbChunks.map((c, i) => `[KB${i + 1}] ${c.title}\n${c.content}`).join("\n\n---\n\n");
+        const matches = (result.matches ?? []).filter(m => (m.score ?? 0) >= 0.35);
+
+        if (matches.length > 0) {
+          kbBlock = "## DOKUMEN INTERNAL (gunakan jika relevan):\n\n" +
+            matches.map((m, i) => {
+              const meta = m.metadata as Record<string, string> ?? {};
+              return `[KB${i + 1}] ${meta.title ?? ""}\n${meta.content ?? ""}`;
+            }).join("\n\n---\n\n");
+          sources.push(...matches.slice(0, 4).map((match, index) => {
+            const meta = match.metadata as Record<string, string> ?? {};
+            return { title: meta.title || `Dokumen internal ${index + 1}`, url: meta.source_url || meta.url || null, category: "Basis pengetahuan" };
+          }));
+        }
       }
     } catch (err) {
       console.error("[/api/chat] KB retrieval error:", err);
     }
 
-    // Tavily search (non-streaming, awaited before Groq stream starts)
+    // Published summaries are always first-class sources, even before they are embedded.
     try {
+      const admin = createAdminClient();
+      const { data: published } = await admin
+        .from("articles")
+        .select("title, slug, excerpt, content, source_url, category")
+        .eq("published", true)
+        .neq("category", "Portfolio")
+        .or(`title.ilike.%${message.slice(0, 120)}%,excerpt.ilike.%${message.slice(0, 120)}%`)
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .limit(3);
+      if (published?.length) {
+        const articleBlock = published.map((article, index) =>
+          `[ARTIKEL ${index + 1}] ${article.title}\n${article.excerpt || article.content || ""}`
+        ).join("\n\n---\n\n");
+        kbBlock = `${kbBlock}${kbBlock ? "\n\n" : ""}## ARTIKEL TERBIT (prioritaskan):\n\n${articleBlock}`;
+        sources.push(...published.map((article) => ({
+          title: article.title,
+          url: `/news/${article.slug}`,
+          category: article.category || "Artikel",
+        })));
+      }
+    } catch (err) {
+      console.error("[/api/chat] Published article retrieval error:", err);
+    }
+
+    // Tavily is a fallback: only for fresh questions or insufficient local context.
+    if (needsFreshSearch(message) || !kbBlock) try {
       const searchQuery =
         gorontalo && !message.toLowerCase().includes("gorontalo")
           ? `${message} Gorontalo`
           : message;
 
-      const tavilyRes = await tavilyClient.search(searchQuery, {
+      const tavilyRes = await getTavilyClient().search(searchQuery, {
         searchDepth: "basic",
         maxResults: 7,
         includeAnswer: false,
@@ -145,14 +220,18 @@ export async function POST(req: NextRequest) {
         .map((r, i) => `[${i + 1}] ${r.title}\nURL: ${r.url}\n${r.content}`)
         .join("\n\n---\n\n");
 
-      sources = results.map((r) => ({
+      sources.push(...results.map((r) => ({
         title: r.title,
         url: r.url,
         category: "Web",
-      }));
+      })));
     } catch (err) {
       console.error("[/api/chat] Tavily error:", err);
     }
+
+    sources = sources.filter((source, index, all) =>
+      Boolean(source.title) && all.findIndex((candidate) => candidate.title === source.title && candidate.url === source.url) === index
+    ).slice(0, 8);
 
     // Build system prompt
     let systemPrompt: string;
@@ -164,7 +243,7 @@ export async function POST(req: NextRequest) {
 
 1. **Jika ada DOKUMEN INTERNAL**, utamakan informasi dari sana — itu adalah data resmi yang sudah diverifikasi.
 2. **Jika ada HASIL PENCARIAN yang relevan**, gunakan sebagai pelengkap.
-3. **Jika tidak ada keduanya**, jawab berdasarkan pengetahuanmu. Jangan katakan "hubungi Dinas" kecuali soal prosedur administrasi resmi.
+3. **Jika tidak ada keduanya**, katakan informasi belum cukup. Jangan mengisi kekosongan dengan pengetahuan umum yang tidak dapat disitasi.
 4. **Jika benar-benar tidak tahu**, katakan: "Saya tidak memiliki informasi yang cukup tentang hal ini."
 
 ${SHARED_RULES}
@@ -178,7 +257,7 @@ ${hasContext ? "## HASIL PENCARIAN WEB (gunakan jika relevan):\n\n" + contextBlo
 ## ATURAN:
 1. **Utamakan DOKUMEN INTERNAL** jika tersedia dan relevan.
 2. **Gunakan HASIL PENCARIAN WEB** sebagai pelengkap.
-3. Jika tidak ada keduanya, jawab berdasarkan pengetahuanmu.
+3. Jika tidak ada keduanya, katakan informasi belum cukup; jangan mengarang.
 4. Jika benar-benar tidak tahu: "Saya tidak memiliki informasi yang cukup tentang ini."
 
 ${SHARED_RULES}
@@ -207,13 +286,13 @@ ${hasContext ? "## HASIL PENCARIAN WEB:\n\n" + contextBlock : ""}`;
     // Try primary model, fall back to mixtral on error
     let streamIterable: AsyncIterable<Groq.Chat.ChatCompletionChunk>;
     try {
-      streamIterable = await groq.chat.completions.create({
+      streamIterable = await getGroq().chat.completions.create({
         model: PRIMARY_MODEL,
         ...groqParams,
       });
     } catch (primaryErr) {
       console.error("[/api/chat] Primary model error, retrying with fallback:", primaryErr);
-      streamIterable = await groq.chat.completions.create({
+      streamIterable = await getGroq().chat.completions.create({
         model: FALLBACK_MODEL,
         ...groqParams,
       });

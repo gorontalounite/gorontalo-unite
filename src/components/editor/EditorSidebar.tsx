@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Block, BLOCK_REGISTRY, BlockType } from "./types";
+import { Block, BLOCK_REGISTRY } from "./types";
 
 /* ─── Types ─────────────────────────────────────────────────── */
 export interface PostMeta {
@@ -472,6 +472,24 @@ export default function EditorSidebar({
                 onChange={(url) => setField("image_url", url)}
               />
             </Panel>
+
+            {postType === "news" && (
+              <Panel title="Sumber asli" defaultOpen>
+                <div>
+                  <label className="mb-1 block text-[11px] font-medium text-gray-500">URL artikel sumber</label>
+                  <input
+                    type="url"
+                    value={meta.source_url ?? ""}
+                    onChange={(event) => setField("source_url", event.target.value)}
+                    placeholder="https://media-sumber.id/artikel…"
+                    className="w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-[11px] outline-none focus:border-[#F5C400]"
+                  />
+                  <p className="mt-1.5 text-[10px] leading-relaxed text-gray-400">
+                    Tautkan artikel asli. Publikasikan ringkasan editorial, bukan salinan penuh.
+                  </p>
+                </div>
+              </Panel>
+            )}
 
             {/* Excerpt */}
             <Panel title="Ringkasan / Excerpt">
