@@ -2,12 +2,12 @@
 
 > Platform media hyperlokal berbasis AI untuk Gorontalo. Menggabungkan chatbot AI, portal berita, portofolio, sistem komentar, affiliate, dan knowledge base dalam satu ekosistem terpadu — dengan dashboard admin full-featured dan dukungan PWA.
 
-**Live:** [gorontalounite.id](https://gorontalounite.id) · **Repo:** `main` auto-deploy ke Vercel
+**Live:** [gorontalounite.com](https://gorontalounite.com) · **Repo:** `main` auto-deploy ke Vercel
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5-blue?logo=typescript)](https://www.typescriptlang.org/)
 [![Next.js](https://img.shields.io/badge/Next.js-16.2-black?logo=next.js)](https://nextjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-PostgreSQL-green?logo=supabase)](https://supabase.com/)
-[![PWA](https://img.shields.io/badge/PWA-ready-purple?logo=googlechrome)](https://gorontalounite.id)
+[![PWA](https://img.shields.io/badge/PWA-ready-purple?logo=googlechrome)](https://gorontalounite.com)
 [![Deploy](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://vercel.com/)
 
 ---
@@ -500,7 +500,7 @@ GROQ_API_KEY=gsk_...
 TAVILY_API_KEY=tvly-...
 
 # App
-NEXT_PUBLIC_SITE_URL=https://gorontalounite.id
+NEXT_PUBLIC_SITE_URL=https://gorontalounite.com
 ```
 
 Lihat `.env.example` untuk detail lengkap.

@@ -40,7 +40,8 @@ function SignInForm() {
   const [error,         setError]         = useState<string | null>(null);
   const [magicSent,     setMagicSent]     = useState(false);
 
-  const callbackUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_APP_URL}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
+  const callbackUrl = `${siteUrl}/auth/callback?next=${encodeURIComponent(redirectTo)}`;
 
   const handleGoogle = async () => {
     setGoogleLoading(true); setError(null);

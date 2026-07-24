@@ -3,6 +3,7 @@ import LandingPage, {
   type NewsItem,
 } from "@/components/Landing/LandingPage";
 import { createAdminClient } from "@/lib/supabase/admin";
+import { previewArticles } from "@/data/newsPreview";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,23 @@ export default async function HomePage() {
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
     newsUnavailable = true;
+  }
+
+  // Keep the homepage useful while editorial assets are reviewed locally.
+  // Supabase data takes priority as soon as published articles exist.
+  if (newsItems.length === 0) {
+    newsItems = previewArticles.slice(0, 6).map((article) => ({
+      id: article.id,
+      title: article.title,
+      slug: article.slug,
+      excerpt: article.excerpt,
+      image_url: article.image_url,
+      category: article.category,
+      published_at: article.source_published_at,
+      created_at: article.source_published_at,
+    }));
+    newsTotalCount = previewArticles.length;
+    newsUnavailable = false;
   }
 
   return (

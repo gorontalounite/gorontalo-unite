@@ -21,7 +21,7 @@ interface Props {
 
 export const dynamic = "force-dynamic";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.id";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id: slug } = await params;

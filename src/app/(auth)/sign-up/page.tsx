@@ -32,7 +32,8 @@ export default function SignUpPage() {
   const [error,         setError]         = useState<string | null>(null);
   const [success,       setSuccess]       = useState(false);
 
-  const callbackUrl = `${process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_APP_URL}/auth/callback`;
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
+  const callbackUrl = `${siteUrl}/auth/callback`;
 
   const handleGoogle = async () => {
     setGoogleLoading(true); setError(null);

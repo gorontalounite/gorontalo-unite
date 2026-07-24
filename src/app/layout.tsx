@@ -27,7 +27,7 @@ const instrumentSerif = Instrument_Serif({
   display: "swap",
 });
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.id";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
 
 export const viewport: Viewport = {
   themeColor:  [

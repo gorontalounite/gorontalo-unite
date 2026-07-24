@@ -128,7 +128,7 @@ A: Semua kontribusi tercatat di GitHub dengan timestamp dan nama. Lisensi proyek
 ## Kontak & Sosial Media
 
 - **GitHub:** [github.com/gorontalounite/gorontalo-unite](https://github.com/gorontalounite/gorontalo-unite)
-- **Website:** [gorontalounite.id](https://gorontalounite.id)
+- **Website:** [gorontalounite.com](https://gorontalounite.com)
 - *(Media sosial resmi — segera hadir)*
 
 ---
