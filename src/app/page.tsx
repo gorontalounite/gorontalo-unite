@@ -60,6 +60,7 @@ export default async function HomePage() {
     newsUnavailable = Boolean(news.error || newsCount.error);
   } catch (error) {
     console.error("Failed to fetch homepage data:", error);
+    newsUnavailable = true;
   }
 
   return (
