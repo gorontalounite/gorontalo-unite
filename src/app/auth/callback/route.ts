@@ -21,6 +21,18 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
     const { error } = await supabase.auth.exchangeCodeForSession(code);
     if (error) return NextResponse.redirect(new URL("/sign-in?error=oauth", siteUrl));
+
+    const { data: { user } } = await supabase.auth.getUser();
+    if (next === "/" && user) {
+      const { data: profile } = await supabase
+        .from("user_profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+      if (profile?.role === "admin" || profile?.role === "editor") {
+        return NextResponse.redirect(new URL("/admin", siteUrl));
+      }
+    }
   }
 
   // Always redirect to the live site root (or next param), never localhost
