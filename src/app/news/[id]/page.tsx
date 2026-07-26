@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { createClient }      from "@/lib/supabase/server";
+import { CATEGORIES }        from "@/app/berita/categories";
 import MarkdownContent    from "@/components/ui/MarkdownContent";
 import BlockRenderer      from "@/components/ui/BlockRenderer";
 import ShareButtons       from "@/components/ui/ShareButtons";
@@ -19,6 +20,10 @@ interface Props {
 export const dynamic = "force-dynamic";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
+
+const CAT_LABEL_TO_KEY: Record<string, string> = Object.fromEntries(
+  CATEGORIES.map((category) => [category.label, category.key]),
+);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id: slug } = await params;
