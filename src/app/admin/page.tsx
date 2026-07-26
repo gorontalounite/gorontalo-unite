@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Dashboard | Admin Gorontalo Unite" };
 
 export default async function AdminDashboardPage() {
-  const admin = createAdminClient();
+  const admin = await createClient();
 
   const [
     { count: totalArticles },

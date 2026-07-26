@@ -1,5 +1,5 @@
 import { notFound }         from "next/navigation";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import PostEditor            from "@/components/editor/PostEditor";
 import CommentModerator      from "@/components/admin/CommentModerator";
 import type { Block }        from "@/components/editor/types";
@@ -14,7 +14,7 @@ interface Props {
 
 export default async function EditNewsPage({ params }: Props) {
   const { id } = await params;
-  const admin  = createAdminClient();
+  const admin  = await createClient();
 
   const { data: article } = await admin
     .from("articles")

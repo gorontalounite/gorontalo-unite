@@ -1,11 +1,11 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import AffiliateAdminClient from "./AffiliateAdminClient";
 
 export const metadata = { title: "Affiliate | Admin Gorontalo Unite" };
 export const dynamic = "force-dynamic";
 
 export default async function AdminAffiliatePage() {
-  const admin = createAdminClient();
+  const admin = await createClient();
 
   const [{ data: items }, { data: clickRows }] = await Promise.all([
     admin.from("affiliate_items").select("*").order("created_at", { ascending: false }),
