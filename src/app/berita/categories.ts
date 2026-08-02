@@ -29,16 +29,9 @@ export const CATEGORIES = [
 
 export type CategoryKey = typeof CATEGORIES[number]["key"];
 
-// The only seven channels shown in the public Side Right Panel and offered to
-// editors for new news content. General legacy categories remain readable so
-// existing articles are not changed, but they are not navigation channels.
+// Editorial channels intentionally remain separate from City Guide. Wisata
+// and Event have their own tables, public routes, and admin workspaces.
 export const WEB_CATEGORY_GROUPS: ReadonlyArray<{ title: string; categories: ReadonlyArray<{ key: string; label: string }> }> = [
-  { title: "Jelajahi Gorontalo", categories: [
-    { key: "wisata", label: "Wisata" },
-    { key: "bisnis", label: "Bisnis" },
-    { key: "budaya", label: "Budaya" },
-    { key: "event", label: "Event" },
-  ] },
   { title: "Kabar Baik", categories: [
     { key: "inspire", label: "Inspire" },
     { key: "insight", label: "Insight" },

@@ -1,0 +1,80 @@
+"use client";
+
+import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+
+type Item = Record<string, string | boolean | null> & { id: string; slug: string; published: boolean; featured: boolean };
+type Kind = "wisata" | "event";
+
+const slugify = (value: string) => value.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+const localDateTime = () => new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 16);
+
+export default function CityGuideManager({ kind, initialItems }: { kind: Kind; initialItems: Item[] }) {
+  const isEvent = kind === "event";
+  const endpoint = isEvent ? "/api/admin/events" : "/api/admin/tourism";
+  const [items, setItems] = useState(initialItems);
+  const [editing, setEditing] = useState<Item | null>(null);
+  const [open, setOpen] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const titleField = isEvent ? "title" : "name";
+  const form = useMemo(() => ({
+    [titleField]: "", slug: "", description: "", category: "", image_url: "", location: "", address: "", maps_url: "", contact: "", featured: false, published: false,
+    ...(isEvent ? { venue: "", organizer: "", registration_url: "", price_label: "", starts_at: localDateTime(), ends_at: "" } : { opening_hours: "", website_url: "" }),
+  }), [isEvent, titleField]);
+  const [values, setValues] = useState<Record<string, string | boolean>>(form);
+
+  function start(item?: Item) {
+    setEditing(item ?? null); setError("");
+    setValues(item ? Object.fromEntries(Object.entries(form).map(([key, fallback]) => [key, key === "starts_at" || key === "ends_at" ? (item[key] ? String(item[key]).slice(0, 16) : "") : item[key] ?? fallback])) : form);
+    setOpen(true);
+  }
+  function change(key: string, value: string | boolean) {
+    setValues((current) => ({ ...current, [key]: value, ...(key === titleField && !editing ? { slug: slugify(String(value)) } : {}) }));
+  }
+  async function upload(event: ChangeEvent<HTMLInputElement>) {
+    const file = event.target.files?.[0]; if (!file) return;
+    const data = new FormData(); data.append("file", file); setSaving(true); setError("");
+    const response = await fetch("/api/admin/upload", { method: "POST", body: data }); const result = await response.json(); setSaving(false);
+    if (!response.ok) return setError(result.error ?? "Unggahan gambar gagal.");
+    change("image_url", result.url);
+  }
+  async function submit(event: FormEvent) {
+    event.preventDefault(); setSaving(true); setError("");
+    const payload = { ...values, ...(isEvent ? { starts_at: new Date(String(values.starts_at)).toISOString(), ends_at: values.ends_at ? new Date(String(values.ends_at)).toISOString() : null } : {}) };
+    const response = await fetch(endpoint, { method: editing ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing ? { id: editing.id, ...payload } : payload) });
+    const result = await response.json(); setSaving(false);
+    if (!response.ok) return setError(result.error ?? "Tidak dapat menyimpan.");
+    setItems((current) => editing ? current.map((item) => item.id === editing.id ? result.data : item) : [result.data, ...current]); setOpen(false);
+  }
+  async function remove(item: Item) {
+    if (!window.confirm(`Hapus ${item[titleField]}? Tindakan ini tidak dapat dibatalkan.`)) return;
+    const response = await fetch(endpoint, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: item.id }) });
+    if (response.ok) setItems((current) => current.filter((row) => row.id !== item.id));
+    else setError("Tidak dapat menghapus item.");
+  }
+
+  const label = isEvent ? "Event" : "Wisata";
+  return <div className="p-6 max-w-6xl">
+    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-8">
+      <div><p className="text-xs font-semibold uppercase tracking-[.2em] text-amber-600">City Guide</p><h1 className="mt-1 text-3xl font-bold text-gray-900">{label}</h1><p className="mt-2 text-sm text-gray-500">{isEvent ? "Kelola agenda, detail acara, dan tautan pendaftaran." : "Kelola direktori tempat, lokasi, dan informasi kunjungan."}</p></div>
+      <button onClick={() => start()} className="rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-semibold text-gray-950 hover:bg-amber-300">+ Tambah {label}</button>
+    </div>
+    {error && <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+      {items.length === 0 ? <div className="px-6 py-16 text-center text-sm text-gray-400">Belum ada {label.toLowerCase()}. Tambahkan entri pertama dari tombol di atas.</div> : <div className="divide-y divide-gray-100">{items.map((item) => <div key={item.id} className="flex items-center gap-4 px-5 py-4"><div className="h-12 w-16 overflow-hidden rounded-lg bg-gray-100">{item.image_url ? <img src={String(item.image_url)} alt="" className="h-full w-full object-cover" /> : null}</div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-gray-900">{String(item[titleField])}</p><p className="mt-0.5 truncate text-xs text-gray-400">/{item.slug}{isEvent && item.starts_at ? ` · ${new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeZone: "Asia/Makassar" }).format(new Date(String(item.starts_at)))}` : ""}</p></div><span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${item.published ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}>{item.published ? "Publik" : "Draft"}</span><button onClick={() => start(item)} className="text-sm font-medium text-amber-700">Edit</button><button onClick={() => remove(item)} className="text-sm text-gray-400 hover:text-red-600">Hapus</button></div>)}</div>}
+    </div>
+    {open && <div className="fixed inset-0 z-50 overflow-y-auto bg-black/35 p-4"><div className="mx-auto my-8 max-w-3xl rounded-2xl bg-white shadow-2xl"><form onSubmit={submit} className="p-6"><div className="mb-6 flex items-start justify-between"><div><h2 className="text-xl font-bold text-gray-900">{editing ? `Edit ${label}` : `Tambah ${label}`}</h2><p className="mt-1 text-sm text-gray-500">Simpan sebagai draft dahulu atau terbitkan saat siap.</p></div><button type="button" onClick={() => setOpen(false)} className="text-2xl text-gray-400">×</button></div><div className="grid gap-4 sm:grid-cols-2">
+      <Field label={isEvent ? "Nama event" : "Nama tempat"} value={String(values[titleField])} onChange={(v) => change(titleField, v)} required />
+      <Field label="Permalink" value={String(values.slug)} onChange={(v) => change("slug", slugify(v))} required prefix="/" />
+      <div className="sm:col-span-2"><label className="mb-1 block text-sm font-medium text-gray-700">Deskripsi</label><textarea required value={String(values.description)} onChange={(e) => change("description", e.target.value)} rows={7} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-amber-400" /></div>
+      <Field label="Kategori" value={String(values.category)} onChange={(v) => change("category", v)} />
+      {isEvent ? <><Field label="Nama venue" value={String(values.venue)} onChange={(v) => change("venue", v)} /><Field label="Mulai (UTC+8)" value={String(values.starts_at)} onChange={(v) => change("starts_at", v)} type="datetime-local" required /><Field label="Selesai (opsional)" value={String(values.ends_at)} onChange={(v) => change("ends_at", v)} type="datetime-local" /></> : <><Field label="Lokasi / kabupaten" value={String(values.location)} onChange={(v) => change("location", v)} /><Field label="Jam buka" value={String(values.opening_hours)} onChange={(v) => change("opening_hours", v)} /></>}
+      <Field label="Alamat" value={String(values.address)} onChange={(v) => change("address", v)} /><Field label="Google Maps URL" value={String(values.maps_url)} onChange={(v) => change("maps_url", v)} type="url" />
+      {isEvent ? <><Field label="Penyelenggara" value={String(values.organizer)} onChange={(v) => change("organizer", v)} /><Field label="Tautan pendaftaran" value={String(values.registration_url)} onChange={(v) => change("registration_url", v)} type="url" /></> : <Field label="Website" value={String(values.website_url)} onChange={(v) => change("website_url", v)} type="url" />}
+      <Field label="Kontak" value={String(values.contact)} onChange={(v) => change("contact", v)} />
+      <div><label className="mb-1 block text-sm font-medium text-gray-700">Gambar utama</label><input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={upload} className="block w-full text-sm" />{values.image_url && <img src={String(values.image_url)} alt="Pratinjau" className="mt-2 h-20 w-32 rounded-lg object-cover" />}</div>
+    </div><div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-5"><div className="flex gap-4"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(values.featured)} onChange={(e) => change("featured", e.target.checked)} />Unggulan</label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(values.published)} onChange={(e) => change("published", e.target.checked)} />Terbitkan</label></div><button disabled={saving} className="rounded-xl bg-amber-400 px-5 py-2.5 text-sm font-semibold text-gray-950 disabled:opacity-50">{saving ? "Menyimpan…" : "Simpan"}</button></div></form></div></div>}
+  </div>;
+}
+
+function Field({ label, value, onChange, type = "text", required, prefix }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; prefix?: string }) { return <label><span className="mb-1 block text-sm font-medium text-gray-700">{label}</span><div className="flex rounded-xl border border-gray-200 focus-within:border-amber-400">{prefix && <span className="px-3 py-2 text-sm text-gray-400">{prefix}</span>}<input required={required} type={type} value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-xl bg-transparent px-3 py-2 text-sm outline-none" /></div></label>; }

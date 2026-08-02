@@ -412,6 +412,18 @@ export type Database = {
         }
         Relationships: []
       }
+      tourism_places: {
+        Row: { id: string; name: string; slug: string; description: string; image_url: string | null; gallery: string[]; category: string | null; location: string | null; address: string | null; maps_url: string | null; opening_hours: string | null; contact: string | null; website_url: string | null; seo_title: string | null; seo_description: string | null; featured: boolean; published: boolean; author_id: string | null; created_at: string; updated_at: string }
+        Insert: { id?: string; name: string; slug: string; description?: string; image_url?: string | null; gallery?: string[]; category?: string | null; location?: string | null; address?: string | null; maps_url?: string | null; opening_hours?: string | null; contact?: string | null; website_url?: string | null; seo_title?: string | null; seo_description?: string | null; featured?: boolean; published?: boolean; author_id?: string | null; created_at?: string; updated_at?: string }
+        Update: { id?: string; name?: string; slug?: string; description?: string; image_url?: string | null; gallery?: string[]; category?: string | null; location?: string | null; address?: string | null; maps_url?: string | null; opening_hours?: string | null; contact?: string | null; website_url?: string | null; seo_title?: string | null; seo_description?: string | null; featured?: boolean; published?: boolean; author_id?: string | null; created_at?: string; updated_at?: string }
+        Relationships: [{ foreignKeyName: "tourism_places_author_id_fkey"; columns: ["author_id"]; isOneToOne: false; referencedRelation: "user_profiles"; referencedColumns: ["id"] }]
+      }
+      events: {
+        Row: { id: string; title: string; slug: string; description: string; image_url: string | null; gallery: string[]; category: string | null; venue: string | null; address: string | null; maps_url: string | null; organizer: string | null; registration_url: string | null; contact: string | null; price_label: string | null; starts_at: string; ends_at: string | null; seo_title: string | null; seo_description: string | null; featured: boolean; published: boolean; author_id: string | null; created_at: string; updated_at: string }
+        Insert: { id?: string; title: string; slug: string; description?: string; image_url?: string | null; gallery?: string[]; category?: string | null; venue?: string | null; address?: string | null; maps_url?: string | null; organizer?: string | null; registration_url?: string | null; contact?: string | null; price_label?: string | null; starts_at: string; ends_at?: string | null; seo_title?: string | null; seo_description?: string | null; featured?: boolean; published?: boolean; author_id?: string | null; created_at?: string; updated_at?: string }
+        Update: { id?: string; title?: string; slug?: string; description?: string; image_url?: string | null; gallery?: string[]; category?: string | null; venue?: string | null; address?: string | null; maps_url?: string | null; organizer?: string | null; registration_url?: string | null; contact?: string | null; price_label?: string | null; starts_at?: string; ends_at?: string | null; seo_title?: string | null; seo_description?: string | null; featured?: boolean; published?: boolean; author_id?: string | null; created_at?: string; updated_at?: string }
+        Relationships: [{ foreignKeyName: "events_author_id_fkey"; columns: ["author_id"]; isOneToOne: false; referencedRelation: "user_profiles"; referencedColumns: ["id"] }]
+      }
     }
     Views: {
       [_ in never]: never
