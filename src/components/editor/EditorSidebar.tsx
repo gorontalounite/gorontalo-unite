@@ -2,7 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Block, BLOCK_REGISTRY } from "./types";
-import { CATEGORIES } from "@/app/berita/categories";
+import { WEB_CATEGORIES } from "@/app/berita/categories";
 
 /* ─── Types ─────────────────────────────────────────────────── */
 export interface PostMeta {
@@ -48,7 +48,7 @@ interface Props {
   showSeoPanel?: boolean;
 }
 
-const NEWS_CATEGORIES = CATEGORIES.map((category) => category.label);
+const NEWS_CATEGORIES = WEB_CATEGORIES.map((category) => category.label);
 
 const PORTFOLIO_STACKS = [
   "stack:web-design","stack:programming","stack:data-analytics",

@@ -105,23 +105,6 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
         </p>
       </div>
 
-      {/* Category chips */}
-      <div className="flex flex-wrap gap-2 mb-10">
-        {CATEGORIES.map((c) => (
-          <Link
-            key={c.key}
-            href={`/berita/${c.key}`}
-            className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-all ${
-              c.key === key
-                ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white"
-                : "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-zinc-500"
-            }`}
-          >
-            {c.label}
-          </Link>
-        ))}
-      </div>
-
       {/* Empty state */}
       {articles.length === 0 && (
         <div className="flex flex-col items-center py-24 text-center">

@@ -29,6 +29,25 @@ export const CATEGORIES = [
 
 export type CategoryKey = typeof CATEGORIES[number]["key"];
 
+// The only seven channels shown in the public Side Right Panel and offered to
+// editors for new news content. General legacy categories remain readable so
+// existing articles are not changed, but they are not navigation channels.
+export const WEB_CATEGORY_GROUPS: ReadonlyArray<{ title: string; categories: ReadonlyArray<{ key: string; label: string }> }> = [
+  { title: "Jelajahi Gorontalo", categories: [
+    { key: "wisata", label: "Wisata" },
+    { key: "bisnis", label: "Bisnis" },
+    { key: "budaya", label: "Budaya" },
+    { key: "event", label: "Event" },
+  ] },
+  { title: "Kabar Baik", categories: [
+    { key: "inspire", label: "Inspire" },
+    { key: "insight", label: "Insight" },
+    { key: "interest", label: "Interest" },
+  ] },
+] ;
+
+export const WEB_CATEGORIES = WEB_CATEGORY_GROUPS.flatMap((group) => group.categories);
+
 export const CAT_COLOR: Record<string, { badge: string; text: string; bg: string }> = {
   "Politik":        { badge: "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300",         text: "text-blue-600 dark:text-blue-400",         bg: "bg-blue-100 dark:bg-blue-900/30"         },
   "Pemerintahan":   { badge: "bg-sky-50 text-sky-700 dark:bg-sky-900/20 dark:text-sky-300",             text: "text-sky-600 dark:text-sky-400",           bg: "bg-sky-100 dark:bg-sky-900/30"           },

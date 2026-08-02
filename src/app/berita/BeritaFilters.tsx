@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { CATEGORIES } from "./categories";
+import { WEB_CATEGORIES } from "./categories";
 
 interface Props {
   activeCategory: string;
@@ -58,7 +58,7 @@ export default function BeritaFilters({ activeCategory, activeSearch, catCounts 
         className="min-w-48 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-gray-200 dark:focus:border-yellow-400 dark:focus:ring-yellow-400/30"
       >
         <option value="">Semua kategori</option>
-        {CATEGORIES.map((category) => (
+        {WEB_CATEGORIES.filter((category) => catCounts[category.label]).map((category) => (
           <option key={category.key} value={category.key}>
             {category.label}{catCounts[category.label] ? ` (${catCounts[category.label]})` : ""}
           </option>
