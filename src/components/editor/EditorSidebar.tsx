@@ -42,6 +42,7 @@ interface Props {
   onMeta:     (m: PostMeta) => void;
   selectedBlock: Block | null;
   onBlockChange: (b: Block) => void;
+  showBlockTab?: boolean;
 }
 
 const NEWS_CATEGORIES = [
@@ -320,7 +321,7 @@ function BlockSettingsPanel({ block, onChange }: { block: Block | null; onChange
 
 /* ─── Main sidebar ──────────────────────────────────────────── */
 export default function EditorSidebar({
-  postType, meta, onMeta, selectedBlock, onBlockChange, onSlugManualEdit,
+  postType, meta, onMeta, selectedBlock, onBlockChange, onSlugManualEdit, showBlockTab = true,
 }: Props & { onSlugManualEdit?: () => void }) {
   const [tab, setTab] = useState<"post" | "block">("post");
 
@@ -334,7 +335,7 @@ export default function EditorSidebar({
   return (
     <aside className="w-72 flex-shrink-0 border-l border-gray-200 bg-white flex flex-col h-full overflow-hidden">
       {/* Tabs */}
-      <div className="flex border-b border-gray-200 flex-shrink-0">
+      {showBlockTab && <div className="flex border-b border-gray-200 flex-shrink-0">
         {(["post","block"] as const).map((t) => (
           <button
             key={t}
@@ -349,16 +350,16 @@ export default function EditorSidebar({
             {t === "post" ? "Post" : "Blok"}
           </button>
         ))}
-      </div>
+      </div>}
 
       <div className="flex-1 overflow-y-auto">
         {/* ── Block tab ── */}
-        {tab === "block" && (
+        {showBlockTab && tab === "block" && (
           <BlockSettingsPanel block={selectedBlock} onChange={onBlockChange} />
         )}
 
         {/* ── Post tab ── */}
-        {tab === "post" && (
+        {(!showBlockTab || tab === "post") && (
           <>
             {/* Status & Visibility */}
             <Panel title="Status & Visibilitas" defaultOpen>

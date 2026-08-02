@@ -1,5 +1,4 @@
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { NextRequest, NextResponse } from "next/server";
 
 const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
@@ -12,8 +11,7 @@ export async function POST(req: NextRequest) {
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const admin = createAdminClient();
-  const { data: profile } = await admin
+  const { data: profile } = await supabase
     .from("user_profiles")
     .select("role")
     .eq("id", user.id)
@@ -37,7 +35,7 @@ export async function POST(req: NextRequest) {
   const filename = `articles/${Date.now()}-${crypto.randomUUID()}.${extension}`;
   const buffer = await file.arrayBuffer();
 
-  const { data, error } = await admin.storage
+  const { data, error } = await supabase.storage
     .from("media")
     .upload(filename, buffer, { contentType: file.type, upsert: false });
 
@@ -45,7 +43,7 @@ export async function POST(req: NextRequest) {
 
   const {
     data: { publicUrl },
-  } = admin.storage.from("media").getPublicUrl(data.path);
+  } = supabase.storage.from("media").getPublicUrl(data.path);
 
   return NextResponse.json({ url: publicUrl });
 }

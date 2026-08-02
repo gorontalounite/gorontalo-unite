@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import BlockCanvas from "./BlockCanvas";
 import EditorSidebar, { PostMeta, EMPTY_META } from "./EditorSidebar";
 import { Block, createBlock, blocksToText } from "./types";
+import TiptapNewsEditor from "./TiptapNewsEditor";
 
 /* ─── Types ───────────────────────────────────────────────── */
 export interface PostEditorProps {
@@ -276,7 +277,7 @@ function PreviewBlock({ block }: { block: Block }) {
 }
 
 /* ─── Main PostEditor ────────────────────────────────────── */
-export default function PostEditor({ postType, editId, initialMeta, initialBlocks, initialSections }: PostEditorProps) {
+function LegacyPostEditor({ postType, editId, initialMeta, initialBlocks, initialSections }: PostEditorProps) {
   const router = useRouter();
 
   const initialBlocksValue = initialBlocks?.length ? initialBlocks : [createBlock("paragraph")];
@@ -664,4 +665,11 @@ export default function PostEditor({ postType, editId, initialMeta, initialBlock
       </div>
     </div>
   );
+}
+
+export default function PostEditor(props: PostEditorProps) {
+  if (props.postType === "news") {
+    return <TiptapNewsEditor editId={props.editId} initialMeta={props.initialMeta} initialBlocks={props.initialBlocks} />;
+  }
+  return <LegacyPostEditor {...props} />;
 }
