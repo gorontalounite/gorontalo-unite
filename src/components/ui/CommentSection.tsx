@@ -126,7 +126,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
             Masuk untuk meninggalkan komentar.
           </p>
           <Link
-            href={`/sign-in?redirect=${encodeURIComponent(`/news/${slug}`)}`}
+            href={`/sign-in?redirect=${encodeURIComponent(`/berita/${slug}`)}`}
             className="inline-flex items-center gap-1.5 bg-[#F5C400] text-black text-xs font-medium px-4 py-2 rounded-lg hover:bg-[#c9a000] transition-colors"
           >
             Masuk / Daftar

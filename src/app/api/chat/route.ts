@@ -187,7 +187,7 @@ export async function POST(req: NextRequest) {
         kbBlock = `${kbBlock}${kbBlock ? "\n\n" : ""}## ARTIKEL TERBIT (prioritaskan):\n\n${articleBlock}`;
         sources.push(...published.map((article) => ({
           title: article.title,
-          url: `/news/${article.slug}`,
+          url: `/berita/${article.slug}`,
           category: article.category || "Artikel",
         })));
       }

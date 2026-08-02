@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import { Block, BLOCK_REGISTRY } from "./types";
+import { CATEGORIES } from "@/app/berita/categories";
 
 /* ─── Types ─────────────────────────────────────────────────── */
 export interface PostMeta {
@@ -34,6 +35,7 @@ export const EMPTY_META: PostMeta = {
   title: "", slug: "", excerpt: "", category: "", categories: [], tags: [],
   image_url: "", published: false, published_at: "",
   seo_title: "", seo_description: "",
+  allow_comments: true,
 };
 
 interface Props {
@@ -43,14 +45,10 @@ interface Props {
   selectedBlock: Block | null;
   onBlockChange: (b: Block) => void;
   showBlockTab?: boolean;
+  showSeoPanel?: boolean;
 }
 
-const NEWS_CATEGORIES = [
-  "Politik","Pemerintahan","Wisata","Budaya","Ekonomi","Bisnis",
-  "Pendidikan","Sosial","Kemasyarakatan","Kesehatan","Pertanian","Perikanan",
-  "Teknologi","Digital","Infrastruktur","Pembangunan","Hukum","Keamanan",
-  "Agama","Lingkungan","Alam","Olahraga",
-];
+const NEWS_CATEGORIES = CATEGORIES.map((category) => category.label);
 
 const PORTFOLIO_STACKS = [
   "stack:web-design","stack:programming","stack:data-analytics",
@@ -138,6 +136,7 @@ function ImageUploadField({ value, onChange, label }: {
 
 /* ─── Category selector — multi-select checkboxes ──────────── */
 function CategorySelector({ values, onChange }: { values: string[]; onChange: (c: string[]) => void }) {
+  const [open, setOpen] = useState(false);
   const toggle = (c: string) =>
     onChange(values.includes(c) ? values.filter((x) => x !== c) : [...values, c]);
 
@@ -153,18 +152,16 @@ function CategorySelector({ values, onChange }: { values: string[]; onChange: (c
           ))}
         </div>
       )}
-      <div className="grid grid-cols-2 gap-0.5 max-h-52 overflow-y-auto pr-1">
-        {NEWS_CATEGORIES.map((c) => (
-          <label key={c} className={`flex items-center gap-1.5 cursor-pointer rounded px-1 py-0.5 transition-colors ${values.includes(c) ? "bg-yellow-50" : "hover:bg-gray-50"}`}>
-            <input type="checkbox" value={c}
-              checked={values.includes(c)}
-              onChange={() => toggle(c)}
-              className="accent-[#F5C400]" />
-            <span className="text-[11px] text-gray-600">{c}</span>
-          </label>
-        ))}
-      </div>
-      <p className="text-[10px] text-gray-400 mt-1">{values.length} kategori dipilih</p>
+      <button type="button" onClick={() => setOpen((value) => !value)} className="w-full rounded-lg border border-dashed border-gray-300 px-2.5 py-2 text-left text-[11px] font-medium text-gray-600 hover:border-[#F5C400] hover:bg-yellow-50">
+        {open ? "Tutup pilihan kategori" : "+ Tambahkan kategori"}
+      </button>
+      {open && <div className="mt-2 grid max-h-52 grid-cols-2 gap-1 overflow-y-auto rounded-lg border border-gray-100 p-1.5">
+        {NEWS_CATEGORIES.map((c) => <label key={c} className={`flex items-center gap-1.5 cursor-pointer rounded px-1 py-1 transition-colors ${values.includes(c) ? "bg-yellow-50" : "hover:bg-gray-50"}`}>
+          <input type="checkbox" checked={values.includes(c)} onChange={() => toggle(c)} className="accent-[#F5C400]" />
+          <span className="text-[11px] text-gray-600">{c}</span>
+        </label>)}
+      </div>}
+      <p className="text-[10px] text-gray-400 mt-1">{values.length ? `${values.length} kategori dipilih` : "Belum ada kategori"}</p>
     </div>
   );
 }
@@ -321,7 +318,7 @@ function BlockSettingsPanel({ block, onChange }: { block: Block | null; onChange
 
 /* ─── Main sidebar ──────────────────────────────────────────── */
 export default function EditorSidebar({
-  postType, meta, onMeta, selectedBlock, onBlockChange, onSlugManualEdit, showBlockTab = true,
+  postType, meta, onMeta, selectedBlock, onBlockChange, onSlugManualEdit, showBlockTab = true, showSeoPanel = true,
 }: Props & { onSlugManualEdit?: () => void }) {
   const [tab, setTab] = useState<"post" | "block">("post");
 
@@ -382,6 +379,7 @@ export default function EditorSidebar({
               </span>
               <div>
                 <label className="text-[11px] font-medium text-gray-500 block mb-1">Tanggal tayang</label>
+                <p className="mb-1 text-[10px] text-gray-400">Waktu Gorontalo (UTC+8)</p>
                 <input
                   type="datetime-local"
                   value={meta.published_at}
@@ -412,7 +410,7 @@ export default function EditorSidebar({
                   >↺</button>
                 </div>
                 <p className="text-[10px] text-gray-400 mt-1">
-                  /{postType === "portfolio" ? "portfolio" : "news"}/{meta.slug || "…"}
+                  /{postType === "portfolio" ? "portfolio" : "berita"}/{meta.slug || "…"}
                 </p>
               </div>
             </Panel>
@@ -492,17 +490,6 @@ export default function EditorSidebar({
               </Panel>
             )}
 
-            {/* Excerpt */}
-            <Panel title="Ringkasan / Excerpt">
-              <textarea
-                rows={3}
-                value={meta.excerpt}
-                onChange={(e) => setField("excerpt", e.target.value)}
-                placeholder="Ringkasan singkat yang tampil di halaman daftar…"
-                className="w-full text-[11px] border border-gray-200 rounded-lg px-2.5 py-2 outline-none focus:border-[#F5C400] resize-none"
-              />
-            </Panel>
-
             {/* Portfolio CPT fields */}
             {postType === "portfolio" && (
               <Panel title="Detail Proyek">
@@ -551,7 +538,7 @@ export default function EditorSidebar({
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
-                  checked={meta.allow_comments ?? false}
+                  checked={meta.allow_comments ?? true}
                   onChange={(e) => setField("allow_comments", e.target.checked)}
                   className="accent-[#F5C400]"
                 />
@@ -560,7 +547,7 @@ export default function EditorSidebar({
             </Panel>
 
             {/* SEO & Distribusi */}
-            <Panel title="SEO & Distribusi">
+            {showSeoPanel && <Panel title="SEO & Distribusi">
               <div>
                 <label className="text-[11px] font-medium text-gray-500 block mb-1">Meta Title</label>
                 <input
@@ -627,7 +614,7 @@ export default function EditorSidebar({
                   Digunakan untuk structured data (Google Rich Results)
                 </p>
               </div>
-            </Panel>
+            </Panel>}
           </>
         )}
       </div>

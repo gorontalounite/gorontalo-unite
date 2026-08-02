@@ -32,7 +32,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const newsSlugs = (articles ?? [])
     .filter((a) => a.category !== "Portfolio")
     .map((a) => ({
-      url:          `${BASE}/news/${a.slug}`,
+      url:          `${BASE}/berita/${a.slug}`,
       lastModified: new Date(a.updated_at ?? a.published_at ?? Date.now()),
       changeFrequency: "weekly" as const,
       priority:     0.8,

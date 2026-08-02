@@ -20,6 +20,29 @@ type Props = {
 
 const EMPTY_DOC: JSONContent = { type: "doc", content: [{ type: "paragraph" }] };
 
+const MAKASSAR_OFFSET = "+08:00";
+const STOP_WORDS = new Set(["dan", "yang", "di", "ke", "dari", "untuk", "pada", "dengan", "atas", "dalam", "oleh", "akan", "ini", "itu", "sebagai", "atau", "karena"]);
+
+function makassarInputValue(date = new Date()) {
+  const parts = new Intl.DateTimeFormat("sv-SE", { timeZone: "Asia/Makassar", year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit", hour12: false }).formatToParts(date);
+  const value = (type: string) => parts.find((part) => part.type === type)?.value ?? "00";
+  return `${value("year")}-${value("month")}-${value("day")}T${value("hour")}:${value("minute")}`;
+}
+
+function toMakassarIso(value: string) {
+  return value ? new Date(`${value}:00${MAKASSAR_OFFSET}`).toISOString() : new Date().toISOString();
+}
+
+function firstParagraph(blocks: Block[]) {
+  return blocks.find((block) => block.type === "paragraph" && block.content.trim())?.content.trim() ?? blocksToText(blocks).trim();
+}
+
+function focusKeyword(title: string, tags: string[], category: string) {
+  if (tags[0]?.trim()) return tags[0].trim();
+  const words = title.toLowerCase().match(/[a-zà-ÿ0-9]+/gi)?.filter((word) => word.length > 2 && !STOP_WORDS.has(word.toLowerCase())) ?? [];
+  return words.slice(0, 3).join(" ") || category;
+}
+
 function textFromNode(node: JSONContent): string {
   if (node.type === "text") return node.text ?? "";
   if (node.type === "hardBreak") return "\n";
@@ -97,9 +120,38 @@ function ToolbarButton({ active, disabled, label, onClick, children }: {
   );
 }
 
+function SeoDistribution({ meta, onChange }: { meta: PostMeta; onChange: (next: PostMeta) => void }) {
+  const field = <K extends keyof PostMeta>(key: K, value: PostMeta[K]) => onChange({ ...meta, [key]: value });
+  return <section className="mt-10 rounded-2xl border border-gray-200 bg-gray-50/70 p-5">
+    <h2 className="text-sm font-semibold text-gray-900">SEO & Distribusi</h2>
+    <p className="mt-1 text-xs text-gray-500">Terisi otomatis saat diterbitkan. Anda tetap dapat menyesuaikannya bila perlu.</p>
+    <div className="mt-4 grid gap-3 sm:grid-cols-2">
+      <label className="text-xs font-medium text-gray-600 sm:col-span-2">Meta title
+        <input value={meta.seo_title} onChange={(event) => field("seo_title", event.target.value)} placeholder={meta.title || "Judul SEO"} className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]" />
+      </label>
+      <label className="text-xs font-medium text-gray-600 sm:col-span-2">Meta description
+        <textarea value={meta.seo_description} onChange={(event) => field("seo_description", event.target.value)} maxLength={160} rows={3} placeholder="Otomatis dari paragraf pertama saat diterbitkan" className="mt-1 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]" />
+      </label>
+      <label className="text-xs font-medium text-gray-600">Focus keyword
+        <input value={meta.focus_keyword ?? ""} onChange={(event) => field("focus_keyword", event.target.value)} placeholder="Otomatis dari judul atau tag" className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]" />
+      </label>
+      <label className="text-xs font-medium text-gray-600">Schema markup
+        <select value={meta.schema_type ?? "NewsArticle"} onChange={(event) => field("schema_type", event.target.value)} className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]">
+          <option value="NewsArticle">NewsArticle</option><option value="Article">Article</option><option value="BlogPosting">BlogPosting</option>
+        </select>
+      </label>
+    </div>
+  </section>;
+}
+
 export default function TiptapNewsEditor({ editId, initialMeta, initialBlocks }: Props) {
   const router = useRouter();
-  const [meta, setMeta] = useState<PostMeta>({ ...EMPTY_META, published_at: new Date().toISOString().slice(0, 16), ...initialMeta });
+  const [meta, setMeta] = useState<PostMeta>({
+    ...EMPTY_META,
+    ...initialMeta,
+    published_at: initialMeta?.published_at ? makassarInputValue(new Date(initialMeta.published_at)) : makassarInputValue(),
+    allow_comments: initialMeta?.allow_comments ?? true,
+  });
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(Boolean(editId));
   const [preview, setPreview] = useState(false);
@@ -160,15 +212,20 @@ export default function TiptapNewsEditor({ editId, initialMeta, initialBlocks }:
     setSaving(true); setError(null);
     const blocks = docToLegacyBlocks(editor.getJSON());
     const categories = meta.categories.length ? meta.categories : (meta.category ? [meta.category] : ["Umum"]);
+    const autoDescription = firstParagraph(blocks).slice(0, 160);
+    const seo = publish ? {
+      seo_title: meta.seo_title || meta.title,
+      seo_description: meta.seo_description || autoDescription,
+      focus_keyword: meta.focus_keyword || focusKeyword(meta.title, meta.tags, categories[0]),
+    } : { seo_title: meta.seo_title || null, seo_description: meta.seo_description || null, focus_keyword: meta.focus_keyword || null };
     const payload = {
-      title: meta.title, slug: meta.slug || slugify(meta.title), excerpt: meta.excerpt || null,
+      title: meta.title, slug: meta.slug || slugify(meta.title), excerpt: firstParagraph(blocks).slice(0, 280) || null,
       content: blocksToText(blocks), blocks, image_url: meta.image_url || null,
       category: categories[0], categories, tags: meta.tags.length ? meta.tags : null,
       published: publish,
-      published_at: publish ? (meta.published_at ? new Date(meta.published_at).toISOString() : new Date().toISOString()) : null,
-      seo_title: meta.seo_title || null, seo_description: meta.seo_description || null,
-      focus_keyword: meta.focus_keyword || null, schema_type: meta.schema_type || "NewsArticle",
-      allow_comments: meta.allow_comments ?? false, source_url: meta.source_url || null,
+      published_at: publish ? toMakassarIso(meta.published_at) : null,
+      ...seo, schema_type: meta.schema_type || "NewsArticle",
+      allow_comments: meta.allow_comments ?? true, source_url: meta.source_url || null,
     };
     const response = await fetch("/api/admin/articles", {
       method: editId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" },
@@ -178,7 +235,7 @@ export default function TiptapNewsEditor({ editId, initialMeta, initialBlocks }:
     setSaving(false);
     if (!response.ok) { setError(data.error ?? "Konten tidak dapat disimpan"); return; }
     try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
-    setMeta((current) => ({ ...current, slug: payload.slug, published: publish }));
+    setMeta((current) => ({ ...current, slug: payload.slug, published: publish, seo_title: payload.seo_title ?? "", seo_description: payload.seo_description ?? "", focus_keyword: payload.focus_keyword ?? "", excerpt: payload.excerpt ?? "" }));
     setSaved(true);
     if (!editId && data.data?.id) router.replace(`/admin/news/edit/${data.data.id}`);
   }, [draftKey, editId, editor, meta, router]);
@@ -226,11 +283,12 @@ export default function TiptapNewsEditor({ editId, initialMeta, initialBlocks }:
               </div>
             )}
             <EditorContent editor={editor} />
+            <SeoDistribution meta={meta} onChange={(next) => { setMeta(next); setSaved(false); }} />
           </div>
         </main>
 
         <div className={`${showSettings ? "block" : "hidden"} border-t border-gray-200 bg-white lg:block lg:w-80 lg:flex-shrink-0 lg:border-l lg:border-t-0`}>
-          <EditorSidebar postType="news" meta={meta} onMeta={(value) => { setMeta(value); setSaved(false); }} selectedBlock={null} onBlockChange={() => {}} onSlugManualEdit={() => { slugManual.current = true; }} showBlockTab={false} />
+          <EditorSidebar postType="news" meta={meta} onMeta={(value) => { setMeta(value); setSaved(false); }} selectedBlock={null} onBlockChange={() => {}} onSlugManualEdit={() => { slugManual.current = true; }} showBlockTab={false} showSeoPanel={false} />
         </div>
       </div>
     </div>

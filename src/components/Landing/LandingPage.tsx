@@ -254,7 +254,7 @@ function NewsCardFeatured({ item }: { item: NewsItem }) {
   const catKey = CAT_KEY_MAP[item.category ?? ""] ?? (item.category ?? "").toLowerCase();
   return (
     <div className="group relative flex flex-col">
-      <Link href={`/news/${item.slug}`} className="absolute inset-0 z-[1]" aria-label={item.title} />
+      <Link href={`/berita/${item.slug}`} className="absolute inset-0 z-[1]" aria-label={item.title} />
       <div className="relative aspect-[16/9] rounded-2xl overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700 mb-4 flex-shrink-0">
         {item.image_url && (
           <img
@@ -295,7 +295,7 @@ function NewsCardSide({ item }: { item: NewsItem }) {
   const catKey = CAT_KEY_MAP[item.category ?? ""] ?? (item.category ?? "").toLowerCase();
   return (
     <div className="relative group flex gap-4 py-3.5 border-b border-gray-100 dark:border-zinc-800 last:border-0">
-      <Link href={`/news/${item.slug}`} className="absolute inset-0 z-[1]" aria-label={item.title} />
+      <Link href={`/berita/${item.slug}`} className="absolute inset-0 z-[1]" aria-label={item.title} />
       <div className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl overflow-hidden flex-shrink-0 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700">
         {item.image_url && (
           <img
@@ -332,7 +332,7 @@ function NewsCardMobile({ item }: { item: NewsItem }) {
   const catKey = CAT_KEY_MAP[item.category ?? ""] ?? (item.category ?? "").toLowerCase();
   return (
     <div className="relative group bg-white dark:bg-zinc-900 rounded-2xl overflow-hidden border border-gray-200 dark:border-zinc-800 hover:border-[#F5C400]/40 dark:hover:border-yellow-500/40 hover:shadow-lg transition-all flex flex-col">
-      <Link href={`/news/${item.slug}`} className="absolute inset-0 z-[1]" aria-label={item.title} />
+      <Link href={`/berita/${item.slug}`} className="absolute inset-0 z-[1]" aria-label={item.title} />
       <div className="aspect-[16/10] bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700 overflow-hidden">
         {item.image_url && (
           <img
@@ -749,7 +749,7 @@ function EventSection({ items }: { items: NewsItem[] }) {
                   {formatDate(selected.published_at ?? selected.created_at)}
                 </span>
                 <Link
-                  href={`/news/${selected.slug}`}
+                  href={`/berita/${selected.slug}`}
                   className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand dark:text-yellow-400 hover:underline"
                 >
                   Detail event

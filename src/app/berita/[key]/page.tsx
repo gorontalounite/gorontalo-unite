@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { CATEGORIES, CAT_COLOR, DEFAULT_COLOR } from "../categories";
 import BeritaPagination from "../BeritaPagination";
+import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/app/news/[id]/page";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +28,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { key } = await params;
+  if (!CAT_MAP[key]) return generateArticleMetadata({ params: Promise.resolve({ id: key }) });
   const cat = CAT_MAP[key];
   if (!cat) return { title: "Gorontalo Unite" };
   return {
@@ -46,12 +47,12 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   const { key }  = await params;
   const { page: pageParam } = await searchParams;
   const cat = CAT_MAP[key];
-  if (!cat) notFound();
+  if (!cat) return <NewsDetailPage params={Promise.resolve({ id: key })} />;
 
   const page   = Math.max(1, parseInt(pageParam ?? "1"));
   const offset = (page - 1) * LIMIT;
   const colors = CAT_COLOR[cat.label] ?? DEFAULT_COLOR;
-  const admin  = createAdminClient();
+  const admin  = await createClient();
 
   const { data: raw, count } = await admin
     .from("articles")
@@ -147,7 +148,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
                     key={article.id}
                     className="relative group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-lg transition-all duration-300"
                   >
-                    <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
+                    <Link href={`/berita/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
                     <div className="relative aspect-[16/10] bg-gray-100 dark:bg-zinc-800 overflow-hidden">
                       {article.image_url ? (
                         <Image src={article.image_url} alt={article.title} fill

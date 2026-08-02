@@ -205,7 +205,7 @@ export default function NewsAdminList({
                 <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-4 py-3">
                     <p className="font-medium text-gray-900 truncate max-w-xs">{a.title}</p>
-                    <p className="text-xs text-gray-400">/news/{a.slug}</p>
+                    <p className="text-xs text-gray-400">/berita/{a.slug}</p>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
@@ -230,7 +230,7 @@ export default function NewsAdminList({
                     <div className="flex items-center justify-end gap-3">
                       <Link href={`/admin/news/edit/${a.id}`}
                         className="text-xs text-brand hover:underline font-medium">Edit</Link>
-                      <Link href={`/news/${a.slug}`} target="_blank"
+                      <Link href={`/berita/${a.slug}`} target="_blank"
                         className="text-xs text-gray-400 hover:underline hidden lg:inline">Lihat →</Link>
                       <button onClick={() => setDeleteId(a.id)}
                         className="text-xs text-red-400 hover:underline">Hapus</button>

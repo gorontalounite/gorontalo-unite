@@ -37,7 +37,7 @@ const jelajahiItems = [
     ),
   },
   {
-    href: "/event",
+    href: "/berita/event",
     label: "Event",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -49,7 +49,7 @@ const jelajahiItems = [
 
 const kabarBaikItems = [
   {
-    href: "/inspire",
+    href: "/berita/inspire",
     label: "Inspire",
     desc: "Kisah inspiratif Gorontalo",
     icon: (
@@ -59,7 +59,7 @@ const kabarBaikItems = [
     ),
   },
   {
-    href: "/insight",
+    href: "/berita/insight",
     label: "Insight",
     desc: "Wawasan & analisis",
     icon: (
@@ -69,7 +69,7 @@ const kabarBaikItems = [
     ),
   },
   {
-    href: "/interest",
+    href: "/berita/interest",
     label: "Interest",
     desc: "Topik menarik pilihan",
     icon: (

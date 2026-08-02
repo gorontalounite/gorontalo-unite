@@ -56,7 +56,7 @@ function ArticleCard({ article }: { article: Article }) {
 
   return (
     <article className="group overflow-hidden rounded-2xl border border-gray-100 bg-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 dark:border-zinc-800 dark:bg-zinc-900">
-      <Link href={`/news/${article.slug}`} className="block">
+      <Link href={`/berita/${article.slug}`} className="block">
         <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700">
           {article.image_url ? (
             <Image src={article.image_url} alt={article.title} fill unoptimized className="object-cover transition duration-500 group-hover:scale-105" />

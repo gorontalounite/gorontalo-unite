@@ -39,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = data.seo_title || data.title;
   const desc  = data.seo_description || data.excerpt;
-  const url   = `${BASE}/news/${slug}`;
+  const url   = `${BASE}/berita/${slug}`;
 
   return {
     title:       `${title} | Gorontalo Unite`,
@@ -88,7 +88,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   Olahraga:       "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300",
 };
 
-export default async function NewsDetailPage({ params }: Props) {
+export async function NewsDetailPage({ params }: Props) {
   const { id: slug } = await params;
   const admin        = await createClient();
 
@@ -122,7 +122,7 @@ export default async function NewsDetailPage({ params }: Props) {
   const isTrending: boolean = (article.is_trending as boolean | null) ?? false;
   const allowComments: boolean = (article.allow_comments as boolean | null) ?? false;
 
-  const canonicalUrl = `${BASE}/news/${slug}`;
+  const canonicalUrl = `${BASE}/berita/${slug}`;
 
   // User info for CommentSection
   const authUser = user
@@ -278,7 +278,7 @@ export default async function NewsDetailPage({ params }: Props) {
       <CommentSection slug={slug} allowComments={allowComments} user={authUser} />
 
       {/* Related posts */}
-      <RelatedPosts items={related} basePath="/news" />
+      <RelatedPosts items={related} basePath="/berita" />
 
       {/* Back navigation */}
       <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 flex gap-4">
@@ -292,3 +292,5 @@ export default async function NewsDetailPage({ params }: Props) {
     </div>
   );
 }
+
+export default NewsDetailPage;
