@@ -83,6 +83,33 @@ function ArticleCard({ article }: { article: Article }) {
   );
 }
 
+function StoryImage({ article, priority = false }: { article: Article; priority?: boolean }) {
+  return (
+    <div className="relative aspect-[16/10] overflow-hidden bg-stone-100 dark:bg-zinc-800">
+      {article.image_url ? (
+        <Image src={article.image_url} alt={article.title} fill unoptimized priority={priority} sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition duration-700 group-hover:scale-105" />
+      ) : (
+        <div className="flex h-full items-end bg-gradient-to-br from-amber-100 via-stone-100 to-stone-200 p-5 text-sm font-medium text-stone-500 dark:from-zinc-800 dark:to-zinc-700">Gorontalo Unite</div>
+      )}
+    </div>
+  );
+}
+
+function StoryMeta({ article }: { article: Article }) {
+  const category = categoryList(article)[0];
+  return <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-amber-700 dark:text-amber-300"><span>{category}</span><span className="h-1 w-1 rounded-full bg-stone-300" /><span className="text-stone-400 dark:text-zinc-500">{formatDate(article.published_at ?? article.created_at)}</span></div>;
+}
+
+function FeaturedStory({ article }: { article: Article }) {
+  return <article className="group overflow-hidden rounded-[1.8rem] border border-stone-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-stone-900/10 dark:border-zinc-800 dark:bg-zinc-900">
+    <Link href={`/berita/${article.slug}`} className="block"><StoryImage article={article} priority /><div className="p-5 sm:p-7"><StoryMeta article={article} /><h2 className="mt-3 font-display text-2xl font-semibold leading-[1.08] text-stone-900 transition group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-300 sm:text-3xl">{article.title}</h2>{article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">{article.excerpt}</p>}</div></Link>
+  </article>;
+}
+
+function CompactStory({ article }: { article: Article }) {
+  return <article className="group overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:border-amber-200 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"><Link href={`/berita/${article.slug}`} className="block"><StoryImage article={article} /><div className="p-4"><StoryMeta article={article} /><h2 className="mt-2 font-display text-lg font-semibold leading-snug text-stone-900 group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-300">{article.title}</h2></div></Link></article>;
+}
+
 interface PageProps { searchParams: Promise<{ category?: string; page?: string; q?: string }>; }
 
 export default async function BeritaPage({ searchParams }: PageProps) {
@@ -131,38 +158,41 @@ export default async function BeritaPage({ searchParams }: PageProps) {
 
   const categoryLabel = categoryKey ? CATEGORY_BY_KEY[categoryKey] : undefined;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const editorialFront = !categoryKey && !search && page === 1;
+  const featured = editorialFront ? articles[0] : undefined;
+  const supportingStories = editorialFront ? articles.slice(1, 4) : [];
+  const latestStories = editorialFront ? articles.slice(4) : articles;
 
   return (
-    <div className="min-h-screen bg-white dark:bg-zinc-950">
+    <div className="min-h-screen bg-[#f7f5ef] text-stone-900 dark:bg-zinc-950 dark:text-white">
       <main className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-        <header className="flex flex-col gap-4 border-b border-gray-100 py-10 dark:border-zinc-800 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-brand dark:text-yellow-400">Gorontalo Unite</p>
-            <h1 className="mt-2 font-display text-4xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-5xl">Berita</h1>
-            <p className="mt-3 max-w-xl text-sm text-gray-500 dark:text-gray-400">Ringkasan berita Gorontalo dengan rujukan ke sumber asli.</p>
-          </div>
-          <Link href="/" className="text-sm text-gray-500 transition hover:text-brand dark:text-gray-400 dark:hover:text-yellow-400">← Kembali ke beranda</Link>
+        <header className="border-b border-stone-300 py-7 dark:border-zinc-800">
+          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[.18em] text-stone-500 dark:text-zinc-400"><span>Berita & cerita Gorontalo</span><Link href="/" className="transition hover:text-amber-700 dark:hover:text-amber-300">Kembali ke beranda ↗</Link></div>
+          <h1 className="mt-6 text-center font-display text-4xl font-semibold tracking-[-.045em] text-stone-900 dark:text-white sm:text-6xl">Gorontalo Unite</h1>
+          <p className="mt-2 text-center text-sm text-stone-500 dark:text-zinc-400">Informasi, cerita, dan kabar baik dari Gorontalo.</p>
         </header>
 
-        <section className="sticky top-14 z-20 border-b border-gray-100 bg-white/95 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
+        <section className="sticky top-14 z-20 border-b border-stone-200 bg-[#f7f5ef]/95 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
           <Suspense fallback={<div className="h-10 animate-pulse rounded-xl bg-gray-100 dark:bg-zinc-800" />}>
             <BeritaFilters activeCategory={categoryKey} activeSearch={search} catCounts={categoryCounts} />
           </Suspense>
         </section>
 
+        {featured && <section className="py-10 sm:py-14"><div className="mb-6 flex items-end justify-between border-b border-stone-300 pb-4 dark:border-zinc-800"><div><p className="text-[11px] font-semibold uppercase tracking-[.2em] text-amber-700 dark:text-amber-300">Pilihan utama</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Gorontalo Unite</h2></div><span className="text-xs text-stone-400">{totalCount} artikel</span></div><div className="grid gap-4 lg:grid-cols-12"><div className="lg:col-span-7"><FeaturedStory article={featured} /></div><div className="grid gap-4 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">{supportingStories.map((article) => <CompactStory key={article.id} article={article} />)}</div></div></section>}
+
         <section className="py-8">
-          <div className="mb-6 flex items-center justify-between gap-4">
-            <p className="text-sm text-gray-500 dark:text-gray-400">{categoryLabel ? `${categoryLabel} · ` : ""}{totalCount} artikel</p>
-            {search && <p className="truncate text-sm text-gray-400 dark:text-gray-500">Hasil untuk “{search}”</p>}
-          </div>
+          <div className="mb-6 flex items-end justify-between gap-4 border-b border-stone-300 pb-4 dark:border-zinc-800"><div><p className="text-[11px] font-semibold uppercase tracking-[.2em] text-amber-700 dark:text-amber-300">{categoryLabel || "Berita terbaru"}</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-tight">{editorialFront ? "Terbaru dari Gorontalo" : "Hasil berita"}</h2></div><p className="text-sm text-stone-500 dark:text-zinc-400">{totalCount} artikel</p></div>
+          {search && <p className="mb-5 truncate text-sm text-stone-500 dark:text-zinc-400">Hasil untuk “{search}”</p>}
 
           {articles.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-gray-200 px-6 py-20 text-center dark:border-zinc-700">
+            <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-20 text-center dark:border-zinc-700 dark:bg-zinc-900">
               <h2 className="font-display text-xl font-semibold text-gray-800 dark:text-gray-100">Artikel sedang disiapkan</h2>
               <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Artikel kurasi Gorontalo Unite akan hadir di sini setelah proses editorial selesai.</p>
             </div>
+          ) : latestStories.length === 0 && editorialFront ? (
+            <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-12 text-center text-sm text-stone-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400">Artikel berikutnya akan muncul di bagian ini.</div>
           ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{articles.map((article) => <ArticleCard key={article.id} article={article} />)}</div>
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{latestStories.map((article) => <ArticleCard key={article.id} article={article} />)}</div>
           )}
         </section>
 
