@@ -21,7 +21,7 @@ export default function PublicFooter() {
   if (hiddenPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null;
 
   return (
-    <footer className="border-t border-gray-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+    <footer className="relative shrink-0 border-t border-gray-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
         <div className="mb-10 grid grid-cols-2 gap-8 md:grid-cols-5 lg:gap-10">
           <div className="col-span-2">
