@@ -2,8 +2,16 @@
 
 import { ChangeEvent, FormEvent, useMemo, useState } from "react";
 
-type Item = Record<string, string | boolean | null> & { id: string; slug: string; published: boolean; featured: boolean };
+type Item = Record<string, unknown> & { id: string; slug: string; published: boolean; featured: boolean };
 type Kind = "wisata" | "event";
+const tourismCategories = ["Atraksi & Wisata", "Akomodasi", "Kuliner", "Belanja", "Layanan Publik & Transportasi"];
+const detailFields: Record<string, Array<[string, string]>> = {
+  "Akomodasi": [["room_details", "Detail kamar"], ["facilities", "Fasilitas umum"], ["hotel_policies", "Kebijakan hotel"], ["price_range", "Rentang harga"]],
+  "Kuliner": [["signature_menu", "Menu andalan"], ["dietary_options", "Label diet & sertifikasi"], ["vibe", "Suasana / vibe"], ["price_range", "Kisaran harga per orang"]],
+  "Atraksi & Wisata": [["entry_fee", "Tiket masuk"], ["special_rules", "Aturan khusus"], ["visitor_facilities", "Fasilitas wisatawan"], ["best_time", "Waktu kunjungan terbaik"]],
+  "Belanja": [["product_specialty", "Produk unggulan"], ["payment_methods", "Metode pembayaran"], ["bargaining_tip", "Tips menawar"]],
+  "Layanan Publik & Transportasi": [["routes_schedule", "Rute & jadwal"], ["medical_services", "Layanan medis"], ["financial_services", "Informasi keuangan"]],
+};
 
 const slugify = (value: string) => value.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 const localDateTime = () => new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 16);
@@ -18,14 +26,14 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
   const [error, setError] = useState("");
   const titleField = isEvent ? "title" : "name";
   const form = useMemo(() => ({
-    [titleField]: "", slug: "", description: "", category: "", image_url: "", location: "", address: "", maps_url: "", contact: "", featured: false, published: false,
+    [titleField]: "", slug: "", description: "", category: isEvent ? "" : "Atraksi & Wisata", listing_details: "{}", image_url: "", location: "", address: "", maps_url: "", contact: "", featured: false, published: false,
     ...(isEvent ? { venue: "", organizer: "", registration_url: "", price_label: "", starts_at: localDateTime(), ends_at: "" } : { opening_hours: "", website_url: "" }),
   }), [isEvent, titleField]);
   const [values, setValues] = useState<Record<string, string | boolean>>(form);
 
   function start(item?: Item) {
     setEditing(item ?? null); setError("");
-    setValues(item ? Object.fromEntries(Object.entries(form).map(([key, fallback]) => [key, key === "starts_at" || key === "ends_at" ? (item[key] ? String(item[key]).slice(0, 16) : "") : item[key] ?? fallback])) : form);
+    setValues(item ? Object.fromEntries(Object.entries(form).map(([key, fallback]) => [key, key === "listing_details" ? JSON.stringify(item[key] ?? {}) : key === "featured" || key === "published" ? Boolean(item[key] ?? fallback) : key === "starts_at" || key === "ends_at" ? (item[key] ? String(item[key]).slice(0, 16) : "") : String(item[key] ?? fallback)])) as Record<string, string | boolean> : form);
     setOpen(true);
   }
   function change(key: string, value: string | boolean) {
@@ -40,7 +48,9 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
   }
   async function submit(event: FormEvent) {
     event.preventDefault(); setSaving(true); setError("");
-    const payload = { ...values, ...(isEvent ? { starts_at: new Date(String(values.starts_at)).toISOString(), ends_at: values.ends_at ? new Date(String(values.ends_at)).toISOString() : null } : {}) };
+    let listingDetails: Record<string, string> = {};
+    if (!isEvent) { try { listingDetails = JSON.parse(String(values.listing_details || "{}")); } catch { setSaving(false); return setError("Detail listing tidak dapat dibaca."); } }
+    const payload = { ...values, ...(!isEvent ? { listing_details: listingDetails } : {}), ...(isEvent ? { starts_at: new Date(String(values.starts_at)).toISOString(), ends_at: values.ends_at ? new Date(String(values.ends_at)).toISOString() : null } : {}) };
     const response = await fetch(endpoint, { method: editing ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing ? { id: editing.id, ...payload } : payload) });
     const result = await response.json(); setSaving(false);
     if (!response.ok) return setError(result.error ?? "Tidak dapat menyimpan.");
@@ -67,7 +77,8 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
       <Field label={isEvent ? "Nama event" : "Nama tempat"} value={String(values[titleField])} onChange={(v) => change(titleField, v)} required />
       <Field label="Permalink" value={String(values.slug)} onChange={(v) => change("slug", slugify(v))} required prefix="/" />
       <div className="sm:col-span-2"><label className="mb-1 block text-sm font-medium text-gray-700">Deskripsi</label><textarea required value={String(values.description)} onChange={(e) => change("description", e.target.value)} rows={7} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-amber-400" /></div>
-      <Field label="Kategori" value={String(values.category)} onChange={(v) => change("category", v)} />
+      {isEvent ? <Field label="Kategori" value={String(values.category)} onChange={(v) => change("category", v)} /> : <CategoryField value={String(values.category)} onChange={(value) => change("category", value)} />}
+      {!isEvent && <ListingDetailsFields category={String(values.category)} value={String(values.listing_details || "{}") } onChange={(value) => change("listing_details", value)} />}
       {isEvent ? <><Field label="Nama venue" value={String(values.venue)} onChange={(v) => change("venue", v)} /><Field label="Mulai (UTC+8)" value={String(values.starts_at)} onChange={(v) => change("starts_at", v)} type="datetime-local" required /><Field label="Selesai (opsional)" value={String(values.ends_at)} onChange={(v) => change("ends_at", v)} type="datetime-local" /></> : <><Field label="Lokasi / kabupaten" value={String(values.location)} onChange={(v) => change("location", v)} /><Field label="Jam buka" value={String(values.opening_hours)} onChange={(v) => change("opening_hours", v)} /></>}
       <Field label="Alamat" value={String(values.address)} onChange={(v) => change("address", v)} /><Field label="Google Maps URL" value={String(values.maps_url)} onChange={(v) => change("maps_url", v)} type="url" />
       {isEvent ? <><Field label="Penyelenggara" value={String(values.organizer)} onChange={(v) => change("organizer", v)} /><Field label="Tautan pendaftaran" value={String(values.registration_url)} onChange={(v) => change("registration_url", v)} type="url" /></> : <Field label="Website" value={String(values.website_url)} onChange={(v) => change("website_url", v)} type="url" />}
@@ -75,6 +86,16 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
       <div><label className="mb-1 block text-sm font-medium text-gray-700">Gambar utama</label><input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={upload} className="block w-full text-sm" />{values.image_url && <img src={String(values.image_url)} alt="Pratinjau" className="mt-2 h-20 w-32 rounded-lg object-cover" />}</div>
     </div><div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-5"><div className="flex gap-4"><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(values.featured)} onChange={(e) => change("featured", e.target.checked)} />Unggulan</label><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(values.published)} onChange={(e) => change("published", e.target.checked)} />Terbitkan</label></div><button disabled={saving} className="rounded-xl bg-amber-400 px-5 py-2.5 text-sm font-semibold text-gray-950 disabled:opacity-50">{saving ? "Menyimpan…" : "Simpan"}</button></div></form></div></div>}
   </div>;
+}
+
+function CategoryField({ value, onChange }: { value: string; onChange: (value: string) => void }) { return <label><span className="mb-1 block text-sm font-medium text-gray-700">Kategori utama</span><select value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-amber-400">{tourismCategories.map((category) => <option key={category}>{category}</option>)}</select></label>; }
+
+function ListingDetailsFields({ category, value, onChange }: { category: string; value: string; onChange: (value: string) => void }) {
+  let details: Record<string, string> = {};
+  try { details = JSON.parse(value) as Record<string, string>; } catch { /* validation happens before save */ }
+  const fields = detailFields[category] ?? [];
+  function update(key: string, next: string) { onChange(JSON.stringify({ ...details, [key]: next })); }
+  return <div className="sm:col-span-2 rounded-xl border border-amber-100 bg-amber-50/60 p-4"><p className="text-sm font-semibold text-gray-900">Informasi khusus {category}</p><p className="mt-1 text-xs text-gray-500">Isi hanya informasi yang sudah diverifikasi; detail ini akan tampil sebagai kartu pada halaman publik.</p><div className="mt-4 grid gap-4 sm:grid-cols-2">{fields.map(([key, label]) => <Field key={key} label={label} value={details[key] ?? ""} onChange={(next) => update(key, next)} />)}</div></div>;
 }
 
 function Field({ label, value, onChange, type = "text", required, prefix }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; prefix?: string }) { return <label><span className="mb-1 block text-sm font-medium text-gray-700">{label}</span><div className="flex rounded-xl border border-gray-200 focus-within:border-amber-400">{prefix && <span className="px-3 py-2 text-sm text-gray-400">{prefix}</span>}<input required={required} type={type} value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-xl bg-transparent px-3 py-2 text-sm outline-none" /></div></label>; }
