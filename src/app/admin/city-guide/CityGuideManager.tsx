@@ -1,17 +1,12 @@
 "use client";
 
 import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import CityGuideRichEditor from "@/components/city-guide/CityGuideRichEditor";
+import type { Block } from "@/components/editor/types";
 
 type Item = Record<string, unknown> & { id: string; slug: string; published: boolean; featured: boolean };
 type Kind = "wisata" | "event";
 const tourismCategories = ["Atraksi & Wisata", "Akomodasi", "Kuliner", "Belanja", "Layanan Publik & Transportasi"];
-const detailFields: Record<string, Array<[string, string]>> = {
-  "Akomodasi": [["room_details", "Detail kamar"], ["facilities", "Fasilitas umum"], ["hotel_policies", "Kebijakan hotel"], ["price_range", "Rentang harga"]],
-  "Kuliner": [["signature_menu", "Menu andalan"], ["dietary_options", "Label diet & sertifikasi"], ["vibe", "Suasana / vibe"], ["price_range", "Kisaran harga per orang"]],
-  "Atraksi & Wisata": [["entry_fee", "Tiket masuk"], ["special_rules", "Aturan khusus"], ["visitor_facilities", "Fasilitas wisatawan"], ["best_time", "Waktu kunjungan terbaik"]],
-  "Belanja": [["product_specialty", "Produk unggulan"], ["payment_methods", "Metode pembayaran"], ["bargaining_tip", "Tips menawar"]],
-  "Layanan Publik & Transportasi": [["routes_schedule", "Rute & jadwal"], ["medical_services", "Layanan medis"], ["financial_services", "Informasi keuangan"]],
-};
 
 const slugify = (value: string) => value.toLowerCase().trim().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
 const localDateTime = () => new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 16);
@@ -26,14 +21,14 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
   const [error, setError] = useState("");
   const titleField = isEvent ? "title" : "name";
   const form = useMemo(() => ({
-    [titleField]: "", slug: "", description: "", category: isEvent ? "" : "Atraksi & Wisata", listing_details: "{}", image_url: "", location: "", address: "", maps_url: "", contact: "", featured: false, published: false,
+    [titleField]: "", slug: "", description: "", category: isEvent ? "" : "Atraksi & Wisata", listing_details: "{}", content_blocks: "[]", image_url: "", location: "", address: "", maps_url: "", contact: "", featured: false, published: false,
     ...(isEvent ? { venue: "", organizer: "", registration_url: "", price_label: "", starts_at: localDateTime(), ends_at: "" } : { opening_hours: "", website_url: "" }),
   }), [isEvent, titleField]);
   const [values, setValues] = useState<Record<string, string | boolean>>(form);
 
   function start(item?: Item) {
     setEditing(item ?? null); setError("");
-    setValues(item ? Object.fromEntries(Object.entries(form).map(([key, fallback]) => [key, key === "listing_details" ? JSON.stringify(item[key] ?? {}) : key === "featured" || key === "published" ? Boolean(item[key] ?? fallback) : key === "starts_at" || key === "ends_at" ? (item[key] ? String(item[key]).slice(0, 16) : "") : String(item[key] ?? fallback)])) as Record<string, string | boolean> : form);
+    setValues(item ? Object.fromEntries(Object.entries(form).map(([key, fallback]) => [key, key === "listing_details" ? JSON.stringify(item[key] ?? {}) : key === "content_blocks" ? JSON.stringify((item.listing_details as Record<string, unknown> | null)?.content_blocks ?? []) : key === "featured" || key === "published" ? Boolean(item[key] ?? fallback) : key === "starts_at" || key === "ends_at" ? (item[key] ? String(item[key]).slice(0, 16) : "") : String(item[key] ?? fallback)])) as Record<string, string | boolean> : form);
     setOpen(true);
   }
   function change(key: string, value: string | boolean) {
@@ -50,7 +45,11 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
     event.preventDefault(); setSaving(true); setError("");
     let listingDetails: Record<string, string> = {};
     if (!isEvent) { try { listingDetails = JSON.parse(String(values.listing_details || "{}")); } catch { setSaving(false); return setError("Detail listing tidak dapat dibaca."); } }
-    const payload = { ...values, ...(!isEvent ? { listing_details: listingDetails } : {}), ...(isEvent ? { starts_at: new Date(String(values.starts_at)).toISOString(), ends_at: values.ends_at ? new Date(String(values.ends_at)).toISOString() : null } : {}) };
+    let contentBlocks: Block[] = [];
+    if (!isEvent) { try { contentBlocks = JSON.parse(String(values.content_blocks || "[]")); } catch { setSaving(false); return setError("Konten listing tidak dapat dibaca."); } }
+    const plainDescription = contentBlocks.map((block) => block.content || (Array.isArray(block.attrs?.items) ? block.attrs.items.join(" ") : "")).join(" ").trim();
+    const baseValues = Object.fromEntries(Object.entries(values).filter(([key]) => key !== "content_blocks" && key !== "listing_details"));
+    const payload = { ...baseValues, ...(!isEvent ? { description: plainDescription, listing_details: { ...listingDetails, content_blocks: contentBlocks } } : {}), ...(isEvent ? { starts_at: new Date(String(values.starts_at)).toISOString(), ends_at: values.ends_at ? new Date(String(values.ends_at)).toISOString() : null } : {}) };
     const response = await fetch(endpoint, { method: editing ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing ? { id: editing.id, ...payload } : payload) });
     const result = await response.json(); setSaving(false);
     if (!response.ok) return setError(result.error ?? "Tidak dapat menyimpan.");
@@ -76,7 +75,7 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
     {open && <div className="fixed inset-0 z-50 overflow-y-auto bg-black/35 p-4"><div className="mx-auto my-8 max-w-3xl rounded-2xl bg-white shadow-2xl"><form onSubmit={submit} className="p-6"><div className="mb-6 flex items-start justify-between"><div><h2 className="text-xl font-bold text-gray-900">{editing ? `Edit ${label}` : `Tambah ${label}`}</h2><p className="mt-1 text-sm text-gray-500">Simpan sebagai draft dahulu atau terbitkan saat siap.</p></div><button type="button" onClick={() => setOpen(false)} className="text-2xl text-gray-400">×</button></div><div className="grid gap-4 sm:grid-cols-2">
       <Field label={isEvent ? "Nama event" : "Nama tempat"} value={String(values[titleField])} onChange={(v) => change(titleField, v)} required />
       <Field label="Permalink" value={String(values.slug)} onChange={(v) => change("slug", slugify(v))} required prefix="/" />
-      <div className="sm:col-span-2"><label className="mb-1 block text-sm font-medium text-gray-700">Deskripsi</label><textarea required value={String(values.description)} onChange={(e) => change("description", e.target.value)} rows={7} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-amber-400" /></div>
+      {isEvent ? <div className="sm:col-span-2"><label className="mb-1 block text-sm font-medium text-gray-700">Deskripsi</label><textarea required value={String(values.description)} onChange={(e) => change("description", e.target.value)} rows={7} className="w-full rounded-xl border border-gray-200 px-3 py-2 text-sm outline-none focus:border-amber-400" /></div> : <div className="sm:col-span-2"><label className="mb-1 block text-sm font-medium text-gray-700">Konten listing</label><p className="mb-2 text-xs text-gray-500">Tulis bebas seperti artikel: heading, paragraf, daftar, quote, tautan, gambar, itinerary, menu, atau fasilitas.</p><CityGuideRichEditor key={editing?.id ?? "new"} value={parseBlocks(String(values.content_blocks || "[]"))} onChange={(blocks) => change("content_blocks", JSON.stringify(blocks))} /></div>}
       {isEvent ? <Field label="Kategori" value={String(values.category)} onChange={(v) => change("category", v)} /> : <CategoryField value={String(values.category)} onChange={(value) => change("category", value)} />}
       {!isEvent && <ListingDetailsFields category={String(values.category)} value={String(values.listing_details || "{}") } onChange={(value) => change("listing_details", value)} />}
       {isEvent ? <><Field label="Nama venue" value={String(values.venue)} onChange={(v) => change("venue", v)} /><Field label="Mulai (UTC+8)" value={String(values.starts_at)} onChange={(v) => change("starts_at", v)} type="datetime-local" required /><Field label="Selesai (opsional)" value={String(values.ends_at)} onChange={(v) => change("ends_at", v)} type="datetime-local" /></> : <><Field label="Lokasi / kabupaten" value={String(values.location)} onChange={(v) => change("location", v)} /><Field label="Jam buka" value={String(values.opening_hours)} onChange={(v) => change("opening_hours", v)} /></>}
@@ -89,17 +88,20 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
 }
 
 function CategoryField({ value, onChange }: { value: string; onChange: (value: string) => void }) { return <label><span className="mb-1 block text-sm font-medium text-gray-700">Kategori utama</span><select value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-amber-400">{tourismCategories.map((category) => <option key={category}>{category}</option>)}</select></label>; }
+function parseBlocks(value: string): Block[] { try { const parsed = JSON.parse(value); return Array.isArray(parsed) ? parsed : []; } catch { return []; } }
 
 function ListingDetailsFields({ category, value, onChange }: { category: string; value: string; onChange: (value: string) => void }) {
   let details: Record<string, string | string[]> = {};
   try { details = JSON.parse(value) as Record<string, string | string[]>; } catch { /* validation happens before save */ }
-  const fields = detailFields[category] ?? [];
-  const text = (key: string) => Array.isArray(details[key]) ? details[key].join("\n") : details[key] ?? "";
-  function update(key: string, next: string) { onChange(JSON.stringify({ ...details, [key]: next })); }
-  function updateList(key: string, next: string) { onChange(JSON.stringify({ ...details, [key]: next.split("\n").map((item) => item.trim()).filter(Boolean) })); }
-  return <div className="sm:col-span-2 rounded-xl border border-amber-100 bg-amber-50/60 p-4"><p className="text-sm font-semibold text-gray-900">Informasi khusus {category}</p><p className="mt-1 text-xs text-gray-500">Isi hanya informasi yang sudah diverifikasi; detail ini akan tampil sebagai kartu pada halaman publik.</p><div className="mt-4 grid gap-4 sm:grid-cols-2">{fields.map(([key, label]) => <Field key={key} label={label} value={String(text(key))} onChange={(next) => update(key, next)} />)}</div><div className="mt-5 grid gap-4 border-t border-amber-100 pt-5 sm:grid-cols-2"><Field label="Rating (opsional)" value={String(text("rating"))} onChange={(next) => update("rating", next)} /><Field label="Jumlah ulasan (opsional)" value={String(text("review_count"))} onChange={(next) => update("review_count", next)} /><LongField label="Amenities / fasilitas" hint="Satu fasilitas per baris, misalnya: Toilet umum" value={String(text("amenities"))} onChange={(next) => updateList("amenities", next)} /><LongField label="Link embed post Instagram" hint="Satu URL post/reel Instagram per baris. Ditampilkan grid 3 kolom desktop, 2 kolom mobile." value={String(text("instagram_posts"))} onChange={(next) => updateList("instagram_posts", next)} /></div></div>;
+  const posts = Array.isArray(details.instagram_posts) ? details.instagram_posts.filter((post): post is string => typeof post === "string") : [];
+  function updateInstagramPosts(next: string[]) { onChange(JSON.stringify({ ...details, instagram_posts: next })); }
+  return <InstagramMediaManager category={category} posts={posts} onChange={updateInstagramPosts} />;
 }
 
-function LongField({ label, hint, value, onChange }: { label: string; hint: string; value: string; onChange: (value: string) => void }) { return <label><span className="mb-1 block text-sm font-medium text-gray-700">{label}</span><textarea value={value} onChange={(event) => onChange(event.target.value)} rows={4} className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-amber-400" /><span className="mt-1 block text-xs text-gray-400">{hint}</span></label>; }
+function InstagramMediaManager({ category, posts, onChange }: { category: string; posts: string[]; onChange: (posts: string[]) => void }) {
+  const [draft, setDraft] = useState("");
+  function add() { const url = draft.trim(); if (!url || posts.includes(url)) return; onChange([...posts, url]); setDraft(""); }
+  return <div className="sm:col-span-2 rounded-xl border border-amber-100 bg-amber-50/60 p-4"><p className="text-sm font-semibold text-gray-900">Media Instagram</p><p className="mt-1 text-xs text-gray-500">Tambahkan beberapa URL post atau reel Instagram untuk {category}. Konten naratif, fasilitas, itinerary, menu, dan aturan ditulis langsung di editor di atas.</p><div className="mt-4 flex gap-2"><input value={draft} onChange={(event) => setDraft(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); add(); } }} placeholder="https://www.instagram.com/p/..." type="url" className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-amber-400" /><button type="button" onClick={add} className="shrink-0 rounded-xl bg-amber-400 px-3 py-2 text-sm font-semibold text-gray-950 hover:bg-amber-300">+ Tambah post</button></div>{posts.length > 0 && <div className="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">{posts.map((post) => <div key={post} className="rounded-xl border border-amber-200 bg-white p-3"><p className="truncate text-xs text-slate-600">{post}</p><button type="button" onClick={() => onChange(posts.filter((item) => item !== post))} className="mt-2 text-xs font-semibold text-red-600">Hapus</button></div>)}</div>}</div>;
+}
 
 function Field({ label, value, onChange, type = "text", required, prefix }: { label: string; value: string; onChange: (value: string) => void; type?: string; required?: boolean; prefix?: string }) { return <label><span className="mb-1 block text-sm font-medium text-gray-700">{label}</span><div className="flex rounded-xl border border-gray-200 focus-within:border-amber-400">{prefix && <span className="px-3 py-2 text-sm text-gray-400">{prefix}</span>}<input required={required} type={type} value={value} onChange={(e) => onChange(e.target.value)} className="w-full rounded-xl bg-transparent px-3 py-2 text-sm outline-none" /></div></label>; }
