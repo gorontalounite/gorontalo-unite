@@ -3,6 +3,7 @@ import { Golos_Text, Space_Grotesk, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import Navbar                 from "@/components/layout/Navbar";
 import BottomNav              from "@/components/layout/BottomNav";
+import PublicFooter           from "@/components/layout/PublicFooter";
 import ServiceWorkerRegister  from "@/components/layout/ServiceWorkerRegister";
 import { ThemeProvider, themeInitScript } from "@/components/layout/ThemeProvider";
 
@@ -104,6 +105,7 @@ export default function RootLayout({
         <ThemeProvider>
           <Navbar />
           <main className="flex-1 flex flex-col min-h-0 pb-16 md:pb-0">{children}</main>
+          <PublicFooter />
           <BottomNav />
         </ThemeProvider>
         {/* PWA service worker registration */}

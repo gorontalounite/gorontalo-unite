@@ -968,77 +968,6 @@ function AboutSection() {
   );
 }
 
-/* ─── Footer ────────────────────────────────────────────────────────── */
-function Footer() {
-  return (
-    <footer className="bg-white dark:bg-zinc-950 border-t border-gray-200 dark:border-zinc-800">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-12 lg:py-16">
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8 lg:gap-10 mb-10">
-          <div className="col-span-2">
-            <p className="text-base font-bold text-gray-900 dark:text-white mb-2">
-              Gorontalo Unite
-            </p>
-            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed max-w-xs">
-              Media online lokal Gorontalo dengan asisten AI dan layanan kreatif digital.
-            </p>
-          </div>
-          <FooterCol
-            title="Platform"
-            links={[
-              ["Beranda", "/"],
-              ["Berita", "/berita"],
-              ["Affiliate", "/affiliate"],
-              ["Portofolio", "/portfolio"],
-            ]}
-          />
-          <FooterCol
-            title="Info"
-            links={[
-              ["Tentang", "/about"],
-              ["Kontak", "/about#kontak"],
-              ["Media Kit", "/media-kit"],
-            ]}
-          />
-          <FooterCol
-            title="Legal"
-            links={[
-              ["Privacy", "/privacy-policy"],
-              ["Terms", "/terms"],
-              ["Pedoman Media", "/pedoman-media-siber"],
-            ]}
-          />
-        </div>
-        <div className="border-t border-gray-200 dark:border-zinc-800 pt-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs text-gray-500 dark:text-gray-500">
-          <p>© {new Date().getFullYear()} Gorontalo Unite. All rights reserved.</p>
-          <p>Made with ♥ for Gorontalo</p>
-        </div>
-      </div>
-    </footer>
-  );
-}
-
-function FooterCol({ title, links }: { title: string; links: [string, string][] }) {
-  return (
-    <div>
-      <p className="text-xs font-semibold text-gray-900 dark:text-white uppercase tracking-widest mb-3">
-        {title}
-      </p>
-      <ul className="space-y-2.5">
-        {links.map(([label, href]) => (
-          <li key={href}>
-            <Link
-              href={href}
-              className="text-sm text-gray-600 dark:text-gray-400 hover:text-brand dark:hover:text-yellow-400 transition-colors"
-            >
-              {label}
-            </Link>
-          </li>
-        ))}
-      </ul>
-    </div>
-  );
-}
-
 /* ─── Main landing page ─────────────────────────────────────────────── */
 export default function LandingPage({ portfolioItems, newsItems, newsTotalCount, eventItems, newsUnavailable }: LandingPageProps) {
   const [chatActive, setChatActive] = useState(false);
@@ -1086,7 +1015,6 @@ export default function LandingPage({ portfolioItems, newsItems, newsTotalCount,
       {eventItems.length > 0 && <EventSection items={eventItems} />}
       {false && <PortfolioSection items={portfolioItems} />}
       {false && <AboutSection />}
-      <Footer />
     </div>
   );
 }
