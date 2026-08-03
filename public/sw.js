@@ -6,7 +6,9 @@
  *   - Offline fallback page untuk navigasi
  */
 
-const CACHE_NAME    = "gu-v2";
+// Bump when a public application shell changes so older clients discard a
+// previously cached route tree on their next service-worker update.
+const CACHE_NAME    = "gu-v3";
 const OFFLINE_URL   = "/offline";
 const STATIC_ASSETS = [
   "/",
