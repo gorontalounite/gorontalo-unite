@@ -28,11 +28,22 @@ export interface NewsItem {
   created_at: string;
 }
 
+export interface DestinationItem {
+  id: string;
+  name: string;
+  slug: string;
+  description: string | null;
+  image_url: string | null;
+  category: string | null;
+  location: string | null;
+  opening_hours: string | null;
+}
+
 interface LandingPageProps {
-  portfolioItems: PortfolioItem[];
   newsItems: NewsItem[];
+  featuredNewsItems: NewsItem[];
+  featuredDestinations: DestinationItem[];
   newsTotalCount: number;
-  eventItems: NewsItem[];
   newsUnavailable: boolean;
 }
 
@@ -603,6 +614,70 @@ function NewsSectionPaginated({
   );
 }
 
+/* ─── Homepage editorial choices ─────────────────────────────────── */
+function FeaturedNewsSection({ items }: { items: NewsItem[] }) {
+  return (
+    <section className="px-4 py-16 sm:px-6 sm:py-24">
+      <div className="mx-auto max-w-6xl">
+        <SectionHeading
+          eyebrow="Pilihan Editor"
+          title="Berita pilihan Gorontalo Unite"
+          description="Liputan yang dipilih redaksi untuk memberi konteks, inspirasi, dan perspektif baru tentang Gorontalo."
+          action={<Link href="/berita" className="text-sm font-semibold text-brand hover:underline dark:text-yellow-400">Lihat semua berita →</Link>}
+        />
+        {items.length ? (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => <NewsCardMobile key={item.id} item={item} />)}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-gray-200 px-6 py-14 text-center text-sm text-gray-400 dark:border-zinc-800 dark:text-gray-500">
+            Berita pilihan akan tampil di sini setelah dipilih dari editor konten.
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function CityGuideSection({ items }: { items: DestinationItem[] }) {
+  return (
+    <section className="border-y border-gray-100 bg-gray-50/60 px-4 py-16 dark:border-zinc-800 dark:bg-zinc-950/60 sm:px-6 sm:py-24">
+      <div className="mx-auto max-w-6xl">
+        <SectionHeading
+          eyebrow="City Guide"
+          title="Destinasi pilihan untuk dijelajahi"
+          description="Panduan ringkas untuk menemukan tempat menarik dan merencanakan kunjungan di Gorontalo."
+          action={<Link href="/wisata" className="text-sm font-semibold text-brand hover:underline dark:text-yellow-400">Jelajahi City Guide →</Link>}
+        />
+        {items.length ? (
+          <div className="grid gap-5 md:grid-cols-3">
+            {items.map((item) => (
+              <Link key={item.id} href={`/wisata/${item.slug}`} className="group overflow-hidden rounded-2xl border border-gray-200 bg-white transition hover:-translate-y-0.5 hover:border-[#F5C400]/60 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
+                <div className="aspect-[16/10] overflow-hidden bg-gradient-to-br from-amber-100 to-yellow-50 dark:from-zinc-800 dark:to-zinc-700">
+                  {item.image_url && <img src={item.image_url} alt={item.name} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />}
+                </div>
+                <div className="p-5">
+                  {item.category && <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-amber-700 dark:text-yellow-400">{item.category}</p>}
+                  <h3 className="mt-2 text-lg font-bold leading-snug text-gray-900 group-hover:text-brand dark:text-white dark:group-hover:text-yellow-400">{item.name}</h3>
+                  <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{item.description || "Informasi kunjungan akan segera tersedia."}</p>
+                  <div className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-gray-400 dark:text-gray-500">
+                    {item.location && <span>⌖ {item.location}</span>}
+                    {item.opening_hours && <span>◷ {item.opening_hours}</span>}
+                  </div>
+                </div>
+              </Link>
+            ))}
+          </div>
+        ) : (
+          <div className="rounded-2xl border border-dashed border-gray-200 bg-white px-6 py-14 text-center text-sm text-gray-400 dark:border-zinc-800 dark:bg-zinc-900 dark:text-gray-500">
+            Destinasi pilihan akan tampil di sini setelah ditandai dari dashboard City Guide.
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 /* ─── Event bento card ──────────────────────────────────────────────── */
 function EventBentoCard({
   item,
@@ -969,7 +1044,7 @@ function AboutSection() {
 }
 
 /* ─── Main landing page ─────────────────────────────────────────────── */
-export default function LandingPage({ portfolioItems, newsItems, newsTotalCount, eventItems, newsUnavailable }: LandingPageProps) {
+export default function LandingPage({ newsItems, featuredNewsItems, featuredDestinations, newsTotalCount, newsUnavailable }: LandingPageProps) {
   const [chatActive, setChatActive] = useState(false);
   const [initialMessage, setInitialMessage] = useState<string | undefined>();
   const [chatToLoad, setChatToLoad] = useState<LiveConversation | null>(null);
@@ -1012,9 +1087,9 @@ export default function LandingPage({ portfolioItems, newsItems, newsTotalCount,
     <div className="flex-1 overflow-y-auto bg-white dark:bg-zinc-950">
       <ChatHero onSend={handleSend} />
       <NewsSectionPaginated initialItems={newsItems} totalCount={newsTotalCount} newsUnavailable={newsUnavailable} />
-      {eventItems.length > 0 && <EventSection items={eventItems} />}
-      {false && <PortfolioSection items={portfolioItems} />}
-      {false && <AboutSection />}
+      <FeaturedNewsSection items={featuredNewsItems} />
+      <CityGuideSection items={featuredDestinations} />
+      <AboutSection />
     </div>
   );
 }

@@ -18,6 +18,7 @@ export interface PostMeta {
   seo_title:       string;
   seo_description: string;
   focus_keyword?:  string;
+  is_trending?:    boolean;
   schema_type?:    string;
   allow_comments?: boolean;
   // Portfolio CPT
@@ -35,6 +36,7 @@ export const EMPTY_META: PostMeta = {
   title: "", slug: "", excerpt: "", category: "", categories: [], tags: [],
   image_url: "", published: false, published_at: "",
   seo_title: "", seo_description: "",
+  is_trending: false,
   allow_comments: true,
 };
 
@@ -471,6 +473,18 @@ export default function EditorSidebar({
                 onChange={(url) => setField("image_url", url)}
               />
             </Panel>
+
+            {postType === "news" && (
+              <Panel title="Tampilan Beranda" defaultOpen>
+                <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-gray-100 p-2.5 hover:bg-yellow-50">
+                  <input type="checkbox" checked={meta.is_trending ?? false} onChange={(event) => setField("is_trending", event.target.checked)} className="mt-0.5 accent-[#F5C400]" />
+                  <span>
+                    <span className="block text-[11px] font-semibold text-gray-700">Berita pilihan</span>
+                    <span className="mt-0.5 block text-[10px] leading-relaxed text-gray-400">Tampilkan artikel ini pada section Berita Pilihan di beranda.</span>
+                  </span>
+                </label>
+              </Panel>
+            )}
 
             {postType === "news" && (
               <Panel title="Sumber asli" defaultOpen>

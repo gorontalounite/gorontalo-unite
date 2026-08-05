@@ -224,6 +224,7 @@ export default function TiptapNewsEditor({ editId, initialMeta, initialBlocks }:
       category: categories[0], categories, tags: meta.tags.length ? meta.tags : null,
       published: publish,
       published_at: publish ? toMakassarIso(meta.published_at) : null,
+      is_trending: meta.is_trending ?? false,
       ...seo, schema_type: meta.schema_type || "NewsArticle",
       allow_comments: meta.allow_comments ?? true, source_url: meta.source_url || null,
     };

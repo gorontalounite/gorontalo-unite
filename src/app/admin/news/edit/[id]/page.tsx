@@ -41,6 +41,7 @@ export default async function EditNewsPage({ params }: Props) {
     seo_title:       article.seo_title ?? "",
     seo_description: article.seo_description ?? "",
     focus_keyword:   article.focus_keyword ?? "",
+    is_trending:     article.is_trending ?? false,
     schema_type:     article.schema_type ?? "NewsArticle",
     allow_comments:  (article.allow_comments as boolean | null) ?? false,
   };

@@ -15,7 +15,7 @@ async function authorizeUser() {
 }
 
 const LIST_COLS =
-  "id, title, slug, category, tags, published, published_at, created_at, excerpt, image_url";
+  "id, title, slug, category, tags, published, published_at, created_at, excerpt, image_url, is_trending";
 
 // GET – list (optionally filtered) OR single by ?id=
 export async function GET(req: NextRequest) {
