@@ -15,7 +15,7 @@ export type NewsArticle = {
   is_trending?: boolean | null;
 };
 
-type Variant = "hero" | "feature" | "card" | "compact" | "list";
+type Variant = "hero" | "feature" | "card" | "compact" | "list" | "channel";
 
 function displayDate(value: string | null) {
   if (!value) return "—";
@@ -74,6 +74,10 @@ export default function NewsCard({ article, variant = "card" }: { article: NewsA
         </Link>
       </article>
     );
+  }
+
+  if (variant === "channel") {
+    return <article className="group overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"><Link href={`/berita/${article.slug}`} className="block h-full"><NewsImage article={article} className="aspect-video" /><div className="p-4 sm:p-5"><NewsMeta article={article} /><h3 className="mt-3 line-clamp-3 font-display text-base font-semibold leading-[1.14] text-stone-950 transition group-hover:text-brand dark:text-white dark:group-hover:text-yellow-300 sm:text-xl">{article.title}</h3>{article.excerpt && <p className="mt-2 line-clamp-2 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">{article.excerpt}</p>}</div></Link></article>;
   }
 
   const body = (
