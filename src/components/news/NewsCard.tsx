@@ -89,7 +89,7 @@ export default function NewsCard({ article, variant = "card" }: { article: NewsA
   );
 
   const classes = variant === "list"
-    ? "group grid overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 sm:grid-cols-[.9fr_1.1fr]"
+    ? "group overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"
     : "group overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900";
 
   return <article className={classes}><Link href={`/berita/${article.slug}`} className={variant === "list" ? "grid h-full sm:grid-cols-[.9fr_1.1fr]" : "block h-full"}>{body}</Link></article>;
