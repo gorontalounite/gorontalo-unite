@@ -24,12 +24,10 @@ function SectionHeading({ eyebrow, title, actionHref, actionLabel }: { eyebrow?:
   return <div className="mb-5 flex items-end justify-between gap-4 border-b border-stone-300 pb-4 dark:border-zinc-700"><div>{eyebrow && <p className="text-[10px] font-bold uppercase tracking-[.22em] text-brand">{eyebrow}</p>}<h2 className={`${eyebrow ? "mt-2" : ""} font-display text-3xl font-semibold tracking-tight sm:text-4xl`}>{title}</h2></div>{actionHref && <Link href={actionHref} className="mb-1 shrink-0 text-sm font-semibold text-brand transition hover:text-stone-950 dark:hover:text-white">{actionLabel ?? "See all"} <span aria-hidden>→</span></Link>}</div>;
 }
 
-function ChannelSection({ name, articles }: { name: ChannelName; articles: NewsArticle[] }) {
-  const categoryKey = CATEGORIES.find((category) => category.label === name)?.key ?? name.toLowerCase();
-  return <section className="pb-12 sm:pb-16">
-    <SectionHeading title={name} />
-    {articles.length > 0 ? <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">{articles.map((article) => <NewsCard key={article.id} article={article} variant="channel" />)}</div> : <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-10 text-center text-sm text-stone-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400">Artikel pilihan untuk kanal {name} akan tampil di sini.</div>}
-    <div className="mt-6 text-center"><Link href={`/berita?category=${categoryKey}`} className="inline-flex rounded-full border border-stone-300 bg-white px-5 py-2.5 text-sm font-semibold text-stone-800 transition hover:border-brand hover:text-brand dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-100">See more <span className="ml-1" aria-hidden>→</span></Link></div>
+function UntoldStorySection({ articles }: { articles: NewsArticle[] }) {
+  return <section className="mb-12 overflow-hidden rounded-3xl bg-stone-950 px-5 py-9 text-white sm:mb-16 sm:px-8 sm:py-12">
+    <div className="mb-7 border-b border-white/20 pb-5"><p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#f5c400]">Pilihan cerita</p><h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-[#f5c400] sm:text-4xl">Untold Story</h2><p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70">Cerita yang menginspirasi, memberi wawasan, dan menarik untuk diikuti.</p></div>
+    {articles.length > 0 ? <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">{articles.map((article) => <NewsCard key={article.id} article={article} variant="channel" />)}</div> : <div className="rounded-2xl border border-dashed border-white/30 bg-white/5 px-6 py-10 text-center text-sm text-white/70">Cerita Inspire, Insight, dan Interest akan tampil di sini.</div>}
   </section>;
 }
 
@@ -69,6 +67,9 @@ export default async function BeritaPage({ searchParams }: PageProps) {
   const sideStories = editorial ? articles.slice(1, 3) : [];
   const newsStories = editorial ? articles.slice(3, 9) : articles;
   const choiceStories = editorial ? articles.filter((article) => article.is_trending).slice(0, 3) : [];
+  const untoldStories = Array.from(new Map(EDITORIAL_CHANNELS.flatMap((name) => channelArticles[name]).map((article) => [article.id, article])).values())
+    .sort((first, second) => new Date(second.published_at ?? second.created_at).getTime() - new Date(first.published_at ?? first.created_at).getTime())
+    .slice(0, 9);
 
   return (
     <div className="min-h-screen bg-[#f7f5ef] text-stone-900 dark:bg-zinc-950 dark:text-white">
@@ -84,7 +85,7 @@ export default async function BeritaPage({ searchParams }: PageProps) {
           {articles.length === 0 ? <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-20 text-center dark:border-zinc-700 dark:bg-zinc-900"><h2 className="font-display text-xl font-semibold">Artikel sedang disiapkan</h2><p className="mt-2 text-sm text-stone-500 dark:text-zinc-400">Coba ubah kata kunci atau pilih kategori lain.</p></div> : newsStories.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{newsStories.map((article) => <NewsCard key={article.id} article={article} variant="card" />)}</div> : <p className="rounded-2xl border border-dashed border-stone-300 bg-white p-10 text-center text-sm text-stone-500 dark:border-zinc-700 dark:bg-zinc-900">Artikel berikutnya akan tampil di sini.</p>}</section>
 
         {editorial && choiceStories.length > 0 && <section className="pb-12 sm:pb-16"><SectionHeading title="Recommended for You" /><div className="mx-auto grid max-w-5xl gap-5">{choiceStories.map((article) => <NewsCard key={article.id} article={article} variant="list" />)}</div></section>}
-        {editorial && EDITORIAL_CHANNELS.map((name) => <ChannelSection key={name} name={name} articles={channelArticles[name]} />)}
+        {editorial && <UntoldStorySection articles={untoldStories} />}
         {!search && !categoryLabel && <section className="rounded-3xl bg-stone-900 px-6 py-10 text-center text-white dark:bg-zinc-900 sm:px-12"><p className="text-[10px] font-bold uppercase tracking-[.24em] text-amber-300">Dari redaksi</p><h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">Ikuti kabar baik dari Gorontalo</h2><p className="mx-auto mt-3 max-w-xl text-sm text-stone-300">Temukan berita, cerita, dan rekomendasi yang dikurasi Gorontalo Unite.</p><Link href="/berita/penulis/gorontalo-unite" className="mt-6 inline-flex rounded-full bg-[#f5c400] px-5 py-2.5 text-sm font-bold text-stone-950 transition hover:bg-yellow-300">Lihat profil redaksi →</Link></section>}
         <Suspense><BeritaPagination page={page} totalPages={totalPages} /></Suspense>
       </main>
