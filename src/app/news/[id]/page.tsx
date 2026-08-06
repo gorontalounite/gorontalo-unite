@@ -149,7 +149,8 @@ export async function NewsDetailPage({ params }: Props) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div className="bg-[#f7f5ef] py-8 pb-20 text-stone-900 dark:bg-zinc-950 dark:text-white sm:py-12">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       {/* Schema.org */}
       <script
         type="application/ld+json"
@@ -159,8 +160,10 @@ export async function NewsDetailPage({ params }: Props) {
       {/* Silent view tracker */}
       <ViewTracker slug={slug} />
 
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+      <div className="min-w-0">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
+      <nav className="mb-7 flex items-center gap-2 text-xs text-stone-400 dark:text-zinc-500">
         <Link href="/" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Beranda</Link>
         <span>/</span>
         <Link href="/berita" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Berita</Link>
@@ -170,7 +173,7 @@ export async function NewsDetailPage({ params }: Props) {
 
       <article>
         {/* Category + Date + Trending */}
-        <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="mb-4 flex flex-wrap items-center gap-3">
           {((article.categories as string[] | null)?.length
             ? (article.categories as string[])
             : [article.category]
@@ -190,7 +193,7 @@ export async function NewsDetailPage({ params }: Props) {
             </span>
           )}
           {publishedDate && (
-            <span className="text-xs text-gray-400 dark:text-gray-500">{publishedDate}</span>
+            <span className="text-xs text-stone-400 dark:text-zinc-500">{publishedDate}</span>
           )}
           {viewCount > 0 && (
             <span className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
@@ -199,14 +202,19 @@ export async function NewsDetailPage({ params }: Props) {
           )}
         </div>
 
+        <div className="mb-5 flex items-center gap-3 text-xs text-stone-500 dark:text-zinc-400">
+          <span className="grid h-8 w-8 place-items-center rounded-full bg-stone-900 text-[10px] font-bold text-white dark:bg-amber-400 dark:text-stone-950">GU</span>
+          <span>Ditulis oleh <Link href="/berita/penulis/gorontalo-unite" className="font-semibold text-stone-700 underline decoration-amber-400 underline-offset-4 hover:text-brand dark:text-zinc-200">Gorontalo Unite</Link></span>
+        </div>
+
         {/* Title */}
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
+        <h1 className="font-display text-4xl font-semibold leading-[1.04] tracking-[-.035em] text-stone-950 dark:text-white sm:text-5xl lg:text-6xl">
           {article.title}
         </h1>
 
         {/* Excerpt */}
         {article.excerpt && (
-          <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed mb-6 border-l-4 border-[#F5C400] dark:border-yellow-500 pl-4 italic">
+          <p className="my-7 border-l-4 border-[#F5C400] pl-4 text-lg leading-relaxed text-stone-600 dark:border-yellow-500 dark:text-zinc-300">
             {article.excerpt}
           </p>
         )}
@@ -269,7 +277,7 @@ export async function NewsDetailPage({ params }: Props) {
         )}
 
         {/* Share buttons */}
-        <div className="mt-8 pt-6 border-t border-gray-100 dark:border-zinc-800">
+        <div className="mt-8 border-t border-stone-200 pt-6 dark:border-zinc-800">
           <ShareButtons url={canonicalUrl} title={article.title} />
         </div>
       </article>
@@ -281,13 +289,26 @@ export async function NewsDetailPage({ params }: Props) {
       <RelatedPosts items={related} basePath="/berita" />
 
       {/* Back navigation */}
-      <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 flex gap-4">
+      <div className="mt-10 flex gap-4 border-t border-stone-200 pt-6 dark:border-zinc-800">
         <Link href="/berita" className="text-sm text-brand dark:text-yellow-400 font-medium hover:underline">
           ← Semua berita
         </Link>
         <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium">
           Tanya Gorontalo AI →
         </Link>
+      </div>
+      </div>
+
+      <aside className="lg:sticky lg:top-24">
+        <div className="border-y border-stone-300 py-6 dark:border-zinc-700">
+          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-brand">Gorontalo Unite</p>
+          <h2 className="mt-2 font-display text-2xl font-semibold leading-tight">Cerita lokal yang patut diikuti.</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">Berita, informasi, dan kabar baik dari Gorontalo dalam satu ruang editorial.</p>
+          <Link href="/berita/penulis/gorontalo-unite" className="mt-5 inline-flex text-sm font-semibold text-brand hover:underline">Tentang redaksi →</Link>
+        </div>
+        {related.length > 0 && <div className="mt-8"><p className="text-[10px] font-bold uppercase tracking-[.22em] text-brand">Baca berikutnya</p><div className="mt-4 space-y-5">{related.map((item) => <Link key={item.id} href={`/berita/${item.slug}`} className="group block border-b border-stone-200 pb-5 dark:border-zinc-800"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-stone-400">{item.category}</p><h3 className="mt-2 font-display text-lg font-semibold leading-tight group-hover:text-brand">{item.title}</h3></Link>)}</div></div>}
+      </aside>
+      </div>
       </div>
     </div>
   );

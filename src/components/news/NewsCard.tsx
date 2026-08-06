@@ -1,0 +1,77 @@
+import Image from "next/image";
+import Link from "next/link";
+import { CAT_COLOR, DEFAULT_COLOR } from "@/app/berita/categories";
+
+export type NewsArticle = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  image_url: string | null;
+  category: string;
+  categories: string[] | null;
+  published_at: string | null;
+  created_at: string;
+  is_trending?: boolean | null;
+};
+
+type Variant = "hero" | "feature" | "card" | "compact" | "list";
+
+function displayDate(value: string | null) {
+  if (!value) return "—";
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar",
+  }).format(new Date(value));
+}
+
+function firstCategory(article: NewsArticle) {
+  return article.categories?.[0] || article.category || "Umum";
+}
+
+export function NewsMeta({ article, withCategory = true }: { article: NewsArticle; withCategory?: boolean }) {
+  const category = firstCategory(article);
+  const color = CAT_COLOR[category] ?? DEFAULT_COLOR;
+  return (
+    <div className="flex flex-wrap items-center gap-2 text-[10px] font-semibold uppercase tracking-[.13em] text-stone-500 dark:text-zinc-400">
+      {withCategory && <span className={`rounded-full px-2 py-1 ${color.badge}`}>{category}</span>}
+      <span>Gorontalo Unite</span>
+      <span className="h-1 w-1 rounded-full bg-stone-300 dark:bg-zinc-600" />
+      <time dateTime={article.published_at ?? article.created_at}>{displayDate(article.published_at ?? article.created_at)}</time>
+    </div>
+  );
+}
+
+export function NewsImage({ article, priority = false, className = "" }: { article: NewsArticle; priority?: boolean; className?: string }) {
+  const category = firstCategory(article);
+  const color = CAT_COLOR[category] ?? DEFAULT_COLOR;
+  return (
+    <div className={`relative overflow-hidden bg-stone-100 dark:bg-zinc-800 ${className}`}>
+      {article.image_url ? (
+        <Image src={article.image_url} alt={article.title} fill priority={priority} unoptimized sizes="(max-width: 768px) 100vw, 66vw" className="object-cover transition duration-700 group-hover:scale-105" />
+      ) : (
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(245,196,0,.25),transparent_30%),linear-gradient(135deg,#f8f5ed,#e7e1d3)] dark:bg-[linear-gradient(135deg,#27272a,#18181b)]" />
+      )}
+      {!article.image_url && <span className={`absolute bottom-4 left-4 rounded-full px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[.16em] ${color.badge}`}>{category}</span>}
+    </div>
+  );
+}
+
+export default function NewsCard({ article, variant = "card" }: { article: NewsArticle; variant?: Variant }) {
+  const body = (
+    <>
+      <NewsImage article={article} priority={variant === "hero"} className={variant === "compact" ? "aspect-[16/9]" : variant === "list" ? "aspect-[4/3]" : "aspect-[16/10]"} />
+      <div className={variant === "hero" ? "p-5 sm:p-7" : variant === "compact" ? "p-4" : "p-5"}>
+        <NewsMeta article={article} />
+        <h3 className={`mt-3 font-display font-semibold leading-[1.08] text-stone-950 transition group-hover:text-brand dark:text-white dark:group-hover:text-yellow-300 ${variant === "hero" ? "text-2xl sm:text-4xl" : variant === "feature" ? "text-xl sm:text-2xl" : variant === "compact" ? "text-base" : "text-xl"}`}>{article.title}</h3>
+        {variant !== "compact" && article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">{article.excerpt}</p>}
+        {variant === "list" && <span className="mt-4 inline-flex text-sm font-semibold text-brand transition group-hover:gap-2">Baca selengkapnya <span aria-hidden>→</span></span>}
+      </div>
+    </>
+  );
+
+  const classes = variant === "list"
+    ? "group grid overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 sm:grid-cols-[.9fr_1.1fr]"
+    : "group overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900";
+
+  return <article className={classes}><Link href={`/berita/${article.slug}`} className="block h-full">{body}</Link></article>;
+}

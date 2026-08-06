@@ -1,201 +1,87 @@
 import type { Metadata } from "next";
-import Image from "next/image";
 import Link from "next/link";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import BeritaFilters from "./BeritaFilters";
 import BeritaPagination from "./BeritaPagination";
-import { CAT_COLOR, CATEGORIES, DEFAULT_COLOR } from "./categories";
+import { CATEGORIES } from "./categories";
+import NewsCard, { type NewsArticle } from "@/components/news/NewsCard";
 
 export const dynamic = "force-dynamic";
-
 export const metadata: Metadata = {
   title: "Berita Gorontalo — Gorontalo Unite",
-  description: "Ringkasan berita dan informasi Gorontalo dari sumber yang dicantumkan.",
+  description: "Berita, cerita, dan informasi terbaru dari Gorontalo.",
   openGraph: { title: "Berita Gorontalo | Gorontalo Unite", type: "website" },
 };
 
 const PAGE_SIZE = 12;
-
 const CATEGORY_BY_KEY = Object.fromEntries(CATEGORIES.map((category) => [category.key, category.label]));
+type PageProps = { searchParams: Promise<{ category?: string; page?: string; q?: string }> };
 
-type Article = {
-  id: string;
-  title: string;
-  slug: string;
-  excerpt: string | null;
-  image_url: string | null;
-  category: string;
-  categories: string[] | null;
-  tags: string[] | null;
-  published_at: string | null;
-  created_at: string;
-  source_url: string | null;
-  is_trending: boolean | null;
-};
-
-function formatDate(value: string | null) {
-  if (!value) return "";
-  return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" }).format(new Date(value));
+function SectionHeading({ eyebrow, title, count }: { eyebrow: string; title: string; count?: string }) {
+  return <div className="mb-5 flex items-end justify-between gap-4 border-b border-stone-300 pb-4 dark:border-zinc-700"><div><p className="text-[10px] font-bold uppercase tracking-[.22em] text-brand">{eyebrow}</p><h2 className="mt-2 font-display text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h2></div>{count && <p className="pb-1 text-sm text-stone-500 dark:text-zinc-400">{count}</p>}</div>;
 }
-
-function sourceName(url: string | null) {
-  if (!url) return null;
-  try { return new URL(url).hostname.replace(/^www\./, ""); }
-  catch { return "Sumber asli"; }
-}
-
-function categoryList(article: Article) {
-  return article.categories?.length ? article.categories : [article.category];
-}
-
-function ArticleCard({ article }: { article: Article }) {
-  const categories = categoryList(article);
-  const tags = article.tags?.slice(0, 3) ?? [];
-  const color = CAT_COLOR[categories[0]] ?? DEFAULT_COLOR;
-
-  return (
-    <article className="group overflow-hidden rounded-2xl border border-gray-100 bg-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/5 dark:border-zinc-800 dark:bg-zinc-900">
-      <Link href={`/berita/${article.slug}`} className="block">
-        <div className="relative aspect-[16/10] overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700">
-          {article.image_url ? (
-            <Image src={article.image_url} alt={article.title} fill unoptimized className="object-cover transition duration-500 group-hover:scale-105" />
-          ) : (
-            <div className="flex h-full items-end p-5 text-sm font-medium text-gray-400 dark:text-zinc-500">Ilustrasi segera tersedia</div>
-          )}
-        </div>
-        <div className="flex min-h-56 flex-col gap-3 p-5">
-          <div className="flex flex-wrap gap-1.5">
-            {categories.slice(0, 2).map((category) => (
-              <span key={category} className={`rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${color.badge}`}>{category}</span>
-            ))}
-          </div>
-          <h2 className="font-display text-lg font-semibold leading-snug text-gray-900 transition group-hover:text-brand dark:text-white dark:group-hover:text-yellow-400">{article.title}</h2>
-          {article.excerpt && <p className="line-clamp-3 text-sm leading-relaxed text-gray-500 dark:text-gray-400">{article.excerpt}</p>}
-          <div className="mt-auto flex items-center justify-between gap-3 pt-2 text-xs text-gray-400 dark:text-gray-500">
-            <span>{formatDate(article.published_at ?? article.created_at)}</span>
-            {sourceName(article.source_url) && <span className="truncate">{sourceName(article.source_url)}</span>}
-          </div>
-          {tags.length > 0 && <div className="flex flex-wrap gap-1">{tags.map((tag) => <span key={tag} className="text-[11px] text-gray-400 dark:text-gray-500">#{tag}</span>)}</div>}
-        </div>
-      </Link>
-    </article>
-  );
-}
-
-function StoryImage({ article, priority = false }: { article: Article; priority?: boolean }) {
-  return (
-    <div className="relative aspect-[16/10] overflow-hidden bg-stone-100 dark:bg-zinc-800">
-      {article.image_url ? (
-        <Image src={article.image_url} alt={article.title} fill unoptimized priority={priority} sizes="(max-width: 768px) 100vw, 50vw" className="object-cover transition duration-700 group-hover:scale-105" />
-      ) : (
-        <div className="flex h-full items-end bg-gradient-to-br from-amber-100 via-stone-100 to-stone-200 p-5 text-sm font-medium text-stone-500 dark:from-zinc-800 dark:to-zinc-700">Gorontalo Unite</div>
-      )}
-    </div>
-  );
-}
-
-function StoryMeta({ article }: { article: Article }) {
-  const category = categoryList(article)[0];
-  return <div className="flex items-center gap-2 text-[10px] font-semibold uppercase tracking-[.14em] text-amber-700 dark:text-amber-300"><span>{category}</span><span className="h-1 w-1 rounded-full bg-stone-300" /><span className="text-stone-400 dark:text-zinc-500">{formatDate(article.published_at ?? article.created_at)}</span></div>;
-}
-
-function FeaturedStory({ article }: { article: Article }) {
-  return <article className="group overflow-hidden rounded-[1.8rem] border border-stone-200 bg-white shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl hover:shadow-stone-900/10 dark:border-zinc-800 dark:bg-zinc-900">
-    <Link href={`/berita/${article.slug}`} className="block"><StoryImage article={article} priority /><div className="p-5 sm:p-7"><StoryMeta article={article} /><h2 className="mt-3 font-display text-2xl font-semibold leading-[1.08] text-stone-900 transition group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-300 sm:text-3xl">{article.title}</h2>{article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">{article.excerpt}</p>}</div></Link>
-  </article>;
-}
-
-function CompactStory({ article }: { article: Article }) {
-  return <article className="group overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:border-amber-200 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900"><Link href={`/berita/${article.slug}`} className="block"><StoryImage article={article} /><div className="p-4"><StoryMeta article={article} /><h2 className="mt-2 font-display text-lg font-semibold leading-snug text-stone-900 group-hover:text-amber-700 dark:text-white dark:group-hover:text-amber-300">{article.title}</h2></div></Link></article>;
-}
-
-interface PageProps { searchParams: Promise<{ category?: string; page?: string; q?: string }>; }
 
 export default async function BeritaPage({ searchParams }: PageProps) {
   const params = await searchParams;
   const categoryKey = CATEGORY_BY_KEY[params.category ?? ""] ? params.category ?? "" : "";
+  const categoryLabel = categoryKey ? CATEGORY_BY_KEY[categoryKey] : undefined;
   const search = (params.q ?? "").trim();
   const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
   const offset = (page - 1) * PAGE_SIZE;
+  let articles: NewsArticle[] = [];
   let categoryRows: { category: string; categories: string[] | null }[] = [];
-  let articles: Article[] = [];
   let totalCount = 0;
 
   try {
-      const admin = await createClient();
-      const { data: categoryData } = await admin
-        .from("articles")
-        .select("category, categories")
-        .eq("published", true)
-        .neq("category", "Portfolio");
-      categoryRows = (categoryData ?? []) as { category: string; categories: string[] | null }[];
-
-      let query = admin
-        .from("articles")
-        .select("id, title, slug, excerpt, image_url, category, categories, tags, published_at, created_at, source_url, is_trending", { count: "exact" })
-        .eq("published", true)
-        .neq("category", "Portfolio")
-        .order("published_at", { ascending: false, nullsFirst: false });
-
-      const categoryLabel = categoryKey ? CATEGORY_BY_KEY[categoryKey] : undefined;
-      if (categoryLabel) query = query.contains("categories", [categoryLabel]);
-      if (search) query = query.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`);
-
-      const { data, count, error } = await query.range(offset, offset + PAGE_SIZE - 1);
-      articles = (data ?? []) as Article[];
-      totalCount = count ?? 0;
-      if (error) articles = [];
-  } catch {
-    articles = [];
-  }
+    const supabase = await createClient();
+    const categoryRequest = supabase.from("articles").select("category, categories").eq("published", true).neq("category", "Portfolio");
+    let articleRequest = supabase.from("articles")
+      .select("id, title, slug, excerpt, image_url, category, categories, published_at, created_at, is_trending", { count: "exact" })
+      .eq("published", true).neq("category", "Portfolio")
+      .order("published_at", { ascending: false, nullsFirst: false });
+    if (categoryLabel) articleRequest = articleRequest.contains("categories", [categoryLabel]);
+    if (search) articleRequest = articleRequest.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`);
+    const [{ data: categoryData }, { data, count, error }] = await Promise.all([categoryRequest, articleRequest.range(offset, offset + PAGE_SIZE - 1)]);
+    categoryRows = (categoryData ?? []) as { category: string; categories: string[] | null }[];
+    articles = error ? [] : (data ?? []) as NewsArticle[];
+    totalCount = count ?? 0;
+  } catch { articles = []; }
 
   const categoryCounts: Record<string, number> = {};
-  for (const row of categoryRows) {
-    const labels = Array.isArray(row.categories) && row.categories.length ? row.categories : [row.category];
-    for (const label of labels) if (typeof label === "string" && label !== "Portfolio") categoryCounts[label] = (categoryCounts[label] ?? 0) + 1;
-  }
-
-  const categoryLabel = categoryKey ? CATEGORY_BY_KEY[categoryKey] : undefined;
+  for (const row of categoryRows) for (const label of row.categories?.length ? row.categories : [row.category]) if (label && label !== "Portfolio") categoryCounts[label] = (categoryCounts[label] ?? 0) + 1;
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const editorialFront = !categoryKey && !search && page === 1;
-  const featured = editorialFront ? articles[0] : undefined;
-  const supportingStories = editorialFront ? articles.slice(1, 4) : [];
-  const latestStories = editorialFront ? articles.slice(4) : articles;
+  const editorial = !categoryKey && !search && page === 1;
+  const lead = editorial ? articles[0] : undefined;
+  const sideStories = editorial ? articles.slice(1, 3) : [];
+  const newsStories = editorial ? articles.slice(3, 9) : articles;
+  const choiceStories = editorial ? articles.filter((article) => article.is_trending).slice(0, 3) : [];
 
   return (
     <div className="min-h-screen bg-[#f7f5ef] text-stone-900 dark:bg-zinc-950 dark:text-white">
-      <main className="mx-auto max-w-7xl px-4 pb-16 sm:px-6 lg:px-8">
-        <header className="border-b border-stone-300 py-7 dark:border-zinc-800">
-          <div className="flex items-center justify-between text-[11px] font-semibold uppercase tracking-[.18em] text-stone-500 dark:text-zinc-400"><span>Berita & cerita Gorontalo</span><Link href="/" className="transition hover:text-amber-700 dark:hover:text-amber-300">Kembali ke beranda ↗</Link></div>
-          <h1 className="mt-6 text-center font-display text-4xl font-semibold tracking-[-.045em] text-stone-900 dark:text-white sm:text-6xl">Gorontalo Unite</h1>
-          <p className="mt-2 text-center text-sm text-stone-500 dark:text-zinc-400">Informasi, cerita, dan kabar baik dari Gorontalo.</p>
+      <main className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
+        <header className="border-b border-stone-300 py-8 text-center dark:border-zinc-800 sm:py-11">
+          <p className="text-[10px] font-bold uppercase tracking-[.28em] text-brand">Berita & cerita dari Gorontalo</p>
+          <h1 className="mt-3 font-display text-4xl font-semibold tracking-[-.05em] sm:text-6xl">Gorontalo Unite</h1>
+          <p className="mx-auto mt-3 max-w-xl text-sm leading-relaxed text-stone-500 dark:text-zinc-400">Kabar lokal yang dipilih dengan lebih dekat, lebih jernih, dan lebih berguna.</p>
         </header>
 
-        <section className="sticky top-14 z-20 border-b border-stone-200 bg-[#f7f5ef]/95 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95">
-          <Suspense fallback={<div className="h-10 animate-pulse rounded-xl bg-gray-100 dark:bg-zinc-800" />}>
-            <BeritaFilters activeCategory={categoryKey} activeSearch={search} catCounts={categoryCounts} />
-          </Suspense>
+        <section className="sticky top-14 z-20 -mx-4 border-b border-stone-200 bg-[#f7f5ef]/95 px-4 py-4 backdrop-blur dark:border-zinc-800 dark:bg-zinc-950/95 sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8">
+          <Suspense fallback={<div className="h-10 animate-pulse rounded-xl bg-stone-200 dark:bg-zinc-800" />}><BeritaFilters activeCategory={categoryKey} activeSearch={search} catCounts={categoryCounts} /></Suspense>
         </section>
 
-        {featured && <section className="py-10 sm:py-14"><div className="mb-6 flex items-end justify-between border-b border-stone-300 pb-4 dark:border-zinc-800"><div><p className="text-[11px] font-semibold uppercase tracking-[.2em] text-amber-700 dark:text-amber-300">Pilihan utama</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-tight sm:text-4xl">Gorontalo Unite</h2></div><span className="text-xs text-stone-400">{totalCount} artikel</span></div><div className="grid gap-4 lg:grid-cols-12"><div className="lg:col-span-7"><FeaturedStory article={featured} /></div><div className="grid gap-4 sm:grid-cols-2 lg:col-span-5 lg:grid-cols-1">{supportingStories.map((article) => <CompactStory key={article.id} article={article} />)}</div></div></section>}
+        {search ? <section className="py-10 sm:py-14"><div className="rounded-3xl bg-stone-900 px-6 py-10 text-white dark:bg-amber-500 dark:text-stone-950 sm:px-10"><p className="text-[10px] font-bold uppercase tracking-[.24em] text-amber-300 dark:text-stone-900">Pencarian berita</p><h2 className="mt-2 font-display text-3xl font-semibold sm:text-5xl">Hasil untuk “{search}”</h2><p className="mt-3 text-sm text-stone-300 dark:text-stone-800">{totalCount} artikel ditemukan.</p></div></section> : categoryLabel ? <section className="py-10 sm:py-14"><p className="text-[10px] font-bold uppercase tracking-[.24em] text-brand">Kategori</p><h2 className="mt-2 font-display text-4xl font-semibold sm:text-6xl">{categoryLabel}</h2><p className="mt-3 text-sm text-stone-500 dark:text-zinc-400">{totalCount} artikel dalam kategori ini.</p></section> : null}
 
-        <section className="py-8">
-          <div className="mb-6 flex items-end justify-between gap-4 border-b border-stone-300 pb-4 dark:border-zinc-800"><div><p className="text-[11px] font-semibold uppercase tracking-[.2em] text-amber-700 dark:text-amber-300">{categoryLabel || "Berita terbaru"}</p><h2 className="mt-1 font-display text-3xl font-semibold tracking-tight">{editorialFront ? "Terbaru dari Gorontalo" : "Hasil berita"}</h2></div><p className="text-sm text-stone-500 dark:text-zinc-400">{totalCount} artikel</p></div>
-          {search && <p className="mb-5 truncate text-sm text-stone-500 dark:text-zinc-400">Hasil untuk “{search}”</p>}
+        {editorial && lead && <>
+          <section className="py-10 sm:py-14"><SectionHeading eyebrow="Sorotan hari ini" title="Gorontalo Unite" count={`${totalCount} artikel`} /><div className="grid gap-5 lg:grid-cols-[1.6fr_.8fr]"><NewsCard article={lead} variant="hero" /><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">{sideStories.map((article) => <NewsCard key={article.id} article={article} variant="compact" />)}</div></div></section>
+          {sideStories.length > 0 && <section className="mb-8 overflow-hidden rounded-3xl bg-[#b68921] px-5 py-6 text-white sm:px-8"><div className="mb-5 flex items-center justify-between"><h2 className="font-display text-2xl font-semibold">Terbaca minggu ini</h2><span className="text-xs text-white/70">Pilihan pembaca</span></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{articles.slice(0, 4).map((article, index) => <Link key={article.id} href={`/berita/${article.slug}`} className="group min-h-28 rounded-xl border border-white/20 bg-stone-900/85 p-4 transition hover:bg-stone-900"><span className="text-xs font-bold text-amber-300">0{index + 1}</span><p className="mt-2 line-clamp-2 text-sm font-semibold leading-snug">{article.title}</p></Link>)}</div></section>}
+        </>}
 
-          {articles.length === 0 ? (
-            <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-20 text-center dark:border-zinc-700 dark:bg-zinc-900">
-              <h2 className="font-display text-xl font-semibold text-gray-800 dark:text-gray-100">Artikel sedang disiapkan</h2>
-              <p className="mt-2 text-sm text-gray-500 dark:text-gray-400">Artikel kurasi Gorontalo Unite akan hadir di sini setelah proses editorial selesai.</p>
-            </div>
-          ) : latestStories.length === 0 && editorialFront ? (
-            <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-12 text-center text-sm text-stone-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400">Artikel berikutnya akan muncul di bagian ini.</div>
-          ) : (
-            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{latestStories.map((article) => <ArticleCard key={article.id} article={article} />)}</div>
-          )}
-        </section>
+        <section className="py-8 sm:py-12"><SectionHeading eyebrow={search ? "Hasil pencarian" : categoryLabel ? "Berita kategori" : "Berita terbaru"} title={search ? "Ditemukan untuk Anda" : categoryLabel ? categoryLabel : "Kabar terbaru"} count={`${totalCount} artikel`} />
+          {articles.length === 0 ? <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-20 text-center dark:border-zinc-700 dark:bg-zinc-900"><h2 className="font-display text-xl font-semibold">Artikel sedang disiapkan</h2><p className="mt-2 text-sm text-stone-500 dark:text-zinc-400">Coba ubah kata kunci atau pilih kategori lain.</p></div> : newsStories.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{newsStories.map((article) => <NewsCard key={article.id} article={article} variant="card" />)}</div> : <p className="rounded-2xl border border-dashed border-stone-300 bg-white p-10 text-center text-sm text-stone-500 dark:border-zinc-700 dark:bg-zinc-900">Artikel berikutnya akan tampil di sini.</p>}</section>
 
+        {editorial && choiceStories.length > 0 && <section className="py-8 sm:py-12"><SectionHeading eyebrow="Pilihan redaksi" title="Direkomendasikan untuk Anda" /><div className="mx-auto grid max-w-5xl gap-5">{choiceStories.map((article) => <NewsCard key={article.id} article={article} variant="list" />)}</div></section>}
+        {!search && !categoryLabel && <section className="mt-8 rounded-3xl bg-stone-900 px-6 py-10 text-center text-white dark:bg-zinc-900 sm:px-12"><p className="text-[10px] font-bold uppercase tracking-[.24em] text-amber-300">Dari redaksi</p><h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">Ikuti kabar baik dari Gorontalo</h2><p className="mx-auto mt-3 max-w-xl text-sm text-stone-300">Temukan berita, cerita, dan rekomendasi yang dikurasi Gorontalo Unite.</p><Link href="/berita/penulis/gorontalo-unite" className="mt-6 inline-flex rounded-full bg-[#f5c400] px-5 py-2.5 text-sm font-bold text-stone-950 transition hover:bg-yellow-300">Lihat profil redaksi →</Link></section>}
         <Suspense><BeritaPagination page={page} totalPages={totalPages} /></Suspense>
       </main>
     </div>
