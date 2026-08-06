@@ -57,13 +57,32 @@ export function NewsImage({ article, priority = false, className = "" }: { artic
 }
 
 export default function NewsCard({ article, variant = "card" }: { article: NewsArticle; variant?: Variant }) {
+  if (variant === "hero" || variant === "compact") {
+    const isHero = variant === "hero";
+    return (
+      <article className="group overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900">
+        <Link href={`/berita/${article.slug}`} className="block h-full">
+          <div className={isHero ? "p-5 pb-0 sm:p-7 sm:pb-0" : "p-4 pb-0"}>
+            <NewsMeta article={article} />
+          </div>
+          <NewsImage article={article} priority={isHero} className={isHero ? "mx-5 mt-4 aspect-[16/9] sm:mx-7" : "mx-4 mt-3 aspect-[16/9]"} />
+          <div className={isHero ? "p-5 sm:p-7" : "p-4"}>
+            <h3 className={`font-display font-semibold leading-[1.08] text-stone-950 transition group-hover:text-brand dark:text-white dark:group-hover:text-yellow-300 ${isHero ? "text-2xl sm:text-4xl" : "text-base"}`}>{article.title}</h3>
+            {isHero && article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">{article.excerpt}</p>}
+            {isHero && <span className="mt-4 inline-flex text-sm font-semibold text-brand">Baca selengkapnya <span className="ml-1" aria-hidden>→</span></span>}
+          </div>
+        </Link>
+      </article>
+    );
+  }
+
   const body = (
     <>
-      <NewsImage article={article} priority={variant === "hero"} className={variant === "compact" ? "aspect-[16/9]" : variant === "list" ? "aspect-[4/3]" : "aspect-[16/10]"} />
-      <div className={variant === "hero" ? "p-5 sm:p-7" : variant === "compact" ? "p-4" : "p-5"}>
+      <NewsImage article={article} className={variant === "list" ? "h-full min-h-52 sm:min-h-0" : "aspect-[16/10]"} />
+      <div className={variant === "list" ? "p-5 sm:p-7" : "p-5"}>
         <NewsMeta article={article} />
-        <h3 className={`mt-3 font-display font-semibold leading-[1.08] text-stone-950 transition group-hover:text-brand dark:text-white dark:group-hover:text-yellow-300 ${variant === "hero" ? "text-2xl sm:text-4xl" : variant === "feature" ? "text-xl sm:text-2xl" : variant === "compact" ? "text-base" : "text-xl"}`}>{article.title}</h3>
-        {variant !== "compact" && article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">{article.excerpt}</p>}
+        <h3 className={`mt-3 font-display font-semibold leading-[1.08] text-stone-950 transition group-hover:text-brand dark:text-white dark:group-hover:text-yellow-300 ${variant === "feature" ? "text-xl sm:text-2xl" : "text-xl"}`}>{article.title}</h3>
+        {article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">{article.excerpt}</p>}
         {variant === "list" && <span className="mt-4 inline-flex text-sm font-semibold text-brand transition group-hover:gap-2">Baca selengkapnya <span aria-hidden>→</span></span>}
       </div>
     </>
@@ -73,5 +92,5 @@ export default function NewsCard({ article, variant = "card" }: { article: NewsA
     ? "group grid overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900 sm:grid-cols-[.9fr_1.1fr]"
     : "group overflow-hidden rounded-2xl border border-stone-200 bg-white transition hover:-translate-y-0.5 hover:shadow-lg dark:border-zinc-800 dark:bg-zinc-900";
 
-  return <article className={classes}><Link href={`/berita/${article.slug}`} className="block h-full">{body}</Link></article>;
+  return <article className={classes}><Link href={`/berita/${article.slug}`} className={variant === "list" ? "grid h-full sm:grid-cols-[.9fr_1.1fr]" : "block h-full"}>{body}</Link></article>;
 }
