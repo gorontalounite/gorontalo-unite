@@ -26,7 +26,7 @@ function SectionHeading({ eyebrow, title, actionHref, actionLabel }: { eyebrow?:
 
 function UntoldStorySection({ articles }: { articles: NewsArticle[] }) {
   return <section className="mb-12 overflow-hidden rounded-3xl bg-stone-950 px-5 py-9 text-white sm:mb-16 sm:px-8 sm:py-12">
-    <div className="mb-7 border-b border-white/20 pb-5"><p className="text-[10px] font-bold uppercase tracking-[.24em] text-[#f5c400]">Pilihan cerita</p><h2 className="mt-2 font-display text-3xl font-semibold tracking-tight text-[#f5c400] sm:text-4xl">Untold Story</h2><p className="mt-3 max-w-2xl text-sm leading-relaxed text-white/70">Cerita yang menginspirasi, memberi wawasan, dan menarik untuk diikuti.</p></div>
+    <div className="mb-7 border-b border-white/20 pb-5 text-center"><h2 className="font-display text-3xl font-semibold uppercase tracking-[.08em] text-[#f5c400] sm:text-4xl">Untold Story</h2><p className="mt-3 text-sm font-medium tracking-wide text-white">Inspire - Insight - Interest</p></div>
     {articles.length > 0 ? <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">{articles.map((article) => <NewsCard key={article.id} article={article} variant="channel" />)}</div> : <div className="rounded-2xl border border-dashed border-white/30 bg-white/5 px-6 py-10 text-center text-sm text-white/70">Cerita Inspire, Insight, dan Interest akan tampil di sini.</div>}
   </section>;
 }
