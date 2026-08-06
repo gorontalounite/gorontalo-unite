@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface Props {
   url:   string;
@@ -9,6 +9,13 @@ interface Props {
 
 export default function ShareButtons({ url, title }: Props) {
   const [copied, setCopied] = useState(false);
+  const [canNativeShare, setCanNativeShare] = useState(false);
+
+  // `navigator.share` only exists in some browsers. Resolve it after hydration so
+  // the server and the initial browser render always have identical markup.
+  useEffect(() => {
+    setCanNativeShare("share" in navigator);
+  }, []);
 
   const encodedUrl   = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
@@ -79,7 +86,7 @@ export default function ShareButtons({ url, title }: Props) {
       </a>
 
       {/* Web Share API (mobile) */}
-      {typeof window !== "undefined" && "share" in navigator && (
+      {canNativeShare && (
         <button
           onClick={nativeShare}
           className={`${btnBase} border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-zinc-800`}
