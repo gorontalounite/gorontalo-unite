@@ -60,7 +60,7 @@ export default function RelatedPosts({ items, basePath }: Props) {
             {item.published_at && (
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
                 {new Date(item.published_at).toLocaleDateString("id-ID", {
-                  day: "numeric", month: "short", year: "numeric",
+                  day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar",
                 })}
               </p>
             )}
