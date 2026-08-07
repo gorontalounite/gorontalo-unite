@@ -139,8 +139,14 @@ function ImageUploadField({ value, onChange, label }: {
 /* ─── Category selector — multi-select checkboxes ──────────── */
 function CategorySelector({ values, onChange }: { values: string[]; onChange: (c: string[]) => void }) {
   const [open, setOpen] = useState(false);
+  const [customCategory, setCustomCategory] = useState("");
   const toggle = (c: string) =>
     onChange(values.includes(c) ? values.filter((x) => x !== c) : [...values, c]);
+  const addCustomCategory = () => {
+    const category = customCategory.trim();
+    if (category && !values.some((value) => value.toLocaleLowerCase() === category.toLocaleLowerCase())) onChange([...values, category]);
+    setCustomCategory("");
+  };
 
   return (
     <div className="space-y-1.5">
@@ -162,6 +168,10 @@ function CategorySelector({ values, onChange }: { values: string[]; onChange: (c
           <input type="checkbox" checked={values.includes(c)} onChange={() => toggle(c)} className="accent-[#F5C400]" />
           <span className="text-[11px] text-gray-600">{c}</span>
         </label>)}
+      </div>}
+      {open && <div className="flex gap-1.5 pt-1">
+        <input value={customCategory} onChange={(event) => setCustomCategory(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addCustomCategory(); } }} placeholder="Kategori baru…" className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-1.5 text-[11px] outline-none focus:border-[#F5C400]" />
+        <button type="button" onClick={addCustomCategory} disabled={!customCategory.trim()} className="rounded-lg bg-gray-900 px-2.5 py-1.5 text-[11px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-40">Tambah</button>
       </div>}
       <p className="text-[10px] text-gray-400 mt-1">{values.length ? `${values.length} kategori dipilih` : "Belum ada kategori"}</p>
     </div>
@@ -391,6 +401,18 @@ export default function EditorSidebar({
               </div>
             </Panel>
 
+            {postType === "news" && (
+              <Panel title="Tampilan Beranda" defaultOpen>
+                <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-gray-100 p-2.5 hover:bg-yellow-50">
+                  <input type="checkbox" checked={meta.is_trending ?? false} onChange={(event) => setField("is_trending", event.target.checked)} className="mt-0.5 accent-[#F5C400]" />
+                  <span>
+                    <span className="block text-[11px] font-semibold text-gray-700">Berita pilihan</span>
+                    <span className="mt-0.5 block text-[10px] leading-relaxed text-gray-400">Tampilkan artikel ini pada section Berita Pilihan di beranda.</span>
+                  </span>
+                </label>
+              </Panel>
+            )}
+
             {/* Permalink */}
             <Panel title="Permalink">
               <div>
@@ -474,35 +496,6 @@ export default function EditorSidebar({
               />
             </Panel>
 
-            {postType === "news" && (
-              <Panel title="Tampilan Beranda" defaultOpen>
-                <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-gray-100 p-2.5 hover:bg-yellow-50">
-                  <input type="checkbox" checked={meta.is_trending ?? false} onChange={(event) => setField("is_trending", event.target.checked)} className="mt-0.5 accent-[#F5C400]" />
-                  <span>
-                    <span className="block text-[11px] font-semibold text-gray-700">Berita pilihan</span>
-                    <span className="mt-0.5 block text-[10px] leading-relaxed text-gray-400">Tampilkan artikel ini pada section Berita Pilihan di beranda.</span>
-                  </span>
-                </label>
-              </Panel>
-            )}
-
-            {postType === "news" && (
-              <Panel title="Sumber asli" defaultOpen>
-                <div>
-                  <label className="mb-1 block text-[11px] font-medium text-gray-500">URL artikel sumber</label>
-                  <input
-                    type="url"
-                    value={meta.source_url ?? ""}
-                    onChange={(event) => setField("source_url", event.target.value)}
-                    placeholder="https://media-sumber.id/artikel…"
-                    className="w-full rounded-lg border border-gray-200 px-2.5 py-1.5 text-[11px] outline-none focus:border-[#F5C400]"
-                  />
-                  <p className="mt-1.5 text-[10px] leading-relaxed text-gray-400">
-                    Tautkan artikel asli. Publikasikan ringkasan editorial, bukan salinan penuh.
-                  </p>
-                </div>
-              </Panel>
-            )}
 
             {/* Portfolio CPT fields */}
             {postType === "portfolio" && (

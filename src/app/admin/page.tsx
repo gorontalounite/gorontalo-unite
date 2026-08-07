@@ -52,7 +52,7 @@ export default async function AdminDashboardPage() {
   ];
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="max-w-5xl p-4 sm:p-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -60,7 +60,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {stats.map((s) => (
           <Link
             key={s.label}

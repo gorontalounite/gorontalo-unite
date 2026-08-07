@@ -130,7 +130,7 @@ function SeoDistribution({ meta, onChange }: { meta: PostMeta; onChange: (next: 
         <input value={meta.seo_title} onChange={(event) => field("seo_title", event.target.value)} placeholder={meta.title || "Judul SEO"} className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]" />
       </label>
       <label className="text-xs font-medium text-gray-600 sm:col-span-2">Meta description
-        <textarea value={meta.seo_description} onChange={(event) => field("seo_description", event.target.value)} maxLength={160} rows={3} placeholder="Otomatis dari paragraf pertama saat diterbitkan" className="mt-1 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]" />
+        <textarea value={meta.seo_description} onChange={(event) => field("seo_description", event.target.value)} maxLength={160} rows={3} placeholder="Ringkasan khusus untuk hasil pencarian (opsional)" className="mt-1 w-full resize-none rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]" />
       </label>
       <label className="text-xs font-medium text-gray-600">Focus keyword
         <input value={meta.focus_keyword ?? ""} onChange={(event) => field("focus_keyword", event.target.value)} placeholder="Otomatis dari judul atau tag" className="mt-1 w-full rounded-lg border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]" />
@@ -212,10 +212,9 @@ export default function TiptapNewsEditor({ editId, initialMeta, initialBlocks }:
     setSaving(true); setError(null);
     const blocks = docToLegacyBlocks(editor.getJSON());
     const categories = meta.categories.length ? meta.categories : (meta.category ? [meta.category] : ["Umum"]);
-    const autoDescription = firstParagraph(blocks).slice(0, 160);
     const seo = publish ? {
       seo_title: meta.seo_title || meta.title,
-      seo_description: meta.seo_description || autoDescription,
+      seo_description: meta.seo_description || null,
       focus_keyword: meta.focus_keyword || focusKeyword(meta.title, meta.tags, categories[0]),
     } : { seo_title: meta.seo_title || null, seo_description: meta.seo_description || null, focus_keyword: meta.focus_keyword || null };
     const payload = {
@@ -226,7 +225,7 @@ export default function TiptapNewsEditor({ editId, initialMeta, initialBlocks }:
       published_at: publish ? toMakassarIso(meta.published_at) : null,
       is_trending: meta.is_trending ?? false,
       ...seo, schema_type: meta.schema_type || "NewsArticle",
-      allow_comments: meta.allow_comments ?? true, source_url: meta.source_url || null,
+      allow_comments: meta.allow_comments ?? true,
     };
     const response = await fetch("/api/admin/articles", {
       method: editId ? "PATCH" : "POST", headers: { "Content-Type": "application/json" },
