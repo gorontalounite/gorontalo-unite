@@ -10,13 +10,14 @@ export default async function HomePage() {
   let newsItems: NewsItem[] = [];
   let featuredNewsItems: NewsItem[] = [];
   let featuredDestinations: DestinationItem[] = [];
+  let eventItems: NewsItem[] = [];
   let newsTotalCount = 0;
   let newsUnavailable = false;
 
   try {
     const admin = await createClient();
 
-    const [news, featuredNews, newsCount, destinations] = await Promise.all([
+    const [news, featuredNews, newsCount, destinations, events] = await Promise.all([
       admin
         .from("articles")
         .select("id, title, slug, excerpt, image_url, category, published_at, created_at")
@@ -47,11 +48,19 @@ export default async function HomePage() {
         .eq("featured", true)
         .order("updated_at", { ascending: false })
         .limit(3),
+      admin
+        .from("articles")
+        .select("id, title, slug, excerpt, image_url, category, published_at, created_at")
+        .eq("published", true)
+        .eq("category", "Event")
+        .order("published_at", { ascending: false, nullsFirst: false })
+        .limit(3),
     ]);
 
     newsItems = (news.data ?? []) as NewsItem[];
     featuredNewsItems = (featuredNews.data ?? []) as NewsItem[];
     featuredDestinations = (destinations.data ?? []) as DestinationItem[];
+    eventItems = (events.data ?? []) as NewsItem[];
     newsTotalCount = newsCount.count ?? 0;
     newsUnavailable = Boolean(news.error || newsCount.error);
   } catch (error) {
@@ -64,6 +73,7 @@ export default async function HomePage() {
       newsItems={newsItems}
       featuredNewsItems={featuredNewsItems}
       featuredDestinations={featuredDestinations}
+      eventItems={eventItems}
       newsTotalCount={newsTotalCount}
       newsUnavailable={newsUnavailable}
     />

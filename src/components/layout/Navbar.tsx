@@ -13,13 +13,16 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-gray-100 dark:border-zinc-800 sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+      <div className="hidden bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.15em] text-[#f5c400] sm:block">
+        GORONTALO UNITE — MEDIA, CITY GUIDE, DAN CERITA BAIK DARI GORONTALO
+      </div>
+      <nav className="sticky top-0 z-30 border-b border-black/10 bg-[#f8f6f0]/95 backdrop-blur-md dark:border-white/10 dark:bg-zinc-950/95">
+        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
           {/* Left: Hamburger + Logo */}
           <div className="flex items-center gap-2">
             <button
               onClick={() => setLeftOpen(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
+              className="flex h-9 w-9 items-center justify-center text-gray-700 transition-colors hover:bg-black hover:text-[#f5c400] dark:text-gray-300 dark:hover:bg-white dark:hover:text-black"
               aria-label="Buka menu"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -31,11 +34,21 @@ export default function Navbar() {
             </Link>
           </div>
 
-          {/* Right: Get Started + Theme + Book */}
+          <div className="hidden items-center gap-7 text-sm font-semibold text-[#202020] lg:flex dark:text-white">
+            <Link href="/berita" className="transition hover:text-[#8f6900] dark:hover:text-[#f5c400]">Berita</Link>
+            <Link href="/wisata" className="transition hover:text-[#8f6900] dark:hover:text-[#f5c400]">City Guide</Link>
+            <Link href="/event" className="transition hover:text-[#8f6900] dark:hover:text-[#f5c400]">Event</Link>
+            <Link href="/berita/inspire" className="transition hover:text-[#8f6900] dark:hover:text-[#f5c400]">Kabar Baik</Link>
+          </div>
+
+          {/* Right: Login + Theme + navigation drawer */}
           <div className="flex items-center gap-1">
+            <Link href="/chat" className="hidden bg-[#f5c400] px-3 py-2 text-xs font-bold text-black transition hover:bg-black hover:text-white sm:inline-flex">
+              Tanya AI
+            </Link>
             <Link
               href="/sign-in"
-              className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
+              className="flex h-9 w-9 items-center justify-center text-gray-600 transition-colors hover:bg-black hover:text-[#f5c400] dark:text-gray-400 dark:hover:bg-white dark:hover:text-black"
               aria-label="Login"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -45,7 +58,7 @@ export default function Navbar() {
             <ThemeToggle />
             <button
               onClick={() => setRightOpen(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
+              className="flex h-9 w-9 items-center justify-center text-gray-600 transition-colors hover:bg-black hover:text-[#f5c400] dark:text-gray-400 dark:hover:bg-white dark:hover:text-black"
               aria-label="Buka panel kategori"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
