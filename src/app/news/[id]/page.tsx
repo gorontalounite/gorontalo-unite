@@ -149,7 +149,7 @@ export async function NewsDetailPage({ params }: Props) {
   };
 
   return (
-    <div className="bg-[#f7f5ef] py-8 pb-20 text-stone-900 dark:bg-zinc-950 dark:text-white sm:py-12">
+    <div className="bg-[#f5f2eb] py-10 pb-20 text-stone-900 dark:bg-zinc-950 dark:text-white sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       {/* Schema.org */}
       <script
@@ -160,7 +160,7 @@ export async function NewsDetailPage({ params }: Props) {
       {/* Silent view tracker */}
       <ViewTracker slug={slug} />
 
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+      <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
       <div className="min-w-0">
       {/* Breadcrumb */}
       <nav className="mb-7 flex items-center gap-2 text-xs text-stone-400 dark:text-zinc-500">
@@ -203,18 +203,18 @@ export async function NewsDetailPage({ params }: Props) {
         </div>
 
         <div className="mb-5 flex items-center gap-3 text-xs text-stone-500 dark:text-zinc-400">
-          <span className="grid h-8 w-8 place-items-center rounded-full bg-stone-900 text-[10px] font-bold text-white dark:bg-amber-400 dark:text-stone-950">GU</span>
+          <span className="grid h-8 w-8 place-items-center bg-stone-900 text-[10px] font-bold text-white dark:bg-amber-400 dark:text-stone-950">GU</span>
           <span>Ditulis oleh <Link href="/berita/penulis/gorontalo-unite" className="font-semibold text-stone-700 underline decoration-amber-400 underline-offset-4 hover:text-brand dark:text-zinc-200">Gorontalo Unite</Link></span>
         </div>
 
         {/* Title */}
-        <h1 className="font-display text-4xl font-semibold leading-[1.04] tracking-[-.035em] text-stone-950 dark:text-white sm:text-5xl lg:text-6xl">
+        <h1 className="font-display text-4xl font-semibold leading-[1.02] tracking-[-.05em] text-stone-950 dark:text-white sm:text-5xl lg:text-7xl">
           {article.title}
         </h1>
 
         {/* Excerpt */}
         {article.excerpt && (
-          <p className="my-7 border-l-4 border-[#F5C400] pl-4 text-lg leading-relaxed text-stone-600 dark:border-yellow-500 dark:text-zinc-300">
+          <p className="my-8 border-l-4 border-[#F5C400] pl-5 text-lg leading-relaxed text-stone-600 dark:border-yellow-500 dark:text-zinc-300">
             {article.excerpt}
           </p>
         )}
@@ -277,7 +277,7 @@ export async function NewsDetailPage({ params }: Props) {
         )}
 
         {/* Share buttons */}
-        <div className="mt-8 border-t border-stone-200 pt-6 dark:border-zinc-800">
+        <div className="mt-8 border-t border-stone-300 pt-6 dark:border-zinc-800">
           <ShareButtons url={canonicalUrl} title={article.title} />
         </div>
       </article>
@@ -294,7 +294,7 @@ export async function NewsDetailPage({ params }: Props) {
           ← Semua berita
         </Link>
         <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium">
-          Tanya Gorontalo AI →
+          Kembali ke beranda →
         </Link>
       </div>
       </div>
