@@ -1,42 +1,5 @@
 "use client";
-
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-
-const hiddenPrefixes = ["/admin", "/sign-in", "/sign-up", "/auth"];
-
-function FooterColumn({ title, links }: { title: string; links: [string, string][] }) {
-  return (
-    <div>
-      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-900 dark:text-white">{title}</p>
-      <ul className="space-y-2.5">
-        {links.map(([label, href]) => <li key={href}><Link href={href} className="text-sm text-gray-600 transition-colors hover:text-brand dark:text-gray-400 dark:hover:text-yellow-400">{label}</Link></li>)}
-      </ul>
-    </div>
-  );
-}
-
-export default function PublicFooter() {
-  const pathname = usePathname();
-  if (hiddenPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null;
-
-  return (
-    <footer className="relative shrink-0 border-t border-gray-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
-        <div className="mb-10 grid grid-cols-2 gap-8 md:grid-cols-5 lg:gap-10">
-          <div className="col-span-2">
-            <p className="mb-2 text-base font-bold text-gray-900 dark:text-white">Gorontalo Unite</p>
-            <p className="max-w-xs text-sm leading-relaxed text-gray-600 dark:text-gray-400">Media lokal Gorontalo dengan asisten AI, berita, City Guide, dan layanan kreatif digital.</p>
-          </div>
-          <FooterColumn title="Jelajahi" links={[["Berita", "/berita"], ["Wisata", "/wisata"], ["Event", "/event"], ["Chat AI", "/chat"]]} />
-          <FooterColumn title="Tentang" links={[["Tentang kami", "/about"], ["Kontak", "/about#kontak"], ["Media Kit", "/media-kit"]]} />
-          <FooterColumn title="Legal" links={[["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Pedoman Media", "/pedoman-media-siber"]]} />
-        </div>
-        <div className="flex flex-col items-start justify-between gap-3 border-t border-gray-200 pt-6 text-xs text-gray-500 dark:border-zinc-800 dark:text-gray-500 sm:flex-row sm:items-center">
-          <p>© {new Date().getFullYear()} Gorontalo Unite. All rights reserved.</p>
-          <p>Made with ♥ for Gorontalo</p>
-        </div>
-      </div>
-    </footer>
-  );
-}
+const columns = [["Pages", [["Home", "/"], ["Blog", "/berita"], ["About", "/about"], ["City Guide", "/wisata"]]], ["Categories", [["Berita", "/berita"], ["Kabar Baik", "/berita"], ["Event", "/event"], ["Wisata", "/wisata"]]], ["Socials", [["Instagram", "https://instagram.com/gorontalo.unite"], ["Facebook", "https://facebook.com"], ["Contact", "/about#kontak"]]]] as const;
+export default function PublicFooter() { const pathname = usePathname(); if (["/admin", "/sign-in", "/sign-up", "/auth"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null; return <footer className="bg-[#2f2f2f] px-5 py-14 text-white md:px-10"><div id="newsletter" className="mx-auto max-w-7xl border-b border-white/20 pb-12"><div className="grid gap-8 md:grid-cols-2 md:items-end"><div><p className="text-xs font-bold uppercase tracking-[.18em] text-[#f0bf75]">Newsletter</p><h2 className="mt-3 font-serif text-4xl">Never miss an update</h2></div><form className="flex border-b border-white/50 pb-2"><input placeholder="Subscribe with your email" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-white/50" /><button type="button" className="text-xs font-bold uppercase tracking-widest text-[#f0bf75]">Subscribe</button></form></div></div><div className="mx-auto grid max-w-7xl gap-8 py-12 sm:grid-cols-2 lg:grid-cols-4"><div><p className="font-serif text-3xl">Gorontalo Unite</p><p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">Berita, City Guide, dan cerita lokal dari Gorontalo.</p></div>{columns.map(([title, items]) => <div key={title}><p className="text-xs font-bold uppercase tracking-[.16em] text-[#f0bf75]">{title}</p><div className="mt-4 grid gap-2">{items.map(([label, href]) => <Link key={label} href={href} className="text-sm text-white/70 hover:text-white">{label}</Link>)}</div></div>)}</div><div className="mx-auto flex max-w-7xl justify-between border-t border-white/20 pt-5 text-xs text-white/45"><span>© 2026 Gorontalo Unite</span><span>Made for Gorontalo</span></div></footer>; }
