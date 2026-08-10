@@ -1,37 +1,72 @@
 import Link from "next/link";
 
-export interface NewsItem { id: string; title: string; slug: string; excerpt: string | null; image_url: string | null; category: string; published_at: string | null; created_at: string; }
-export interface DestinationItem { id: string; name: string; slug: string; description: string | null; image_url: string | null; category: string | null; location: string | null; opening_hours: string | null; }
+type Story = {
+  number: string;
+  category: string;
+  title: string;
+  summary: string;
+  image: string;
+};
 
-interface Props { newsItems: NewsItem[]; featuredNewsItems: NewsItem[]; featuredDestinations: DestinationItem[]; newsTotalCount: number; newsUnavailable: boolean; }
-const fallback = "/og-image.png";
-const categories = ["Berita", "Kabar Baik", "Wisata", "Kuliner", "Budaya", "Bisnis", "Event"];
-const date = (value: string | null) => value ? new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric" }).format(new Date(value)) : "Gorontalo";
+const stories: Story[] = [
+  { number: "001", category: "Culture", title: "Karawo, bahasa visual yang terus tumbuh dari Gorontalo", summary: "Menyusuri detail, tangan-tangan terampil, dan cerita di balik kain khas Gorontalo.", image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?auto=format&fit=crop&w=1200&q=85" },
+  { number: "002", category: "Travel", title: "Pesisir yang membuat orang ingin tinggal lebih lama", summary: "Catatan perjalanan pelan dari sisi lain Gorontalo yang jarang dibicarakan.", image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1200&q=85" },
+  { number: "003", category: "People", title: "Mereka yang merawat ruang kreatif untuk generasi baru", summary: "Cerita orang-orang lokal yang memulai sesuatu dengan sumber daya seadanya.", image: "https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=1200&q=85" },
+  { number: "004", category: "Food", title: "Rasa yang mengingatkan kita pada rumah", summary: "Mengenal meja makan, resep, dan perjumpaan yang khas dari Gorontalo.", image: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=85" },
+  { number: "005", category: "Nature", title: "Melihat laut Gorontalo dengan cara yang lebih pelan", summary: "Sebuah pengingat untuk menikmati perjalanan, bukan hanya tujuannya.", image: "https://images.unsplash.com/photo-1530053969600-caed2596d242?auto=format&fit=crop&w=1200&q=85" },
+  { number: "006", category: "Community", title: "Komunitas kecil yang mengubah cara kita berkumpul", summary: "Dari perbincangan sederhana lahir gerakan yang terasa dekat dan berguna.", image: "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1200&q=85" },
+];
 
-function Meta({ item, number }: { item: NewsItem; number?: number }) { return <p className="text-[11px] font-medium text-[#868686]">{number ? `[No. ${String(number).padStart(3, "0")}] ` : ""}{item.category || "Berita"} <span className="mx-1 text-[#f0bf75]">●</span> oleh Gorontalo Unite <span className="mx-1 text-[#f0bf75]">●</span> {date(item.published_at ?? item.created_at)}</p>; }
-function ImageBox({ src, alt, className = "" }: { src: string | null; alt: string; className?: string }) { return <div className={`overflow-hidden bg-[#e9e9e9] ${className}`}>{src ? <img src={src} alt={alt} className="size-full object-cover transition duration-500 hover:scale-105" /> : null}</div>; }
-function PostCard({ item, index, featured = false }: { item: NewsItem; index: number; featured?: boolean }) { return <article className={`group bg-white ${featured ? "grid gap-0 md:grid-cols-[1.1fr_.9fr]" : ""}`}><Link href={`/berita/${item.slug}`} className={featured ? "contents" : "block"}><ImageBox src={item.image_url} alt={item.title} className={featured ? "aspect-[4/3] md:h-full md:aspect-auto" : "aspect-[4/3]"} /><div className={featured ? "flex flex-col justify-center p-6 sm:p-9" : "p-5"}><Meta item={item} number={index} /><h3 className={`mt-4 font-serif leading-[1.08] text-[#2f2f2f] ${featured ? "text-3xl sm:text-5xl" : "text-2xl"}`}>{item.title}</h3>{item.excerpt ? <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-[#868686]">{item.excerpt}</p> : null}<span className="mt-5 inline-block text-xs font-semibold text-[#2f2f2f] underline decoration-[#f0bf75] underline-offset-4">Baca selengkapnya</span></div></Link></article>; }
+function StoryCard({ story, wide = false }: { story: Story; wide?: boolean }) {
+  return (
+    <article className={wide ? "grid overflow-hidden border border-[#dedede] bg-white md:grid-cols-2" : "group"}>
+      <div className={wide ? "min-h-[260px]" : "aspect-[4/3] overflow-hidden bg-[#e9e9e9]"}>
+        <img src={story.image} alt="" className="size-full object-cover transition duration-500 group-hover:scale-105" />
+      </div>
+      <div className={wide ? "flex flex-col justify-center p-7 sm:p-10" : "pt-4"}>
+        <p className="text-[10px] font-semibold uppercase tracking-[.18em] text-[#8a6b3f]">[No.{story.number}] &nbsp; {story.category}</p>
+        <h3 className={wide ? "mt-4 font-serif text-3xl leading-[1.1] text-[#2f2f2f] sm:text-5xl" : "mt-3 font-serif text-2xl leading-tight text-[#2f2f2f]"}>{story.title}</h3>
+        <p className="mt-3 max-w-xl text-sm leading-relaxed text-[#777]">{story.summary}</p>
+        <Link href="/blog" className="mt-5 text-xs font-bold uppercase tracking-[.15em] underline decoration-[#f0bf75] underline-offset-4">Read article</Link>
+      </div>
+    </article>
+  );
+}
 
-export default function LandingPage({ newsItems, featuredNewsItems, featuredDestinations }: Props) {
-  const posts = newsItems.length ? newsItems : [];
-  const featured = featuredNewsItems[0] ?? posts[0];
-  const recent = posts.filter((post) => post.id !== featured?.id).slice(0, 6);
-  const editors = featuredNewsItems.length ? featuredNewsItems : posts.slice(0, 3);
-  return <main className="bg-[#f5f5f3] text-[#2f2f2f]">
-    <section className="border-b border-[#dedede] px-5 pt-28 md:px-10 md:pt-36"><div className="mx-auto max-w-7xl pb-12"><div className="flex flex-wrap gap-x-6 gap-y-3 text-xs font-semibold uppercase tracking-[.08em] text-[#555]"><span>Berita lokal</span><span>City Guide</span><span>Kabar baik</span><span>Agenda Gorontalo</span></div><div className="mt-10 grid gap-8 lg:grid-cols-[1.15fr_.85fr] lg:items-end"><div><p className="text-sm font-semibold uppercase tracking-[.18em] text-[#f0bf75]">Gorontalo Unite</p><h1 className="mt-4 max-w-4xl font-serif text-5xl leading-[.95] sm:text-7xl">Kabar, cerita, dan tempat yang patut ditemukan di Gorontalo.</h1></div><div className="rounded-2xl bg-[#2f2f2f] p-7 text-white"><p className="font-serif text-2xl">Jangan lewatkan kabar baik.</p><p className="mt-2 text-sm leading-relaxed text-white/70">Ringkasan pilihan Gorontalo Unite dikirim langsung ke inbox Anda.</p><form className="mt-5 flex border-b border-white/40 pb-2"><input aria-label="Email" placeholder="Masukkan email" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-white/50" /><button type="button" className="text-xs font-bold uppercase tracking-widest text-[#f0bf75]">Ikuti</button></form></div></div></div></section>
+export default function LandingPage() {
+  return (
+    <div className="overflow-hidden bg-[#f7f7f5] text-[#2f2f2f]">
+      <section className="border-b border-[#dedede] px-5 pb-16 pt-28 sm:px-8 lg:px-12 lg:pb-24 lg:pt-36">
+        <div className="mx-auto max-w-[1440px]">
+          <div className="grid gap-12 lg:grid-cols-[1.15fr_.85fr] lg:items-end">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[.22em] text-[#8a6b3f]">Gorontalo Unite — independent local journal</p>
+              <h1 className="mt-6 max-w-5xl font-serif text-5xl leading-[.94] tracking-[-.04em] sm:text-7xl lg:text-[6.5rem]">Stories for people who stay curious.</h1>
+              <p className="mt-7 max-w-2xl text-base leading-relaxed text-[#777] sm:text-lg">A new editorial home for people, places, food, culture, and thoughtful conversations from Gorontalo.</p>
+            </div>
+            <div className="border-t border-[#2f2f2f] pt-5">
+              <p className="font-serif text-3xl leading-tight">Don&apos;t miss a thing.</p>
+              <p className="mt-3 max-w-sm text-sm leading-relaxed text-[#777]">A compact weekly read, delivered to your inbox.</p>
+              <form className="mt-8 flex border-b border-[#2f2f2f] pb-3"><input aria-label="Email" placeholder="Your email address" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#999]" /><button type="button" className="text-xs font-bold uppercase tracking-[.16em]">Subscribe ↗</button></form>
+            </div>
+          </div>
+          <div className="mt-16 flex gap-2 overflow-x-auto border-y border-[#dedede] py-4 no-scrollbar">{["All", "Finance", "Health", "Business", "Food", "Travel", "Lifestyle", "Tech"].map((item) => <button type="button" key={item} className="shrink-0 rounded-full border border-[#d5d5d2] bg-white px-4 py-2 text-xs font-semibold transition hover:bg-[#2f2f2f] hover:text-white">{item}</button>)}</div>
+        </div>
+      </section>
 
-    <section className="border-b border-[#dedede] bg-white px-5 py-4 md:px-10"><div className="mx-auto flex max-w-7xl gap-2 overflow-x-auto no-scrollbar">{categories.map((label) => <Link key={label} href={label === "Wisata" ? "/wisata" : label === "Event" ? "/event" : "/berita"} className="shrink-0 rounded-full border border-[#dedede] px-4 py-2 text-xs font-semibold transition hover:border-[#2f2f2f]">{label}</Link>)}</div></section>
+      <section className="px-5 py-14 sm:px-8 lg:px-12 lg:py-24"><div className="mx-auto max-w-[1440px]"><StoryCard story={stories[0]} wide /></div></section>
 
-    <section className="px-5 py-14 md:px-10 md:py-20"><div className="mx-auto max-w-7xl">{featured ? <PostCard item={featured} index={19} featured /> : <div className="grid min-h-[420px] place-items-center bg-white text-sm text-[#868686]">Berita pilihan sedang disiapkan.</div>}</div></section>
+      <section className="bg-[#f0bf75] px-5 py-14 sm:px-8 lg:px-12 lg:py-20">
+        <div className="mx-auto max-w-[1440px]"><div className="flex items-end justify-between"><div><p className="text-[10px] font-bold uppercase tracking-[.2em]">[Recent posts]</p><h2 className="mt-3 font-serif text-4xl sm:text-5xl">Read what&apos;s new</h2></div><Link href="/blog" className="text-xs font-bold uppercase tracking-[.15em]">View all ↗</Link></div><div className="mt-10 grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">{stories.slice(1).map((story) => <StoryCard key={story.number} story={story} />)}</div></div>
+      </section>
 
-    <section className="bg-[#f0bf75] px-5 py-10 md:px-10"><div className="mx-auto max-w-7xl"><div className="flex items-end justify-between"><div><p className="text-xs font-semibold uppercase tracking-[.16em]">Berita pilihan</p><h2 className="mt-2 font-serif text-4xl">Recent posts</h2></div><Link href="/berita" className="text-xs font-bold uppercase tracking-widest underline">Lihat semua</Link></div><div className="mt-8 grid gap-px bg-[#2f2f2f] sm:grid-cols-2 lg:grid-cols-3">{recent.slice(0, 6).map((item, index) => <PostCard key={item.id} item={item} index={22 - index} />)}</div></div></section>
+      <section className="px-5 py-16 sm:px-8 lg:px-12 lg:py-28"><div className="mx-auto max-w-[1440px]"><div className="flex items-end justify-between border-b border-[#dedede] pb-5"><div><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#8a6b3f]">[Editor&apos;s choice]</p><h2 className="mt-3 font-serif text-4xl sm:text-5xl">Worth your time</h2></div><span className="text-xs text-[#777]">Selected by our editors</span></div><div className="mt-10 grid gap-8 lg:grid-cols-[1.4fr_.6fr]"><StoryCard story={stories[2]} wide /><div className="grid content-start gap-7">{stories.slice(3, 5).map((story) => <StoryCard key={story.number} story={story} />)}</div></div></div></section>
 
-    <section className="px-5 py-16 md:px-10 md:py-24"><div className="mx-auto max-w-7xl"><div className="flex items-end justify-between border-b border-[#dedede] pb-5"><h2 className="font-serif text-4xl">Editor’s choice</h2><Link href="/berita" className="text-xs font-bold uppercase tracking-widest">Selengkapnya →</Link></div><div className="mt-8 grid gap-5 lg:grid-cols-3">{editors.slice(0, 3).map((item, index) => <PostCard key={item.id} item={item} index={18 - index} />)}</div></div></section>
+      <section className="bg-[#2f2f2f] px-5 py-16 text-white sm:px-8 lg:px-12 lg:py-24"><div className="mx-auto grid max-w-[1440px] gap-10 lg:grid-cols-[.7fr_1.3fr]"><div><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#f0bf75]">[Watch]</p><h2 className="mt-4 font-serif text-5xl leading-tight">Watch and listen.</h2><p className="mt-5 max-w-sm text-sm leading-relaxed text-white/65">Conversations, portraits, and moving stories from a changing Gorontalo.</p><Link href="/podcast" className="mt-8 inline-block text-xs font-bold uppercase tracking-[.15em] text-[#f0bf75]">Explore audio ↗</Link></div><div className="grid gap-px bg-white/20 sm:grid-cols-3">{stories.slice(0, 3).map((story) => <article key={story.number} className="bg-[#2f2f2f] p-4"><div className="relative aspect-video overflow-hidden"><img src={story.image} alt="" className="size-full object-cover opacity-75" /><span className="absolute inset-0 grid place-items-center text-3xl">◯</span></div><p className="mt-4 text-[10px] uppercase tracking-[.16em] text-[#f0bf75]">Video · 08:42</p><h3 className="mt-2 font-serif text-xl leading-tight">{story.title}</h3></article>)}</div></div></section>
 
-    <section className="bg-white px-5 py-16 md:px-10 md:py-24"><div className="mx-auto max-w-7xl"><div className="flex items-end justify-between border-b border-[#dedede] pb-5"><h2 className="font-serif text-4xl">Watch</h2><Link href="/event" className="text-xs font-bold uppercase tracking-widest">Lihat event →</Link></div><div className="mt-8 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{[...recent, ...editors].slice(0, 3).map((item, index) => <article key={item.id} className="bg-[#f5f5f3] p-4"><ImageBox src={item.image_url} alt={item.title} className="aspect-video" /><Meta item={item} number={16 - index} /><h3 className="mt-3 font-serif text-2xl leading-tight">{item.title}</h3><p className="mt-2 text-sm text-[#868686]">Cerita visual dan agenda yang layak diikuti.</p></article>)}</div></div></section>
+      <section className="px-5 py-16 sm:px-8 lg:px-12 lg:py-28"><div className="mx-auto max-w-[1440px]"><div className="grid gap-10 border-y border-[#dedede] py-12 lg:grid-cols-[.7fr_1.3fr]"><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#8a6b3f]">[Our point of view]</p><div><h2 className="font-serif text-4xl leading-tight sm:text-6xl">A modern journal, rooted in a place we love.</h2><p className="mt-6 max-w-2xl text-base leading-relaxed text-[#777]">Gorontalo Unite is a place to discover the people, ideas, and everyday details that make this region feel alive.</p><Link href="/about" className="mt-7 inline-block text-xs font-bold uppercase tracking-[.15em] underline decoration-[#f0bf75] underline-offset-4">About Gorontalo Unite</Link></div></div></div></section>
 
-    <section className="px-5 py-16 md:px-10 md:py-24"><div className="mx-auto grid max-w-7xl gap-8 lg:grid-cols-[.8fr_1.2fr]"><div className="bg-[#2f2f2f] p-9 text-white"><p className="text-xs font-semibold uppercase tracking-[.18em] text-[#f0bf75]">Gorontalo Unite</p><h2 className="mt-5 font-serif text-4xl leading-tight">Cerita lokal yang membuka rasa ingin tahu.</h2><p className="mt-5 text-sm leading-relaxed text-white/70">Gorontalo Unite menghubungkan berita, rekomendasi, komunitas, dan orang-orang yang membuat daerah ini terus bergerak.</p><Link href="/about" className="mt-8 inline-block text-xs font-bold uppercase tracking-widest text-[#f0bf75]">Tentang kami →</Link></div><div><p className="text-xs font-semibold uppercase tracking-[.18em] text-[#f0bf75]">Discover more stories</p><h2 className="mt-3 font-serif text-5xl">Terus jelajahi Gorontalo.</h2><div className="mt-8 grid gap-5 sm:grid-cols-2">{featuredDestinations.slice(0, 2).map((place) => <Link href={`/wisata/${place.slug}`} key={place.id} className="group bg-white p-4"><ImageBox src={place.image_url} alt={place.name} className="aspect-[4/3]" /><p className="mt-4 text-xs font-semibold uppercase tracking-widest text-[#f0bf75]">{place.category || "City Guide"}</p><h3 className="mt-2 font-serif text-2xl">{place.name}</h3><p className="mt-2 text-sm text-[#868686]">{place.location || "Gorontalo"}</p></Link>)}</div></div></div></section>
-
-    <section className="bg-[#2f2f2f] px-5 py-16 text-white md:px-10 md:py-24"><div className="mx-auto max-w-7xl"><p className="text-xs font-semibold uppercase tracking-[.18em] text-[#f0bf75]">Agenda</p><h2 className="mt-3 font-serif text-5xl">Event & komunitas</h2><div className="mt-9 grid gap-px bg-white/20 md:grid-cols-3">{["Event minggu ini", "Kirim acara", "Buka kalender"].map((item, index) => <Link href="/event" key={item} className="bg-[#2f2f2f] p-6 transition hover:bg-[#f0bf75] hover:text-[#2f2f2f]"><p className="text-xs text-[#f0bf75] group-hover:text-[#2f2f2f]">[0{index + 1}]</p><h3 className="mt-12 font-serif text-3xl">{item}</h3><span className="mt-4 block text-xs font-bold uppercase tracking-widest">Eksplor →</span></Link>)}</div></div></section>
-  </main>;
+      <section className="px-5 pb-20 sm:px-8 lg:px-12 lg:pb-28"><div className="mx-auto max-w-[1440px] border border-[#dedede] bg-white px-6 py-14 text-center sm:px-12"><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#8a6b3f]">[Newsletter]</p><h2 className="mt-4 font-serif text-4xl sm:text-5xl">Stay in the loop.</h2><p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-[#777]">A weekly dose of considered stories, sent with care.</p><form className="mx-auto mt-8 flex max-w-md border-b border-[#2f2f2f] pb-3"><input aria-label="Email" placeholder="Email address" className="min-w-0 flex-1 bg-transparent text-sm outline-none" /><button type="button" className="text-xs font-bold uppercase tracking-[.15em]">Join ↗</button></form></div></section>
+    </div>
+  );
 }

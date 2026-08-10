@@ -2,11 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Nanum_Myeongjo } from "next/font/google";
 import "./globals.css";
 import Navbar                 from "@/components/layout/Navbar";
-import BottomNav              from "@/components/layout/BottomNav";
 import PublicFooter           from "@/components/layout/PublicFooter";
-import MainContent            from "@/components/layout/MainContent";
-import ServiceWorkerRegister  from "@/components/layout/ServiceWorkerRegister";
-import { ThemeProvider, themeInitScript } from "@/components/layout/ThemeProvider";
 
 const inter = Inter({
   variable: "--font-sans",
@@ -39,13 +35,9 @@ export const metadata: Metadata = {
   manifest:    "/manifest.json",
   metadataBase: new URL(BASE),
 
-  title: {
-    default:  "Gorontalo Unite — Portal Berita & AI Lokal Gorontalo",
-    template: "%s | Gorontalo Unite",
-  },
-  description:
-    "Platform berita lokal Gorontalo dengan AI chatbot. Temukan info wisata, budaya, kuliner, dan berita terkini dari Bumi Serambi Madinah.",
-  keywords: ["Gorontalo", "berita Gorontalo", "wisata Gorontalo", "AI Gorontalo", "informasi lokal", "hulontalo"],
+  title: { default: "Gorontalo Unite — Independent Local Journal", template: "%s | Gorontalo Unite" },
+  description: "An independent local journal for people, culture, food, travel, and thoughtful conversations from Gorontalo.",
+  keywords: ["Gorontalo", "Gorontalo Unite", "culture", "travel", "food", "local journal"],
   authors:  [{ name: "Gorontalo Unite", url: BASE }],
 
   /* ── Icons ──────────────────────────────────────────────── */
@@ -61,8 +53,8 @@ export const metadata: Metadata = {
 
   /* ── Open Graph ─────────────────────────────────────────── */
   openGraph: {
-    title:       "Gorontalo Unite — Portal Berita & AI Lokal",
-    description: "Tanyakan apapun tentang Gorontalo kepada AI kami. Info wisata, budaya, kuliner, dan berita terkini.",
+    title:       "Gorontalo Unite — Independent Local Journal",
+    description: "Stories for people who stay curious.",
     url:         BASE,
     type:        "website",
     locale:      "id_ID",
@@ -73,8 +65,8 @@ export const metadata: Metadata = {
   /* ── Twitter Card ───────────────────────────────────────── */
   twitter: {
     card:        "summary_large_image",
-    title:       "Gorontalo Unite — Portal Berita & AI Lokal",
-    description: "Platform berita lokal Gorontalo dengan asisten AI.",
+    title:       "Gorontalo Unite — Independent Local Journal",
+    description: "Stories for people who stay curious.",
     images:      ["/og-image.png"],
   },
 
@@ -93,18 +85,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="id" className={`${inter.variable} ${nanumMyeongjo.variable} h-full antialiased`} suppressHydrationWarning>
-      <head>
-        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-      </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground font-sans">
-        <ThemeProvider>
-          <Navbar />
-          <MainContent>{children}</MainContent>
-          <PublicFooter />
-          <BottomNav />
-        </ThemeProvider>
-        {/* PWA service worker registration */}
-        <ServiceWorkerRegister />
+        <Navbar />
+        <main className="min-h-0 flex-1">{children}</main>
+        <PublicFooter />
       </body>
     </html>
   );
