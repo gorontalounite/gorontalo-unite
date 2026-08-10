@@ -61,6 +61,8 @@ const navItems = [
 export default function BottomNav() {
   const pathname = usePathname();
 
+  if (!["/admin", "/sign-in", "/sign-up", "/auth"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null;
+
   return (
     <nav className="fixed bottom-0 inset-x-0 z-30 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-t border-gray-100 dark:border-zinc-800 md:hidden">
       <div className="flex items-center justify-around h-16 max-w-lg mx-auto px-2 pb-safe">

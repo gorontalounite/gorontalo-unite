@@ -1,63 +1,43 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import LeftDrawer from "./LeftDrawer";
-import RightPanel from "./RightPanel";
-import ThemeToggle from "./ThemeToggle";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const publicLinks = [
+  ["Beranda", "/"],
+  ["Berita", "/berita"],
+  ["City Guide", "/wisata"],
+  ["Event", "/event"],
+  ["Untold Story", "/berita"],
+] as const;
 
 export default function Navbar() {
-  const [leftOpen, setLeftOpen] = useState(false);
-  const [rightOpen, setRightOpen] = useState(false);
+  const pathname = usePathname();
+  const [open, setOpen] = useState(false);
+  const isApplication = ["/admin", "/sign-in", "/sign-up", "/auth"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
+
+  if (isApplication) return null;
 
   return (
-    <>
-      <nav className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-gray-100 dark:border-zinc-800 sticky top-0 z-30">
-        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-          {/* Left: Hamburger + Logo */}
-          <div className="flex items-center gap-2">
-            <button
-              onClick={() => setLeftOpen(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
-              aria-label="Buka menu"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-            <Link href="/" className="flex items-center select-none">
-              <Image src="/logo.png" alt="Gorontalo Unite" width={120} height={32} className="h-8 w-auto object-contain" priority />
-            </Link>
-          </div>
-
-          {/* Right: Get Started + Theme + Book */}
-          <div className="flex items-center gap-1">
-            <Link
-              href="/sign-in"
-              className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
-              aria-label="Login"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-              </svg>
-            </Link>
-            <ThemeToggle />
-            <button
-              onClick={() => setRightOpen(true)}
-              className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
-              aria-label="Buka panel kategori"
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-              </svg>
-            </button>
-          </div>
+    <header className="pointer-events-none fixed inset-x-0 top-0 z-50 px-3 pt-3 md:px-8 md:pt-7">
+      <nav className="pointer-events-auto mx-auto flex max-w-[1500px] items-center justify-between rounded-2xl border border-white/25 bg-black/35 px-4 py-3 text-white shadow-2xl shadow-black/20 backdrop-blur-xl md:px-6">
+        <Link href="/" className="flex items-center gap-3" aria-label="Gorontalo Unite">
+          <Image src="/logo-gu.png" alt="" width={38} height={38} className="size-8 object-contain md:size-9" priority />
+          <span className="text-xs font-bold uppercase tracking-[.18em] sm:text-sm">Gorontalo Unite</span>
+        </Link>
+        <div className="hidden items-center gap-6 lg:flex">
+          {publicLinks.map(([label, href]) => <Link key={label} href={href} className="text-[11px] font-medium uppercase tracking-[.15em] text-white/70 transition hover:text-[#f4c300]">{label}</Link>)}
+        </div>
+        <div className="flex items-center gap-2">
+          <Link href="/sign-in" className="hidden rounded-full border border-white/30 px-4 py-2 text-[10px] font-bold uppercase tracking-[.16em] transition hover:bg-white hover:text-black sm:block">Masuk</Link>
+          <button onClick={() => setOpen((value) => !value)} className="flex size-9 items-center justify-center rounded-full border border-white/30 text-white lg:hidden" aria-label="Buka navigasi" aria-expanded={open}>
+            <span className="text-lg leading-none">{open ? "×" : "≡"}</span>
+          </button>
         </div>
       </nav>
-
-      <LeftDrawer open={leftOpen} onClose={() => setLeftOpen(false)} />
-      <RightPanel open={rightOpen} onClose={() => setRightOpen(false)} />
-    </>
+      {open ? <div className="pointer-events-auto mx-auto mt-2 max-w-[1500px] rounded-2xl border border-white/20 bg-black/90 p-4 backdrop-blur-xl lg:hidden"><div className="grid gap-1">{publicLinks.map(([label, href]) => <Link onClick={() => setOpen(false)} key={label} href={href} className="rounded-xl px-4 py-3 text-sm font-semibold uppercase tracking-[.12em] text-white transition hover:bg-white/10">{label}</Link>)}<Link onClick={() => setOpen(false)} href="/sign-in" className="rounded-xl bg-[#f4c300] px-4 py-3 text-sm font-semibold uppercase tracking-[.12em] text-black">Masuk</Link></div></div> : null}
+    </header>
   );
 }
