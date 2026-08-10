@@ -47,9 +47,9 @@ export default function TourismDirectory({ places }: TourismDirectoryProps) {
   }, [category, location, places, query]);
 
   return (
-    <main className="bg-[#fcfbf8] pb-20 text-slate-900 dark:bg-zinc-950 dark:text-zinc-50">
+    <main className="dark bg-black pb-24 pt-20 text-zinc-50 md:pt-28">
       <section className="overflow-hidden border-b border-stone-200 bg-[#f5f0e8] dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="mx-auto grid max-w-7xl gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.15fr_.85fr] lg:px-8 lg:py-20">
+        <div className="mx-auto grid max-w-[1500px] gap-10 px-5 py-12 md:px-10 lg:grid-cols-[1.15fr_.85fr] lg:px-16 lg:py-20">
           <div className="relative z-10">
             <p className="text-xs font-bold uppercase tracking-[.24em] text-amber-700 dark:text-amber-300">Gorontalo City Guide</p>
             <h1 className="mt-4 max-w-2xl font-display text-4xl font-bold leading-[.98] tracking-tight sm:text-6xl">Temukan tempat terbaik di Gorontalo.</h1>
@@ -75,7 +75,7 @@ export default function TourismDirectory({ places }: TourismDirectoryProps) {
         </div>
       </section>
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-14">
+      <section className="mx-auto max-w-[1500px] px-5 py-16 md:px-10 lg:px-16 lg:py-24">
         <div className="flex flex-col gap-5 border-b border-stone-200 pb-6 dark:border-zinc-800 sm:flex-row sm:items-end sm:justify-between">
           <div>
             <p className="text-xs font-bold uppercase tracking-[.2em] text-amber-700 dark:text-amber-300">Direktori tempat</p>

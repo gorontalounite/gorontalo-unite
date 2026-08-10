@@ -149,8 +149,8 @@ export async function NewsDetailPage({ params }: Props) {
   };
 
   return (
-    <div className="bg-[#f7f5ef] py-8 pb-20 text-stone-900 dark:bg-zinc-950 dark:text-white sm:py-12">
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+    <div className="dark bg-black py-28 pb-24 text-white md:py-36">
+      <div className="mx-auto max-w-[1500px] px-5 md:px-10 lg:px-16">
       {/* Schema.org */}
       <script
         type="application/ld+json"
@@ -160,7 +160,7 @@ export async function NewsDetailPage({ params }: Props) {
       {/* Silent view tracker */}
       <ViewTracker slug={slug} />
 
-      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+      <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_20rem] lg:items-start">
       <div className="min-w-0">
       {/* Breadcrumb */}
       <nav className="mb-7 flex items-center gap-2 text-xs text-stone-400 dark:text-zinc-500">
@@ -208,7 +208,7 @@ export async function NewsDetailPage({ params }: Props) {
         </div>
 
         {/* Title */}
-        <h1 className="font-display text-4xl font-semibold leading-[1.04] tracking-[-.035em] text-stone-950 dark:text-white sm:text-5xl lg:text-6xl">
+        <h1 className="font-display text-5xl font-semibold uppercase leading-[.9] tracking-[-.055em] text-white sm:text-6xl lg:text-8xl">
           {article.title}
         </h1>
 
