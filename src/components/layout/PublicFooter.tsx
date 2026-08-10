@@ -28,7 +28,7 @@ export default function PublicFooter() {
             <p className="mb-2 text-base font-bold text-[#f5c400]">Gorontalo Unite</p>
             <p className="max-w-xs text-sm leading-relaxed text-stone-300">Media lokal Gorontalo untuk berita, City Guide, event, dan cerita baik yang patut dibagikan.</p>
           </div>
-          <FooterColumn title="Jelajahi" links={[["Berita", "/berita"], ["Wisata", "/wisata"], ["Event", "/event"], ["Chat AI", "/chat"]]} />
+          <FooterColumn title="Jelajahi" links={[["Berita", "/berita"], ["Wisata", "/wisata"], ["Event", "/event"], ["Kabar Baik", "/berita/inspire"]]} />
           <FooterColumn title="Tentang" links={[["Tentang kami", "/about"], ["Kontak", "/about#kontak"], ["Media Kit", "/media-kit"]]} />
           <FooterColumn title="Legal" links={[["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Pedoman Media", "/pedoman-media-siber"]]} />
         </div>

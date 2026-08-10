@@ -14,7 +14,7 @@ export default function Navbar() {
   return (
     <>
       <div className="hidden bg-black px-4 py-2 text-center text-[10px] font-bold tracking-[0.15em] text-[#f5c400] sm:block">
-        GORONTALO UNITE — MEDIA, CITY GUIDE, DAN CERITA BAIK DARI GORONTALO
+        Berbagi Kabar Baik dari Gorontalo
       </div>
       <nav className="sticky top-0 z-30 border-b border-black/10 bg-[#f8f6f0]/95 backdrop-blur-md dark:border-white/10 dark:bg-zinc-950/95">
         <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6">
@@ -43,9 +43,6 @@ export default function Navbar() {
 
           {/* Right: Login + Theme + navigation drawer */}
           <div className="flex items-center gap-1">
-            <Link href="/chat" className="hidden bg-[#f5c400] px-3 py-2 text-xs font-bold text-black transition hover:bg-black hover:text-white sm:inline-flex">
-              Tanya AI
-            </Link>
             <Link
               href="/sign-in"
               className="flex h-9 w-9 items-center justify-center text-gray-600 transition-colors hover:bg-black hover:text-[#f5c400] dark:text-gray-400 dark:hover:bg-white dark:hover:text-black"

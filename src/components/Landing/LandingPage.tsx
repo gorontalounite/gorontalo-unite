@@ -24,20 +24,9 @@ export interface DestinationItem {
 }
 
 interface LandingPageProps {
-  newsItems: NewsItem[];
-  featuredNewsItems: NewsItem[];
   featuredDestinations: DestinationItem[];
   eventItems: NewsItem[];
-  newsTotalCount: number;
-  newsUnavailable: boolean;
 }
-
-const CATEGORY_LABELS: Record<string, string> = {
-  Inspire: "INSPIRE",
-  Insight: "INSIGHT",
-  Interest: "INTEREST",
-  Event: "EVENT",
-};
 
 function formatDate(date: string | null): string {
   if (!date) return "";
@@ -47,10 +36,6 @@ function formatDate(date: string | null): string {
     month: "short",
     year: "numeric",
   }).format(new Date(date));
-}
-
-function categorySlug(category: string): string {
-  return category.toLowerCase().replace(/\s+/g, "-");
 }
 
 function MediaPlaceholder({ label }: { label: string }) {
@@ -116,78 +101,9 @@ function SectionTitle({
   );
 }
 
-function StoryMeta({ item, light = false }: { item: NewsItem; light?: boolean }) {
-  const category = CATEGORY_LABELS[item.category] ?? item.category ?? "UMUM";
-  return (
-    <div className={`flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-bold tracking-[0.14em] ${light ? "text-white/70" : "text-[#6e6a62]"}`}>
-      <Link href={`/berita/${categorySlug(item.category)}`} className={light ? "text-[#f5c400]" : "text-[#8f6900]"}>
-        {category}
-      </Link>
-      <span aria-hidden="true">•</span>
-      <span>GORONTALO UNITE</span>
-      {item.published_at && <><span aria-hidden="true">•</span><span>{formatDate(item.published_at)}</span></>}
-    </div>
-  );
-}
-
-function LeadStory({ item }: { item: NewsItem }) {
-  return (
-    <article className="group relative overflow-hidden bg-[#181818] text-white">
-      <Link href={`/berita/${item.slug}`} className="absolute inset-0 z-10" aria-label={item.title} />
-      <div className="relative aspect-[4/5] min-h-[440px] sm:aspect-[16/10] lg:min-h-[520px]">
-        <ArticleImage item={item} priority />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/55 to-transparent" />
-        <div className="absolute inset-x-0 bottom-0 p-6 sm:p-8 lg:p-10">
-          <StoryMeta item={item} light />
-          <h2 className="mt-3 max-w-3xl text-3xl font-bold leading-[0.98] tracking-[-0.065em] sm:text-5xl lg:text-6xl">
-            {item.title}
-          </h2>
-          {item.excerpt && <p className="mt-4 max-w-2xl text-sm leading-relaxed text-white/75 sm:text-base line-clamp-2">{item.excerpt}</p>}
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function CompactStory({ item }: { item: NewsItem }) {
-  return (
-    <article className="group relative grid grid-cols-[112px_1fr] gap-4 border-b border-black/10 py-4 last:border-b-0 sm:grid-cols-[132px_1fr]">
-      <Link href={`/berita/${item.slug}`} className="absolute inset-0 z-10" aria-label={item.title} />
-      <div className="relative aspect-[4/3] overflow-hidden bg-[#e6e2d9]">
-        <ArticleImage item={item} />
-      </div>
-      <div className="self-center">
-        <StoryMeta item={item} />
-        <h3 className="mt-2 text-base font-bold leading-[1.08] tracking-[-0.035em] text-[#161616] transition group-hover:text-[#8f6900] sm:text-lg">
-          {item.title}
-        </h3>
-      </div>
-    </article>
-  );
-}
-
-function EditorialStory({ item }: { item: NewsItem }) {
-  return (
-    <article className="group relative grid overflow-hidden border border-black/10 bg-white sm:grid-cols-[0.9fr_1.1fr]">
-      <Link href={`/berita/${item.slug}`} className="absolute inset-0 z-10" aria-label={item.title} />
-      <div className="relative aspect-[4/3] overflow-hidden bg-[#e6e2d9] sm:aspect-auto sm:min-h-[245px]">
-        <ArticleImage item={item} />
-      </div>
-      <div className="flex flex-col justify-center p-5 sm:p-7">
-        <StoryMeta item={item} />
-        <h3 className="mt-3 text-2xl font-bold leading-[1.02] tracking-[-0.05em] text-[#161616] transition group-hover:text-[#8f6900] sm:text-3xl">
-          {item.title}
-        </h3>
-        {item.excerpt && <p className="mt-4 text-sm leading-relaxed text-[#666159] line-clamp-3">{item.excerpt}</p>}
-        <span className="mt-5 text-xs font-bold text-[#8f6900]">Baca selengkapnya →</span>
-      </div>
-    </article>
-  );
-}
-
 function DestinationCard({ item }: { item: DestinationItem }) {
   return (
-    <Link href={`/wisata/${item.slug}`} className="group relative min-h-[340px] overflow-hidden bg-[#181818] text-white sm:min-h-[420px]">
+    <Link href={item.id.startsWith("demo-destination-") ? "/wisata" : `/wisata/${item.slug}`} className="group relative min-h-[340px] overflow-hidden bg-[#181818] text-white sm:min-h-[420px]">
       {item.image_url ? (
         <Image src={item.image_url} alt={item.name} fill sizes="(max-width: 640px) 100vw, 33vw" className="object-cover transition duration-700 group-hover:scale-105" />
       ) : <MediaPlaceholder label="CITY GUIDE" />}
@@ -208,7 +124,7 @@ function DestinationCard({ item }: { item: DestinationItem }) {
 function EventCard({ item }: { item: NewsItem }) {
   return (
     <article className="group relative overflow-hidden border border-white/15 bg-white/[0.06] text-white">
-      <Link href={`/berita/${item.slug}`} className="absolute inset-0 z-10" aria-label={item.title} />
+      <Link href={item.id.startsWith("demo-event-") ? "/event" : `/berita/${item.slug}`} className="absolute inset-0 z-10" aria-label={item.title} />
       <div className="relative aspect-[16/10] overflow-hidden bg-white/10">
         <ArticleImage item={item} />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
@@ -223,19 +139,44 @@ function EventCard({ item }: { item: NewsItem }) {
   );
 }
 
-function EmptyState({ children, dark = false }: { children: React.ReactNode; dark?: boolean }) {
-  return <div className={`border border-dashed px-6 py-12 text-center text-sm ${dark ? "border-white/20 text-white/60" : "border-black/20 text-[#6e6a62]"}`}>{children}</div>;
-}
+const DUMMY_DESTINATIONS: DestinationItem[] = [
+  ["olele", "Taman Laut Olele", "Atraksi & Wisata", "Bone Bolango"],
+  ["botubarani", "Hiu Paus Botubarani", "Atraksi & Wisata", "Bone Bolango"],
+  ["lake-limboto", "Danau Limboto", "Atraksi & Wisata", "Kabupaten Gorontalo"],
+  ["saronde", "Pulau Saronde", "Atraksi & Wisata", "Gorontalo Utara"],
+  ["tilamuta", "Pantai Tilamuta", "Atraksi & Wisata", "Boalemo"],
+  ["pulo-cinta", "Pulo Cinta", "Akomodasi", "Boalemo"],
+].map(([slug, name, category, location], index) => ({
+  id: `demo-destination-${index}`,
+  slug,
+  name,
+  category,
+  location,
+  opening_hours: "Detail kunjungan segera hadir",
+  description: "Contoh tampilan City Guide Gorontalo. Informasi lengkap akan ditambahkan oleh redaksi.",
+  image_url: null,
+}));
+
+const DUMMY_EVENTS: NewsItem[] = [
+  "Festival Karawo Gorontalo", "Pekan Budaya Hulonthalo", "Gorontalo Creative Market",
+  "Festival Teluk Tomini", "Lari 10K Gorontalo", "Panggung Musik di Kota",
+].map((title, index) => ({
+  id: `demo-event-${index}`,
+  title,
+  slug: `agenda-gorontalo-${index + 1}`,
+  excerpt: "Contoh kartu agenda. Detail waktu, lokasi, dan pendaftaran akan tersedia setelah event dipublikasikan.",
+  image_url: null,
+  category: "Event",
+  published_at: null,
+  created_at: new Date().toISOString(),
+}));
 
 export default function LandingPage({
-  newsItems,
-  featuredNewsItems,
   featuredDestinations,
   eventItems,
-  newsTotalCount,
-  newsUnavailable,
 }: LandingPageProps) {
-  const [lead, ...supportingNews] = newsItems;
+  const destinationsToShow = [...featuredDestinations, ...DUMMY_DESTINATIONS].slice(0, 6);
+  const eventsToShow = [...eventItems, ...DUMMY_EVENTS].slice(0, 6);
 
   return (
     <div className="bg-[#f5f2eb] text-[#171717]">
@@ -243,19 +184,18 @@ export default function LandingPage({
         <div className="mx-auto max-w-7xl">
           <div className="grid gap-10 lg:grid-cols-[1.05fr_0.95fr] lg:items-end">
             <div>
-              <Eyebrow>MEDIA LOKAL GORONTALO</Eyebrow>
+              <Eyebrow>GORONTALO UNITE MEDIAHUB</Eyebrow>
               <h1 className="mt-4 max-w-4xl text-5xl font-bold leading-[0.88] tracking-[-0.08em] sm:text-7xl lg:text-8xl">
-                Cerita baik, kabar penting, dan tempat yang layak ditemukan.
+                Spreading good news and happiness from Gorontalo! Follow for positive vibes and fun updates.
               </h1>
             </div>
             <div className="border-l-0 border-black/15 pl-0 lg:border-l lg:pl-8">
               <p className="max-w-lg text-lg leading-relaxed text-[#68635a]">
-                Gorontalo Unite merangkum denyut kota, orang-orangnya, dan pengalaman yang membuat Gorontalo terasa lebih dekat.
+                Berita, city guide, dan event untuk mengenal Gorontalo melalui cerita-cerita yang dekat dengan keseharian.
               </p>
               <div className="mt-7 flex flex-wrap gap-3">
-                <Link href="/berita" className="bg-[#171717] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#8f6900]">Baca berita terbaru</Link>
-                <Link href="/wisata" className="border border-black/20 px-5 py-3 text-sm font-bold transition hover:border-[#8f6900] hover:text-[#8f6900]">Jelajahi City Guide</Link>
-                <Link href="/chat" className="px-3 py-3 text-sm font-bold text-[#8f6900] hover:text-black">Tanya AI ↗</Link>
+                <Link href="/berita" className="bg-[#171717] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#8f6900]">Explore Gorontalo</Link>
+                <Link href="/wisata" className="border border-black/20 px-5 py-3 text-sm font-bold transition hover:border-[#8f6900] hover:text-[#8f6900]">City Guide</Link>
               </div>
             </div>
           </div>
@@ -267,73 +207,20 @@ export default function LandingPage({
         </div>
       </section>
 
-      <section className="px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-7xl">
-          <SectionTitle eyebrow="SOROTAN HARI INI" title="Kabar utama" href="/berita" />
-          {lead ? (
-            <div className="grid gap-0 border border-black/15 lg:grid-cols-[1.5fr_0.9fr]">
-              <LeadStory item={lead} />
-              <div className="bg-white px-5 py-2 sm:px-7">
-                {supportingNews.length ? supportingNews.slice(0, 4).map((item) => <CompactStory key={item.id} item={item} />) : <EmptyState>Berita lain sedang disiapkan.</EmptyState>}
-              </div>
-            </div>
-          ) : <EmptyState>{newsUnavailable ? "Berita belum dapat dimuat. Silakan coba lagi nanti." : "Belum ada berita yang dipublikasikan."}</EmptyState>}
-        </div>
-      </section>
-
-      <section className="border-y border-black/15 bg-[#171717] px-4 py-10 text-white sm:px-6">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-5 flex items-center justify-between gap-4">
-            <h2 className="text-xl font-bold tracking-[-0.04em] sm:text-2xl">Terbaca minggu ini</h2>
-            <Link href="/berita" className="text-xs font-semibold text-[#f5c400] hover:text-white">Pilihan pembaca ↗</Link>
-          </div>
-          <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
-            {(newsItems.length ? newsItems : featuredNewsItems).slice(0, 4).map((item, index) => (
-              <Link key={item.id} href={`/berita/${item.slug}`} className="group border border-white/15 bg-white/[0.06] p-4 transition hover:bg-[#f5c400] hover:text-black">
-                <span className="text-[10px] font-bold tracking-[0.16em] text-[#f5c400] group-hover:text-black/70">0{index + 1}</span>
-                <h3 className="mt-4 text-sm font-bold leading-snug">{item.title}</h3>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="px-4 py-14 sm:px-6 sm:py-20">
-        <div className="mx-auto max-w-5xl">
-          <SectionTitle eyebrow="PILIHAN REDAKSI" title="Direkomendasikan untuk Anda" href="/berita" />
-          {featuredNewsItems.length ? (
-            <div className="space-y-4">
-              {featuredNewsItems.map((item) => <EditorialStory key={item.id} item={item} />)}
-            </div>
-          ) : <EmptyState>Artikel pilihan akan tampil setelah ditandai oleh redaksi.</EmptyState>}
-          <div className="mt-8 text-center sm:hidden"><Link href="/berita" className="text-sm font-bold text-[#8f6900]">Lihat semua berita →</Link></div>
-        </div>
-      </section>
-
       <section className="bg-white px-4 py-14 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-7xl">
           <SectionTitle eyebrow="CITY GUIDE" title="Jelajahi Gorontalo" href="/wisata" action="Lihat City Guide" />
-          {featuredDestinations.length ? (
-            <div className="grid gap-4 md:grid-cols-3">{featuredDestinations.map((item) => <DestinationCard key={item.id} item={item} />)}</div>
-          ) : <EmptyState>Destinasi pilihan akan segera hadir.</EmptyState>}
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{destinationsToShow.map((item) => <DestinationCard key={item.id} item={item} />)}</div>
         </div>
       </section>
 
       <section className="bg-[#171717] px-4 py-14 sm:px-6 sm:py-20">
         <div className="mx-auto max-w-7xl">
           <SectionTitle eyebrow="KALENDER KOTA" title="Event yang akan datang" href="/event" action="Lihat semua event" dark />
-          {eventItems.length ? (
-            <div className="grid gap-4 md:grid-cols-3">{eventItems.map((item) => <EventCard key={item.id} item={item} />)}</div>
-          ) : <EmptyState dark>Agenda event akan hadir setelah dipublikasikan.</EmptyState>}
+          <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">{eventsToShow.map((item) => <EventCard key={item.id} item={item} />)}</div>
         </div>
       </section>
 
-      <section className="border-t border-black/15 px-4 py-12 sm:px-6">
-        <div className="mx-auto flex max-w-7xl flex-col justify-between gap-5 sm:flex-row sm:items-center">
-          <p className="max-w-xl text-sm leading-relaxed text-[#68635a]">{newsTotalCount} artikel telah dipilih dan disajikan oleh Gorontalo Unite.</p>
-          <Link href="/chat" className="inline-flex w-fit items-center gap-2 bg-[#f5c400] px-5 py-3 text-sm font-bold text-black transition hover:bg-black hover:text-white">Tanya AI Gorontalo <span aria-hidden="true">↗</span></Link>
-        </div>
-      </section>
     </div>
   );
 }
