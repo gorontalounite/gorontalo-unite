@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
-import { notFound } from "next/navigation";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import { CATEGORIES, CAT_COLOR, DEFAULT_COLOR } from "../categories";
 import BeritaPagination from "../BeritaPagination";
+import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/app/news/[id]/page";
 
 export const dynamic = "force-dynamic";
 
@@ -28,6 +28,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { key } = await params;
+  if (!CAT_MAP[key]) return generateArticleMetadata({ params: Promise.resolve({ id: key }) });
   const cat = CAT_MAP[key];
   if (!cat) return { title: "Gorontalo Unite" };
   return {
@@ -46,12 +47,12 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   const { key }  = await params;
   const { page: pageParam } = await searchParams;
   const cat = CAT_MAP[key];
-  if (!cat) notFound();
+  if (!cat) return <NewsDetailPage params={Promise.resolve({ id: key })} />;
 
   const page   = Math.max(1, parseInt(pageParam ?? "1"));
   const offset = (page - 1) * LIMIT;
   const colors = CAT_COLOR[cat.label] ?? DEFAULT_COLOR;
-  const admin  = createAdminClient();
+  const admin  = await createClient();
 
   const { data: raw, count } = await admin
     .from("articles")
@@ -104,23 +105,6 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
         </p>
       </div>
 
-      {/* Category chips */}
-      <div className="flex flex-wrap gap-2 mb-10">
-        {CATEGORIES.map((c) => (
-          <Link
-            key={c.key}
-            href={`/berita/${c.key}`}
-            className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-all ${
-              c.key === key
-                ? "bg-gray-900 dark:bg-white text-white dark:text-gray-900 border-gray-900 dark:border-white"
-                : "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-gray-400 hover:border-gray-400 dark:hover:border-zinc-500"
-            }`}
-          >
-            {c.label}
-          </Link>
-        ))}
-      </div>
-
       {/* Empty state */}
       {articles.length === 0 && (
         <div className="flex flex-col items-center py-24 text-center">
@@ -147,7 +131,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
                     key={article.id}
                     className="relative group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-lg transition-all duration-300"
                   >
-                    <Link href={`/news/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
+                    <Link href={`/berita/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
                     <div className="relative aspect-[16/10] bg-gray-100 dark:bg-zinc-800 overflow-hidden">
                       {article.image_url ? (
                         <Image src={article.image_url} alt={article.title} fill

@@ -88,7 +88,7 @@ body:
     attributes:
       label: URL Halaman
       description: Alamat halaman di mana bug ditemukan
-      placeholder: "https://gorontalounite.id/..."
+      placeholder: "https://gorontalounite.com/..."
 
   - type: textarea
     id: additional

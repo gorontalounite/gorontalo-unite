@@ -134,3 +134,52 @@ html { transition: background-color 0.2s ease, color 0.2s ease; }
   background: #f5f5f5;
   color-scheme: light;
 }
+
+/* TipTap news editor — deliberately narrow so public article rendering is unchanged. */
+.tiptap-editor {
+  min-height: 55vh;
+  outline: none;
+  color: #27272a;
+  font-family: var(--font-serif), Georgia, serif;
+  font-size: 1.125rem;
+  line-height: 1.9;
+}
+.tiptap-editor > * + * { margin-top: 1.25rem; }
+.tiptap-editor h1,
+.tiptap-editor h2,
+.tiptap-editor h3,
+.tiptap-editor h4 {
+  color: #18181b;
+  font-family: var(--font-display), system-ui, sans-serif;
+  line-height: 1.25;
+}
+.tiptap-editor h1 { font-size: 2rem; }
+.tiptap-editor h2 { font-size: 1.6rem; }
+.tiptap-editor h3 { font-size: 1.3rem; }
+.tiptap-editor ul, .tiptap-editor ol { padding-left: 1.5rem; }
+.tiptap-editor ul { list-style: disc; }
+.tiptap-editor ol { list-style: decimal; }
+.tiptap-editor blockquote {
+  border-left: 4px solid #f5c400;
+  color: #52525b;
+  font-style: italic;
+  padding-left: 1rem;
+}
+.tiptap-editor pre {
+  overflow-x: auto;
+  border-radius: 0.75rem;
+  background: #18181b;
+  color: #f4f4f5;
+  padding: 1rem;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+}
+.tiptap-editor img { width: 100%; border-radius: 0.875rem; }
+.tiptap-editor p.is-editor-empty:first-child::before {
+  float: left;
+  height: 0;
+  color: #a1a1aa;
+  content: attr(data-placeholder);
+  pointer-events: none;
+}

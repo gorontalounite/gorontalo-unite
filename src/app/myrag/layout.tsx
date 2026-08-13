@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { redirect } from "next/navigation";
 
 export const metadata: Metadata = {
@@ -14,9 +13,7 @@ export default async function MyRagLayout({ children }: { children: React.ReactN
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) redirect("/sign-in?redirect=/myrag");
 
-  // Use service role (admin) client — bypasses RLS entirely, always reliable
-  const adminClient = createAdminClient();
-  const { data: profileRaw } = await adminClient
+  const { data: profileRaw } = await supabase
     .from("user_profiles")
     .select("role, full_name")
     .eq("id", user.id)

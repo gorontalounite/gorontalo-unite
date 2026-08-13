@@ -1,4 +1,4 @@
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import NewsAdminList from "./NewsAdminList";
 
 export const dynamic  = "force-dynamic";
@@ -30,10 +30,9 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     ? sp.sort : "created_at") as SortField;
   const sortDir: SortDir = sp.dir === "asc" ? "asc" : "desc";
 
-  const admin = createAdminClient();
+  const admin = await createClient();
 
   // Build filtered, paginated query
-  // eslint-disable-next-line prefer-const
   let qb = admin
     .from("articles")
     .select("id, title, slug, category, published, published_at, created_at", { count: "exact" })

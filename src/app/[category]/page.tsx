@@ -143,7 +143,7 @@ export default async function CategoryPage({ params }: Props) {
         <>
           {/* Featured hero */}
           {featured && (
-            <Link href={`/news/${featured.slug}`} className="group block mb-8">
+            <Link href={`/berita/${featured.slug}`} className="group block mb-8">
               <div className="relative rounded-2xl overflow-hidden aspect-[16/8] sm:aspect-[16/7] bg-gray-100 dark:bg-zinc-800">
                 {featured.image_url ? (
                   <Image
@@ -212,7 +212,7 @@ function ArticleCard({
 }) {
   return (
     <Link
-      href={`/news/${article.slug}`}
+      href={`/berita/${article.slug}`}
       className="group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:shadow-lg hover:shadow-black/5 dark:hover:shadow-black/30 transition-all duration-200"
     >
       {/* Thumbnail */}

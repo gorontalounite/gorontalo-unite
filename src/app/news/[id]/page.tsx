@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { createAdminClient } from "@/lib/supabase/admin";
 import { createClient }      from "@/lib/supabase/server";
 import { CATEGORIES }        from "@/app/berita/categories";
 import MarkdownContent    from "@/components/ui/MarkdownContent";
@@ -13,7 +12,6 @@ import ViewTracker        from "@/components/ui/ViewTracker";
 import CommentSection     from "@/components/ui/CommentSection";
 import ArticleHeroImage   from "@/components/ui/ArticleHeroImage";
 import type { Block }     from "@/components/editor/types";
-import { getPreviewArticle, type PreviewArticle } from "@/data/newsPreview";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -21,20 +19,15 @@ interface Props {
 
 export const dynamic = "force-dynamic";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.id";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
+
+const CAT_LABEL_TO_KEY: Record<string, string> = Object.fromEntries(
+  CATEGORIES.map((category) => [category.label, category.key]),
+);
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id: slug } = await params;
-  const preview = getPreviewArticle(slug);
-  if (preview) {
-    return {
-      title: `${preview.title} | Gorontalo Unite`,
-      description: preview.excerpt,
-      alternates: { canonical: `${BASE}/news/${preview.slug}` },
-      openGraph: { title: preview.title, description: preview.excerpt, type: "article", publishedTime: preview.source_published_at },
-    };
-  }
-  const admin = createAdminClient();
+  const admin = await createClient();
   const { data } = await admin
     .from("articles")
     .select("title, excerpt, seo_title, seo_description, image_url, published_at, category")
@@ -46,7 +39,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const title = data.seo_title || data.title;
   const desc  = data.seo_description || data.excerpt;
-  const url   = `${BASE}/news/${slug}`;
+  const url   = `${BASE}/berita/${slug}`;
 
   return {
     title:       `${title} | Gorontalo Unite`,
@@ -69,10 +62,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
   };
 }
-
-const CAT_LABEL_TO_KEY: Record<string, string> = Object.fromEntries(
-  CATEGORIES.map((c) => [c.label, c.key]),
-);
 
 const CATEGORY_COLORS: Record<string, string> = {
   Politik:        "bg-blue-50 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
@@ -99,11 +88,9 @@ const CATEGORY_COLORS: Record<string, string> = {
   Olahraga:       "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300",
 };
 
-export default async function NewsDetailPage({ params }: Props) {
+export async function NewsDetailPage({ params }: Props) {
   const { id: slug } = await params;
-  const preview = getPreviewArticle(slug);
-  if (preview) return <PreviewNewsDetail article={preview} />;
-  const admin        = createAdminClient();
+  const admin        = await createClient();
 
   const [{ data: article }, { data: { user } }] = await Promise.all([
     admin.from("articles").select("*").eq("slug", slug).eq("published", true).neq("category", "Portfolio").single(),
@@ -135,7 +122,7 @@ export default async function NewsDetailPage({ params }: Props) {
   const isTrending: boolean = (article.is_trending as boolean | null) ?? false;
   const allowComments: boolean = (article.allow_comments as boolean | null) ?? false;
 
-  const canonicalUrl = `${BASE}/news/${slug}`;
+  const canonicalUrl = `${BASE}/berita/${slug}`;
 
   // User info for CommentSection
   const authUser = user
@@ -162,7 +149,8 @@ export default async function NewsDetailPage({ params }: Props) {
   };
 
   return (
-    <div className="max-w-3xl mx-auto px-4 sm:px-6 py-8 sm:py-12">
+    <div className="bg-[#f5f2eb] py-10 pb-20 text-stone-900 dark:bg-zinc-950 dark:text-white sm:py-16">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
       {/* Schema.org */}
       <script
         type="application/ld+json"
@@ -172,8 +160,10 @@ export default async function NewsDetailPage({ params }: Props) {
       {/* Silent view tracker */}
       <ViewTracker slug={slug} />
 
+      <div className="grid gap-14 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start">
+      <div className="min-w-0">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
+      <nav className="mb-7 flex items-center gap-2 text-xs text-stone-400 dark:text-zinc-500">
         <Link href="/" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Beranda</Link>
         <span>/</span>
         <Link href="/berita" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Berita</Link>
@@ -183,7 +173,7 @@ export default async function NewsDetailPage({ params }: Props) {
 
       <article>
         {/* Category + Date + Trending */}
-        <div className="flex flex-wrap items-center gap-3 mb-4">
+        <div className="mb-4 flex flex-wrap items-center gap-3">
           {((article.categories as string[] | null)?.length
             ? (article.categories as string[])
             : [article.category]
@@ -203,7 +193,7 @@ export default async function NewsDetailPage({ params }: Props) {
             </span>
           )}
           {publishedDate && (
-            <span className="text-xs text-gray-400 dark:text-gray-500">{publishedDate}</span>
+            <span className="text-xs text-stone-400 dark:text-zinc-500">{publishedDate}</span>
           )}
           {viewCount > 0 && (
             <span className="text-xs text-gray-400 dark:text-gray-500 flex items-center gap-1">
@@ -212,14 +202,19 @@ export default async function NewsDetailPage({ params }: Props) {
           )}
         </div>
 
+        <div className="mb-5 flex items-center gap-3 text-xs text-stone-500 dark:text-zinc-400">
+          <span className="grid h-8 w-8 place-items-center bg-stone-900 text-[10px] font-bold text-white dark:bg-amber-400 dark:text-stone-950">GU</span>
+          <span>Ditulis oleh <Link href="/berita/penulis/gorontalo-unite" className="font-semibold text-stone-700 underline decoration-amber-400 underline-offset-4 hover:text-brand dark:text-zinc-200">Gorontalo Unite</Link></span>
+        </div>
+
         {/* Title */}
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight mb-4">
+        <h1 className="font-display text-4xl font-semibold leading-[1.02] tracking-[-.05em] text-stone-950 dark:text-white sm:text-5xl lg:text-7xl">
           {article.title}
         </h1>
 
         {/* Excerpt */}
         {article.excerpt && (
-          <p className="text-base text-gray-500 dark:text-gray-400 leading-relaxed mb-6 border-l-4 border-[#F5C400] dark:border-yellow-500 pl-4 italic">
+          <p className="my-8 border-l-4 border-[#F5C400] pl-5 text-lg leading-relaxed text-stone-600 dark:border-yellow-500 dark:text-zinc-300">
             {article.excerpt}
           </p>
         )}
@@ -282,7 +277,7 @@ export default async function NewsDetailPage({ params }: Props) {
         )}
 
         {/* Share buttons */}
-        <div className="mt-8 pt-6 border-t border-gray-100 dark:border-zinc-800">
+        <div className="mt-8 border-t border-stone-300 pt-6 dark:border-zinc-800">
           <ShareButtons url={canonicalUrl} title={article.title} />
         </div>
       </article>
@@ -291,77 +286,32 @@ export default async function NewsDetailPage({ params }: Props) {
       <CommentSection slug={slug} allowComments={allowComments} user={authUser} />
 
       {/* Related posts */}
-      <RelatedPosts items={related} basePath="/news" />
+      <RelatedPosts items={related} basePath="/berita" />
 
       {/* Back navigation */}
-      <div className="mt-10 pt-6 border-t border-gray-100 dark:border-zinc-800 flex gap-4">
+      <div className="mt-10 flex gap-4 border-t border-stone-200 pt-6 dark:border-zinc-800">
         <Link href="/berita" className="text-sm text-brand dark:text-yellow-400 font-medium hover:underline">
           ← Semua berita
         </Link>
         <Link href="/" className="text-sm text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 font-medium">
-          Tanya Gorontalo AI →
+          Kembali ke beranda →
         </Link>
+      </div>
+      </div>
+
+      <aside className="lg:sticky lg:top-24">
+        <div className="border-y border-stone-300 py-6 dark:border-zinc-700">
+          <p className="text-[10px] font-bold uppercase tracking-[.22em] text-brand">Gorontalo Unite</p>
+          <h2 className="mt-2 font-display text-2xl font-semibold leading-tight">Cerita lokal yang patut diikuti.</h2>
+          <p className="mt-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">Berita, informasi, dan kabar baik dari Gorontalo dalam satu ruang editorial.</p>
+          <Link href="/berita/penulis/gorontalo-unite" className="mt-5 inline-flex text-sm font-semibold text-brand hover:underline">Tentang redaksi →</Link>
+        </div>
+        {related.length > 0 && <div className="mt-8"><p className="text-[10px] font-bold uppercase tracking-[.22em] text-brand">Baca berikutnya</p><div className="mt-4 space-y-5">{related.map((item) => <Link key={item.id} href={`/berita/${item.slug}`} className="group block border-b border-stone-200 pb-5 dark:border-zinc-800"><p className="text-[10px] font-bold uppercase tracking-[.14em] text-stone-400">{item.category}</p><h3 className="mt-2 font-display text-lg font-semibold leading-tight group-hover:text-brand">{item.title}</h3></Link>)}</div></div>}
+      </aside>
+      </div>
       </div>
     </div>
   );
 }
 
-function PreviewNewsDetail({ article }: { article: PreviewArticle }) {
-  const publishedDate = new Intl.DateTimeFormat("id-ID", {
-    weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Makassar",
-  }).format(new Date(article.source_published_at));
-
-  return (
-    <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 sm:py-12">
-      <nav className="mb-6 flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500">
-        <Link href="/" className="transition-colors hover:text-brand dark:hover:text-yellow-400">Beranda</Link>
-        <span>/</span>
-        <Link href="/berita" className="transition-colors hover:text-brand dark:hover:text-yellow-400">Berita</Link>
-        <span>/</span>
-        <span className="max-w-[200px] truncate text-gray-500 dark:text-gray-400">{article.title}</span>
-      </nav>
-
-      <article>
-        <div className="mb-4 flex flex-wrap items-center gap-2">
-          {article.categories.map((category) => (
-            <Link
-              key={category}
-              href={`/berita?category=${CAT_LABEL_TO_KEY[category] ?? category.toLowerCase()}`}
-              className="rounded-full bg-gray-100 px-2.5 py-1 text-xs font-semibold text-gray-700 transition hover:bg-yellow-100 hover:text-yellow-900 dark:bg-zinc-800 dark:text-gray-200 dark:hover:bg-yellow-400 dark:hover:text-black"
-            >
-              {category}
-            </Link>
-          ))}
-          <span className="text-xs text-gray-400 dark:text-gray-500">{publishedDate}</span>
-        </div>
-
-        <p className="mb-3 text-xs font-semibold uppercase tracking-[0.18em] text-brand dark:text-yellow-400">Ringkasan oleh Gorontalo Unite</p>
-        <h1 className="mb-4 text-2xl font-bold leading-tight text-gray-900 dark:text-white sm:text-3xl">{article.title}</h1>
-        <p className="mb-8 border-l-4 border-[#F5C400] pl-4 text-base italic leading-relaxed text-gray-500 dark:text-gray-400">{article.excerpt}</p>
-
-        <div className="mb-8 rounded-2xl border border-gray-100 bg-gray-50 p-5 dark:border-zinc-800 dark:bg-zinc-900">
-          <h2 className="text-sm font-semibold text-gray-900 dark:text-white">Poin penting</h2>
-          <ul className="mt-3 list-disc space-y-2 pl-5 text-sm leading-relaxed text-gray-700 dark:text-gray-300">
-            {article.summary_points.map((point) => <li key={point}>{point}</li>)}
-          </ul>
-        </div>
-
-        <div className="space-y-5 text-[17px] leading-8 text-gray-700 dark:text-gray-300">
-          {article.summary_paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-        </div>
-
-        <div className="mt-8 flex flex-wrap gap-2">
-          {article.tags.map((tag) => <span key={tag} className="rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600 dark:bg-zinc-800 dark:text-gray-300">#{tag}</span>)}
-        </div>
-
-        <div className="mt-8 rounded-xl border border-yellow-200 bg-yellow-50 p-4 text-sm text-yellow-900 dark:border-yellow-900/50 dark:bg-yellow-950/30 dark:text-yellow-100">
-          Contoh tampilan lokal. Artikel ini belum dipublikasikan melalui CMS; tanggal di atas adalah tanggal dari sumber asli.
-        </div>
-
-        <div className="mt-6 text-sm text-gray-500 dark:text-gray-400">
-          Sumber asli: <a href={article.source_url} target="_blank" rel="noopener noreferrer" className="font-medium underline transition hover:text-brand dark:hover:text-yellow-400">{article.source_name}</a>
-        </div>
-      </article>
-    </div>
-  );
-}
+export default NewsDetailPage;

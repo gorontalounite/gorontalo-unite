@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 import PostEditor from "@/components/editor/PostEditor";
 import type { Block } from "@/components/editor/types";
 import type { PostMeta } from "@/components/editor/EditorSidebar";
@@ -13,7 +13,7 @@ interface Props {
 
 export default async function EditPortfolioPage({ params }: Props) {
   const { id } = await params;
-  const admin  = createAdminClient();
+  const admin  = await createClient();
 
   const { data: item } = await admin
     .from("articles")

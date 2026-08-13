@@ -12,7 +12,7 @@ import ViewTracker    from "@/components/ui/ViewTracker";
 import CommentSection from "@/components/ui/CommentSection";
 import type { Block } from "@/components/editor/types";
 
-const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.id";
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
 
 interface Props {
   params: Promise<{ slug: string }>;

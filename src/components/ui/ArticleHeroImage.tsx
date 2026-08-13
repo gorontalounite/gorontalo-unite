@@ -9,7 +9,7 @@ export default function ArticleHeroImage({ src, alt }: { src: string; alt: strin
   if (failed) return null;
 
   return (
-    <div className="aspect-video relative rounded-2xl overflow-hidden mb-8">
+    <div className="relative mb-8 aspect-[16/10] overflow-hidden rounded-[.65rem] border border-stone-200 dark:border-zinc-800">
       <Image
         src={src}
         alt={alt}

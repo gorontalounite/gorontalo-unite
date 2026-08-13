@@ -1,19 +1,17 @@
 import Link from "next/link";
-import { createAdminClient } from "@/lib/supabase/admin";
+import { createClient } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Dashboard | Admin Gorontalo Unite" };
 
 export default async function AdminDashboardPage() {
-  const admin = createAdminClient();
+  const admin = await createClient();
 
   const [
     { count: totalArticles },
     { count: publishedArticles },
     { count: draftArticles },
     { count: totalUsers },
-    { count: totalAffiliate },
-    { count: totalClicks },
     { data: recentArticles },
     { data: userRoles },
   ] = await Promise.all([
@@ -21,8 +19,6 @@ export default async function AdminDashboardPage() {
     admin.from("articles").select("*", { count: "exact", head: true }).neq("category", "Portfolio").eq("published", true),
     admin.from("articles").select("*", { count: "exact", head: true }).neq("category", "Portfolio").eq("published", false),
     admin.from("user_profiles").select("*", { count: "exact", head: true }),
-    admin.from("affiliate_items").select("*", { count: "exact", head: true }),
-    admin.from("affiliate_clicks").select("*", { count: "exact", head: true }),
     admin.from("articles").select("id, title, category, published, created_at").neq("category", "Portfolio").order("created_at", { ascending: false }).limit(5),
     admin.from("user_profiles").select("role").neq("role", "user"),
   ]);
@@ -47,33 +43,16 @@ export default async function AdminDashboardPage() {
       href: "/admin/users",
       color: "border-l-blue-400",
     },
-    {
-      label: "Produk Affiliate",
-      value: totalAffiliate ?? 0,
-      sub: `${totalClicks ?? 0} total klik`,
-      icon: "🛍️",
-      href: "/admin/affiliate",
-      color: "border-l-purple-400",
-    },
-    {
-      label: "Klik Affiliate",
-      value: totalClicks ?? 0,
-      sub: "semua waktu",
-      icon: "🖱️",
-      href: "/admin/affiliate",
-      color: "border-l-green-400",
-    },
   ];
 
   const quickActions = [
     { href: "/admin/news/new",  label: "Tulis Konten Baru",   icon: "✏️",  primary: true },
     { href: "/admin/users",     label: "Kelola Pengguna",      icon: "👤",  primary: false },
-    { href: "/admin/affiliate", label: "Tambah Produk",        icon: "➕",  primary: false },
     { href: "/",                label: "Lihat Situs",          icon: "↗️",  primary: false },
   ];
 
   return (
-    <div className="p-6 max-w-5xl">
+    <div className="max-w-5xl p-4 sm:p-6">
       {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -81,7 +60,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {stats.map((s) => (
           <Link
             key={s.label}

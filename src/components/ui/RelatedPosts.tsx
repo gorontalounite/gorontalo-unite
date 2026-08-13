@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 
 export interface RelatedItem {
@@ -21,9 +19,9 @@ export default function RelatedPosts({ items, basePath }: Props) {
   if (!items.length) return null;
 
   return (
-    <section className="mt-12 pt-8 border-t border-gray-100 dark:border-zinc-800">
-      <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-5">
-        Baca Juga
+    <section className="mt-14 border-t border-stone-300 pt-8 dark:border-zinc-800">
+      <h2 className="font-display text-3xl font-semibold tracking-[-.035em] text-stone-950 dark:text-white">
+        Baca berikutnya
       </h2>
 
       <div className="grid sm:grid-cols-3 gap-4">
@@ -34,14 +32,13 @@ export default function RelatedPosts({ items, basePath }: Props) {
             className="group flex flex-col"
           >
             {/* Thumbnail */}
-            <div className="aspect-video relative rounded-xl overflow-hidden mb-3 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700 shrink-0">
+            <div className="relative mb-3 aspect-[16/10] overflow-hidden rounded-[.55rem] bg-gradient-to-br from-stone-100 to-stone-200 dark:from-zinc-800 dark:to-zinc-700 shrink-0">
               {item.image_url && (
                 <img
                   src={item.image_url}
                   alt={item.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"
-                  onError={(e) => { e.currentTarget.style.display = "none"; }}
                 />
               )}
             </div>
@@ -60,7 +57,7 @@ export default function RelatedPosts({ items, basePath }: Props) {
             {item.published_at && (
               <p className="text-xs text-gray-400 dark:text-gray-500 mt-1.5">
                 {new Date(item.published_at).toLocaleDateString("id-ID", {
-                  day: "numeric", month: "short", year: "numeric",
+                  day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar",
                 })}
               </p>
             )}

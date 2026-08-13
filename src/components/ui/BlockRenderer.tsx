@@ -1,6 +1,3 @@
-"use client";
-
-import Image from "next/image";
 import type { Block } from "@/components/editor/types";
 
 interface Props {

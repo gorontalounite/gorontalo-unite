@@ -7,10 +7,11 @@ interface RightPanelProps {
   onClose: () => void;
 }
 
-const jelajahiItems = [
+const cityGuideItems = [
   {
-    href: "/berita/wisata",
+    href: "/wisata",
     label: "Wisata",
+    description: "Direktori tempat pilihan",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -19,26 +20,9 @@ const jelajahiItems = [
     ),
   },
   {
-    href: "/berita/bisnis",
-    label: "Bisnis",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-      </svg>
-    ),
-  },
-  {
-    href: "/berita/budaya",
-    label: "Budaya",
-    icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-      </svg>
-    ),
-  },
-  {
     href: "/event",
     label: "Event",
+    description: "Agenda seru di Gorontalo",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -49,7 +33,7 @@ const jelajahiItems = [
 
 const kabarBaikItems = [
   {
-    href: "/inspire",
+    href: "/berita/inspire",
     label: "Inspire",
     desc: "Kisah inspiratif Gorontalo",
     icon: (
@@ -59,7 +43,7 @@ const kabarBaikItems = [
     ),
   },
   {
-    href: "/insight",
+    href: "/berita/insight",
     label: "Insight",
     desc: "Wawasan & analisis",
     icon: (
@@ -69,7 +53,7 @@ const kabarBaikItems = [
     ),
   },
   {
-    href: "/interest",
+    href: "/berita/interest",
     label: "Interest",
     desc: "Topik menarik pilihan",
     icon: (
@@ -147,21 +131,27 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
         {/* Scrollable content */}
         <div className="flex-1 overflow-y-auto pb-6">
 
-          {/* ── JELAJAHI GORONTALO ── */}
+          {/* ── CITY GUIDE ── */}
           <div className="px-4 pt-5 pb-3">
             <p className="text-[11px] font-semibold tracking-widest text-gray-400 dark:text-zinc-500 uppercase mb-3">
-              Jelajahi Gorontalo
+              City Guide
             </p>
             <div className="grid grid-cols-2 gap-2">
-              {jelajahiItems.map((item) => (
+              {cityGuideItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
                   onClick={onClose}
-                  className="flex flex-col items-center justify-center gap-1.5 py-4 rounded-xl bg-gray-50 dark:bg-zinc-900 hover:bg-yellow-50 dark:hover:bg-yellow-950/40 hover:text-brand dark:hover:text-yellow-400 text-gray-600 dark:text-gray-400 transition-colors"
+                  className="group relative min-h-36 overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-amber-50 via-white to-gray-50 p-4 text-gray-700 transition hover:-translate-y-0.5 hover:border-amber-200 hover:shadow-lg hover:shadow-amber-900/5 dark:border-zinc-800 dark:from-zinc-900 dark:via-zinc-950 dark:to-zinc-900 dark:text-gray-200"
                 >
-                  {item.icon}
-                  <span className="text-xs font-medium">{item.label}</span>
+                  <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-amber-200/40 transition group-hover:scale-125 dark:bg-amber-400/10" />
+                  <div className="relative flex h-full flex-col justify-between">
+                    <span className="text-brand dark:text-yellow-400">{item.icon}</span>
+                    <div>
+                      <p className="text-sm font-semibold">{item.label}</p>
+                      <p className="mt-1 text-[11px] leading-snug text-gray-400 dark:text-zinc-500">{item.description}</p>
+                    </div>
+                  </div>
                 </Link>
               ))}
             </div>
