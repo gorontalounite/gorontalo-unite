@@ -12,6 +12,8 @@ export default async function AdminDashboardPage() {
     { count: publishedArticles },
     { count: draftArticles },
     { count: totalUsers },
+    { count: totalReels },
+    { count: publishedReels },
     { data: recentArticles },
     { data: userRoles },
   ] = await Promise.all([
@@ -19,6 +21,8 @@ export default async function AdminDashboardPage() {
     admin.from("articles").select("*", { count: "exact", head: true }).neq("category", "Portfolio").eq("published", true),
     admin.from("articles").select("*", { count: "exact", head: true }).neq("category", "Portfolio").eq("published", false),
     admin.from("user_profiles").select("*", { count: "exact", head: true }),
+    admin.from("reels").select("*", { count: "exact", head: true }),
+    admin.from("reels").select("*", { count: "exact", head: true }).eq("status", "published"),
     admin.from("articles").select("id, title, category, published, created_at").neq("category", "Portfolio").order("created_at", { ascending: false }).limit(5),
     admin.from("user_profiles").select("role").neq("role", "user"),
   ]);
@@ -36,6 +40,14 @@ export default async function AdminDashboardPage() {
       color: "border-l-yellow-400",
     },
     {
+      label: "Reels",
+      value: totalReels ?? 0,
+      sub: `${publishedReels ?? 0} published · ${(totalReels ?? 0) - (publishedReels ?? 0)} draft`,
+      icon: "▶",
+      href: "/admin/reels",
+      color: "border-l-violet-400",
+    },
+    {
       label: "Pengguna",
       value: totalUsers ?? 0,
       sub: `${adminCount} admin · ${editorCount} editor`,
@@ -47,6 +59,7 @@ export default async function AdminDashboardPage() {
 
   const quickActions = [
     { href: "/admin/news/new",  label: "Tulis Konten Baru",   icon: "✏️",  primary: true },
+    { href: "/admin/reels",     label: "Kelola Reels",         icon: "▶",   primary: false },
     { href: "/admin/users",     label: "Kelola Pengguna",      icon: "👤",  primary: false },
     { href: "/",                label: "Lihat Situs",          icon: "↗️",  primary: false },
   ];
@@ -60,7 +73,7 @@ export default async function AdminDashboardPage() {
       </div>
 
       {/* Stats Grid */}
-      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <div className="mb-8 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {stats.map((s) => (
           <Link
             key={s.label}

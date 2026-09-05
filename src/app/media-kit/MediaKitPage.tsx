@@ -681,10 +681,10 @@ export default function MediaKitPage() {
                 WhatsApp Sekarang
               </a>
               <Link
-                href="/services"
+                href="/about#kontak"
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-sm font-medium px-6 py-3.5 rounded-xl border border-zinc-700 text-zinc-300 hover:border-zinc-500 hover:text-white transition-colors"
               >
-                Lihat Services Lain
+                Hubungi Tim Kami
               </Link>
             </div>
           </div>

@@ -42,5 +42,14 @@ next-env.d.ts
 .vercel
 # Generated local editorial previews; source scrape data and drafts are never committed.
 /article-previews/
+# AI-generated editorial batches remain local until explicitly approved for import.
+/article-summaries/
+# Full-text scrape selections stay local and are never committed or published verbatim.
+/curated-scrape/
+/curated-scrape-*/
+/.local-archive/
 # Supabase CLI workspace metadata.
 /supabase/.temp/
+
+# Claude Code local session state (may contain local tokens/config).
+/.claude/

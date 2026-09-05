@@ -1,0 +1,14 @@
+# Local editorial working data is not part of the web runtime.
+article-previews/
+article-summaries/
+curated-scrape/
+curated-scrape-*/
+.local-archive/
+
+# Local build and tooling artifacts.
+.next/
+node_modules/
+coverage/
+*.tsbuildinfo
+.DS_Store
+summarize_curated.py

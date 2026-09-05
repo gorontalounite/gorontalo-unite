@@ -40,17 +40,17 @@ export default function MarkdownContent({ content, className = "" }: Props) {
             <del className="line-through text-gray-400">{children}</del>
           ),
           ul: ({ children }) => (
-            <ul className="list-disc list-inside space-y-1.5 mb-4 text-gray-700 dark:text-gray-300 pl-2">
+            <ul className="mb-6 list-outside list-disc space-y-2 pl-6 text-gray-700 marker:font-semibold marker:text-stone-500 dark:text-gray-300 dark:marker:text-zinc-400">
               {children}
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className="list-decimal list-inside space-y-1.5 mb-4 text-gray-700 dark:text-gray-300 pl-2">
+            <ol className="mb-6 list-outside list-decimal space-y-2 pl-6 text-gray-700 marker:font-semibold marker:text-stone-500 dark:text-gray-300 dark:marker:text-zinc-400">
               {children}
             </ol>
           ),
           li: ({ children }) => (
-            <li className="leading-relaxed">{children}</li>
+            <li className="pl-1 leading-relaxed">{children}</li>
           ),
           blockquote: ({ children }) => (
             <blockquote className="border-l-4 border-[#F5C400] dark:border-yellow-500 pl-4 italic text-gray-500 dark:text-gray-400 my-4">

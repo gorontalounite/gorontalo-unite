@@ -55,7 +55,7 @@ export default function SidebarNews() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <Link
-                    href={`/berita/${catKeyMap[item.category] ?? item.category.toLowerCase()}`}
+                    href={`/category/${catKeyMap[item.category] ?? item.category.toLowerCase()}`}
                     className={`inline-block text-xs px-1.5 py-0.5 rounded-md font-medium mb-1 ${
                       categoryColors[item.category] ?? "bg-gray-100 text-gray-700"
                     }`}

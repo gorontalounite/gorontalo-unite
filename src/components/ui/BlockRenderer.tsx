@@ -108,9 +108,9 @@ function RenderBlock({ block }: { block: Block }) {
       if (!items.length) return null;
       const Tag = ordered ? "ol" : "ul";
       return (
-        <Tag className={`${ordered ? "list-decimal" : "list-disc"} list-inside space-y-1.5 mb-4 text-gray-700 dark:text-gray-300 pl-2`}>
+        <Tag className={`${ordered ? "list-decimal" : "list-disc"} mb-6 list-outside space-y-2 pl-6 text-gray-700 marker:font-semibold marker:text-stone-500 dark:text-gray-300 dark:marker:text-zinc-400`}>
           {items.filter(Boolean).map((item, i) => (
-            <li key={i} className="leading-relaxed">{item}</li>
+            <li key={i} className="pl-1 leading-relaxed">{item}</li>
           ))}
         </Tag>
       );

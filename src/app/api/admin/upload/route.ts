@@ -23,6 +23,8 @@ export async function POST(req: NextRequest) {
 
   const formData = await req.formData();
   const file = formData.get("file") as File | null;
+  const requestedFolder = String(formData.get("folder") ?? "articles");
+  const folder = requestedFolder === "reels" ? "reels" : "articles";
   if (!file) return NextResponse.json({ error: "No file provided" }, { status: 400 });
   if (!ALLOWED_IMAGE_TYPES.has(file.type)) {
     return NextResponse.json({ error: "Gunakan gambar JPEG, PNG, WebP, atau AVIF" }, { status: 400 });
@@ -32,7 +34,7 @@ export async function POST(req: NextRequest) {
   }
 
   const extension = file.type.split("/")[1] === "jpeg" ? "jpg" : file.type.split("/")[1];
-  const filename = `articles/${Date.now()}-${crypto.randomUUID()}.${extension}`;
+  const filename = `${folder}/${Date.now()}-${crypto.randomUUID()}.${extension}`;
   const buffer = await file.arrayBuffer();
 
   const { data, error } = await supabase.storage

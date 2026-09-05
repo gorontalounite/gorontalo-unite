@@ -1,7 +1,42 @@
-import Link from "next/link";
+"use client";
 
-const groups = [["Explore", [["Home", "/"], ["Journal", "/blog"], ["Podcast", "/podcast"], ["About", "/about"]]], ["Topics", [["Culture", "/blog"], ["Travel", "/blog"], ["People", "/blog"], ["Food", "/blog"]]], ["Follow", [["Instagram", "https://instagram.com/gorontalo.unite"], ["Facebook", "https://facebook.com"], ["YouTube", "https://youtube.com"]]]] as const;
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+const hiddenPrefixes = ["/admin", "/sign-in", "/sign-up", "/auth"];
+
+function FooterColumn({ title, links }: { title: string; links: [string, string][] }) {
+  return (
+    <div>
+      <p className="mb-3 text-xs font-semibold uppercase tracking-widest text-gray-900 dark:text-white">{title}</p>
+      <ul className="space-y-2.5">
+        {links.map(([label, href]) => <li key={href}><Link href={href} className="text-sm text-gray-600 transition-colors hover:text-brand dark:text-gray-400 dark:hover:text-yellow-400">{label}</Link></li>)}
+      </ul>
+    </div>
+  );
+}
 
 export default function PublicFooter() {
-  return <footer className="bg-[#2f2f2f] px-5 py-14 text-white sm:px-8 lg:px-12"><div className="mx-auto max-w-[1440px]"><div className="grid gap-12 border-b border-white/20 pb-14 lg:grid-cols-[1.2fr_.8fr]"><div><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#f0bf75]">[Newsletter]</p><h2 className="mt-4 font-serif text-4xl sm:text-5xl">Stories in your inbox.</h2></div><form className="self-end flex border-b border-white/50 pb-3"><input aria-label="Email address" placeholder="Your email address" className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-white/45" /><button type="button" className="text-xs font-bold uppercase tracking-[.15em] text-[#f0bf75]">Subscribe ↗</button></form></div><div className="grid gap-10 py-14 sm:grid-cols-2 lg:grid-cols-4"><div><p className="font-serif text-3xl tracking-[-.04em]">Gorontalo Unite</p><p className="mt-4 max-w-xs text-sm leading-relaxed text-white/60">An independent local journal for curious minds.</p></div>{groups.map(([heading, links]) => <div key={heading}><p className="text-[10px] font-bold uppercase tracking-[.2em] text-[#f0bf75]">{heading}</p><div className="mt-4 grid gap-2.5">{links.map(([label, href]) => <Link key={label} href={href} className="text-sm text-white/65 transition hover:text-white">{label}</Link>)}</div></div>)}</div><div className="flex flex-wrap justify-between gap-4 border-t border-white/20 pt-5 text-xs text-white/45"><span>© 2026 Gorontalo Unite</span><span>Made in Gorontalo, Indonesia</span></div></div></footer>;
+  const pathname = usePathname();
+  if (hiddenPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null;
+
+  return (
+    <footer className="relative shrink-0 border-t border-gray-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6 lg:py-16">
+        <div className="mb-10 grid grid-cols-2 gap-8 md:grid-cols-5 lg:gap-10">
+          <div className="col-span-2">
+            <p className="mb-2 text-base font-bold text-gray-900 dark:text-white">Gorontalo Unite</p>
+            <p className="max-w-xs text-sm leading-relaxed text-gray-600 dark:text-gray-400">Independent local media covering the stories, people, culture, and life of Gorontalo.</p>
+          </div>
+          <FooterColumn title="Explore" links={[["News", "/"], ["City Guide", "/city-guide"], ["Reels", "/reels"], ["Destinations", "/wisata"], ["Events", "/event"]]} />
+          <FooterColumn title="About" links={[["About us", "/about"], ["Services", "/services"], ["Contact", "/about#kontak"], ["Media Kit", "/media-kit"]]} />
+          <FooterColumn title="Legal" links={[["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Pedoman Media", "/pedoman-media-siber"]]} />
+        </div>
+        <div className="flex flex-col items-start justify-between gap-3 border-t border-gray-200 pt-6 text-xs text-gray-500 dark:border-zinc-800 dark:text-gray-500 sm:flex-row sm:items-center">
+          <p>© {new Date().getFullYear()} Gorontalo Unite. All rights reserved.</p>
+          <p>Made with ♥ for Gorontalo</p>
+        </div>
+      </div>
+    </footer>
+  );
 }

@@ -26,13 +26,13 @@ interface ArticleForm {
 }
 
 const PRESET_CATEGORIES = [
-  "Wisata", "Budaya", "Kuliner", "Ekonomi", "Pendidikan",
-  "Kesehatan", "Infrastruktur", "Sejarah", "Umum", "+ Kategori Baru",
+  "What’s On", "Travel", "Culinary", "Culture", "People", "Life",
+  "+ Kategori Baru",
 ];
 
 const emptyForm: ArticleForm = {
   title: "", slug: "", excerpt: "", content: "",
-  image_url: "", category: "Wisata", customCategory: "",
+  image_url: "", category: "News", customCategory: "",
   published: false, published_at: "",
 };
 

@@ -1,11 +1,63 @@
 "use client";
 
-import Link from "next/link";
 import { useState } from "react";
-
-const links = [["Home", "/"], ["Blog", "/blog"], ["Podcast", "/podcast"], ["About", "/about"]] as const;
+import Link from "next/link";
+import Image from "next/image";
+import LeftDrawer from "./LeftDrawer";
+import RightPanel from "./RightPanel";
+import ThemeToggle from "./ThemeToggle";
 
 export default function Navbar() {
-  const [open, setOpen] = useState(false);
-  return <header className="fixed inset-x-0 top-0 z-50 border-b border-[#dedede] bg-[#f7f7f5]/95 text-[#2f2f2f] backdrop-blur"><nav className="mx-auto flex h-[72px] max-w-[1440px] items-center justify-between px-5 sm:px-8 lg:px-12"><Link href="/" className="font-serif text-2xl leading-none tracking-[-.04em] sm:text-3xl">Gorontalo Unite</Link><div className="hidden items-center gap-7 md:flex">{links.map(([label, href]) => <Link key={label} href={href} className="text-xs font-semibold transition hover:text-[#8a6b3f]">{label}</Link>)}<span className="text-sm text-[#777]">⌕</span><button type="button" className="rounded-full bg-[#2f2f2f] px-5 py-2.5 text-xs font-bold text-white">Subscribe</button></div><button type="button" onClick={() => setOpen((value) => !value)} className="grid size-9 place-items-center rounded-full border border-[#2f2f2f] text-lg md:hidden" aria-label="Toggle menu">{open ? "×" : "≡"}</button></nav>{open ? <div className="border-t border-[#dedede] bg-[#f7f7f5] px-5 pb-5 md:hidden">{links.map(([label, href]) => <Link onClick={() => setOpen(false)} key={label} href={href} className="block border-b border-[#dedede] py-4 text-sm font-semibold">{label}</Link>)}<button type="button" className="mt-5 w-full rounded-full bg-[#2f2f2f] px-5 py-3 text-xs font-bold text-white">Subscribe</button></div> : null}</header>;
+  const [leftOpen, setLeftOpen] = useState(false);
+  const [rightOpen, setRightOpen] = useState(false);
+
+  return (
+    <>
+      <nav className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-gray-100 dark:border-zinc-800 sticky top-0 z-30">
+        <div className="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+          {/* Left: Hamburger + Logo */}
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setLeftOpen(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
+              aria-label="Buka menu"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              </svg>
+            </button>
+            <Link href="/" className="flex items-center select-none">
+              <Image src="/logo.png" alt="Gorontalo Unite" width={120} height={32} className="h-8 w-auto object-contain" priority />
+            </Link>
+          </div>
+
+          {/* Right: Get Started + Theme + Book */}
+          <div className="flex items-center gap-1">
+            <Link
+              href="/sign-in"
+              className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
+              aria-label="Login"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+              </svg>
+            </Link>
+            <ThemeToggle />
+            <button
+              onClick={() => setRightOpen(true)}
+              className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
+              aria-label="Buka panel kategori"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </nav>
+
+      <LeftDrawer open={leftOpen} onClose={() => setLeftOpen(false)} />
+      <RightPanel open={rightOpen} onClose={() => setRightOpen(false)} />
+    </>
+  );
 }

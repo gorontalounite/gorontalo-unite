@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState, useTransition, useCallback } from "react";
+import { useState, useTransition, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 
 interface NewsItem {
@@ -15,6 +15,10 @@ interface NewsItem {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
+  News:"bg-slate-100 text-slate-700", "What’s On":"bg-orange-50 text-orange-700",
+  Travel:"bg-sky-50 text-sky-700", Culinary:"bg-amber-50 text-amber-800",
+  Culture:"bg-purple-50 text-purple-700", People:"bg-rose-50 text-rose-700",
+  Life:"bg-emerald-50 text-emerald-700",
   Politik:"bg-blue-50 text-blue-700", Pemerintahan:"bg-sky-50 text-sky-700",
   Wisata:"bg-yellow-50 text-yellow-700", Budaya:"bg-purple-50 text-purple-700",
   Ekonomi:"bg-emerald-50 text-emerald-700", Bisnis:"bg-green-50 text-green-700",
@@ -30,6 +34,12 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 type SortField = "title" | "category" | "published_at" | "created_at";
 type SortDir   = "asc" | "desc";
+
+function SortIcon({ field, activeField, direction }: { field: SortField; activeField: SortField; direction: SortDir }) {
+  return field === activeField
+    ? <span className="ml-0.5 text-[10px]">{direction === "asc" ? "▲" : "▼"}</span>
+    : <span className="ml-0.5 text-[10px] text-gray-300">⬍</span>;
+}
 
 interface Props {
   initialItems:   NewsItem[];
@@ -53,6 +63,7 @@ export default function NewsAdminList({
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [searchVal, setSearchVal] = useState(q);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
@@ -75,11 +86,6 @@ export default function NewsAdminList({
     else nav({ sort: field, dir: "asc", page: "1" });
   };
 
-  const SortIcon = ({ field }: { field: SortField }) =>
-    sortField === field
-      ? <span className="ml-0.5 text-[10px]">{sortDir === "asc" ? "▲" : "▼"}</span>
-      : <span className="ml-0.5 text-[10px] text-gray-300">⬍</span>;
-
   const handleDelete = async (id: string) => {
     setDeleting(true);
     await fetch("/api/admin/articles", {
@@ -93,11 +99,10 @@ export default function NewsAdminList({
   };
 
   // Search with debounce via simple timeout
-  let searchTimer: ReturnType<typeof setTimeout>;
   const handleSearch = (val: string) => {
     setSearchVal(val);
-    clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => nav({ q: val, page: "1" }), 400);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => nav({ q: val, page: "1" }), 400);
   };
 
   const publishedCount = initialItems.filter((i) => i.published).length;
@@ -181,19 +186,19 @@ export default function NewsAdminList({
                 <th className="px-4 py-3 text-left">
                   <button type="button" onClick={() => toggleSort("title")}
                     className="flex items-center hover:text-gray-800 font-semibold">
-                    Judul <SortIcon field="title" />
+                    Judul <SortIcon field="title" activeField={sortField} direction={sortDir} />
                   </button>
                 </th>
                 <th className="px-4 py-3 text-left hidden md:table-cell">
                   <button type="button" onClick={() => toggleSort("category")}
                     className="flex items-center hover:text-gray-800 font-semibold">
-                    Kategori <SortIcon field="category" />
+                    Kategori <SortIcon field="category" activeField={sortField} direction={sortDir} />
                   </button>
                 </th>
                 <th className="px-4 py-3 text-left hidden lg:table-cell">
                   <button type="button" onClick={() => toggleSort("published_at")}
                     className="flex items-center hover:text-gray-800 font-semibold">
-                    Tanggal <SortIcon field="published_at" />
+                    Tanggal <SortIcon field="published_at" activeField={sortField} direction={sortDir} />
                   </button>
                 </th>
                 <th className="px-4 py-3 text-left">Status</th>
@@ -205,7 +210,7 @@ export default function NewsAdminList({
                 <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
                   <td className="px-4 py-3">
                     <p className="font-medium text-gray-900 truncate max-w-xs">{a.title}</p>
-                    <p className="text-xs text-gray-400">/berita/{a.slug}</p>
+                    <p className="text-xs text-gray-400">/{a.slug}</p>
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
@@ -230,7 +235,7 @@ export default function NewsAdminList({
                     <div className="flex items-center justify-end gap-3">
                       <Link href={`/admin/news/edit/${a.id}`}
                         className="text-xs text-brand hover:underline font-medium">Edit</Link>
-                      <Link href={`/berita/${a.slug}`} target="_blank"
+                      <Link href={`/${a.slug}`} target="_blank"
                         className="text-xs text-gray-400 hover:underline hidden lg:inline">Lihat →</Link>
                       <button onClick={() => setDeleteId(a.id)}
                         className="text-xs text-red-400 hover:underline">Hapus</button>

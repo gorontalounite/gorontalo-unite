@@ -9,7 +9,7 @@ interface Props {
   basePath?:  string;
 }
 
-export default function BeritaPagination({ page, totalPages, basePath = "/berita" }: Props) {
+export default function BeritaPagination({ page, totalPages, basePath = "/" }: Props) {
   const router     = useRouter();
   const sp         = useSearchParams();
   const [, startT] = useTransition();

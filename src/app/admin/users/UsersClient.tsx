@@ -24,7 +24,6 @@ const PERMISSIONS: { label: string; user: boolean; editor: boolean; admin: boole
   { label: "Buat & edit konten",        user: false, editor: true,  admin: true  },
   { label: "Publish / unpublish",       user: false, editor: true,  admin: true  },
   { label: "Hapus konten",              user: false, editor: false, admin: true  },
-  { label: "Kelola produk affiliate",   user: false, editor: false, admin: true  },
   { label: "Kelola pengguna & role",    user: false, editor: false, admin: true  },
   { label: "Akses panel admin",         user: false, editor: true,  admin: true  },
 ];

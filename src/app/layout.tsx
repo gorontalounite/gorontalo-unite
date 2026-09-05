@@ -1,23 +1,33 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Nanum_Myeongjo } from "next/font/google";
+import { Golos_Text, Space_Grotesk, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import Navbar                 from "@/components/layout/Navbar";
+import BottomNav              from "@/components/layout/BottomNav";
 import PublicFooter           from "@/components/layout/PublicFooter";
+import MainContent            from "@/components/layout/MainContent";
+import ServiceWorkerRegister  from "@/components/layout/ServiceWorkerRegister";
+import { ThemeProvider, themeInitScript } from "@/components/layout/ThemeProvider";
 
-const inter = Inter({
+const golosText = Golos_Text({
   variable: "--font-sans",
   subsets: ["latin"],
   weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const nanumMyeongjo = Nanum_Myeongjo({
-  variable: "--font-serif",
+const spaceGrotesk = Space_Grotesk({
+  variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "700", "800"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
+const instrumentSerif = Instrument_Serif({
+  variable: "--font-serif",
+  subsets: ["latin"],
+  weight: ["400"],
+  display: "swap",
+});
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
 
@@ -35,9 +45,13 @@ export const metadata: Metadata = {
   manifest:    "/manifest.json",
   metadataBase: new URL(BASE),
 
-  title: { default: "Gorontalo Unite — Independent Local Journal", template: "%s | Gorontalo Unite" },
-  description: "An independent local journal for people, culture, food, travel, and thoughtful conversations from Gorontalo.",
-  keywords: ["Gorontalo", "Gorontalo Unite", "culture", "travel", "food", "local journal"],
+  title: {
+    default:  "Gorontalo Unite — Berbagi Kabar Baik dari Gorontalo",
+    template: "%s | Gorontalo Unite",
+  },
+  description:
+    "Gorontalo Unite Mediahub berbagi kabar baik dari Gorontalo—berita, wisata, kuliner, budaya, event, dan cerita inspiratif pilihan.",
+  keywords: ["Gorontalo", "berita Gorontalo", "wisata Gorontalo", "AI Gorontalo", "informasi lokal", "hulontalo"],
   authors:  [{ name: "Gorontalo Unite", url: BASE }],
 
   /* ── Icons ──────────────────────────────────────────────── */
@@ -53,8 +67,8 @@ export const metadata: Metadata = {
 
   /* ── Open Graph ─────────────────────────────────────────── */
   openGraph: {
-    title:       "Gorontalo Unite — Independent Local Journal",
-    description: "Stories for people who stay curious.",
+    title:       "Gorontalo Unite — Berbagi Kabar Baik dari Gorontalo",
+    description: "Berita, wisata, kuliner, budaya, event, dan cerita inspiratif pilihan dari Gorontalo.",
     url:         BASE,
     type:        "website",
     locale:      "id_ID",
@@ -65,8 +79,8 @@ export const metadata: Metadata = {
   /* ── Twitter Card ───────────────────────────────────────── */
   twitter: {
     card:        "summary_large_image",
-    title:       "Gorontalo Unite — Independent Local Journal",
-    description: "Stories for people who stay curious.",
+    title:       "Gorontalo Unite — Berbagi Kabar Baik dari Gorontalo",
+    description: "Berita dan cerita positif pilihan dari Gorontalo.",
     images:      ["/og-image.png"],
   },
 
@@ -84,11 +98,19 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className={`${inter.variable} ${nanumMyeongjo.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="id" className={`${golosText.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} h-full antialiased`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
+      </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground font-sans">
-        <Navbar />
-        <main className="min-h-0 flex-1">{children}</main>
-        <PublicFooter />
+        <ThemeProvider>
+          <Navbar />
+          <MainContent>{children}</MainContent>
+          <PublicFooter />
+          <BottomNav />
+        </ThemeProvider>
+        {/* PWA service worker registration */}
+        <ServiceWorkerRegister />
       </body>
     </html>
   );

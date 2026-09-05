@@ -1,93 +1,411 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
-import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import BeritaPagination from "./BeritaPagination";
-import { CATEGORIES } from "./categories";
-import NewsCard, { type NewsArticle } from "@/components/news/NewsCard";
+import LatestNewsGrid from "./LatestNewsGrid";
+import { articleBelongsToWebCategory } from "./categories";
 
 export const dynamic = "force-dynamic";
+
 export const metadata: Metadata = {
-  title: "Berita Gorontalo — Gorontalo Unite",
-  description: "Berita, cerita, dan informasi terbaru dari Gorontalo.",
-  openGraph: { title: "Berita Gorontalo | Gorontalo Unite", type: "website" },
+  title: "Berita & Cerita Gorontalo",
+  description: "Kabar terpilih, agenda, perjalanan, kuliner, budaya, dan orang-orang menarik dari Gorontalo.",
+  openGraph: {
+    title: "Berita & Cerita Gorontalo | Gorontalo Unite",
+    description: "Yang penting, menarik, dan dekat dengan hidup di Gorontalo.",
+    type: "website",
+  },
 };
 
-const PAGE_SIZE = 12;
-const CATEGORY_BY_KEY = Object.fromEntries(CATEGORIES.map((category) => [category.key, category.label]));
-type PageProps = { searchParams: Promise<{ category?: string; page?: string; q?: string }> };
-type ChannelName = "Inspire" | "Insight" | "Interest";
-const EDITORIAL_CHANNELS: ChannelName[] = ["Inspire", "Insight", "Interest"];
-const ARTICLE_FIELDS = "id, title, slug, excerpt, image_url, category, categories, published_at, created_at, is_trending";
+type Article = {
+  id: string;
+  title: string;
+  slug: string;
+  excerpt: string | null;
+  image_url: string | null;
+  category: string;
+  categories: string[] | null;
+  tags: string[] | null;
+  published_at: string | null;
+  created_at: string;
+  is_trending: boolean | null;
+  view_count: number | null;
+};
 
-function SectionHeading({ eyebrow, title, actionHref, actionLabel }: { eyebrow?: string; title: string; actionHref?: string; actionLabel?: string }) {
-  return <div className="mb-5 flex items-end justify-between gap-4 border-b border-stone-300 pb-4 dark:border-zinc-700"><div>{eyebrow && <p className="text-[10px] font-bold uppercase tracking-[.22em] text-brand">{eyebrow}</p>}<h2 className={`${eyebrow ? "mt-2" : ""} font-display text-3xl font-semibold tracking-tight sm:text-4xl`}>{title}</h2></div>{actionHref && <Link href={actionHref} className="mb-1 shrink-0 text-sm font-semibold text-brand transition hover:text-stone-950 dark:hover:text-white">{actionLabel ?? "See all"} <span aria-hidden>→</span></Link>}</div>;
+type DeskKey = "news" | "whats-on" | "travel" | "culinary" | "culture" | "people" | "life";
+
+const ARTICLE_FIELDS = "id, title, slug, excerpt, image_url, category, categories, tags, published_at, created_at, is_trending, view_count";
+
+const DESKS: ReadonlyArray<{ key: DeskKey; label: string; description: string; terms: string[] }> = [
+  {
+    key: "news",
+    label: "News",
+    description: "Kabar yang berdampak pada cara kita hidup, berkarya, dan menikmati Gorontalo.",
+    terms: ["pembangunan", "infrastruktur", "ruang publik", "taman", "penerbangan", "bandara", "rute baru", "destinasi baru", "kebijakan", "pariwisata", "lifestyle", "gaya hidup", "prestasi", "anak muda", "industri kreatif", "ekonomi kreatif", "digitalisasi", "umkm", "olahraga"],
+  },
+  {
+    key: "whats-on",
+    label: "What’s On",
+    description: "Konser, festival, bazaar, exhibition, dan agenda pilihan untuk akhir pekanmu.",
+    terms: ["event", "acara", "konser", "festival", "bazaar", "bazar", "pameran", "exhibition", "agenda", "weekend", "lomba", "wisuda", "perayaan", "pelantikan", "turnamen", "kompetisi"],
+  },
+  {
+    key: "travel",
+    label: "Travel",
+    description: "Destinasi, hotel, itinerary, hidden gems, dan cara terbaik menjelajah Gorontalo.",
+    terms: ["wisata", "travel", "destinasi", "pantai", "pulau", "hotel", "resort", "itinerary", "transportasi", "diving", "laut", "alam", "liburan"],
+  },
+  {
+    key: "culinary",
+    label: "Culinary",
+    description: "Tempat makan, kopi, resep, dan pelaku F&B lokal yang layak dicoba.",
+    terms: ["kuliner", "food", "drink", "makan", "rumah makan", "warung", "cafe", "kafe", "kopi", "restoran", "umkm", "resep", "dapur", "chef", "ikan", "jagung", "binte", "ilabulo"],
+  },
+  {
+    key: "culture",
+    label: "Culture",
+    description: "Karawo, tradisi, sejarah, seni, bahasa, dan warisan yang membentuk kita.",
+    terms: ["budaya", "culture", "karawo", "tradisi", "sejarah", "seni", "bahasa", "heritage", "adat", "musik", "tari", "agama"],
+  },
+  {
+    key: "people",
+    label: "People",
+    description: "Creator, entrepreneur, seniman, komunitas, dan orang menarik dari Gorontalo.",
+    terms: ["people", "profil", "tokoh", "creator", "kreator", "entrepreneur", "pengusaha", "seniman", "komunitas", "inspire", "sosok", "pemuda"],
+  },
+  {
+    key: "life",
+    label: "Life",
+    description: "Kampus, karier, relationship, wellness, dan keseharian anak muda.",
+    terms: ["life", "lifestyle", "kampus", "pendidikan", "karier", "career", "relationship", "wellness", "kesehatan", "anak muda", "mahasiswa", "sekolah", "sosial"],
+  },
+] as const;
+
+function belongsTo(article: Article, key: DeskKey) {
+  return articleBelongsToWebCategory(article, key);
 }
 
-function UntoldStorySection({ articles }: { articles: NewsArticle[] }) {
-  return <section className="mb-12 overflow-hidden rounded-3xl bg-stone-950 px-5 py-9 text-white sm:mb-16 sm:px-8 sm:py-12">
-    <div className="mb-7 border-b border-white/20 pb-5 text-center"><h2 className="font-display text-3xl font-semibold uppercase tracking-[.08em] text-[#f5c400] sm:text-4xl">Untold Story</h2><p className="mt-3 text-sm font-medium tracking-wide text-white">Inspire - Insight - Interest</p></div>
-    {articles.length > 0 ? <div className="grid grid-cols-2 gap-4 sm:gap-5 lg:grid-cols-3">{articles.map((article) => <NewsCard key={article.id} article={article} variant="channel" />)}</div> : <div className="rounded-2xl border border-dashed border-white/30 bg-white/5 px-6 py-10 text-center text-sm text-white/70">Cerita Inspire, Insight, dan Interest akan tampil di sini.</div>}
-  </section>;
+function articlesFor(articles: Article[], key: DeskKey, limit: number) {
+  return articles.filter((article) => belongsTo(article, key)).slice(0, limit);
 }
 
-export default async function BeritaPage({ searchParams }: PageProps) {
+function articleDate(article: Article) {
+  return article.published_at ?? article.created_at;
+}
+
+function displayDate(value: string) {
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    timeZone: "Asia/Makassar",
+  }).format(new Date(value));
+}
+
+function deskLabel(article: Article) {
+  return DESKS.find((desk) => belongsTo(article, desk.key))?.label ?? article.categories?.[0] ?? article.category ?? "News";
+}
+
+function ArticleImage({ article, className, priority = false, sizes = "(max-width: 768px) 100vw, 50vw" }: { article: Article; className: string; priority?: boolean; sizes?: string }) {
+  return (
+    <div className={`relative overflow-hidden rounded-[4px] bg-[#e8e4dc] ${className}`}>
+      {article.image_url ? (
+        <Image
+          src={article.image_url}
+          alt=""
+          fill
+          priority={priority}
+          loading={priority ? "eager" : "lazy"}
+          unoptimized
+          sizes={sizes}
+          className="object-cover transition duration-700 ease-out group-hover:scale-[1.035]"
+        />
+      ) : (
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(245,196,0,.55),transparent_28%),linear-gradient(135deg,#eee9df,#cfc9bb)]" />
+      )}
+    </div>
+  );
+}
+
+function Eyebrow({ article, light = false }: { article: Article; light?: boolean }) {
+  return (
+    <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#77736b]"}`}>
+      <span className={light ? "text-[#f5c400]" : "text-[#9b7513]"}>{deskLabel(article)}</span>
+      <span aria-hidden>•</span>
+      <time dateTime={articleDate(article)}>{displayDate(articleDate(article))}</time>
+    </div>
+  );
+}
+
+function SectionTitle({ id, title, dark = false, showViewAll = true }: { id: string; title: string; dark?: boolean; showViewAll?: boolean }) {
+  return (
+    <div className="mb-6 flex items-center justify-between gap-4">
+      <h2 className="flex items-center gap-2 font-display text-[20px] font-extrabold tracking-[-.025em] sm:text-[24px]">
+        <span className="text-[#f5c400]" aria-hidden>/</span>
+        <span>{title}</span>
+        <span className="text-[#f5c400]" aria-hidden>/</span>
+      </h2>
+      {showViewAll ? <Link href={`/category/${id}`} className={`hidden shrink-0 text-xs font-bold sm:inline ${dark ? "text-white" : "text-[#302f2c]"}`}>View all <span aria-hidden>→</span></Link> : null}
+    </div>
+  );
+}
+
+function StoryCard({ article, large = false }: { article: Article; large?: boolean }) {
+  return (
+    <article className="group">
+      <Link href={`/${article.slug}`} className="block">
+        <ArticleImage article={article} className={large ? "aspect-[16/10]" : "aspect-[4/3]"} sizes={large ? "(max-width: 768px) 100vw, 55vw" : "(max-width: 768px) 82vw, 30vw"} />
+        <div className="pt-4">
+          <Eyebrow article={article} />
+          <h3 className={`mt-2 font-display font-extrabold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#9b7513] ${large ? "text-[22px] sm:text-[30px]" : "text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
+          {article.excerpt ? <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#6d6961]">{article.excerpt}</p> : null}
+        </div>
+      </Link>
+    </article>
+  );
+}
+
+function CompactStory({ article }: { article: Article }) {
+  return (
+    <article className="group border-b border-[#d7d1c6] pb-4 last:border-0 last:pb-0">
+      <Link href={`/${article.slug}`} className="grid grid-cols-[1fr_108px] gap-4">
+        <div>
+          <Eyebrow article={article} />
+          <h3 className="mt-2 line-clamp-3 font-display text-[15px] font-extrabold leading-[1.16] tracking-[-.015em] transition group-hover:text-[#9b7513] sm:text-[17px]">{article.title}</h3>
+        </div>
+        <div className="relative">
+          <ArticleImage article={article} className="aspect-square" sizes="108px" />
+        </div>
+      </Link>
+    </article>
+  );
+}
+
+function DarkFeature({ article }: { article: Article }) {
+  return (
+    <article className="group relative min-h-[430px] overflow-hidden rounded-[4px] sm:min-h-[560px]">
+      <ArticleImage article={article} className="absolute inset-0 h-full w-full" priority sizes="(max-width: 768px) 100vw, 70vw" />
+      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent" />
+      <Link href={`/${article.slug}`} className="absolute inset-0 flex items-end p-6 sm:p-9">
+        <div className="max-w-3xl text-white">
+          <Eyebrow article={article} light />
+          <h3 className="mt-3 font-display text-[26px] font-extrabold leading-[1.04] tracking-[-.035em] sm:text-[38px]">{article.title}</h3>
+          {article.excerpt ? <p className="mt-4 hidden max-w-2xl text-sm leading-relaxed text-white/75 sm:line-clamp-2">{article.excerpt}</p> : null}
+        </div>
+      </Link>
+    </article>
+  );
+}
+
+function DeskNav() {
+  return (
+    <nav aria-label="Rubrik berita" className="border-y border-[#d7d1c6]">
+      <div className="mx-auto flex max-w-[1280px] gap-6 overflow-x-auto px-4 py-3 [scrollbar-width:none] sm:px-6 lg:px-8 [&::-webkit-scrollbar]:hidden">
+        {DESKS.filter((desk) => desk.key !== "news").map((desk) => <Link key={desk.key} href={`/category/${desk.key}`} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] transition hover:text-[#9b7513]">{desk.label}</Link>)}
+        <Link href="/category" className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] transition hover:text-[#9b7513]">All Categories</Link>
+        <a href="#latest" className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] transition hover:text-[#9b7513]">Latest News</a>
+      </div>
+    </nav>
+  );
+}
+
+function EmptyDesk({ dark = false }: { dark?: boolean }) {
+  return (
+    <div className={`border border-dashed px-6 py-14 text-center ${dark ? "border-white/25 bg-white/[.03] text-white/65" : "border-[#bbb3a5] bg-white/20 text-[#77736b]"}`}>
+      <p className="font-display text-[18px] font-bold">Cerita pilihan sedang disiapkan.</p>
+      <p className="mt-2 text-xs">Rubrik ini akan diisi setelah lolos kurasi redaksi.</p>
+    </div>
+  );
+}
+
+export default async function BeritaPage({ searchParams }: { searchParams: Promise<{ section?: string; q?: string }> }) {
   const params = await searchParams;
-  const categoryKey = CATEGORY_BY_KEY[params.category ?? ""] ? params.category ?? "" : "";
-  const categoryLabel = categoryKey ? CATEGORY_BY_KEY[categoryKey] : undefined;
+  const activeDesk = DESKS.find((desk) => desk.key === params.section);
   const search = (params.q ?? "").trim();
-  const page = Math.max(1, Number.parseInt(params.page ?? "1", 10) || 1);
-  const offset = (page - 1) * PAGE_SIZE;
-  const editorial = !categoryKey && !search && page === 1;
-  let articles: NewsArticle[] = [];
-  let totalCount = 0;
-  const channelArticles: Record<ChannelName, NewsArticle[]> = { Inspire: [], Insight: [], Interest: [] };
+  let articles: Article[] = [];
 
   try {
     const supabase = await createClient();
-    let articleRequest = supabase.from("articles")
-      .select(ARTICLE_FIELDS, { count: "exact" })
-      .eq("published", true).neq("category", "Portfolio")
-      .order("published_at", { ascending: false, nullsFirst: false });
-    if (categoryLabel) articleRequest = articleRequest.contains("categories", [categoryLabel]);
-    if (search) articleRequest = articleRequest.or(`title.ilike.%${search}%,excerpt.ilike.%${search}%`);
-    const { data, count, error } = await articleRequest.range(offset, offset + PAGE_SIZE - 1);
-    articles = error ? [] : (data ?? []) as NewsArticle[];
-    totalCount = count ?? 0;
-    if (editorial) {
-      const channelResults = await Promise.all(EDITORIAL_CHANNELS.map((name) => supabase.from("articles").select(ARTICLE_FIELDS).eq("published", true).neq("category", "Portfolio").contains("categories", [name]).order("published_at", { ascending: false, nullsFirst: false }).limit(6)));
-      channelResults.forEach(({ data, error }, index) => {
-        if (!error) channelArticles[EDITORIAL_CHANNELS[index]] = (data ?? []) as NewsArticle[];
-      });
+    let request = supabase
+      .from("articles")
+      .select(ARTICLE_FIELDS)
+      .eq("published", true)
+      .neq("category", "Portfolio")
+      .order("published_at", { ascending: false, nullsFirst: false })
+      .limit(90);
+    if (search) {
+      const safeSearch = search.replace(/[,%_]/g, " ");
+      request = request.or(`title.ilike.%${safeSearch}%,excerpt.ilike.%${safeSearch}%`);
     }
-  } catch { articles = []; }
+    const { data, error } = await request;
+    if (!error) articles = (data ?? []) as Article[];
+  } catch {
+    articles = [];
+  }
 
-  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const lead = editorial ? articles[0] : undefined;
-  const sideStories = editorial ? articles.slice(1, 3) : [];
-  const newsStories = editorial ? articles.slice(3, 9) : articles;
-  const choiceStories = editorial ? articles.filter((article) => article.is_trending).slice(0, 3) : [];
-  const untoldStories = Array.from(new Map(EDITORIAL_CHANNELS.flatMap((name) => channelArticles[name]).map((article) => [article.id, article])).values())
-    .sort((first, second) => new Date(second.published_at ?? second.created_at).getTime() - new Date(first.published_at ?? first.created_at).getTime())
-    .slice(0, 9);
+  const displayedArticles = activeDesk ? articles.filter((article) => belongsTo(article, activeDesk.key)) : articles;
+
+  if (activeDesk || search) {
+    const title = search ? `Hasil untuk “${search}”` : activeDesk?.label ?? "Berita";
+    const description = search ? `${displayedArticles.length} artikel ditemukan.` : activeDesk?.description;
+    return (
+      <div className="min-h-screen bg-white text-[#302f2c]">
+        <DeskNav />
+        <main className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
+          <div className="mb-10 border-b border-[#302f2c] pb-7">
+            <Link href="/category" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#9b7513]">← All categories</Link>
+            <h1 className="mt-4 font-display text-[40px] font-extrabold tracking-[-.04em] sm:text-[56px]">{title}</h1>
+            {description ? <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#6d6961]">{description}</p> : null}
+          </div>
+          {displayedArticles.length ? (
+            <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
+              {displayedArticles.map((article, index) => <StoryCard key={article.id} article={article} large={index === 0} />)}
+            </div>
+          ) : (
+            <div className="border border-dashed border-[#bbb3a5] px-6 py-24 text-center">
+              <p className="font-display text-2xl font-bold">Belum ada cerita di rubrik ini.</p>
+              <p className="mt-2 text-sm text-[#77736b]">Redaksi sedang menyiapkan pilihan yang relevan untukmu.</p>
+            </div>
+          )}
+        </main>
+      </div>
+    );
+  }
+
+  if (!articles.length) {
+    return (
+      <div className="min-h-[70vh] bg-white px-4 pt-36 text-center text-[#302f2c]">
+        <h1 className="font-display text-4xl font-extrabold">Berita sedang disiapkan</h1>
+        <p className="mt-3 text-sm text-[#77736b]">Silakan kembali beberapa saat lagi.</p>
+      </div>
+    );
+  }
+
+  const hero = articles[0];
+  const heroSide = articles.slice(1, 3);
+  const news = articlesFor(articles.slice(3), "news", 5);
+  const whatsOn = articlesFor(articles, "whats-on", 4);
+  const travel = articlesFor(articles, "travel", 5);
+  const culinary = articlesFor(articles, "culinary", 3);
+  const culture = articlesFor(articles, "culture", 4);
+  const people = articlesFor(articles, "people", 4);
+  const life = articlesFor(articles, "life", 4);
 
   return (
-    <div className="min-h-screen bg-[#f7f5ef] text-stone-900 dark:bg-zinc-950 dark:text-white">
-      <main className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 lg:px-8">
-        {search ? <section className="pb-4 pt-9 sm:pb-6 sm:pt-12"><div className="rounded-3xl bg-stone-900 px-6 py-10 text-white dark:bg-amber-500 dark:text-stone-950 sm:px-10"><p className="text-[10px] font-bold uppercase tracking-[.24em] text-amber-300 dark:text-stone-900">Pencarian berita</p><h2 className="mt-2 font-display text-3xl font-semibold sm:text-5xl">Hasil untuk “{search}”</h2><p className="mt-3 text-sm text-stone-300 dark:text-stone-800">{totalCount} artikel ditemukan.</p></div></section> : categoryLabel ? <section className="pb-4 pt-9 sm:pb-6 sm:pt-12"><p className="text-[10px] font-bold uppercase tracking-[.24em] text-brand">Kategori</p><h2 className="mt-2 font-display text-4xl font-semibold sm:text-6xl">{categoryLabel}</h2><p className="mt-3 text-sm text-stone-500 dark:text-zinc-400">{totalCount} artikel dalam kategori ini.</p></section> : null}
+    <div className="min-h-screen bg-white text-[#302f2c]">
+      <DeskNav />
+      <main>
+        <section className="mx-auto max-w-[1280px] px-4 pb-12 pt-6 sm:px-6 sm:pb-16 sm:pt-8 lg:px-8">
+          <div className="grid gap-4 lg:grid-cols-[1.7fr_.8fr]">
+            <article className="group relative min-h-[440px] overflow-hidden rounded-[4px] bg-black sm:min-h-[570px]">
+              <ArticleImage article={hero} className="absolute inset-0 h-full w-full" priority sizes="(max-width: 1024px) 100vw, 70vw" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
+              <Link href={`/${hero.slug}`} className="absolute inset-0 flex items-end p-6 sm:p-10">
+                <div className="max-w-3xl text-white">
+                  <Eyebrow article={hero} light />
+                  <h1 className="mt-3 font-display text-[30px] font-extrabold leading-[1.02] tracking-[-.04em] sm:text-[46px]">{hero.title}</h1>
+                  {hero.excerpt ? <p className="mt-4 hidden max-w-2xl text-sm leading-relaxed text-white/75 sm:line-clamp-2">{hero.excerpt}</p> : null}
+                </div>
+              </Link>
+            </article>
+            <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
+              {heroSide.map((article) => (
+                <article key={article.id} className="group relative min-h-[240px] overflow-hidden rounded-[4px] bg-black sm:min-h-[275px]">
+                  <ArticleImage article={article} className="absolute inset-0 h-full w-full" sizes="(max-width: 1024px) 50vw, 30vw" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
+                  <Link href={`/${article.slug}`} className="absolute inset-0 flex items-end p-4 sm:p-6">
+                    <div className="text-white"><Eyebrow article={article} light /><h2 className="mt-2 line-clamp-3 font-display text-[16px] font-extrabold leading-[1.08] tracking-[-.02em] sm:text-[20px]">{article.title}</h2></div>
+                  </Link>
+                </article>
+              ))}
+            </div>
+          </div>
+        </section>
 
-        {editorial && lead && <>
-          <section aria-label="Sorotan hari ini" className="pb-8 pt-9 sm:pb-10 sm:pt-12"><div className="grid gap-5 lg:grid-cols-[1.6fr_.8fr]"><NewsCard article={lead} variant="hero" /><div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">{sideStories.map((article) => <NewsCard key={article.id} article={article} variant="compact" />)}</div></div></section>
-          {sideStories.length > 0 && <section className="overflow-hidden rounded-3xl bg-[#b68921] px-5 py-6 text-white sm:px-8 sm:py-7"><div className="mb-5 flex items-center justify-between"><h2 className="font-display text-2xl font-semibold">Terbaca minggu ini</h2><span className="text-xs text-white/70">Pilihan pembaca</span></div><div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">{articles.slice(0, 4).map((article, index) => <Link key={article.id} href={`/berita/${article.slug}`} className="group min-h-28 rounded-xl border border-white/20 bg-stone-900/85 p-4 transition hover:bg-stone-900"><span className="text-xs font-bold text-amber-300">0{index + 1}</span><p className="mt-2 line-clamp-2 text-sm font-semibold leading-snug">{article.title}</p></Link>)}</div></section>}
-        </>}
+        <section id="news" className="scroll-mt-24 border-t border-[#d7d1c6] py-12 sm:py-16">
+          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+            <SectionTitle id="news" title="Top Stories" showViewAll={false} />
+            {news.length ? <div className="grid gap-8 lg:grid-cols-[1.2fr_.8fr]">
+              <StoryCard article={news[0]} large />
+              <div className="grid content-start gap-4 sm:grid-cols-2 lg:grid-cols-1">{news.slice(1).map((article) => <CompactStory key={article.id} article={article} />)}</div>
+            </div> : <EmptyDesk />}
+          </div>
+        </section>
 
-        <section className={editorial ? "pb-12 pt-12 sm:pb-16 sm:pt-16" : "pb-12 pt-9 sm:pb-16 sm:pt-12"}><SectionHeading eyebrow={search ? "Hasil pencarian" : categoryLabel ? "Berita kategori" : undefined} title={search ? "Ditemukan untuk Anda" : categoryLabel ? categoryLabel : "Latest News"} actionHref={!search && !categoryLabel ? "/berita" : undefined} actionLabel="See all" />
-          {articles.length === 0 ? <div className="rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-20 text-center dark:border-zinc-700 dark:bg-zinc-900"><h2 className="font-display text-xl font-semibold">Artikel sedang disiapkan</h2><p className="mt-2 text-sm text-stone-500 dark:text-zinc-400">Coba ubah kata kunci atau pilih kategori lain.</p></div> : newsStories.length ? <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">{newsStories.map((article) => <NewsCard key={article.id} article={article} variant="card" />)}</div> : <p className="rounded-2xl border border-dashed border-stone-300 bg-white p-10 text-center text-sm text-stone-500 dark:border-zinc-700 dark:bg-zinc-900">Artikel berikutnya akan tampil di sini.</p>}</section>
+        <section id="whats-on" className="scroll-mt-24 bg-[#17191d] py-12 text-white sm:py-16">
+          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+            <SectionTitle id="whats-on" title="What’s On" dark />
+            {whatsOn.length ? <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+              {whatsOn.map((article, index) => (
+                <article key={article.id} className={`group ${index === 0 ? "md:col-span-2 lg:col-span-2" : ""}`}>
+                  <Link href={`/${article.slug}`} className="block">
+                    <div className="relative">
+                      <ArticleImage article={article} className={index === 0 ? "aspect-[16/9]" : "aspect-[4/3]"} sizes="(max-width: 768px) 100vw, 40vw" />
+                      <span className="absolute left-4 top-4 bg-[#f5c400] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[.14em] text-black">Save the date</span>
+                    </div>
+                    <h3 className={`mt-4 font-display font-extrabold leading-[1.1] tracking-[-.02em] ${index === 0 ? "text-[21px] sm:text-[26px]" : "text-[17px]"}`}>{article.title}</h3>
+                    <p className="mt-2 text-[10px] font-bold uppercase tracking-[.14em] text-white/50">{displayDate(articleDate(article))}</p>
+                  </Link>
+                </article>
+              ))}
+            </div> : <EmptyDesk dark />}
+          </div>
+        </section>
 
-        {editorial && choiceStories.length > 0 && <section className="pb-12 sm:pb-16"><SectionHeading title="Recommended for You" /><div className="mx-auto grid max-w-5xl gap-5">{choiceStories.map((article) => <NewsCard key={article.id} article={article} variant="list" />)}</div></section>}
-        {editorial && <UntoldStorySection articles={untoldStories} />}
-        {!search && !categoryLabel && <section className="rounded-3xl bg-stone-900 px-6 py-10 text-center text-white dark:bg-zinc-900 sm:px-12"><p className="text-[10px] font-bold uppercase tracking-[.24em] text-amber-300">Dari redaksi</p><h2 className="mt-3 font-display text-3xl font-semibold sm:text-4xl">Ikuti kabar baik dari Gorontalo</h2><p className="mx-auto mt-3 max-w-xl text-sm text-stone-300">Temukan berita, cerita, dan rekomendasi yang dikurasi Gorontalo Unite.</p><Link href="/berita/penulis/gorontalo-unite" className="mt-6 inline-flex rounded-full bg-[#f5c400] px-5 py-2.5 text-sm font-bold text-stone-950 transition hover:bg-yellow-300">Lihat profil redaksi →</Link></section>}
-        <Suspense><BeritaPagination page={page} totalPages={totalPages} /></Suspense>
+        <section id="travel" className="scroll-mt-24 py-12 sm:py-16">
+          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+            <SectionTitle id="travel" title="Travel" />
+            {travel.length ? <div className="grid gap-6 lg:grid-cols-[1.45fr_.55fr]">
+              <DarkFeature article={travel[0]} />
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">{travel.slice(1).map((article) => <CompactStory key={article.id} article={article} />)}</div>
+            </div> : <EmptyDesk />}
+          </div>
+        </section>
+
+        <section id="culinary" className="scroll-mt-24 border-y border-[#dedede] bg-[#f6f6f6] py-12 sm:py-16">
+          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+            <SectionTitle id="culinary" title="Culinary" />
+            {culinary.length ? <div className="grid gap-8 sm:grid-cols-3">{culinary.map((article) => <StoryCard key={article.id} article={article} />)}</div> : <EmptyDesk />}
+          </div>
+        </section>
+
+        <section id="culture" className="scroll-mt-24 bg-white py-12 sm:py-16">
+          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+            <SectionTitle id="culture" title="Culture" />
+            {culture.length ? <div className="grid gap-5 lg:grid-cols-[1.35fr_.65fr]">
+              <DarkFeature article={culture[0]} />
+              <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">
+                {culture.slice(1).map((article) => <article key={article.id} className="group border-b border-[#dedede] pb-5 last:border-0"><Link href={`/${article.slug}`} className="grid grid-cols-[112px_1fr] gap-4"><ArticleImage article={article} className="aspect-square" sizes="112px" /><div><p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#9b7513]">Culture</p><h3 className="mt-2 line-clamp-3 font-display text-[16px] font-extrabold leading-[1.1]">{article.title}</h3></div></Link></article>)}
+              </div>
+            </div> : <EmptyDesk />}
+          </div>
+        </section>
+
+        <section id="people" className="scroll-mt-24 py-12 sm:py-16">
+          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+            <SectionTitle id="people" title="People" />
+            {people.length ? <div className="flex snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
+              {people.map((article) => <div key={article.id} className="min-w-[78vw] snap-start sm:min-w-0"><StoryCard article={article} /></div>)}
+            </div> : <EmptyDesk />}
+          </div>
+        </section>
+
+        <section id="life" className="scroll-mt-24 border-y border-[#dedede] bg-[#f7f7f7] py-12 sm:py-16">
+          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+            <SectionTitle id="life" title="Life" />
+            {life.length ? <div className="grid gap-6 lg:grid-cols-2">
+              <StoryCard article={life[0]} large />
+              <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">{life.slice(1).map((article) => <CompactStory key={article.id} article={article} />)}</div>
+            </div> : <EmptyDesk />}
+          </div>
+        </section>
+
+        <section id="latest" className="scroll-mt-24 py-12 sm:py-16">
+          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+            <SectionTitle id="latest" title="Latest News" showViewAll={false} />
+            <LatestNewsGrid articles={articles} />
+          </div>
+        </section>
       </main>
     </div>
   );

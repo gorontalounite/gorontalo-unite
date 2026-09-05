@@ -21,7 +21,7 @@ export default function BeritaFilters({ activeCategory, activeSearch, catCounts 
     if (value) params.set(key, value);
     else params.delete(key);
     params.delete("page");
-    startTransition(() => router.push(`/berita${params.size ? `?${params.toString()}` : ""}`, { scroll: false }));
+    startTransition(() => router.push(`/${params.size ? `?${params.toString()}` : ""}`, { scroll: false }));
   }, [router, searchParams]);
 
   useEffect(() => () => {
@@ -68,7 +68,7 @@ export default function BeritaFilters({ activeCategory, activeSearch, catCounts 
       {hasFilters && (
         <button
           type="button"
-          onClick={() => startTransition(() => router.push("/berita", { scroll: false }))}
+          onClick={() => startTransition(() => router.push("/", { scroll: false }))}
           className="rounded-xl border border-gray-200 px-3 py-2 text-sm text-gray-500 transition-colors hover:text-gray-900 dark:border-zinc-700 dark:text-gray-400 dark:hover:text-white"
         >
           Hapus filter

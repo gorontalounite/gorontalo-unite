@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { CATEGORIES, CAT_COLOR, DEFAULT_COLOR } from "../categories";
+import { articleBelongsToWebCategory, CATEGORIES, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS } from "../categories";
 import BeritaPagination from "../BeritaPagination";
 import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/app/news/[id]/page";
 
@@ -12,10 +12,10 @@ export const dynamic = "force-dynamic";
 const LIMIT = 9;
 
 const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]));
-const LABEL_TO_KEY: Record<string, string> = Object.fromEntries(CATEGORIES.map((c) => [c.label, c.key]));
 
 interface Article {
   id: string; title: string; slug: string; category: string; categories: string[];
+  tags: string[] | null;
   excerpt: string | null; image_url: string | null;
   published_at: string | null; created_at: string;
   is_trending: boolean; view_count: number;
@@ -31,16 +31,28 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (!CAT_MAP[key]) return generateArticleMetadata({ params: Promise.resolve({ id: key }) });
   const cat = CAT_MAP[key];
   if (!cat) return { title: "Gorontalo Unite" };
+  const description = WEB_CATEGORY_DESCRIPTIONS[key] ?? `Berita terkini seputar ${cat.label} di Gorontalo.`;
   return {
-    title:       `${cat.label} — Gorontalo Unite`,
-    description: `Berita terkini seputar ${cat.label} di Gorontalo.`,
-    openGraph:   { title: `${cat.label} | Gorontalo Unite`, type: "website" },
+    title: cat.label,
+    description,
+    alternates: { canonical: `/category/${key}` },
+    openGraph: {
+      title: `${cat.label} | Gorontalo Unite`,
+      description,
+      url: `/category/${key}`,
+      type: "website",
+    },
   };
 }
 
 function formatDate(d: string | null) {
   if (!d) return "";
-  return new Date(d).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+  return new Date(d).toLocaleDateString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "Asia/Makassar",
+  });
 }
 
 export default async function BeritaCategoryPage({ params, searchParams }: Props) {
@@ -54,23 +66,33 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   const colors = CAT_COLOR[cat.label] ?? DEFAULT_COLOR;
   const admin  = await createClient();
 
-  const { data: raw, count } = await admin
+  const { data: raw } = await admin
     .from("articles")
-    .select("id, title, slug, category, categories, excerpt, image_url, published_at, created_at, is_trending, view_count", { count: "exact" })
+    .select("id, title, slug, category, categories, tags, excerpt, image_url, published_at, created_at, is_trending, view_count")
     .eq("published", true)
-    .contains("categories", [cat.label])
     .order("published_at", { ascending: false, nullsFirst: false })
-    .range(offset, offset + LIMIT - 1);
+    .limit(500);
 
-  const totalCount = count ?? 0;
+  const matching = (raw ?? []).filter((article) => {
+    if (WEB_CATEGORY_DESCRIPTIONS[key]) return articleBelongsToWebCategory({
+      category: article.category as string,
+      categories: article.categories as string[] | null,
+      tags: article.tags as string[] | null,
+      title: article.title as string,
+      excerpt: article.excerpt as string | null,
+    }, key);
+    return (article.categories as string[] | null)?.includes(cat.label) || article.category === cat.label;
+  });
+  const totalCount = matching.length;
   const totalPages = Math.ceil(totalCount / LIMIT);
 
-  const articles: Article[] = (raw ?? []).map((a) => ({
+  const articles: Article[] = matching.slice(offset, offset + LIMIT).map((a) => ({
     id:           a.id as string,
     title:        a.title as string,
     slug:         a.slug as string,
     category:     a.category as string,
     categories:   (a.categories as string[] | null) ?? [a.category as string],
+    tags:          a.tags as string[] | null,
     excerpt:      a.excerpt as string | null,
     image_url:    a.image_url as string | null,
     published_at: a.published_at as string | null,
@@ -79,120 +101,102 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
     view_count:   (a.view_count as number) ?? 0,
   }));
 
-  const grid = articles;
+  const description = WEB_CATEGORY_DESCRIPTIONS[key] ?? `Berita terkini seputar ${cat.label} di Gorontalo.`;
 
   return (
-    <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 pb-24 md:pb-8">
-
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-8">
-        <Link href="/" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Beranda</Link>
-        <span>/</span>
-        <Link href="/berita" className="hover:text-brand dark:hover:text-yellow-400 transition-colors">Berita</Link>
-        <span>/</span>
-        <span className={`font-medium ${colors.text}`}>{cat.label}</span>
-      </nav>
-
-      {/* Header */}
-      <div className="mb-10 pb-8 border-b border-gray-100 dark:border-zinc-800">
-        <h1 className={`font-display text-4xl sm:text-5xl font-bold mb-2 leading-none tracking-tight ${colors.text}`}>
-          {cat.label}
-        </h1>
-        <p className="text-sm text-gray-400 dark:text-gray-500 mt-2">
-          {totalCount > 0
-            ? `${totalCount} artikel · halaman ${page} dari ${totalPages}`
-            : "Belum ada artikel"}
-        </p>
-      </div>
-
-      {/* Empty state */}
-      {articles.length === 0 && (
-        <div className="flex flex-col items-center py-24 text-center">
-          <h2 className="font-display text-xl font-semibold text-gray-700 dark:text-gray-300 mb-2">
-            Belum ada artikel
-          </h2>
-          <p className="text-sm text-gray-400 dark:text-gray-500 max-w-xs mb-6">
-            Konten kategori {cat.label} akan segera hadir.
+    <div className="min-h-screen bg-[#f7f7f7] pb-24 text-[#101018] dark:bg-zinc-950 dark:text-white md:pb-10">
+      <section className="relative overflow-hidden border-b border-stone-100 bg-white dark:border-zinc-800 dark:bg-zinc-950">
+        <div
+          aria-hidden="true"
+          className="absolute inset-0 opacity-60 dark:opacity-20"
+          style={{
+            backgroundImage: "radial-gradient(circle, rgba(120,120,120,.24) 1.2px, transparent 1.2px)",
+            backgroundSize: "22px 22px",
+          }}
+        />
+        <div className="relative mx-auto flex max-w-4xl flex-col items-center px-5 py-12 text-center sm:px-8 sm:py-16">
+          <span className={`h-4 w-4 rounded-full ${colors.bg} ring-4 ring-white shadow-sm dark:ring-zinc-950`} />
+          <p className="mt-5 text-[10px] font-bold uppercase tracking-[.2em] text-stone-400 dark:text-zinc-500">Category</p>
+          <h1 className={`mt-2 font-display text-3xl font-semibold tracking-[-.025em] sm:text-4xl ${colors.text}`}>
+            {cat.label}
+          </h1>
+          <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-600 dark:text-zinc-300 sm:text-base">
+            {description}
           </p>
-          <Link href="/berita" className="px-5 py-2 bg-[#F5C400] text-black text-sm font-medium rounded-xl hover:opacity-90 transition-opacity">
-            ← Semua berita
-          </Link>
+          <p className="mt-3 text-[11px] text-stone-400 dark:text-zinc-500 sm:text-xs">
+            {totalCount > 0 ? `${totalCount} articles · page ${page} of ${totalPages}` : "No articles yet"}
+          </p>
         </div>
-      )}
+      </section>
 
-      {articles.length > 0 && (
-        <>
-          {/* Grid 3×3 */}
-          {grid.length > 0 && (
-            <>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
-                {grid.map((article) => (
-                  <div
+      <main className="mx-auto max-w-7xl px-4 sm:px-8">
+        <div className="py-7 text-xs sm:text-sm">
+          <Link href="/" className="font-semibold text-brand hover:underline">← All news</Link>
+        </div>
+
+        {articles.length === 0 ? (
+          <div className="mx-auto flex max-w-2xl flex-col items-center rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center dark:border-zinc-700 dark:bg-zinc-900">
+            <h2 className="font-display text-xl font-semibold text-stone-700 dark:text-zinc-200">No articles yet</h2>
+            <p className="mt-2 max-w-sm text-sm leading-relaxed text-stone-400 dark:text-zinc-500">
+              Stories for {cat.label} will appear here.
+            </p>
+          </div>
+        ) : (
+          <>
+            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
+              {articles.map((article) => {
+                const articleCategory = article.categories[0] || article.category;
+                const articleColors = CAT_COLOR[articleCategory] ?? DEFAULT_COLOR;
+                const publishedAt = article.published_at ?? article.created_at;
+
+                return (
+                  <Link
                     key={article.id}
-                    className="relative group flex flex-col rounded-2xl overflow-hidden border border-gray-100 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-lg transition-all duration-300"
+                    href={`/${article.slug}`}
+                    className="group flex min-h-36 overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-[0_10px_35px_rgba(15,23,42,.06)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_40px_rgba(15,23,42,.1)] dark:border-zinc-800 dark:bg-zinc-900 sm:min-h-48"
                   >
-                    <Link href={`/berita/${article.slug}`} className="absolute inset-0 z-[1]" aria-label={article.title} />
-                    <div className="relative aspect-[16/10] bg-gray-100 dark:bg-zinc-800 overflow-hidden">
+                    <div className="category-article-image relative min-h-full shrink-0 overflow-hidden bg-stone-100 dark:bg-zinc-800">
                       {article.image_url ? (
-                        <Image src={article.image_url} alt={article.title} fill
-                          className="object-cover group-hover:scale-105 transition-transform duration-500" unoptimized />
+                        <Image
+                          src={article.image_url}
+                          alt=""
+                          fill
+                          unoptimized
+                          className="object-cover transition duration-500 group-hover:scale-[1.03]"
+                          sizes="(max-width: 639px) 124px, (max-width: 1023px) 208px, 190px"
+                        />
                       ) : (
-                        <div className={`w-full h-full ${colors.bg} opacity-60`} />
+                        <div className={`absolute inset-0 ${articleColors.bg}`} />
                       )}
                       {article.is_trending && (
-                        <span className="absolute top-2.5 left-2.5 text-[10px] font-semibold bg-orange-500 text-white px-2 py-0.5 rounded-full">
+                        <span className="absolute left-2 top-2 rounded-full bg-orange-500 px-2 py-0.5 text-[9px] font-semibold text-white">
                           Trending
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-col flex-1 p-4 sm:p-5 space-y-2.5">
-                      <div className="relative z-[2] flex flex-wrap gap-1">
-                        {article.categories.map((c) => {
-                          const k = LABEL_TO_KEY[c] ?? c.toLowerCase();
-                          const bc = CAT_COLOR[c] ?? DEFAULT_COLOR;
-                          return (
-                            <Link key={c} href={`/berita/${k}`}
-                              className={`inline-block text-[10px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-full ${bc.badge}`}>
-                              {c}
-                            </Link>
-                          );
-                        })}
-                      </div>
-                      <h3 className="relative z-[1] font-display text-sm sm:text-base font-semibold text-gray-900 dark:text-white leading-snug line-clamp-2 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+
+                    <div className="flex min-w-0 flex-1 flex-col justify-center px-4 py-4 sm:px-6 sm:py-5">
+                      <span className={`w-fit rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[.1em] sm:text-[10px] ${articleColors.badge}`}>
+                        {articleCategory}
+                      </span>
+                      <h2 className="mt-3 line-clamp-3 text-sm font-semibold leading-snug tracking-[-.015em] text-[#101018] transition group-hover:text-brand dark:text-white sm:text-lg">
                         {article.title}
-                      </h3>
-                      {article.excerpt && (
-                        <p className="text-xs text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-2 flex-1">
-                          {article.excerpt}
-                        </p>
-                      )}
-                      <p className="text-xs text-gray-400 dark:text-gray-500 pt-1">
-                        {formatDate(article.published_at ?? article.created_at)}
-                      </p>
+                      </h2>
+                      <time dateTime={publishedAt} className="mt-4 text-[10px] text-stone-400 dark:text-zinc-500 sm:text-xs">
+                        {formatDate(publishedAt)}
+                      </time>
                     </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
+                  </Link>
+                );
+              })}
+            </div>
 
-          {/* Pagination */}
-          <Suspense>
-            <BeritaPagination
-              page={page}
-              totalPages={totalPages}
-              basePath={`/berita/${key}`}
-            />
-          </Suspense>
-
-          {/* Back link */}
-          <div className="pt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center gap-4">
-            <Link href="/berita" className="text-sm text-brand dark:text-yellow-400 font-medium hover:underline">
-              ← Semua berita
-            </Link>
-          </div>
-        </>
-      )}
+            <Suspense>
+              <BeritaPagination page={page} totalPages={totalPages} basePath={`/category/${key}`} />
+            </Suspense>
+          </>
+        )}
+      </main>
     </div>
   );
 }

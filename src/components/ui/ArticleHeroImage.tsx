@@ -9,15 +9,16 @@ export default function ArticleHeroImage({ src, alt }: { src: string; alt: strin
   if (failed) return null;
 
   return (
-    <div className="aspect-video relative rounded-2xl overflow-hidden mb-8">
+    <figure className="relative aspect-video overflow-hidden rounded-xl bg-stone-100 dark:bg-zinc-900">
       <Image
         src={src}
         alt={alt}
         fill
         className="object-cover"
+        sizes="(max-width: 1024px) 100vw, 896px"
         priority
         onError={() => setFailed(true)}
       />
-    </div>
+    </figure>
   );
 }

@@ -72,7 +72,7 @@ export default function GoodNewsList({ items, featured }: Props) {
     <>
       {/* Featured hero */}
       {featured && (
-        <Link href={`/berita/${featured.slug}`} className="group block mb-8">
+        <Link href={`/${featured.slug}`} className="group block mb-8">
           <div className="relative rounded-2xl overflow-hidden aspect-[16/7] bg-gray-100 dark:bg-zinc-800">
             {featured.image_url ? (
               <Image
@@ -182,7 +182,7 @@ export default function GoodNewsList({ items, featured }: Props) {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {paginated.map((item) => (
-            <Link key={item.id} href={`/berita/${item.slug}`} className="group">
+            <Link key={item.id} href={`/${item.slug}`} className="group">
               <article className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden hover:shadow-md hover:border-[#F5C400]/30 dark:hover:border-yellow-700/40 transition-all h-full flex flex-col">
                 {/* Thumbnail */}
                 <div className="aspect-video relative bg-gray-100 dark:bg-zinc-800 shrink-0">

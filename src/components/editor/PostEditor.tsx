@@ -485,6 +485,9 @@ function LegacyPostEditor({ postType, editId, initialMeta, initialBlocks, initia
       focus_keyword:    meta.focus_keyword    || null,
       schema_type:      meta.schema_type      || "Article",
       allow_comments:   meta.allow_comments   ?? false,
+      is_sponsored:     meta.is_sponsored     ?? false,
+      sponsor_name:     meta.is_sponsored ? meta.sponsor_name?.trim() || null : null,
+      sponsor_logo_url: meta.is_sponsored ? meta.sponsor_logo_url || null : null,
       source_url:       postType === "portfolio" ? meta.project_url || null : meta.source_url || null,
       ...(postType === "portfolio" ? {
         project_url:      meta.project_url  || null,

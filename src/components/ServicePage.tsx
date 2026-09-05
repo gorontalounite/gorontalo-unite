@@ -74,10 +74,10 @@ export default function ServicePage({
               </svg>
             </a>
             <Link
-              href="/services"
+              href="/about#kontak"
               className="inline-flex items-center gap-2 border border-zinc-700 text-zinc-300 text-sm font-medium px-6 py-3 rounded-xl hover:border-zinc-500 hover:text-white transition-colors"
             >
-              Lihat Layanan Lain
+              Hubungi Kami
             </Link>
           </div>
         </div>

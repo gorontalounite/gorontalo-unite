@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import type { JSONContent } from "@tiptap/core";
+import { Fragment, Slice } from "@tiptap/pm/model";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import Link from "@tiptap/extension-link";
@@ -37,6 +38,10 @@ function firstParagraph(blocks: Block[]) {
   return blocks.find((block) => block.type === "paragraph" && block.content.trim())?.content.trim() ?? blocksToText(blocks).trim();
 }
 
+function normalizedCopy(value: string) {
+  return value.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().toLocaleLowerCase("id-ID");
+}
+
 function focusKeyword(title: string, tags: string[], category: string) {
   if (tags[0]?.trim()) return tags[0].trim();
   const words = title.toLowerCase().match(/[a-zà-ÿ0-9]+/gi)?.filter((word) => word.length > 2 && !STOP_WORDS.has(word.toLowerCase())) ?? [];
@@ -47,6 +52,82 @@ function textFromNode(node: JSONContent): string {
   if (node.type === "text") return node.text ?? "";
   if (node.type === "hardBreak") return "\n";
   return (node.content ?? []).map(textFromNode).join("");
+}
+
+const BULLET_LINE = /^[-*•–]\s+(.+)$/;
+const ORDERED_LINE = /^\d+[.)]\s+(.+)$/;
+const MARKDOWN_HEADING = /^(#{1,4})\s+(.+)$/;
+
+function looksLikeSectionHeading(lines: string[], index: number) {
+  const line = lines[index].trim();
+  if (!line || line.length > 90 || /[.!?,;:]$/.test(line)) return false;
+  const previousIsBlank = index === 0 || !lines[index - 1].trim();
+  const nextIsBlank = index === lines.length - 1 || !lines[index + 1].trim();
+  if (!previousIsBlank || !nextIsBlank) return false;
+
+  const words = line.replace(/^\*\*|\*\*$/g, "").split(/\s+/).filter(Boolean);
+  if (words.length < 2 || words.length > 12) return false;
+  const meaningfulWords = words.filter((word) => word.length > 2);
+  const capitalized = meaningfulWords.filter((word) => /^[A-ZÀ-Ý0-9]/.test(word)).length;
+  const isUppercase = line === line.toLocaleUpperCase("id-ID") && /[A-ZÀ-Ý]/.test(line);
+  const isBoldMarkdown = /^\*\*.+\*\*$/.test(line);
+  return isUppercase || isBoldMarkdown || (meaningfulWords.length > 0 && capitalized / meaningfulWords.length >= 0.65);
+}
+
+function plainTextToStructuredContent(text: string): JSONContent[] | null {
+  const lines = text.replace(/\r\n?/g, "\n").split("\n");
+  const content: JSONContent[] = [];
+  let paragraph: string[] = [];
+  let foundStructure = false;
+
+  const flushParagraph = () => {
+    const value = paragraph.join(" ").replace(/\s+/g, " ").trim();
+    if (value) content.push({ type: "paragraph", content: [{ type: "text", text: value }] });
+    paragraph = [];
+  };
+
+  for (let index = 0; index < lines.length;) {
+    const line = lines[index].trim();
+    if (!line) {
+      flushParagraph();
+      index += 1;
+      continue;
+    }
+
+    const markdownHeading = line.match(MARKDOWN_HEADING);
+    if (markdownHeading || looksLikeSectionHeading(lines, index)) {
+      flushParagraph();
+      const headingText = (markdownHeading?.[2] ?? line).replace(/^\*\*|\*\*$/g, "").trim();
+      content.push({ type: "heading", attrs: { level: 2 }, content: [{ type: "text", text: headingText }] });
+      foundStructure = true;
+      index += 1;
+      continue;
+    }
+
+    const bullet = line.match(BULLET_LINE);
+    const ordered = line.match(ORDERED_LINE);
+    if (bullet || ordered) {
+      flushParagraph();
+      const orderedList = Boolean(ordered);
+      const items: JSONContent[] = [];
+      while (index < lines.length) {
+        const itemLine = lines[index].trim();
+        const match = itemLine.match(orderedList ? ORDERED_LINE : BULLET_LINE);
+        if (!match) break;
+        items.push({ type: "listItem", content: [{ type: "paragraph", content: [{ type: "text", text: match[1].trim() }] }] });
+        index += 1;
+      }
+      content.push({ type: orderedList ? "orderedList" : "bulletList", content: items });
+      foundStructure = true;
+      continue;
+    }
+
+    paragraph.push(line);
+    index += 1;
+  }
+
+  flushParagraph();
+  return foundStructure ? content : null;
 }
 
 function legacyBlocksToDoc(blocks?: Block[]): JSONContent {
@@ -173,7 +254,22 @@ export default function TiptapNewsEditor({ editId, initialMeta, initialBlocks }:
       TextAlign.configure({ types: ["heading", "paragraph"] }),
     ],
     content: initialDoc,
-    editorProps: { attributes: { class: "tiptap-editor" } },
+    editorProps: {
+      attributes: { class: "tiptap-editor" },
+      handlePaste(view, event) {
+        const clipboard = event.clipboardData;
+        const text = clipboard?.getData("text/plain") ?? "";
+        const html = clipboard?.getData("text/html") ?? "";
+        if (!text.includes("\n") || /<(h[1-6]|ul|ol|li)\b/i.test(html)) return false;
+
+        const structured = plainTextToStructuredContent(text);
+        if (!structured) return false;
+        const nodes = structured.map((node) => view.state.schema.nodeFromJSON(node));
+        const slice = new Slice(Fragment.fromArray(nodes), 0, 0);
+        view.dispatch(view.state.tr.replaceSelection(slice).scrollIntoView());
+        return true;
+      },
+    },
     onUpdate: () => setSaved(false),
   });
 
@@ -209,21 +305,43 @@ export default function TiptapNewsEditor({ editId, initialMeta, initialBlocks }:
 
   const save = useCallback(async (publish: boolean) => {
     if (!editor || !meta.title.trim()) { setError("Judul wajib diisi"); return; }
+    if (publish && !meta.categories.length && !meta.category) { setError("Pilih minimal satu kategori rubrik sebelum menerbitkan"); return; }
+    if (publish && meta.is_sponsored && (!meta.sponsor_name?.trim() || !meta.sponsor_logo_url)) {
+      setError("Nama dan logo sponsor wajib diisi untuk konten bersponsor");
+      return;
+    }
     setSaving(true); setError(null);
     const blocks = docToLegacyBlocks(editor.getJSON());
+    const summary = meta.excerpt.trim();
+    const openingParagraph = firstParagraph(blocks);
+    const normalizedSummary = normalizedCopy(summary);
+    const normalizedOpening = normalizedCopy(openingParagraph);
+    if (publish && !summary) {
+      setSaving(false);
+      setError("Ringkasan artikel wajib diisi sebelum diterbitkan");
+      return;
+    }
+    if (publish && normalizedSummary && normalizedOpening && (normalizedSummary === normalizedOpening || normalizedOpening.startsWith(normalizedSummary) || normalizedSummary.startsWith(normalizedOpening))) {
+      setSaving(false);
+      setError("Ringkasan artikel harus berbeda dari paragraf pertama isi berita");
+      return;
+    }
     const categories = meta.categories.length ? meta.categories : (meta.category ? [meta.category] : ["Umum"]);
     const seo = publish ? {
       seo_title: meta.seo_title || meta.title,
-      seo_description: meta.seo_description || null,
+      seo_description: meta.seo_description || summary || null,
       focus_keyword: meta.focus_keyword || focusKeyword(meta.title, meta.tags, categories[0]),
     } : { seo_title: meta.seo_title || null, seo_description: meta.seo_description || null, focus_keyword: meta.focus_keyword || null };
     const payload = {
-      title: meta.title, slug: meta.slug || slugify(meta.title), excerpt: firstParagraph(blocks).slice(0, 280) || null,
+      title: meta.title, slug: meta.slug || slugify(meta.title), excerpt: summary || null,
       content: blocksToText(blocks), blocks, image_url: meta.image_url || null,
       category: categories[0], categories, tags: meta.tags.length ? meta.tags : null,
       published: publish,
       published_at: publish ? toMakassarIso(meta.published_at) : null,
       is_trending: meta.is_trending ?? false,
+      is_sponsored: meta.is_sponsored ?? false,
+      sponsor_name: meta.is_sponsored ? meta.sponsor_name?.trim() || null : null,
+      sponsor_logo_url: meta.is_sponsored ? meta.sponsor_logo_url || null : null,
       ...seo, schema_type: meta.schema_type || "NewsArticle",
       allow_comments: meta.allow_comments ?? true,
     };

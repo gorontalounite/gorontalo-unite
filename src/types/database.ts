@@ -105,6 +105,7 @@ export type Database = {
           id: string
           image_prompt: string | null
           image_url: string | null
+          is_sponsored: boolean
           is_trending: boolean
           project_url: string | null
           published: boolean
@@ -115,6 +116,8 @@ export type Database = {
           source_name: string | null
           source_published_at: string | null
           source_url: string | null
+          sponsor_logo_url: string | null
+          sponsor_name: string | null
           tags: string[]
           title: string
           updated_at: string
@@ -133,6 +136,7 @@ export type Database = {
           id?: string
           image_prompt?: string | null
           image_url?: string | null
+          is_sponsored?: boolean
           is_trending?: boolean
           project_url?: string | null
           published?: boolean
@@ -143,6 +147,8 @@ export type Database = {
           source_name?: string | null
           source_published_at?: string | null
           source_url?: string | null
+          sponsor_logo_url?: string | null
+          sponsor_name?: string | null
           tags?: string[]
           title: string
           updated_at?: string
@@ -161,6 +167,7 @@ export type Database = {
           id?: string
           image_prompt?: string | null
           image_url?: string | null
+          is_sponsored?: boolean
           is_trending?: boolean
           project_url?: string | null
           published?: boolean
@@ -171,6 +178,8 @@ export type Database = {
           source_name?: string | null
           source_published_at?: string | null
           source_url?: string | null
+          sponsor_logo_url?: string | null
+          sponsor_name?: string | null
           tags?: string[]
           title?: string
           updated_at?: string

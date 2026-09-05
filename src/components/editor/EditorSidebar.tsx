@@ -19,6 +19,9 @@ export interface PostMeta {
   seo_description: string;
   focus_keyword?:  string;
   is_trending?:    boolean;
+  is_sponsored?:   boolean;
+  sponsor_name?:   string;
+  sponsor_logo_url?: string;
   schema_type?:    string;
   allow_comments?: boolean;
   // Portfolio CPT
@@ -37,6 +40,9 @@ export const EMPTY_META: PostMeta = {
   image_url: "", published: false, published_at: "",
   seo_title: "", seo_description: "",
   is_trending: false,
+  is_sponsored: false,
+  sponsor_name: "",
+  sponsor_logo_url: "",
   allow_comments: true,
 };
 
@@ -49,8 +55,6 @@ interface Props {
   showBlockTab?: boolean;
   showSeoPanel?: boolean;
 }
-
-const NEWS_CATEGORIES = WEB_CATEGORIES.map((category) => category.label);
 
 const PORTFOLIO_STACKS = [
   "stack:web-design","stack:programming","stack:data-analytics",
@@ -86,8 +90,8 @@ function Panel({ title, children, defaultOpen = false }: {
 }
 
 /* ─── Image upload field ────────────────────────────────────── */
-function ImageUploadField({ value, onChange, label }: {
-  value: string; onChange: (url: string) => void; label?: string;
+function ImageUploadField({ value, onChange, label, contain = false }: {
+  value: string; onChange: (url: string) => void; label?: string; contain?: boolean;
 }) {
   const fileRef  = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
@@ -106,9 +110,9 @@ function ImageUploadField({ value, onChange, label }: {
     <div>
       {label && <label className="text-[11px] font-medium text-gray-500 block mb-1">{label}</label>}
       {value ? (
-        <div className="relative rounded-xl overflow-hidden border border-gray-100">
+        <div className="relative aspect-video overflow-hidden rounded-xl border border-gray-100 bg-white">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={value} alt="" className="w-full h-28 object-cover" onError={(e) => (e.currentTarget.style.display="none")} />
+          <img src={value} alt="" className={`h-full w-full ${contain ? "object-contain p-3" : "object-cover"}`} onError={(e) => (e.currentTarget.style.display="none")} />
           <button
             type="button"
             onClick={() => onChange("")}
@@ -139,14 +143,8 @@ function ImageUploadField({ value, onChange, label }: {
 /* ─── Category selector — multi-select checkboxes ──────────── */
 function CategorySelector({ values, onChange }: { values: string[]; onChange: (c: string[]) => void }) {
   const [open, setOpen] = useState(false);
-  const [customCategory, setCustomCategory] = useState("");
   const toggle = (c: string) =>
     onChange(values.includes(c) ? values.filter((x) => x !== c) : [...values, c]);
-  const addCustomCategory = () => {
-    const category = customCategory.trim();
-    if (category && !values.some((value) => value.toLocaleLowerCase() === category.toLocaleLowerCase())) onChange([...values, category]);
-    setCustomCategory("");
-  };
 
   return (
     <div className="space-y-1.5">
@@ -163,15 +161,11 @@ function CategorySelector({ values, onChange }: { values: string[]; onChange: (c
       <button type="button" onClick={() => setOpen((value) => !value)} className="w-full rounded-lg border border-dashed border-gray-300 px-2.5 py-2 text-left text-[11px] font-medium text-gray-600 hover:border-[#F5C400] hover:bg-yellow-50">
         {open ? "Tutup pilihan kategori" : "+ Tambahkan kategori"}
       </button>
-      {open && <div className="mt-2 grid max-h-52 grid-cols-2 gap-1 overflow-y-auto rounded-lg border border-gray-100 p-1.5">
-        {NEWS_CATEGORIES.map((c) => <label key={c} className={`flex items-center gap-1.5 cursor-pointer rounded px-1 py-1 transition-colors ${values.includes(c) ? "bg-yellow-50" : "hover:bg-gray-50"}`}>
-          <input type="checkbox" checked={values.includes(c)} onChange={() => toggle(c)} className="accent-[#F5C400]" />
-          <span className="text-[11px] text-gray-600">{c}</span>
+      {open && <div className="mt-2 max-h-80 space-y-1 overflow-y-auto rounded-lg border border-gray-100 p-1.5">
+        {WEB_CATEGORIES.map((category) => <label key={category.key} className={`flex cursor-pointer items-center gap-2 rounded px-2 py-2 transition-colors ${values.includes(category.label) ? "bg-yellow-50" : "hover:bg-gray-50"}`}>
+          <input type="checkbox" checked={values.includes(category.label)} onChange={() => toggle(category.label)} className="accent-[#F5C400]" />
+          <span className="text-[11px] font-semibold text-gray-700">{category.label}</span>
         </label>)}
-      </div>}
-      {open && <div className="flex gap-1.5 pt-1">
-        <input value={customCategory} onChange={(event) => setCustomCategory(event.target.value)} onKeyDown={(event) => { if (event.key === "Enter") { event.preventDefault(); addCustomCategory(); } }} placeholder="Kategori baru…" className="min-w-0 flex-1 rounded-lg border border-gray-200 px-2.5 py-1.5 text-[11px] outline-none focus:border-[#F5C400]" />
-        <button type="button" onClick={addCustomCategory} disabled={!customCategory.trim()} className="rounded-lg bg-gray-900 px-2.5 py-1.5 text-[11px] font-medium text-white disabled:cursor-not-allowed disabled:opacity-40">Tambah</button>
       </div>}
       <p className="text-[10px] text-gray-400 mt-1">{values.length ? `${values.length} kategori dipilih` : "Belum ada kategori"}</p>
     </div>
@@ -402,6 +396,23 @@ export default function EditorSidebar({
             </Panel>
 
             {postType === "news" && (
+              <Panel title="Ringkasan Artikel" defaultOpen>
+                <textarea
+                  rows={5}
+                  value={meta.excerpt}
+                  onChange={(event) => setField("excerpt", event.target.value)}
+                  maxLength={280}
+                  placeholder="Tulis pengantar singkat yang berbeda dari paragraf pertama isi berita…"
+                  className="w-full resize-none rounded-lg border border-gray-200 px-2.5 py-2 text-[11px] leading-relaxed outline-none focus:border-[#F5C400]"
+                />
+                <div className="flex items-start justify-between gap-3 text-[10px] text-gray-400">
+                  <p>Wajib diisi saat menerbitkan dan tidak boleh menyalin paragraf pertama.</p>
+                  <span className="shrink-0">{meta.excerpt.length}/280</span>
+                </div>
+              </Panel>
+            )}
+
+            {postType === "news" && (
               <Panel title="Tampilan Beranda" defaultOpen>
                 <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-gray-100 p-2.5 hover:bg-yellow-50">
                   <input type="checkbox" checked={meta.is_trending ?? false} onChange={(event) => setField("is_trending", event.target.checked)} className="mt-0.5 accent-[#F5C400]" />
@@ -410,6 +421,36 @@ export default function EditorSidebar({
                     <span className="mt-0.5 block text-[10px] leading-relaxed text-gray-400">Tampilkan artikel ini pada section Berita Pilihan di beranda.</span>
                   </span>
                 </label>
+                <div className="border-t border-gray-100 pt-3">
+                  <label className="flex cursor-pointer items-start gap-2 rounded-lg border border-gray-100 p-2.5 hover:bg-orange-50">
+                    <input type="checkbox" checked={meta.is_sponsored ?? false} onChange={(event) => setField("is_sponsored", event.target.checked)} className="mt-0.5 accent-orange-500" />
+                    <span>
+                      <span className="block text-[11px] font-semibold text-gray-700">Konten bersponsor</span>
+                      <span className="mt-0.5 block text-[10px] leading-relaxed text-gray-400">Tampilkan label “Sponsored By” dan logo mitra pada artikel.</span>
+                    </span>
+                  </label>
+                  {meta.is_sponsored && (
+                    <div className="mt-3 space-y-3 rounded-xl border border-orange-100 bg-orange-50/50 p-3">
+                      <div>
+                        <label className="mb-1 block text-[11px] font-medium text-gray-500">Nama sponsor</label>
+                        <input
+                          type="text"
+                          value={meta.sponsor_name ?? ""}
+                          onChange={(event) => setField("sponsor_name", event.target.value)}
+                          placeholder="Contoh: Bstore"
+                          className="w-full rounded-lg border border-gray-200 bg-white px-2.5 py-1.5 text-[11px] outline-none focus:border-orange-400"
+                        />
+                      </div>
+                      <ImageUploadField
+                        label="Logo sponsor"
+                        value={meta.sponsor_logo_url ?? ""}
+                        onChange={(url) => setField("sponsor_logo_url", url)}
+                        contain
+                      />
+                      <p className="text-[10px] leading-relaxed text-gray-400">Gunakan PNG transparan atau SVG horizontal. Logo ditampilkan maksimal 112 × 32 px.</p>
+                    </div>
+                  )}
+                </div>
               </Panel>
             )}
 

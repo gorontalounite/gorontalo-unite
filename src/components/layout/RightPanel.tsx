@@ -33,7 +33,7 @@ const cityGuideItems = [
 
 const kabarBaikItems = [
   {
-    href: "/berita/inspire",
+    href: "/category/inspire",
     label: "Inspire",
     desc: "Kisah inspiratif Gorontalo",
     icon: (
@@ -43,7 +43,7 @@ const kabarBaikItems = [
     ),
   },
   {
-    href: "/berita/insight",
+    href: "/category/insight",
     label: "Insight",
     desc: "Wawasan & analisis",
     icon: (
@@ -53,7 +53,7 @@ const kabarBaikItems = [
     ),
   },
   {
-    href: "/berita/interest",
+    href: "/category/interest",
     label: "Interest",
     desc: "Topik menarik pilihan",
     icon: (

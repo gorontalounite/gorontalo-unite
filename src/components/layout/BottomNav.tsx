@@ -18,28 +18,28 @@ const navItems = [
     ),
   },
   {
-    href: "/berita",
-    label: "Berita",
+    href: "/city-guide",
+    label: "City Guide",
     icon: (active: boolean) => (
       <svg
         className={`w-6 h-6 ${active ? "text-brand dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
         fill="none" stroke="currentColor" viewBox="0 0 24 24"
       >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.5}
-          d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
+          d="M12 21s7-5.2 7-12a7 7 0 1 0-14 0c0 6.8 7 12 7 12Z M12 11.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z" />
       </svg>
     ),
   },
   {
-    href: "/services",
-    label: "Services",
+    href: "/reels",
+    label: "Reels",
     icon: (active: boolean) => (
       <svg
         className={`w-6 h-6 ${active ? "text-brand dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
         fill="none" stroke="currentColor" viewBox="0 0 24 24"
       >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.5}
-          d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          d="M15.75 5.25 18 3m0 0 2.25 2.25M18 3v5.25M8.25 5.25 6 3M6 3 3.75 5.25M6 3v5.25M9.75 9.75v4.5l4-2.25-4-2.25ZM5.25 21h13.5A2.25 2.25 0 0 0 21 18.75v-7.5A2.25 2.25 0 0 0 18.75 9H5.25A2.25 2.25 0 0 0 3 11.25v7.5A2.25 2.25 0 0 0 5.25 21Z" />
       </svg>
     ),
   },
@@ -60,8 +60,6 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
-
-  if (!["/admin", "/sign-in", "/sign-up", "/auth"].some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`))) return null;
 
   return (
     <nav className="fixed bottom-0 inset-x-0 z-30 bg-white/90 dark:bg-zinc-950/90 backdrop-blur-md border-t border-gray-100 dark:border-zinc-800 md:hidden">
