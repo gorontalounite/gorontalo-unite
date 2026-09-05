@@ -73,7 +73,7 @@ export const metadata: Metadata = {
     type:        "website",
     locale:      "id_ID",
     siteName:    "Gorontalo Unite",
-    images:      [{ url: "/og-image.png", width: 1890, height: 1890, alt: "Gorontalo Unite" }],
+    images:      [{ url: "/og-image.png", width: 1200, height: 630, alt: "Gorontalo Unite" }],
   },
 
   /* ── Twitter Card ───────────────────────────────────────── */
