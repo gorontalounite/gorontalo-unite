@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import LatestNewsGrid from "./LatestNewsGrid";
+import HeroCarousel from "./HeroCarousel";
 import { articleBelongsToWebCategory, resolveWebCategoryLabel, buildCategoryDeskMap, type CategoryRow } from "./categories";
 
 type DeskMap = Readonly<Record<string, string>>;
@@ -290,64 +291,35 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
     );
   }
 
-  // Hero prioritizes "Berita pilihan" (is_trending) articles — editors curate
-  // this, so it naturally covers several categories instead of whichever
-  // desk happened to publish most recently. Falls back to recency when
-  // there aren't enough featured articles yet.
+  // Hero rotates through every "Berita pilihan" (is_trending) article
+  // instead of freezing on just the newest one — editors may flag several,
+  // and this naturally covers several categories rather than whichever desk
+  // happened to publish most recently. Falls back to the 3 most recent
+  // articles when nothing is flagged yet.
   const trending = articles.filter((article) => article.is_trending);
-  const heroPool = trending.length >= 3 ? trending : [...trending, ...articles.filter((article) => !article.is_trending)];
-  const hero = heroPool[0];
-  const heroSide = heroPool.slice(1, 3);
-  const heroIds = new Set([hero.id, ...heroSide.map((article) => article.id)]);
+  const heroPool = trending.length > 0 ? trending.slice(0, 9) : articles.slice(0, 3);
+  const heroIds = new Set(heroPool.map((article) => article.id));
   const remaining = articles.filter((article) => !heroIds.has(article.id));
 
   const news = articlesFor(remaining, "news", 5, deskMap);
   const travel = articlesFor(remaining, "travel", 5, deskMap);
   const culinary = articlesFor(remaining, "culinary", 3, deskMap);
-  const culture = articlesFor(remaining, "culture", 4, deskMap);
+  const culture = articlesFor(remaining, "culture", 3, deskMap);
   const people = articlesFor(remaining, "people", 4, deskMap);
-  const life = articlesFor(remaining, "life", 4, deskMap);
+  const life = articlesFor(remaining, "life", 5, deskMap);
 
   return (
     <div className="min-h-screen bg-white text-[#302f2c]">
       <DeskNav />
       <main>
         <section className="mx-auto max-w-[1280px] px-4 pb-12 pt-6 sm:px-6 sm:pb-16 sm:pt-8 lg:px-8">
-          <div className="grid gap-4 lg:grid-cols-[1.7fr_.8fr]">
-            <article className="group relative min-h-[440px] overflow-hidden rounded-[4px] bg-black sm:min-h-[570px]">
-              <ArticleImage article={hero} className="absolute inset-0 h-full w-full" priority sizes="(max-width: 1024px) 100vw, 70vw" />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
-              <Link href={`/${hero.slug}`} className="absolute inset-0 flex items-end p-6 sm:p-10">
-                <div className="max-w-3xl text-white">
-                  <Eyebrow article={hero} light deskMap={deskMap} />
-                  <h1 className="mt-3 font-display text-[30px] font-extrabold leading-[1.02] tracking-[-.04em] sm:text-[46px]">{hero.title}</h1>
-                  {hero.excerpt ? <p className="mt-4 hidden max-w-2xl text-sm leading-relaxed text-white/75 sm:line-clamp-2">{hero.excerpt}</p> : null}
-                </div>
-              </Link>
-            </article>
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
-              {heroSide.map((article) => (
-                <article key={article.id} className="group relative min-h-[240px] overflow-hidden rounded-[4px] bg-black sm:min-h-[275px]">
-                  <ArticleImage article={article} className="absolute inset-0 h-full w-full" sizes="(max-width: 1024px) 50vw, 30vw" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
-                  <Link href={`/${article.slug}`} className="absolute inset-0 flex items-end p-4 sm:p-6">
-                    <div className="text-white"><Eyebrow article={article} light deskMap={deskMap} /><h2 className="mt-2 line-clamp-3 font-display text-[16px] font-extrabold leading-[1.08] tracking-[-.02em] sm:text-[20px]">{article.title}</h2></div>
-                  </Link>
-                </article>
-              ))}
-            </div>
-          </div>
+          <HeroCarousel pool={heroPool} deskMap={deskMap} />
         </section>
 
         <section id="culture" className="scroll-mt-24 border-t border-[#d7d1c6] bg-white py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="culture" title="Culture" />
-            {culture.length ? <div className="grid gap-5 lg:grid-cols-[1.35fr_.65fr]">
-              <DarkFeature article={culture[0]} deskMap={deskMap} />
-              <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">
-                {culture.slice(1).map((article) => <article key={article.id} className="group border-b border-[#dedede] pb-5 last:border-0"><Link href={`/${article.slug}`} className="grid grid-cols-[112px_1fr] gap-4"><ArticleImage article={article} className="aspect-square" sizes="112px" /><div><p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#9b7513]">Culture</p><h3 className="mt-2 line-clamp-3 font-display text-[16px] font-extrabold leading-[1.1]">{article.title}</h3></div></Link></article>)}
-              </div>
-            </div> : <EmptyDesk />}
+            {culture.length ? <div className="grid gap-8 sm:grid-cols-3">{culture.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</div> : <EmptyDesk />}
           </div>
         </section>
 
@@ -371,9 +343,9 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
         <section id="life" className="scroll-mt-24 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="life" title="Lifestyle" />
-            {life.length ? <div className="grid gap-6 lg:grid-cols-2">
-              <StoryCard article={life[0]} large deskMap={deskMap} />
-              <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">{life.slice(1).map((article) => <CompactStory key={article.id} article={article} deskMap={deskMap} />)}</div>
+            {life.length ? <div className="grid gap-6 lg:grid-cols-[1.45fr_.55fr]">
+              <DarkFeature article={life[0]} deskMap={deskMap} />
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">{life.slice(1).map((article) => <CompactStory key={article.id} article={article} deskMap={deskMap} />)}</div>
             </div> : <EmptyDesk />}
           </div>
         </section>
