@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Block, BLOCK_REGISTRY } from "./types";
-import { WEB_CATEGORIES } from "@/app/berita/categories";
 
 /* ─── Types ─────────────────────────────────────────────────── */
 export interface PostMeta {
@@ -140,26 +139,66 @@ function ImageUploadField({ value, onChange, label, contain = false }: {
   );
 }
 
-/* ─── Category selector — multi-select checkboxes + custom entries ── */
+/* ─── Category selector — real parent/child tree from the categories table ── */
+interface CategoryNode { id: string; name: string; slug: string; parent_id: string | null; desk_key: string | null }
+
+function useCategoryTree() {
+  const [nodes, setNodes] = useState<CategoryNode[] | null>(null);
+  useEffect(() => {
+    let active = true;
+    fetch("/api/admin/categories").then((res) => res.json()).then((json) => { if (active) setNodes(json.data ?? []); }).catch(() => { if (active) setNodes([]); });
+    return () => { active = false; };
+  }, []);
+  const addNode = (node: CategoryNode) => setNodes((current) => current ? [...current, node] : [node]);
+  return { nodes, addNode };
+}
+
+function AddCategoryRow({ placeholder, onAdd, saving }: { placeholder: string; onAdd: (name: string) => void; saving: boolean }) {
+  const [value, setValue] = useState("");
+  const submit = () => { const trimmed = value.trim(); if (!trimmed) return; onAdd(trimmed); setValue(""); };
+  return (
+    <div className="flex gap-1">
+      <input
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); submit(); } }}
+        placeholder={placeholder}
+        disabled={saving}
+        className="min-w-0 flex-1 text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400] disabled:opacity-50"
+      />
+      <button type="button" onClick={submit} disabled={saving} className="shrink-0 text-[11px] bg-gray-100 text-gray-700 px-2 py-1.5 rounded-lg hover:bg-gray-200 disabled:opacity-50">+</button>
+    </div>
+  );
+}
+
 function CategorySelector({ values, onChange }: { values: string[]; onChange: (c: string[]) => void }) {
+  const { nodes, addNode } = useCategoryTree();
   const [open, setOpen] = useState(false);
-  const [customInput, setCustomInput] = useState("");
-  const toggle = (c: string) =>
-    onChange(values.includes(c) ? values.filter((x) => x !== c) : [...values, c]);
-  const addCustom = () => {
-    const value = customInput.trim();
-    if (value && !values.includes(value)) onChange([...values, value]);
-    setCustomInput("");
-  };
-  const presetLabels = WEB_CATEGORIES.map((c) => c.label);
-  const customValues = values.filter((v) => !presetLabels.includes(v));
+  const [addingUnder, setAddingUnder] = useState<string | null>(null); // node id, or "root"
+  const [saving, setSaving] = useState(false);
+  const toggle = (name: string) => onChange(values.includes(name) ? values.filter((x) => x !== name) : [...values, name]);
+
+  async function createCategory(name: string, parentId: string | null) {
+    setSaving(true);
+    try {
+      const res = await fetch("/api/admin/categories", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ name, parent_id: parentId }) });
+      const json = await res.json();
+      if (res.ok && json.data) { addNode(json.data); toggle(json.data.name); }
+    } finally {
+      setSaving(false);
+      setAddingUnder(null);
+    }
+  }
+
+  const roots = (nodes ?? []).filter((n) => !n.parent_id);
+  const childrenOf = (id: string) => (nodes ?? []).filter((n) => n.parent_id === id);
 
   return (
     <div className="space-y-1.5">
       {values.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-2">
           {values.map((c) => (
-            <span key={c} className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium ${customValues.includes(c) ? "bg-sky-100 text-sky-800" : "bg-yellow-100 text-yellow-800"}`}>
+            <span key={c} className="inline-flex items-center gap-1 text-[11px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full font-medium">
               {c}
               <button type="button" onClick={() => toggle(c)} className="hover:text-red-500">✕</button>
             </span>
@@ -170,24 +209,37 @@ function CategorySelector({ values, onChange }: { values: string[]; onChange: (c
         {open ? "Tutup pilihan kategori" : "+ Tambahkan kategori"}
       </button>
       {open && <div className="mt-2 space-y-2 rounded-lg border border-gray-100 p-1.5">
-        <div className="max-h-64 space-y-1 overflow-y-auto">
-          {WEB_CATEGORIES.map((category) => <label key={category.key} className={`flex cursor-pointer items-center gap-2 rounded px-2 py-2 transition-colors ${values.includes(category.label) ? "bg-yellow-50" : "hover:bg-gray-50"}`}>
-            <input type="checkbox" checked={values.includes(category.label)} onChange={() => toggle(category.label)} className="accent-[#F5C400]" />
-            <span className="text-[11px] font-semibold text-gray-700">{category.label}</span>
-          </label>)}
-        </div>
-        <div className="border-t border-gray-100 pt-2">
-          <label className="mb-1 block px-1 text-[10px] font-medium text-gray-500">Kategori atau turunan baru</label>
-          <div className="flex gap-1 px-1">
-            <input
-              value={customInput}
-              onChange={(e) => setCustomInput(e.target.value)}
-              onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addCustom(); } }}
-              placeholder="mis. Kesehatan, Sub-Wisata Religi…"
-              className="min-w-0 flex-1 text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
-            />
-            <button type="button" onClick={addCustom} className="shrink-0 text-[11px] bg-gray-100 text-gray-700 px-2 py-1.5 rounded-lg hover:bg-gray-200">+</button>
+        {!nodes ? <p className="px-1 py-2 text-[11px] text-gray-400">Memuat kategori…</p> : (
+          <div className="max-h-72 space-y-2 overflow-y-auto">
+            {roots.map((root) => (
+              <div key={root.id}>
+                <label className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 transition-colors ${values.includes(root.name) ? "bg-yellow-50" : "hover:bg-gray-50"}`}>
+                  <input type="checkbox" checked={values.includes(root.name)} onChange={() => toggle(root.name)} className="accent-[#F5C400]" />
+                  <span className="text-[11px] font-bold text-gray-800">{root.name}</span>
+                </label>
+                <div className="ml-5 space-y-0.5 border-l border-gray-100 pl-2">
+                  {childrenOf(root.id).map((child) => (
+                    <label key={child.id} className={`flex cursor-pointer items-center gap-2 rounded px-2 py-1 transition-colors ${values.includes(child.name) ? "bg-yellow-50" : "hover:bg-gray-50"}`}>
+                      <input type="checkbox" checked={values.includes(child.name)} onChange={() => toggle(child.name)} className="accent-[#F5C400]" />
+                      <span className="text-[11px] text-gray-600">{child.name}</span>
+                    </label>
+                  ))}
+                  {addingUnder === root.id ? (
+                    <div className="py-1"><AddCategoryRow placeholder={`Turunan baru di ${root.name}…`} saving={saving} onAdd={(name) => createCategory(name, root.id)} /></div>
+                  ) : (
+                    <button type="button" onClick={() => setAddingUnder(root.id)} className="mt-0.5 text-[10px] font-medium text-gray-400 hover:text-[#9b7513]">+ tambah turunan</button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
+        )}
+        <div className="border-t border-gray-100 pt-2">
+          {addingUnder === "root" ? (
+            <AddCategoryRow placeholder="Nama kategori baru (level atas)…" saving={saving} onAdd={(name) => createCategory(name, null)} />
+          ) : (
+            <button type="button" onClick={() => setAddingUnder("root")} className="text-[10px] font-medium text-gray-400 hover:text-[#9b7513]">+ Kategori baru (level atas)</button>
+          )}
         </div>
       </div>}
       <p className="text-[10px] text-gray-400 mt-1">{values.length ? `${values.length} kategori dipilih` : "Belum ada kategori"}</p>

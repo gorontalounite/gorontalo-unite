@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import NewsAdminList from "./NewsAdminList";
-import { resolveWebCategoryLabel, WEB_CATEGORIES } from "@/app/berita/categories";
+import { resolveWebCategoryLabel, buildCategoryDeskMap, WEB_CATEGORIES, type CategoryRow } from "@/app/berita/categories";
 
 export const dynamic  = "force-dynamic";
 export const metadata = { title: "Berita | Admin Gorontalo Unite" };
@@ -49,7 +49,11 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
   if (status === "published") qb = qb.eq("published", true);
   if (status === "draft")     qb = qb.eq("published", false);
 
-  const { data: rows } = await qb;
+  const [{ data: rows }, { data: categoryRows }] = await Promise.all([
+    qb,
+    admin.from("categories").select("id, name, parent_id, desk_key"),
+  ]);
+  const deskMap = buildCategoryDeskMap((categoryRows ?? []) as CategoryRow[]);
   const withCanonicalCategory = (rows ?? []).map((row) => ({
     ...row,
     canonicalCategory: resolveWebCategoryLabel({
@@ -58,7 +62,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
       tags:       row.tags as string[] | null,
       title:      row.title as string,
       excerpt:    row.excerpt as string | null,
-    }),
+    }, deskMap),
   }));
 
   const filtered = category

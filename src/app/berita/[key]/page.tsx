@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { articleBelongsToWebCategory, CATEGORIES, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS } from "../categories";
+import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, type CategoryRow } from "../categories";
 import BeritaPagination from "../BeritaPagination";
 import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/app/news/[id]/page";
 
@@ -66,12 +66,16 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   const colors = CAT_COLOR[cat.label] ?? DEFAULT_COLOR;
   const admin  = await createClient();
 
-  const { data: raw } = await admin
-    .from("articles")
-    .select("id, title, slug, category, categories, tags, excerpt, image_url, published_at, created_at, is_trending, view_count")
-    .eq("published", true)
-    .order("published_at", { ascending: false, nullsFirst: false })
-    .limit(500);
+  const [{ data: raw }, { data: categoryRows }] = await Promise.all([
+    admin
+      .from("articles")
+      .select("id, title, slug, category, categories, tags, excerpt, image_url, published_at, created_at, is_trending, view_count")
+      .eq("published", true)
+      .order("published_at", { ascending: false, nullsFirst: false })
+      .limit(500),
+    admin.from("categories").select("id, name, parent_id, desk_key"),
+  ]);
+  const deskMap = buildCategoryDeskMap((categoryRows ?? []) as CategoryRow[]);
 
   const matching = (raw ?? []).filter((article) => {
     if (WEB_CATEGORY_DESCRIPTIONS[key]) return articleBelongsToWebCategory({
@@ -80,7 +84,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
       tags: article.tags as string[] | null,
       title: article.title as string,
       excerpt: article.excerpt as string | null,
-    }, key);
+    }, key, deskMap);
     return (article.categories as string[] | null)?.includes(cat.label) || article.category === cat.label;
   });
   const totalCount = matching.length;

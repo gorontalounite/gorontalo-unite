@@ -97,6 +97,33 @@ const LEGACY_CATEGORY_MAP: Readonly<Record<string, string>> = {
   lingkungan: "news", olahraga: "news", kemasyarakatan: "news", insight: "news",
 };
 
+// Rows from the `categories` table (real parent/child hierarchy). Root rows
+// (parent_id null) carry desk_key — a sub-category resolves to its root's
+// desk by walking up the chain, so new sub-categories created in the admin
+// stay connected to the same 6+1 homepage desks without any code change.
+export interface CategoryRow {
+  id: string;
+  name: string;
+  parent_id: string | null;
+  desk_key: string | null;
+}
+
+export function buildCategoryDeskMap(rows: readonly CategoryRow[]): Readonly<Record<string, string>> {
+  const byId = new Map(rows.map((row) => [row.id, row]));
+  const deskOf = (row: CategoryRow, guard = 0): string | null => {
+    if (row.desk_key) return row.desk_key;
+    if (!row.parent_id || guard > 10) return null;
+    const parent = byId.get(row.parent_id);
+    return parent ? deskOf(parent, guard + 1) : null;
+  };
+  const map: Record<string, string> = {};
+  for (const row of rows) {
+    const desk = deskOf(row);
+    if (desk) map[normalizedCategory(row.name)] = desk;
+  }
+  return map;
+}
+
 function normalizedCategory(value: string) {
   return value
     .toLocaleLowerCase("id-ID")
@@ -116,10 +143,15 @@ function matchesWebCategoryTerms(article: WebCategoryArticle, key: string) {
   });
 }
 
-export function articleBelongsToWebCategory(article: WebCategoryArticle, key: string) {
+export function articleBelongsToWebCategory(article: WebCategoryArticle, key: string, categoryDeskMap: Readonly<Record<string, string>> = {}) {
   const selected = [article.category, ...(article.categories ?? [])].map(normalizedCategory);
   const category = WEB_CATEGORIES.find((item) => item.key === key);
   if (!category) return false;
+
+  // The admin-curated category tree is the most authoritative source —
+  // checked before the legacy map and fuzzy fallback.
+  const tableKeys = selected.map((value) => categoryDeskMap[value]).filter((value): value is string => Boolean(value));
+  if (tableKeys.length) return tableKeys.includes(key);
 
   const legacyKeys = selected.map((value) => LEGACY_CATEGORY_MAP[value]).filter((value): value is string => Boolean(value));
   if (legacyKeys.length) return legacyKeys.includes(key);
@@ -144,8 +176,8 @@ export function articleBelongsToWebCategory(article: WebCategoryArticle, key: st
 // Single source of truth for "which web desk does this article belong to",
 // used by both the public homepage/category pages and the admin news list —
 // so an article's category badge always means the same thing everywhere.
-export function resolveWebCategoryLabel(article: WebCategoryArticle): string {
-  const match = WEB_CATEGORIES.find((item) => articleBelongsToWebCategory(article, item.key));
+export function resolveWebCategoryLabel(article: WebCategoryArticle, categoryDeskMap: Readonly<Record<string, string>> = {}): string {
+  const match = WEB_CATEGORIES.find((item) => articleBelongsToWebCategory(article, item.key, categoryDeskMap));
   return match?.label ?? article.categories?.[0] ?? article.category ?? "Regional";
 }
 

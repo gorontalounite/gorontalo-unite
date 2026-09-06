@@ -3,7 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import LatestNewsGrid from "./LatestNewsGrid";
-import { articleBelongsToWebCategory, resolveWebCategoryLabel } from "./categories";
+import { articleBelongsToWebCategory, resolveWebCategoryLabel, buildCategoryDeskMap, type CategoryRow } from "./categories";
+
+type DeskMap = Readonly<Record<string, string>>;
 
 export const dynamic = "force-dynamic";
 
@@ -81,12 +83,12 @@ const DESKS: ReadonlyArray<{ key: DeskKey; label: string; description: string; t
   },
 ] as const;
 
-function belongsTo(article: Article, key: DeskKey) {
-  return articleBelongsToWebCategory(article, key);
+function belongsTo(article: Article, key: DeskKey, deskMap: DeskMap = {}) {
+  return articleBelongsToWebCategory(article, key, deskMap);
 }
 
-function articlesFor(articles: Article[], key: DeskKey, limit: number) {
-  return articles.filter((article) => belongsTo(article, key)).slice(0, limit);
+function articlesFor(articles: Article[], key: DeskKey, limit: number, deskMap: DeskMap = {}) {
+  return articles.filter((article) => belongsTo(article, key, deskMap)).slice(0, limit);
 }
 
 function articleDate(article: Article) {
@@ -102,8 +104,8 @@ function displayDate(value: string) {
   }).format(new Date(value));
 }
 
-function deskLabel(article: Article) {
-  return resolveWebCategoryLabel(article);
+function deskLabel(article: Article, deskMap: DeskMap = {}) {
+  return resolveWebCategoryLabel(article, deskMap);
 }
 
 function ArticleImage({ article, className, priority = false, sizes = "(max-width: 768px) 100vw, 50vw" }: { article: Article; className: string; priority?: boolean; sizes?: string }) {
@@ -127,10 +129,10 @@ function ArticleImage({ article, className, priority = false, sizes = "(max-widt
   );
 }
 
-function Eyebrow({ article, light = false }: { article: Article; light?: boolean }) {
+function Eyebrow({ article, light = false, deskMap = {} }: { article: Article; light?: boolean; deskMap?: DeskMap }) {
   return (
     <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#77736b]"}`}>
-      <span className={light ? "text-[#f5c400]" : "text-[#9b7513]"}>{deskLabel(article)}</span>
+      <span className={light ? "text-[#f5c400]" : "text-[#9b7513]"}>{deskLabel(article, deskMap)}</span>
       <span aria-hidden>•</span>
       <time dateTime={articleDate(article)}>{displayDate(articleDate(article))}</time>
     </div>
@@ -150,13 +152,13 @@ function SectionTitle({ id, title, dark = false, showViewAll = true }: { id: str
   );
 }
 
-function StoryCard({ article, large = false }: { article: Article; large?: boolean }) {
+function StoryCard({ article, large = false, deskMap = {} }: { article: Article; large?: boolean; deskMap?: DeskMap }) {
   return (
     <article className="group">
       <Link href={`/${article.slug}`} className="block">
         <ArticleImage article={article} className={large ? "aspect-[16/10]" : "aspect-[4/3]"} sizes={large ? "(max-width: 768px) 100vw, 55vw" : "(max-width: 768px) 82vw, 30vw"} />
         <div className="pt-4">
-          <Eyebrow article={article} />
+          <Eyebrow article={article} deskMap={deskMap} />
           <h3 className={`mt-2 font-display font-extrabold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#9b7513] ${large ? "text-[22px] sm:text-[30px]" : "text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
           {article.excerpt ? <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#6d6961]">{article.excerpt}</p> : null}
         </div>
@@ -165,12 +167,12 @@ function StoryCard({ article, large = false }: { article: Article; large?: boole
   );
 }
 
-function CompactStory({ article }: { article: Article }) {
+function CompactStory({ article, deskMap = {} }: { article: Article; deskMap?: DeskMap }) {
   return (
     <article className="group border-b border-[#d7d1c6] pb-4 last:border-0 last:pb-0">
       <Link href={`/${article.slug}`} className="grid grid-cols-[1fr_108px] gap-4">
         <div>
-          <Eyebrow article={article} />
+          <Eyebrow article={article} deskMap={deskMap} />
           <h3 className="mt-2 line-clamp-3 font-display text-[15px] font-extrabold leading-[1.16] tracking-[-.015em] transition group-hover:text-[#9b7513] sm:text-[17px]">{article.title}</h3>
         </div>
         <div className="relative">
@@ -181,14 +183,14 @@ function CompactStory({ article }: { article: Article }) {
   );
 }
 
-function DarkFeature({ article }: { article: Article }) {
+function DarkFeature({ article, deskMap = {} }: { article: Article; deskMap?: DeskMap }) {
   return (
     <article className="group relative min-h-[430px] overflow-hidden rounded-[4px] sm:min-h-[560px]">
       <ArticleImage article={article} className="absolute inset-0 h-full w-full" priority sizes="(max-width: 768px) 100vw, 70vw" />
       <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent" />
       <Link href={`/${article.slug}`} className="absolute inset-0 flex items-end p-6 sm:p-9">
         <div className="max-w-3xl text-white">
-          <Eyebrow article={article} light />
+          <Eyebrow article={article} light deskMap={deskMap} />
           <h3 className="mt-3 font-display text-[26px] font-extrabold leading-[1.04] tracking-[-.035em] sm:text-[38px]">{article.title}</h3>
           {article.excerpt ? <p className="mt-4 hidden max-w-2xl text-sm leading-relaxed text-white/75 sm:line-clamp-2">{article.excerpt}</p> : null}
         </div>
@@ -225,6 +227,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
   const activeDesk = DESKS.find((desk) => desk.key === params.section);
   const search = (params.q ?? "").trim();
   let articles: Article[] = [];
+  let deskMap: DeskMap = {};
 
   try {
     const supabase = await createClient();
@@ -239,13 +242,17 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
       const safeSearch = search.replace(/[,%_]/g, " ");
       request = request.or(`title.ilike.%${safeSearch}%,excerpt.ilike.%${safeSearch}%`);
     }
-    const { data, error } = await request;
+    const [{ data, error }, { data: categoryRows }] = await Promise.all([
+      request,
+      supabase.from("categories").select("id, name, parent_id, desk_key"),
+    ]);
     if (!error) articles = (data ?? []) as Article[];
+    deskMap = buildCategoryDeskMap((categoryRows ?? []) as CategoryRow[]);
   } catch {
     articles = [];
   }
 
-  const displayedArticles = activeDesk ? articles.filter((article) => belongsTo(article, activeDesk.key)) : articles;
+  const displayedArticles = activeDesk ? articles.filter((article) => belongsTo(article, activeDesk.key, deskMap)) : articles;
 
   if (activeDesk || search) {
     const title = search ? `Hasil untuk “${search}”` : activeDesk?.label ?? "Berita";
@@ -261,7 +268,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           </div>
           {displayedArticles.length ? (
             <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
-              {displayedArticles.map((article, index) => <StoryCard key={article.id} article={article} large={index === 0} />)}
+              {displayedArticles.map((article, index) => <StoryCard key={article.id} article={article} large={index === 0} deskMap={deskMap} />)}
             </div>
           ) : (
             <div className="border border-dashed border-[#bbb3a5] px-6 py-24 text-center">
@@ -285,12 +292,12 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
 
   const hero = articles[0];
   const heroSide = articles.slice(1, 3);
-  const news = articlesFor(articles.slice(3), "news", 5);
-  const travel = articlesFor(articles, "travel", 5);
-  const culinary = articlesFor(articles, "culinary", 3);
-  const culture = articlesFor(articles, "culture", 4);
-  const people = articlesFor(articles, "people", 4);
-  const life = articlesFor(articles, "life", 4);
+  const news = articlesFor(articles.slice(3), "news", 5, deskMap);
+  const travel = articlesFor(articles, "travel", 5, deskMap);
+  const culinary = articlesFor(articles, "culinary", 3, deskMap);
+  const culture = articlesFor(articles, "culture", 4, deskMap);
+  const people = articlesFor(articles, "people", 4, deskMap);
+  const life = articlesFor(articles, "life", 4, deskMap);
 
   return (
     <div className="min-h-screen bg-white text-[#302f2c]">
@@ -303,7 +310,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
               <div className="absolute inset-0 bg-gradient-to-t from-black via-black/30 to-transparent" />
               <Link href={`/${hero.slug}`} className="absolute inset-0 flex items-end p-6 sm:p-10">
                 <div className="max-w-3xl text-white">
-                  <Eyebrow article={hero} light />
+                  <Eyebrow article={hero} light deskMap={deskMap} />
                   <h1 className="mt-3 font-display text-[30px] font-extrabold leading-[1.02] tracking-[-.04em] sm:text-[46px]">{hero.title}</h1>
                   {hero.excerpt ? <p className="mt-4 hidden max-w-2xl text-sm leading-relaxed text-white/75 sm:line-clamp-2">{hero.excerpt}</p> : null}
                 </div>
@@ -315,7 +322,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
                   <ArticleImage article={article} className="absolute inset-0 h-full w-full" sizes="(max-width: 1024px) 50vw, 30vw" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
                   <Link href={`/${article.slug}`} className="absolute inset-0 flex items-end p-4 sm:p-6">
-                    <div className="text-white"><Eyebrow article={article} light /><h2 className="mt-2 line-clamp-3 font-display text-[16px] font-extrabold leading-[1.08] tracking-[-.02em] sm:text-[20px]">{article.title}</h2></div>
+                    <div className="text-white"><Eyebrow article={article} light deskMap={deskMap} /><h2 className="mt-2 line-clamp-3 font-display text-[16px] font-extrabold leading-[1.08] tracking-[-.02em] sm:text-[20px]">{article.title}</h2></div>
                   </Link>
                 </article>
               ))}
@@ -327,7 +334,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="culture" title="Culture" />
             {culture.length ? <div className="grid gap-5 lg:grid-cols-[1.35fr_.65fr]">
-              <DarkFeature article={culture[0]} />
+              <DarkFeature article={culture[0]} deskMap={deskMap} />
               <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">
                 {culture.slice(1).map((article) => <article key={article.id} className="group border-b border-[#dedede] pb-5 last:border-0"><Link href={`/${article.slug}`} className="grid grid-cols-[112px_1fr] gap-4"><ArticleImage article={article} className="aspect-square" sizes="112px" /><div><p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#9b7513]">Culture</p><h3 className="mt-2 line-clamp-3 font-display text-[16px] font-extrabold leading-[1.1]">{article.title}</h3></div></Link></article>)}
               </div>
@@ -339,8 +346,8 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="travel" title="Tourism" />
             {travel.length ? <div className="grid gap-6 lg:grid-cols-[1.45fr_.55fr]">
-              <DarkFeature article={travel[0]} />
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">{travel.slice(1).map((article) => <CompactStory key={article.id} article={article} />)}</div>
+              <DarkFeature article={travel[0]} deskMap={deskMap} />
+              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">{travel.slice(1).map((article) => <CompactStory key={article.id} article={article} deskMap={deskMap} />)}</div>
             </div> : <EmptyDesk />}
           </div>
         </section>
@@ -348,7 +355,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
         <section id="culinary" className="scroll-mt-24 border-y border-[#dedede] bg-[#f6f6f6] py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="culinary" title="Culinary" />
-            {culinary.length ? <div className="grid gap-8 sm:grid-cols-3">{culinary.map((article) => <StoryCard key={article.id} article={article} />)}</div> : <EmptyDesk />}
+            {culinary.length ? <div className="grid gap-8 sm:grid-cols-3">{culinary.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</div> : <EmptyDesk />}
           </div>
         </section>
 
@@ -356,8 +363,8 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="life" title="Lifestyle" />
             {life.length ? <div className="grid gap-6 lg:grid-cols-2">
-              <StoryCard article={life[0]} large />
-              <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">{life.slice(1).map((article) => <CompactStory key={article.id} article={article} />)}</div>
+              <StoryCard article={life[0]} large deskMap={deskMap} />
+              <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">{life.slice(1).map((article) => <CompactStory key={article.id} article={article} deskMap={deskMap} />)}</div>
             </div> : <EmptyDesk />}
           </div>
         </section>
@@ -366,7 +373,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="people" title="People" />
             {people.length ? <div className="flex snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
-              {people.map((article) => <div key={article.id} className="min-w-[78vw] snap-start sm:min-w-0"><StoryCard article={article} /></div>)}
+              {people.map((article) => <div key={article.id} className="min-w-[78vw] snap-start sm:min-w-0"><StoryCard article={article} deskMap={deskMap} /></div>)}
             </div> : <EmptyDesk />}
           </div>
         </section>
@@ -375,8 +382,8 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="news" title="Regional" showViewAll={false} />
             {news.length ? <div className="grid gap-8 lg:grid-cols-[1.2fr_.8fr]">
-              <StoryCard article={news[0]} large />
-              <div className="grid content-start gap-4 sm:grid-cols-2 lg:grid-cols-1">{news.slice(1).map((article) => <CompactStory key={article.id} article={article} />)}</div>
+              <StoryCard article={news[0]} large deskMap={deskMap} />
+              <div className="grid content-start gap-4 sm:grid-cols-2 lg:grid-cols-1">{news.slice(1).map((article) => <CompactStory key={article.id} article={article} deskMap={deskMap} />)}</div>
             </div> : <EmptyDesk />}
           </div>
         </section>
