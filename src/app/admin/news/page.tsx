@@ -1,11 +1,19 @@
 import { createClient } from "@/lib/supabase/server";
 import NewsAdminList from "./NewsAdminList";
+import { resolveWebCategoryLabel, WEB_CATEGORIES } from "@/app/berita/categories";
 
 export const dynamic  = "force-dynamic";
 export const metadata = { title: "Berita | Admin Gorontalo Unite" };
 
 type SortField = "title" | "category" | "published_at" | "created_at";
 type SortDir   = "asc" | "desc";
+
+// Same order shown on the public homepage/nav, so the admin filter speaks
+// the same vocabulary as what visitors actually see.
+const CATEGORY_FILTER_ORDER = ["culture", "travel", "culinary", "life", "people", "news", "whats-on"];
+const CATEGORY_OPTIONS = CATEGORY_FILTER_ORDER
+  .map((key) => WEB_CATEGORIES.find((item) => item.key === key)?.label)
+  .filter((label): label is string => Boolean(label));
 
 interface PageProps {
   searchParams: Promise<{
@@ -32,32 +40,56 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
 
   const admin = await createClient();
 
-  // Build filtered, paginated query
   let qb = admin
     .from("articles")
-    .select("id, title, slug, category, published, published_at, created_at", { count: "exact" })
+    .select("id, title, slug, category, categories, tags, excerpt, published, published_at, created_at")
     .neq("category", "Portfolio")
-    .order(sortField, { ascending: sortDir === "asc", nullsFirst: false })
-    .range((page - 1) * pageSize, page * pageSize - 1);
+    .limit(1000);
+  if (q)                      qb = qb.or(`title.ilike.%${q}%,slug.ilike.%${q}%`);
+  if (status === "published") qb = qb.eq("published", true);
+  if (status === "draft")     qb = qb.eq("published", false);
 
-  if (q)                         qb = qb.or(`title.ilike.%${q}%,slug.ilike.%${q}%`);
-  if (category && category !== "all") qb = qb.eq("category", category);
-  if (status === "published")    qb = qb.eq("published", true);
-  if (status === "draft")        qb = qb.eq("published", false);
+  const { data: rows } = await qb;
+  const withCanonicalCategory = (rows ?? []).map((row) => ({
+    ...row,
+    canonicalCategory: resolveWebCategoryLabel({
+      category:   row.category as string,
+      categories: row.categories as string[] | null,
+      tags:       row.tags as string[] | null,
+      title:      row.title as string,
+      excerpt:    row.excerpt as string | null,
+    }),
+  }));
 
-  // Distinct categories for filter dropdown (separate lightweight query)
-  const { data: catRows } = await admin
-    .from("articles")
-    .select("category")
-    .neq("category", "Portfolio");
-  const allCategories = [...new Set((catRows ?? []).map((r) => r.category as string))].sort();
+  const filtered = category
+    ? withCanonicalCategory.filter((row) => row.canonicalCategory === category)
+    : withCanonicalCategory;
 
-  const { data: items, count } = await qb;
+  const sorted = [...filtered].sort((a, b) => {
+    let cmp = 0;
+    if (sortField === "title")             cmp = a.title.localeCompare(b.title, "id");
+    else if (sortField === "category")     cmp = a.canonicalCategory.localeCompare(b.canonicalCategory, "id");
+    else if (sortField === "published_at") cmp = new Date(a.published_at ?? a.created_at).getTime() - new Date(b.published_at ?? b.created_at).getTime();
+    else                                   cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+    return sortDir === "asc" ? cmp : -cmp;
+  });
+
+  const totalCount = sorted.length;
+  const start      = (page - 1) * pageSize;
+  const items = sorted.slice(start, start + pageSize).map((row) => ({
+    id: row.id as string,
+    title: row.title as string,
+    slug: row.slug as string,
+    category: row.canonicalCategory,
+    published: row.published as boolean,
+    published_at: row.published_at as string | null,
+    created_at: row.created_at as string,
+  }));
 
   return (
     <NewsAdminList
-      initialItems={items ?? []}
-      totalCount={count ?? 0}
+      initialItems={items}
+      totalCount={totalCount}
       page={page}
       pageSize={pageSize}
       q={q}
@@ -65,7 +97,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
       status={status}
       sortField={sortField}
       sortDir={sortDir}
-      allCategories={allCategories}
+      allCategories={CATEGORY_OPTIONS}
     />
   );
 }
