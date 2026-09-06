@@ -202,13 +202,26 @@ function DarkFeature({ article, deskMap = {} }: { article: Article; deskMap?: De
 
 const NAV_ORDER: DeskKey[] = ["culture", "travel", "culinary", "life", "people", "news"];
 
+const QUICK_LINKS = [
+  { href: "/city-guide", label: "City Guide" },
+  { href: "/reels", label: "Reels" },
+] as const;
+
 function DeskNav() {
   const navDesks = NAV_ORDER.map((key) => DESKS.find((desk) => desk.key === key)).filter((desk): desk is (typeof DESKS)[number] => Boolean(desk));
   return (
     <nav aria-label="Rubrik berita" className="border-y border-[#d7d1c6]">
-      <div className="mx-auto flex max-w-[1280px] gap-6 overflow-x-auto px-4 py-3 [scrollbar-width:none] sm:px-6 lg:px-8 [&::-webkit-scrollbar]:hidden">
-        {navDesks.map((desk) => <Link key={desk.key} href={`/category/${desk.key}`} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] transition hover:text-[#9b7513]">{desk.label}</Link>)}
-        <a href="#latest" className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] transition hover:text-[#9b7513]">Latest News</a>
+      <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-4 py-3 sm:px-6 lg:px-8">
+        <div className="flex min-w-0 gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {navDesks.map((desk) => <Link key={desk.key} href={`/category/${desk.key}`} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] transition hover:text-[#9b7513]">{desk.label}</Link>)}
+          <a href="#latest" className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] transition hover:text-[#9b7513]">Latest News</a>
+        </div>
+        <div className="hidden shrink-0 items-center gap-2 lg:flex">
+          <span className="text-[10px] font-bold uppercase tracking-[.1em] text-[#a8a29e]">Quick Links</span>
+          {QUICK_LINKS.map((link) => (
+            <Link key={link.href} href={link.href} className="rounded-full bg-[#f6f6f6] px-3 py-1.5 text-[11px] font-bold text-[#302f2c] transition hover:bg-[#ececec]">{link.label}</Link>
+          ))}
+        </div>
       </div>
     </nav>
   );
