@@ -464,7 +464,7 @@ function LegacyPostEditor({ postType, editId, initialMeta, initialBlocks, initia
     const finalSlug = meta.slug || slugify(meta.title);
     const cats = postType === "portfolio"
       ? ["Portfolio"]
-      : (meta.categories?.length ? meta.categories : (meta.category ? [meta.category] : ["Umum"]));
+      : (meta.categories?.length ? meta.categories : (meta.category ? [meta.category] : ["Regional"]));
     const cat = cats[0];
     return {
       title:        meta.title,
@@ -507,6 +507,10 @@ function LegacyPostEditor({ postType, editId, initialMeta, initialBlocks, initia
 
   const save = async (publish: boolean) => {
     if (!meta.title.trim()) { setError("Judul wajib diisi"); return; }
+    if (publish && postType === "news") {
+      const realTags = (meta.tags ?? []).filter((t) => !t.startsWith("stack:"));
+      if (!realTags.length) { setError("Tambahkan minimal satu tag sebelum menerbitkan."); return; }
+    }
     setSaving(true);
     setError(null);
 

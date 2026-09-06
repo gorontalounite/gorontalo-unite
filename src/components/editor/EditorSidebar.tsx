@@ -140,20 +140,28 @@ function ImageUploadField({ value, onChange, label, contain = false }: {
   );
 }
 
-/* ─── Category selector — multi-select checkboxes ──────────── */
+/* ─── Category selector — multi-select checkboxes + custom entries ── */
 function CategorySelector({ values, onChange }: { values: string[]; onChange: (c: string[]) => void }) {
   const [open, setOpen] = useState(false);
+  const [customInput, setCustomInput] = useState("");
   const toggle = (c: string) =>
     onChange(values.includes(c) ? values.filter((x) => x !== c) : [...values, c]);
+  const addCustom = () => {
+    const value = customInput.trim();
+    if (value && !values.includes(value)) onChange([...values, value]);
+    setCustomInput("");
+  };
+  const presetLabels = WEB_CATEGORIES.map((c) => c.label);
+  const customValues = values.filter((v) => !presetLabels.includes(v));
 
   return (
     <div className="space-y-1.5">
       {values.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-2">
           {values.map((c) => (
-            <span key={c} className="inline-flex items-center gap-1 text-[11px] bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded-full font-medium">
+            <span key={c} className={`inline-flex items-center gap-1 text-[11px] px-2 py-0.5 rounded-full font-medium ${customValues.includes(c) ? "bg-sky-100 text-sky-800" : "bg-yellow-100 text-yellow-800"}`}>
               {c}
-              <button type="button" onClick={() => toggle(c)} className="text-yellow-600 hover:text-red-500">✕</button>
+              <button type="button" onClick={() => toggle(c)} className="hover:text-red-500">✕</button>
             </span>
           ))}
         </div>
@@ -161,11 +169,26 @@ function CategorySelector({ values, onChange }: { values: string[]; onChange: (c
       <button type="button" onClick={() => setOpen((value) => !value)} className="w-full rounded-lg border border-dashed border-gray-300 px-2.5 py-2 text-left text-[11px] font-medium text-gray-600 hover:border-[#F5C400] hover:bg-yellow-50">
         {open ? "Tutup pilihan kategori" : "+ Tambahkan kategori"}
       </button>
-      {open && <div className="mt-2 max-h-80 space-y-1 overflow-y-auto rounded-lg border border-gray-100 p-1.5">
-        {WEB_CATEGORIES.map((category) => <label key={category.key} className={`flex cursor-pointer items-center gap-2 rounded px-2 py-2 transition-colors ${values.includes(category.label) ? "bg-yellow-50" : "hover:bg-gray-50"}`}>
-          <input type="checkbox" checked={values.includes(category.label)} onChange={() => toggle(category.label)} className="accent-[#F5C400]" />
-          <span className="text-[11px] font-semibold text-gray-700">{category.label}</span>
-        </label>)}
+      {open && <div className="mt-2 space-y-2 rounded-lg border border-gray-100 p-1.5">
+        <div className="max-h-64 space-y-1 overflow-y-auto">
+          {WEB_CATEGORIES.map((category) => <label key={category.key} className={`flex cursor-pointer items-center gap-2 rounded px-2 py-2 transition-colors ${values.includes(category.label) ? "bg-yellow-50" : "hover:bg-gray-50"}`}>
+            <input type="checkbox" checked={values.includes(category.label)} onChange={() => toggle(category.label)} className="accent-[#F5C400]" />
+            <span className="text-[11px] font-semibold text-gray-700">{category.label}</span>
+          </label>)}
+        </div>
+        <div className="border-t border-gray-100 pt-2">
+          <label className="mb-1 block px-1 text-[10px] font-medium text-gray-500">Kategori atau turunan baru</label>
+          <div className="flex gap-1 px-1">
+            <input
+              value={customInput}
+              onChange={(e) => setCustomInput(e.target.value)}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); addCustom(); } }}
+              placeholder="mis. Kesehatan, Sub-Wisata Religi…"
+              className="min-w-0 flex-1 text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
+            />
+            <button type="button" onClick={addCustom} className="shrink-0 text-[11px] bg-gray-100 text-gray-700 px-2 py-1.5 rounded-lg hover:bg-gray-200">+</button>
+          </div>
+        </div>
       </div>}
       <p className="text-[10px] text-gray-400 mt-1">{values.length ? `${values.length} kategori dipilih` : "Belum ada kategori"}</p>
     </div>
@@ -519,7 +542,7 @@ export default function EditorSidebar({
             )}
 
             {/* Tags */}
-            <Panel title="Tag">
+            <Panel title="Tag" defaultOpen>
               <TagInput
                 tags={(meta.tags ?? []).filter((t) => !t.startsWith("stack:"))}
                 onChange={(newTags) => {
@@ -527,6 +550,9 @@ export default function EditorSidebar({
                   setField("tags", [...stackTags, ...newTags]);
                 }}
               />
+              {postType === "news" && (
+                <p className="text-[10px] text-gray-400">Wajib diisi minimal satu tag sebelum menerbitkan.</p>
+              )}
             </Panel>
 
             {/* Featured image */}
