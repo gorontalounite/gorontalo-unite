@@ -237,7 +237,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
       .eq("published", true)
       .neq("category", "Portfolio")
       .order("published_at", { ascending: false, nullsFirst: false })
-      .limit(90);
+      .limit(500);
     if (search) {
       const safeSearch = search.replace(/[,%_]/g, " ");
       request = request.or(`title.ilike.%${safeSearch}%,excerpt.ilike.%${safeSearch}%`);
@@ -290,14 +290,23 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
     );
   }
 
-  const hero = articles[0];
-  const heroSide = articles.slice(1, 3);
-  const news = articlesFor(articles.slice(3), "news", 5, deskMap);
-  const travel = articlesFor(articles, "travel", 5, deskMap);
-  const culinary = articlesFor(articles, "culinary", 3, deskMap);
-  const culture = articlesFor(articles, "culture", 4, deskMap);
-  const people = articlesFor(articles, "people", 4, deskMap);
-  const life = articlesFor(articles, "life", 4, deskMap);
+  // Hero prioritizes "Berita pilihan" (is_trending) articles — editors curate
+  // this, so it naturally covers several categories instead of whichever
+  // desk happened to publish most recently. Falls back to recency when
+  // there aren't enough featured articles yet.
+  const trending = articles.filter((article) => article.is_trending);
+  const heroPool = trending.length >= 3 ? trending : [...trending, ...articles.filter((article) => !article.is_trending)];
+  const hero = heroPool[0];
+  const heroSide = heroPool.slice(1, 3);
+  const heroIds = new Set([hero.id, ...heroSide.map((article) => article.id)]);
+  const remaining = articles.filter((article) => !heroIds.has(article.id));
+
+  const news = articlesFor(remaining, "news", 5, deskMap);
+  const travel = articlesFor(remaining, "travel", 5, deskMap);
+  const culinary = articlesFor(remaining, "culinary", 3, deskMap);
+  const culture = articlesFor(remaining, "culture", 4, deskMap);
+  const people = articlesFor(remaining, "people", 4, deskMap);
+  const life = articlesFor(remaining, "life", 4, deskMap);
 
   return (
     <div className="min-h-screen bg-white text-[#302f2c]">
