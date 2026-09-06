@@ -59,6 +59,7 @@ export const WEB_CATEGORY_DESCRIPTIONS: Readonly<Record<string, string>> = {
   culture: "Karawo, tradisi, sejarah, seni, bahasa, dan warisan budaya Gorontalo.",
   people: "Creator, entrepreneur, seniman, komunitas, dan sosok menarik dari Gorontalo.",
   life: "Kampus, karier, relationship, wellness, dan lifestyle anak muda Gorontalo.",
+  news: "Pembangunan, kebijakan, dan kabar regional lain dari Gorontalo.",
 };
 
 export const WEB_CATEGORY_TERMS: Readonly<Record<string, readonly string[]>> = {
@@ -78,6 +79,23 @@ export interface WebCategoryArticle {
   title: string;
   excerpt: string | null;
 }
+
+// Deterministic mapping for the older Indonesian category taxonomy (still
+// stored on many existing articles) to the current web desks. Checked before
+// fuzzy term matching so that, e.g., an article tagged "Wisata" always
+// resolves to Tourism even if its text happens to also mention an unrelated
+// term like "event" in passing.
+const LEGACY_CATEGORY_MAP: Readonly<Record<string, string>> = {
+  wisata: "travel", alam: "travel",
+  budaya: "culture", agama: "culture",
+  event: "whats-on",
+  pendidikan: "life", kesehatan: "life", sosial: "life", interest: "life",
+  inspire: "people",
+  politik: "news", pemerintahan: "news", ekonomi: "news", bisnis: "news",
+  pertanian: "news", perikanan: "news", teknologi: "news", digital: "news",
+  infrastruktur: "news", pembangunan: "news", hukum: "news", keamanan: "news",
+  lingkungan: "news", olahraga: "news", kemasyarakatan: "news", insight: "news",
+};
 
 function normalizedCategory(value: string) {
   return value
@@ -102,6 +120,9 @@ export function articleBelongsToWebCategory(article: WebCategoryArticle, key: st
   const selected = [article.category, ...(article.categories ?? [])].map(normalizedCategory);
   const category = WEB_CATEGORIES.find((item) => item.key === key);
   if (!category) return false;
+
+  const legacyKeys = selected.map((value) => LEGACY_CATEGORY_MAP[value]).filter((value): value is string => Boolean(value));
+  if (legacyKeys.length) return legacyKeys.includes(key);
 
   const explicitKeys = WEB_CATEGORIES
     .filter((item) => selected.includes(normalizedCategory(item.label)) || selected.includes(normalizedCategory(item.key)))
