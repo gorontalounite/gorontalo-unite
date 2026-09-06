@@ -64,6 +64,35 @@ export default function NewsAdminList({
   const [deleting, setDeleting] = useState(false);
   const [searchVal, setSearchVal] = useState(q);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<"draft" | "delete" | null>(null);
+  const [bulkRunning, setBulkRunning] = useState(false);
+
+  const toggleOne = (id: string) => setSelected((current) => {
+    const next = new Set(current);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const allSelected = initialItems.length > 0 && initialItems.every((item) => selected.has(item.id));
+  const toggleAll = () => setSelected(allSelected ? new Set() : new Set(initialItems.map((item) => item.id)));
+
+  const runBulk = async (action: "draft" | "delete") => {
+    setBulkRunning(true);
+    const ids = [...selected];
+    if (action === "delete") {
+      await Promise.all(ids.map((id) => fetch("/api/admin/articles", {
+        method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id }),
+      })));
+    } else {
+      await Promise.all(ids.map((id) => fetch("/api/admin/articles", {
+        method: "PATCH", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id, published: false, published_at: null }),
+      })));
+    }
+    setBulkRunning(false);
+    setBulkAction(null);
+    setSelected(new Set());
+    router.refresh();
+  };
 
   const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
 
@@ -171,6 +200,18 @@ export default function NewsAdminList({
         </select>
       </div>
 
+      {/* Bulk action bar */}
+      {selected.size > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-3 rounded-xl border border-[#F5C400]/40 bg-yellow-50 px-4 py-2.5">
+          <p className="text-sm font-medium text-gray-700">{selected.size} artikel dipilih</p>
+          <div className="ml-auto flex items-center gap-2">
+            <button onClick={() => setBulkAction("draft")} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-gray-300 text-gray-700 hover:bg-white">Jadikan Draft</button>
+            <button onClick={() => setBulkAction("delete")} className="text-xs font-semibold px-3 py-1.5 rounded-lg border border-red-300 text-red-600 hover:bg-red-50">Hapus</button>
+            <button onClick={() => setSelected(new Set())} className="text-xs text-gray-400 hover:text-gray-600">Batalkan pilihan</button>
+          </div>
+        </div>
+      )}
+
       {/* Table */}
       <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
         {initialItems.length === 0 ? (
@@ -183,6 +224,9 @@ export default function NewsAdminList({
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-xs text-gray-500 uppercase select-none">
               <tr>
+                <th className="w-10 px-4 py-3 text-left">
+                  <input type="checkbox" checked={allSelected} onChange={toggleAll} className="accent-[#F5C400]" aria-label="Pilih semua" />
+                </th>
                 <th className="px-4 py-3 text-left">
                   <button type="button" onClick={() => toggleSort("title")}
                     className="flex items-center hover:text-gray-800 font-semibold">
@@ -207,7 +251,10 @@ export default function NewsAdminList({
             </thead>
             <tbody className="divide-y divide-gray-50">
               {initialItems.map((a) => (
-                <tr key={a.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={a.id} className={`hover:bg-gray-50/50 transition-colors ${selected.has(a.id) ? "bg-yellow-50/60" : ""}`}>
+                  <td className="px-4 py-3">
+                    <input type="checkbox" checked={selected.has(a.id)} onChange={() => toggleOne(a.id)} className="accent-[#F5C400]" aria-label={`Pilih ${a.title}`} />
+                  </td>
                   <td className="px-4 py-3">
                     <p className="font-medium text-gray-900 truncate max-w-xs">{a.title}</p>
                     <p className="text-xs text-gray-400">/{a.slug}</p>
@@ -284,6 +331,28 @@ export default function NewsAdminList({
               className="w-8 h-8 text-sm rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 flex items-center justify-center">›</button>
             <button onClick={() => nav({ page: String(totalPages) })} disabled={page === totalPages}
               className="w-8 h-8 text-xs rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-50 disabled:opacity-40 flex items-center justify-center">»</button>
+          </div>
+        </div>
+      )}
+
+      {/* Bulk action confirm */}
+      {bulkAction && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl shadow-xl p-6 w-full max-w-sm text-center">
+            <p className="font-semibold text-gray-900 mb-2">
+              {bulkAction === "delete" ? `Hapus ${selected.size} artikel?` : `Jadikan ${selected.size} artikel draft?`}
+            </p>
+            <p className="text-sm text-gray-500 mb-5">
+              {bulkAction === "delete" ? "Tindakan ini tidak dapat dibatalkan." : "Artikel yang dipilih akan disembunyikan dari publik."}
+            </p>
+            <div className="flex gap-3">
+              <button onClick={() => setBulkAction(null)} disabled={bulkRunning}
+                className="flex-1 text-sm border border-gray-200 text-gray-600 py-2 rounded-xl hover:bg-gray-50 disabled:opacity-50">Batal</button>
+              <button onClick={() => runBulk(bulkAction)} disabled={bulkRunning}
+                className={`flex-1 text-sm py-2 rounded-xl text-white disabled:opacity-50 ${bulkAction === "delete" ? "bg-red-500 hover:bg-red-600" : "bg-gray-800 hover:bg-gray-900"}`}>
+                {bulkRunning ? "Memproses…" : bulkAction === "delete" ? "Hapus" : "Jadikan Draft"}
+              </button>
+            </div>
           </div>
         </div>
       )}
