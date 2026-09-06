@@ -31,160 +31,246 @@ export type CityGuideEvent = {
   featured: boolean;
 };
 
-type DirectoryKind = "all" | "destination" | "event";
+type SectionKey = "explore" | "eat" | "stay" | "shop" | "services" | "events";
 
 type DirectoryItem = {
   id: string;
+  href: string;
   title: string;
-  slug: string;
-  description: string;
   imageUrl: string | null;
-  category: string;
-  location: string;
+  eyebrow: string;
   detail: string;
   featured: boolean;
-  kind: Exclude<DirectoryKind, "all">;
+  searchable: string;
 };
+
+const SECTION_META: Record<SectionKey, { label: string; category: string | null; icon: React.ReactNode }> = {
+  explore: { label: "Explore", category: "Atraksi & Wisata", icon: <path d="M3 18l5-7 4 5 3-4 6 6M8 7a2 2 0 100-4 2 2 0 000 4z" /> },
+  eat: { label: "Eat", category: "Kuliner", icon: <path d="M6 3v7a2 2 0 002 2v9M6 3v7M10 3v9M18 3c-2 0-3 2-3 4v4h3v9" /> },
+  stay: { label: "Stay", category: "Akomodasi", icon: <path d="M3 19V7m0 12h18M3 19v-4h18v4M7 15V9a2 2 0 012-2h2a2 2 0 012 2v6" /> },
+  shop: { label: "Shop", category: "Belanja", icon: <path d="M6 8h12l1 12H5L6 8zM9 8V6a3 3 0 016 0v2" /> },
+  services: { label: "Services", category: "Layanan Publik & Transportasi", icon: <path d="M3 16l2-6h14l2 6M5 16v3M19 16v3M7 10V6h10v4" /> },
+  events: { label: "Events", category: null, icon: <path d="M8 3v3M16 3v3M4 9h16M5 6h14a1 1 0 011 1v12a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1z" /> },
+};
+
+const SECTION_ORDER: SectionKey[] = ["explore", "eat", "stay", "shop", "services", "events"];
 
 const normalize = (value: string) => value.toLocaleLowerCase("id-ID").trim();
 
 function eventDate(value: string) {
-  return new Intl.DateTimeFormat("id-ID", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "Asia/Makassar",
-  }).format(new Date(value));
+  return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" }).format(new Date(value));
 }
 
 export default function CityGuideDirectory({ places, events }: { places: CityGuidePlace[]; events: CityGuideEvent[] }) {
   const [query, setQuery] = useState("");
-  const [kind, setKind] = useState<DirectoryKind>("all");
+  const [tab, setTab] = useState<"all" | SectionKey>("all");
 
-  const items = useMemo<DirectoryItem[]>(() => [
-    ...places.map((place) => ({
-      id: place.id,
-      title: place.name,
-      slug: place.slug,
-      description: place.description,
-      imageUrl: place.image_url,
-      category: place.category || "Destination",
-      location: place.location || place.address || "Gorontalo",
-      detail: place.opening_hours || "View visitor information",
-      featured: place.featured,
-      kind: "destination" as const,
-    })),
-    ...events.map((event) => ({
-      id: event.id,
-      title: event.title,
-      slug: event.slug,
-      description: event.description,
-      imageUrl: event.image_url,
-      category: event.category || "Event",
-      location: event.venue || event.address || "Gorontalo",
-      detail: eventDate(event.starts_at),
-      featured: event.featured,
-      kind: "event" as const,
-    })),
-  ].sort((a, b) => Number(b.featured) - Number(a.featured)), [events, places]);
+  const bySections = useMemo(() => {
+    const map = new Map<SectionKey, DirectoryItem[]>();
+    for (const key of SECTION_ORDER) map.set(key, []);
 
-  const results = useMemo(() => {
-    const needle = normalize(query);
-    return items.filter((item) => {
-      const matchesKind = kind === "all" || item.kind === kind;
-      const searchable = normalize([item.title, item.description, item.category, item.location].join(" "));
-      return matchesKind && (!needle || searchable.includes(needle));
-    });
-  }, [items, kind, query]);
+    for (const place of places) {
+      const key = (Object.keys(SECTION_META) as SectionKey[]).find((k) => SECTION_META[k].category === place.category) ?? "explore";
+      map.get(key)!.push({
+        id: place.id,
+        href: `/wisata/${place.slug}`,
+        title: place.name,
+        imageUrl: place.image_url,
+        eyebrow: `${SECTION_META[key].label} · ${place.location || place.address || "Gorontalo"}`,
+        detail: place.opening_hours || "Lihat info kunjungan",
+        featured: place.featured,
+        searchable: normalize([place.name, place.description, place.category, place.location, place.address].filter(Boolean).join(" ")),
+      });
+    }
+
+    for (const event of events) {
+      map.get("events")!.push({
+        id: event.id,
+        href: `/event/${event.slug}`,
+        title: event.title,
+        imageUrl: event.image_url,
+        eyebrow: eventDate(event.starts_at),
+        detail: event.venue || event.address || "Gorontalo",
+        featured: event.featured,
+        searchable: normalize([event.title, event.description, event.category, event.venue, event.address].filter(Boolean).join(" ")),
+      });
+    }
+
+    for (const list of map.values()) list.sort((a, b) => Number(b.featured) - Number(a.featured));
+    return map;
+  }, [places, events]);
+
+  const needle = normalize(query);
+  const filteredSections = useMemo(() => {
+    const result = new Map<SectionKey, DirectoryItem[]>();
+    for (const key of SECTION_ORDER) {
+      const items = bySections.get(key) ?? [];
+      result.set(key, needle ? items.filter((item) => item.searchable.includes(needle)) : items);
+    }
+    return result;
+  }, [bySections, needle]);
+
+  const totalMatches = useMemo(() => SECTION_ORDER.reduce((sum, key) => sum + (filteredSections.get(key)?.length ?? 0), 0), [filteredSections]);
+
+  const sectionsToRender = tab === "all" ? SECTION_ORDER : [tab];
 
   return (
-    <main className="min-h-screen bg-[#fcfbf8] pb-24 text-slate-950 dark:bg-zinc-950 dark:text-white">
-      <header className="border-b border-stone-200 bg-[#f5f0e8] px-4 py-10 dark:border-zinc-800 dark:bg-zinc-900 sm:px-6 sm:py-16">
-        <div className="mx-auto max-w-7xl">
-          <p className="text-[10px] font-bold uppercase tracking-[.24em] text-amber-700 dark:text-amber-300">Gorontalo Unite</p>
-          <h1 className="mt-3 font-display text-4xl font-bold tracking-[-.04em] sm:text-6xl">City Guide</h1>
-          <p className="mt-4 max-w-xl text-sm leading-7 text-slate-600 dark:text-zinc-300 sm:text-base">
-            Discover destinations and upcoming events across Gorontalo.
+    <main className="bg-white text-[#302f2c] dark:bg-zinc-950 dark:text-zinc-50">
+      <div className="border-b border-[#d7d1c6] dark:border-zinc-800">
+        <div className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 sm:py-8 lg:px-8">
+          <p className="text-[11px] font-bold uppercase tracking-[.18em] text-[#555149] dark:text-zinc-400">Gorontalo Unite</p>
+          <h1 className="mt-2 font-display text-[34px] font-extrabold tracking-[-.02em] sm:text-[42px]">City Guide</h1>
+          <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#78716c] dark:text-zinc-400">
+            Satu direktori untuk menjawab: mau ke mana, makan di mana, menginap di mana, dan event apa yang berlangsung di Gorontalo minggu ini.
           </p>
 
-          <div className="mt-7 grid gap-3 sm:grid-cols-[1fr_auto]">
-            <label className="flex h-12 items-center gap-3 rounded-xl border border-stone-200 bg-white px-4 shadow-sm dark:border-zinc-700 dark:bg-zinc-950">
-              <SearchIcon />
-              <input
-                value={query}
-                onChange={(event) => setQuery(event.target.value)}
-                placeholder="Search destinations or events…"
-                className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-slate-400"
-                aria-label="Search City Guide"
-              />
-            </label>
-            <div className="grid grid-cols-3 gap-2" aria-label="Directory type">
-              <FilterButton active={kind === "all"} onClick={() => setKind("all")}>All</FilterButton>
-              <FilterButton active={kind === "destination"} onClick={() => setKind("destination")}>Destinations</FilterButton>
-              <FilterButton active={kind === "event"} onClick={() => setKind("event")}>Events</FilterButton>
-            </div>
+          <div className="mt-5 flex max-w-xl gap-2">
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Cari tempat, kuliner, atau event…"
+              aria-label="Cari City Guide"
+              className="min-h-11 min-w-0 flex-1 rounded border border-[#d7d1c6] bg-white px-3.5 text-sm outline-none placeholder:text-[#a8a29e] focus-visible:border-[#9b7513] dark:border-zinc-700 dark:bg-zinc-900"
+            />
+            <button
+              type="button"
+              className="min-h-11 shrink-0 rounded bg-[#302f2c] px-5 text-sm font-bold text-white dark:bg-amber-300 dark:text-zinc-950"
+            >
+              Cari
+            </button>
+          </div>
+
+          <div className="mt-5 flex gap-5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Kategori direktori">
+            <TabButton active={tab === "all"} onClick={() => setTab("all")}>Semua</TabButton>
+            {SECTION_ORDER.map((key) => (
+              <TabButton key={key} active={tab === key} onClick={() => setTab(key)}>{SECTION_META[key].label}</TabButton>
+            ))}
           </div>
         </div>
-      </header>
+      </div>
 
-      <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <div className="flex items-end justify-between border-b border-stone-200 pb-5 dark:border-zinc-800">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[.2em] text-amber-700 dark:text-amber-300">Directory listing</p>
-            <h2 className="mt-2 font-display text-2xl font-bold sm:text-3xl">Explore Gorontalo</h2>
+      {needle && totalMatches === 0 ? (
+        <div className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8">
+          <div className="rounded border border-dashed border-[#d7d1c6] bg-white px-6 py-16 text-center dark:border-zinc-700 dark:bg-zinc-900">
+            <h3 className="font-display text-lg font-bold">Tidak ada hasil untuk &ldquo;{query}&rdquo;</h3>
+            <p className="mt-2 text-sm text-[#78716c] dark:text-zinc-400">Coba kata kunci lain, atau reset pencarian.</p>
+            <button type="button" onClick={() => setQuery("")} className="mt-5 rounded bg-[#302f2c] px-5 py-2.5 text-sm font-bold text-white dark:bg-amber-300 dark:text-zinc-950">
+              Reset pencarian
+            </button>
           </div>
-          <p className="text-xs text-slate-500 dark:text-zinc-400">{results.length} listings</p>
         </div>
-
-        {results.length ? (
-          <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3">
-            {results.map((item) => <DirectoryCard key={`${item.kind}-${item.id}`} item={item} />)}
-          </div>
-        ) : (
-          <div className="mt-6 rounded-2xl border border-dashed border-stone-300 bg-white px-5 py-16 text-center dark:border-zinc-700 dark:bg-zinc-900">
-            <h3 className="font-display text-xl font-bold">No listings found</h3>
-            <p className="mt-2 text-sm text-slate-500 dark:text-zinc-400">Try another search or directory type.</p>
-          </div>
-        )}
-      </section>
+      ) : (
+        sectionsToRender.map((key, index) => (
+          <Section
+            key={key}
+            sectionKey={key}
+            items={filteredSections.get(key) ?? []}
+            band={key === "events" ? "dark" : index % 2 === 1 ? "light" : "plain"}
+            layout={tab === "all" ? "rail" : "grid"}
+            onViewAll={() => setTab(key)}
+            showViewAll={tab === "all"}
+          />
+        ))
+      )}
     </main>
   );
 }
 
-function FilterButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
+function TabButton({ active, onClick, children }: { active: boolean; onClick: () => void; children: React.ReactNode }) {
   return (
     <button
       type="button"
       onClick={onClick}
-      className={`min-h-10 rounded-xl px-3 text-[10px] font-bold transition sm:text-xs ${active ? "bg-slate-950 text-white dark:bg-amber-300 dark:text-zinc-950" : "border border-stone-200 bg-white text-slate-600 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-300"}`}
+      role="tab"
+      aria-selected={active}
+      className={`shrink-0 min-h-11 border-b-2 py-2 text-[11px] font-bold uppercase tracking-[.1em] transition ${
+        active ? "border-[#9b7513] text-[#302f2c] dark:border-amber-300 dark:text-white" : "border-transparent text-[#555149] hover:text-[#9b7513] dark:text-zinc-400"
+      }`}
     >
       {children}
     </button>
   );
 }
 
-function DirectoryCard({ item }: { item: DirectoryItem }) {
-  const href = item.kind === "event" ? `/event/${item.slug}` : `/wisata/${item.slug}`;
+function Section({
+  sectionKey,
+  items,
+  band,
+  layout,
+  onViewAll,
+  showViewAll,
+}: {
+  sectionKey: SectionKey;
+  items: DirectoryItem[];
+  band: "plain" | "light" | "dark";
+  layout: "rail" | "grid";
+  onViewAll: () => void;
+  showViewAll: boolean;
+}) {
+  const meta = SECTION_META[sectionKey];
+  const isDark = band === "dark";
+  const bandClass = band === "dark" ? "bg-[#17191d] text-white" : band === "light" ? "border-y border-[#dedede] bg-[#f6f6f6] dark:border-zinc-800 dark:bg-zinc-900" : "";
+
   return (
-    <Link href={href} className="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5 transition hover:-translate-y-1 hover:shadow-xl dark:bg-zinc-900 dark:ring-white/10">
-      <div className="relative aspect-[4/3] overflow-hidden bg-gradient-to-br from-amber-200 via-orange-100 to-stone-200 dark:from-amber-800 dark:to-zinc-800">
-        {item.imageUrl ? (
-          <Image src={item.imageUrl} alt={item.title} fill unoptimized sizes="(max-width: 639px) 50vw, 33vw" className="object-cover transition duration-500 group-hover:scale-105" />
-        ) : null}
-        <span className={`absolute left-2 top-2 rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[.08em] backdrop-blur ${item.kind === "event" ? "bg-orange-500/90 text-white" : "bg-white/90 text-slate-900"}`}>
-          {item.kind === "event" ? "Event" : "Destination"}
-        </span>
+    <section className={`py-12 sm:py-16 ${bandClass}`} aria-labelledby={`section-${sectionKey}`}>
+      <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center justify-between gap-4">
+          <h2 id={`section-${sectionKey}`} className="font-display text-[20px] font-extrabold tracking-[-.025em] sm:text-[24px]">
+            / {meta.label} /
+          </h2>
+          {showViewAll && (
+            <button type="button" onClick={onViewAll} className={`shrink-0 min-h-11 text-xs font-bold ${isDark ? "text-white hover:text-[#f5c400]" : "hover:text-[#9b7513]"}`}>
+              Lihat semua →
+            </button>
+          )}
+        </div>
+
+        {items.length === 0 ? (
+          <div className={`rounded border border-dashed px-6 py-14 text-center ${isDark ? "border-white/15" : "border-[#d7d1c6] dark:border-zinc-700"}`}>
+            <p className={`text-sm ${isDark ? "text-white/60" : "text-[#78716c] dark:text-zinc-400"}`}>
+              Belum ada listing {meta.label.toLowerCase()} yang dipublikasikan.
+            </p>
+          </div>
+        ) : layout === "rail" ? (
+          <div className="-mx-4 flex gap-5 overflow-x-auto px-4 pb-1 [scroll-snap-type:x_mandatory] sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {items.map((item) => (
+              <DirectoryCard key={item.id} item={item} sectionKey={sectionKey} isDark={isDark} className="w-[15.5rem] shrink-0 [scroll-snap-align:start]" />
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
+            {items.map((item) => (
+              <DirectoryCard key={item.id} item={item} sectionKey={sectionKey} isDark={isDark} />
+            ))}
+          </div>
+        )}
       </div>
-      <div className="p-3 sm:p-5">
-        <p className="line-clamp-1 text-[9px] font-bold uppercase tracking-[.12em] text-amber-700 dark:text-amber-300">{item.category}</p>
-        <h3 className="mt-1.5 line-clamp-2 text-sm font-bold leading-tight sm:text-xl">{item.title}</h3>
-        <p className="mt-2 line-clamp-1 text-[10px] text-slate-500 dark:text-zinc-400 sm:text-xs">{item.location}</p>
-        <p className="mt-2 text-[10px] font-semibold text-slate-800 dark:text-zinc-200 sm:text-xs">{item.detail}</p>
-      </div>
-    </Link>
+    </section>
   );
 }
 
-function SearchIcon() {
-  return <svg aria-hidden="true" viewBox="0 0 24 24" className="h-5 w-5 shrink-0 text-slate-400" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="11" cy="11" r="6" /><path d="m16 16 4 4" /></svg>;
+function DirectoryCard({ item, sectionKey, isDark, className = "" }: { item: DirectoryItem; sectionKey: SectionKey; isDark: boolean; className?: string }) {
+  const isPoster = sectionKey === "events";
+  return (
+    <Link href={item.href} className={`group block ${className}`}>
+      <div
+        className={`relative overflow-hidden rounded-[4px] ${isPoster ? "aspect-[9/16]" : "aspect-[4/3]"} ${isDark ? "bg-[#23262c]" : "bg-[#e8e4dc] dark:bg-zinc-800"}`}
+      >
+        {item.imageUrl ? (
+          <Image src={item.imageUrl} alt={item.title} fill unoptimized sizes="(max-width: 639px) 45vw, 20vw" className="object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={`h-8 w-8 ${isDark ? "text-[#4b4536]" : "text-[#a08a5c]"}`}>
+              {SECTION_META[sectionKey].icon}
+            </svg>
+          </div>
+        )}
+      </div>
+      <p className={`mt-2.5 text-[11px] font-bold uppercase tracking-[.08em] ${isDark ? "text-[#f5c400]/90" : "text-[#9b7513]"}`}>{item.eyebrow}</p>
+      <h3 className={`mt-1 text-sm font-extrabold leading-snug tracking-[-.01em] transition ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
+        {item.title}
+      </h3>
+      <p className={`mt-1 text-xs ${isDark ? "text-zinc-400" : "text-[#78716c] dark:text-zinc-400"}`}>{item.detail}</p>
+    </Link>
+  );
 }
