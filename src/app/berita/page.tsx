@@ -147,7 +147,7 @@ function SectionTitle({ id, title, dark = false, showViewAll = true }: { id: str
         <span>{title}</span>
         <span className="text-[#f5c400]" aria-hidden>/</span>
       </h2>
-      {showViewAll ? <Link href={`/category/${id}`} className={`hidden shrink-0 text-xs font-bold sm:inline ${dark ? "text-white" : "text-[#302f2c]"}`}>View all <span aria-hidden>→</span></Link> : null}
+      {showViewAll ? <Link href={`/category/${id}`} className={`inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold ${dark ? "text-white" : "text-[#302f2c]"}`}>View all <span aria-hidden>→</span></Link> : null}
     </div>
   );
 }
