@@ -141,6 +141,14 @@ export function articleBelongsToWebCategory(article: WebCategoryArticle, key: st
   return matchesWebCategoryTerms(article, key);
 }
 
+// Single source of truth for "which web desk does this article belong to",
+// used by both the public homepage/category pages and the admin news list —
+// so an article's category badge always means the same thing everywhere.
+export function resolveWebCategoryLabel(article: WebCategoryArticle): string {
+  const match = WEB_CATEGORIES.find((item) => articleBelongsToWebCategory(article, item.key));
+  return match?.label ?? article.categories?.[0] ?? article.category ?? "Regional";
+}
+
 export const CAT_COLOR: Record<string, { badge: string; text: string; bg: string }> = {
   "Regional":       { badge: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200", text: "text-slate-700 dark:text-slate-300", bg: "bg-slate-100 dark:bg-slate-800" },
   "What’s On":      { badge: "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300", text: "text-orange-600 dark:text-orange-400", bg: "bg-orange-100 dark:bg-orange-900/30" },

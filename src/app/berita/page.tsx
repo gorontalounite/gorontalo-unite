@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import LatestNewsGrid from "./LatestNewsGrid";
-import { articleBelongsToWebCategory } from "./categories";
+import { articleBelongsToWebCategory, resolveWebCategoryLabel } from "./categories";
 
 export const dynamic = "force-dynamic";
 
@@ -103,7 +103,7 @@ function displayDate(value: string) {
 }
 
 function deskLabel(article: Article) {
-  return DESKS.find((desk) => belongsTo(article, desk.key))?.label ?? article.categories?.[0] ?? article.category ?? "News";
+  return resolveWebCategoryLabel(article);
 }
 
 function ArticleImage({ article, className, priority = false, sizes = "(max-width: 768px) 100vw, 50vw" }: { article: Article; className: string; priority?: boolean; sizes?: string }) {
