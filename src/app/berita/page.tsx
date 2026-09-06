@@ -39,9 +39,9 @@ const ARTICLE_FIELDS = "id, title, slug, excerpt, image_url, category, categorie
 const DESKS: ReadonlyArray<{ key: DeskKey; label: string; description: string; terms: string[] }> = [
   {
     key: "news",
-    label: "News",
+    label: "Regional",
     description: "Kabar yang berdampak pada cara kita hidup, berkarya, dan menikmati Gorontalo.",
-    terms: ["pembangunan", "infrastruktur", "ruang publik", "taman", "penerbangan", "bandara", "rute baru", "destinasi baru", "kebijakan", "pariwisata", "lifestyle", "gaya hidup", "prestasi", "anak muda", "industri kreatif", "ekonomi kreatif", "digitalisasi", "umkm", "olahraga"],
+    terms: ["regional", "pembangunan", "infrastruktur", "ruang publik", "taman", "penerbangan", "bandara", "rute baru", "destinasi baru", "kebijakan", "pariwisata", "gaya hidup", "prestasi", "anak muda", "industri kreatif", "ekonomi kreatif", "digitalisasi", "umkm", "olahraga"],
   },
   {
     key: "whats-on",
@@ -51,9 +51,9 @@ const DESKS: ReadonlyArray<{ key: DeskKey; label: string; description: string; t
   },
   {
     key: "travel",
-    label: "Travel",
+    label: "Tourism",
     description: "Destinasi, hotel, itinerary, hidden gems, dan cara terbaik menjelajah Gorontalo.",
-    terms: ["wisata", "travel", "destinasi", "pantai", "pulau", "hotel", "resort", "itinerary", "transportasi", "diving", "laut", "alam", "liburan"],
+    terms: ["tourism", "wisata", "travel", "destinasi", "pantai", "pulau", "hotel", "resort", "itinerary", "transportasi", "diving", "laut", "alam", "liburan"],
   },
   {
     key: "culinary",
@@ -75,9 +75,9 @@ const DESKS: ReadonlyArray<{ key: DeskKey; label: string; description: string; t
   },
   {
     key: "life",
-    label: "Life",
+    label: "Lifestyle",
     description: "Kampus, karier, relationship, wellness, dan keseharian anak muda.",
-    terms: ["life", "lifestyle", "kampus", "pendidikan", "karier", "career", "relationship", "wellness", "kesehatan", "anak muda", "mahasiswa", "sekolah", "sosial"],
+    terms: ["lifestyle", "life", "kampus", "pendidikan", "karier", "career", "relationship", "wellness", "kesehatan", "anak muda", "mahasiswa", "sekolah", "sosial"],
   },
 ] as const;
 
@@ -284,7 +284,6 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
   const hero = articles[0];
   const heroSide = articles.slice(1, 3);
   const news = articlesFor(articles.slice(3), "news", 5);
-  const whatsOn = articlesFor(articles, "whats-on", 4);
   const travel = articlesFor(articles, "travel", 5);
   const culinary = articlesFor(articles, "culinary", 3);
   const culture = articlesFor(articles, "culture", 4);
@@ -322,39 +321,21 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           </div>
         </section>
 
-        <section id="news" className="scroll-mt-24 border-t border-[#d7d1c6] py-12 sm:py-16">
+        <section id="culture" className="scroll-mt-24 border-t border-[#d7d1c6] bg-white py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-            <SectionTitle id="news" title="Top Stories" showViewAll={false} />
-            {news.length ? <div className="grid gap-8 lg:grid-cols-[1.2fr_.8fr]">
-              <StoryCard article={news[0]} large />
-              <div className="grid content-start gap-4 sm:grid-cols-2 lg:grid-cols-1">{news.slice(1).map((article) => <CompactStory key={article.id} article={article} />)}</div>
+            <SectionTitle id="culture" title="Culture" />
+            {culture.length ? <div className="grid gap-5 lg:grid-cols-[1.35fr_.65fr]">
+              <DarkFeature article={culture[0]} />
+              <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">
+                {culture.slice(1).map((article) => <article key={article.id} className="group border-b border-[#dedede] pb-5 last:border-0"><Link href={`/${article.slug}`} className="grid grid-cols-[112px_1fr] gap-4"><ArticleImage article={article} className="aspect-square" sizes="112px" /><div><p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#9b7513]">Culture</p><h3 className="mt-2 line-clamp-3 font-display text-[16px] font-extrabold leading-[1.1]">{article.title}</h3></div></Link></article>)}
+              </div>
             </div> : <EmptyDesk />}
-          </div>
-        </section>
-
-        <section id="whats-on" className="scroll-mt-24 bg-[#17191d] py-12 text-white sm:py-16">
-          <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-            <SectionTitle id="whats-on" title="What’s On" dark />
-            {whatsOn.length ? <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {whatsOn.map((article, index) => (
-                <article key={article.id} className={`group ${index === 0 ? "md:col-span-2 lg:col-span-2" : ""}`}>
-                  <Link href={`/${article.slug}`} className="block">
-                    <div className="relative">
-                      <ArticleImage article={article} className={index === 0 ? "aspect-[16/9]" : "aspect-[4/3]"} sizes="(max-width: 768px) 100vw, 40vw" />
-                      <span className="absolute left-4 top-4 bg-[#f5c400] px-2.5 py-1 text-[9px] font-extrabold uppercase tracking-[.14em] text-black">Save the date</span>
-                    </div>
-                    <h3 className={`mt-4 font-display font-extrabold leading-[1.1] tracking-[-.02em] ${index === 0 ? "text-[21px] sm:text-[26px]" : "text-[17px]"}`}>{article.title}</h3>
-                    <p className="mt-2 text-[10px] font-bold uppercase tracking-[.14em] text-white/50">{displayDate(articleDate(article))}</p>
-                  </Link>
-                </article>
-              ))}
-            </div> : <EmptyDesk dark />}
           </div>
         </section>
 
         <section id="travel" className="scroll-mt-24 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-            <SectionTitle id="travel" title="Travel" />
+            <SectionTitle id="travel" title="Tourism" />
             {travel.length ? <div className="grid gap-6 lg:grid-cols-[1.45fr_.55fr]">
               <DarkFeature article={travel[0]} />
               <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">{travel.slice(1).map((article) => <CompactStory key={article.id} article={article} />)}</div>
@@ -369,19 +350,17 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           </div>
         </section>
 
-        <section id="culture" className="scroll-mt-24 bg-white py-12 sm:py-16">
+        <section id="life" className="scroll-mt-24 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-            <SectionTitle id="culture" title="Culture" />
-            {culture.length ? <div className="grid gap-5 lg:grid-cols-[1.35fr_.65fr]">
-              <DarkFeature article={culture[0]} />
-              <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">
-                {culture.slice(1).map((article) => <article key={article.id} className="group border-b border-[#dedede] pb-5 last:border-0"><Link href={`/${article.slug}`} className="grid grid-cols-[112px_1fr] gap-4"><ArticleImage article={article} className="aspect-square" sizes="112px" /><div><p className="text-[9px] font-bold uppercase tracking-[.16em] text-[#9b7513]">Culture</p><h3 className="mt-2 line-clamp-3 font-display text-[16px] font-extrabold leading-[1.1]">{article.title}</h3></div></Link></article>)}
-              </div>
+            <SectionTitle id="life" title="Lifestyle" />
+            {life.length ? <div className="grid gap-6 lg:grid-cols-2">
+              <StoryCard article={life[0]} large />
+              <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">{life.slice(1).map((article) => <CompactStory key={article.id} article={article} />)}</div>
             </div> : <EmptyDesk />}
           </div>
         </section>
 
-        <section id="people" className="scroll-mt-24 py-12 sm:py-16">
+        <section id="people" className="scroll-mt-24 border-y border-[#dedede] bg-[#f7f7f7] py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="people" title="People" />
             {people.length ? <div className="flex snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
@@ -390,12 +369,12 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           </div>
         </section>
 
-        <section id="life" className="scroll-mt-24 border-y border-[#dedede] bg-[#f7f7f7] py-12 sm:py-16">
+        <section id="news" className="scroll-mt-24 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-            <SectionTitle id="life" title="Life" />
-            {life.length ? <div className="grid gap-6 lg:grid-cols-2">
-              <StoryCard article={life[0]} large />
-              <div className="grid gap-5 sm:grid-cols-3 lg:grid-cols-1">{life.slice(1).map((article) => <CompactStory key={article.id} article={article} />)}</div>
+            <SectionTitle id="news" title="Regional" showViewAll={false} />
+            {news.length ? <div className="grid gap-8 lg:grid-cols-[1.2fr_.8fr]">
+              <StoryCard article={news[0]} large />
+              <div className="grid content-start gap-4 sm:grid-cols-2 lg:grid-cols-1">{news.slice(1).map((article) => <CompactStory key={article.id} article={article} />)}</div>
             </div> : <EmptyDesk />}
           </div>
         </section>

@@ -1,11 +1,11 @@
 export const CATEGORIES = [
-  { key: "news",           label: "News"           },
+  { key: "news",           label: "Regional"       },
   { key: "whats-on",       label: "What’s On"      },
-  { key: "travel",         label: "Travel"         },
+  { key: "travel",         label: "Tourism"        },
   { key: "culinary",       label: "Culinary"       },
   { key: "culture",        label: "Culture"        },
   { key: "people",         label: "People"         },
-  { key: "life",           label: "Life"           },
+  { key: "life",           label: "Lifestyle"      },
   { key: "politik",        label: "Politik"        },
   { key: "pemerintahan",   label: "Pemerintahan"   },
   { key: "wisata",         label: "Wisata"         },
@@ -41,11 +41,11 @@ export type CategoryKey = typeof CATEGORIES[number]["key"];
 export const WEB_CATEGORY_GROUPS: ReadonlyArray<{ title: string; categories: ReadonlyArray<{ key: string; label: string }> }> = [
   { title: "Rubrik Berita", categories: [
     { key: "whats-on", label: "What’s On" },
-    { key: "travel", label: "Travel" },
+    { key: "travel", label: "Tourism" },
     { key: "culinary", label: "Culinary" },
     { key: "culture", label: "Culture" },
     { key: "people", label: "People" },
-    { key: "life", label: "Life" },
+    { key: "life", label: "Lifestyle" },
   ] },
 ] ;
 
@@ -61,13 +61,13 @@ export const WEB_CATEGORY_DESCRIPTIONS: Readonly<Record<string, string>> = {
 };
 
 export const WEB_CATEGORY_TERMS: Readonly<Record<string, readonly string[]>> = {
-  news: ["pembangunan", "infrastruktur", "ruang publik", "taman", "penerbangan", "bandara", "rute baru", "destinasi baru", "kebijakan", "pariwisata", "lifestyle", "gaya hidup", "prestasi", "anak muda", "industri kreatif", "ekonomi kreatif", "digitalisasi", "umkm", "olahraga"],
+  news: ["regional", "pembangunan", "infrastruktur", "ruang publik", "taman", "penerbangan", "bandara", "rute baru", "destinasi baru", "kebijakan", "pariwisata", "gaya hidup", "prestasi", "anak muda", "industri kreatif", "ekonomi kreatif", "digitalisasi", "umkm", "olahraga"],
   "whats-on": ["event", "acara", "konser", "festival", "bazaar", "bazar", "pameran", "exhibition", "agenda", "weekend", "lomba", "wisuda", "perayaan", "pelantikan", "turnamen", "kompetisi"],
-  travel: ["wisata", "travel", "destinasi", "pantai", "pulau", "hotel", "resort", "itinerary", "transportasi", "diving", "laut", "alam", "liburan"],
+  travel: ["tourism", "wisata", "travel", "destinasi", "pantai", "pulau", "hotel", "resort", "itinerary", "transportasi", "diving", "laut", "alam", "liburan"],
   culinary: ["kuliner", "culinary", "food", "drink", "makan", "rumah makan", "warung", "cafe", "kafe", "kopi", "restoran", "umkm", "resep", "dapur", "chef", "ikan", "jagung", "binte", "ilabulo"],
   culture: ["budaya", "culture", "karawo", "tradisi", "sejarah", "seni", "bahasa", "heritage", "adat", "musik", "tari", "agama"],
   people: ["people", "profil", "tokoh", "creator", "kreator", "entrepreneur", "pengusaha", "seniman", "komunitas", "inspire", "sosok", "pemuda"],
-  life: ["life", "lifestyle", "kampus", "pendidikan", "karier", "career", "relationship", "wellness", "kesehatan", "anak muda", "mahasiswa", "sekolah", "sosial"],
+  life: ["lifestyle", "life", "kampus", "pendidikan", "karier", "career", "relationship", "wellness", "kesehatan", "anak muda", "mahasiswa", "sekolah", "sosial"],
 };
 
 export interface WebCategoryArticle {
@@ -108,14 +108,14 @@ export function articleBelongsToWebCategory(article: WebCategoryArticle, key: st
 }
 
 export const CAT_COLOR: Record<string, { badge: string; text: string; bg: string }> = {
-  "News":           { badge: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200", text: "text-slate-700 dark:text-slate-300", bg: "bg-slate-100 dark:bg-slate-800" },
+  "Regional":       { badge: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-200", text: "text-slate-700 dark:text-slate-300", bg: "bg-slate-100 dark:bg-slate-800" },
   "What’s On":      { badge: "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300", text: "text-orange-600 dark:text-orange-400", bg: "bg-orange-100 dark:bg-orange-900/30" },
-  "Travel":         { badge: "bg-sky-50 text-sky-700 dark:bg-sky-900/20 dark:text-sky-300", text: "text-sky-600 dark:text-sky-400", bg: "bg-sky-100 dark:bg-sky-900/30" },
+  "Tourism":        { badge: "bg-sky-50 text-sky-700 dark:bg-sky-900/20 dark:text-sky-300", text: "text-sky-600 dark:text-sky-400", bg: "bg-sky-100 dark:bg-sky-900/30" },
   "Culinary":       { badge: "bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-200", text: "text-amber-700 dark:text-amber-300", bg: "bg-amber-50 dark:bg-amber-900/20" },
   "Food & Drink":   { badge: "bg-amber-50 text-amber-800 dark:bg-amber-900/20 dark:text-amber-200", text: "text-amber-700 dark:text-amber-300", bg: "bg-amber-50 dark:bg-amber-900/20" },
   "Culture":        { badge: "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300", text: "text-purple-600 dark:text-purple-400", bg: "bg-purple-100 dark:bg-purple-900/30" },
   "People":         { badge: "bg-rose-50 text-rose-700 dark:bg-rose-900/20 dark:text-rose-300", text: "text-rose-600 dark:text-rose-400", bg: "bg-rose-100 dark:bg-rose-900/30" },
-  "Life":           { badge: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300", text: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
+  "Lifestyle":      { badge: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-300", text: "text-emerald-600 dark:text-emerald-400", bg: "bg-emerald-100 dark:bg-emerald-900/30" },
   "Politik":        { badge: "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300",         text: "text-blue-600 dark:text-blue-400",         bg: "bg-blue-100 dark:bg-blue-900/30"         },
   "Pemerintahan":   { badge: "bg-sky-50 text-sky-700 dark:bg-sky-900/20 dark:text-sky-300",             text: "text-sky-600 dark:text-sky-400",           bg: "bg-sky-100 dark:bg-sky-900/30"           },
   "Wisata":         { badge: "bg-yellow-50 text-yellow-700 dark:bg-yellow-900/20 dark:text-yellow-300", text: "text-yellow-600 dark:text-yellow-400",     bg: "bg-yellow-100 dark:bg-yellow-900/30"     },

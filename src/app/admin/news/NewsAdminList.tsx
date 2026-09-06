@@ -15,10 +15,10 @@ interface NewsItem {
 }
 
 const CATEGORY_COLORS: Record<string, string> = {
-  News:"bg-slate-100 text-slate-700", "What’s On":"bg-orange-50 text-orange-700",
-  Travel:"bg-sky-50 text-sky-700", Culinary:"bg-amber-50 text-amber-800",
+  News:"bg-slate-100 text-slate-700", Regional:"bg-slate-100 text-slate-700", "What’s On":"bg-orange-50 text-orange-700",
+  Travel:"bg-sky-50 text-sky-700", Tourism:"bg-sky-50 text-sky-700", Culinary:"bg-amber-50 text-amber-800",
   Culture:"bg-purple-50 text-purple-700", People:"bg-rose-50 text-rose-700",
-  Life:"bg-emerald-50 text-emerald-700",
+  Life:"bg-emerald-50 text-emerald-700", Lifestyle:"bg-emerald-50 text-emerald-700",
   Politik:"bg-blue-50 text-blue-700", Pemerintahan:"bg-sky-50 text-sky-700",
   Wisata:"bg-yellow-50 text-yellow-700", Budaya:"bg-purple-50 text-purple-700",
   Ekonomi:"bg-emerald-50 text-emerald-700", Bisnis:"bg-green-50 text-green-700",

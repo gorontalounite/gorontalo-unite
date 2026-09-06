@@ -26,7 +26,7 @@ interface ArticleForm {
 }
 
 const PRESET_CATEGORIES = [
-  "What’s On", "Travel", "Culinary", "Culture", "People", "Life",
+  "Regional", "What’s On", "Tourism", "Culinary", "Culture", "People", "Lifestyle",
   "+ Kategori Baru",
 ];
 
