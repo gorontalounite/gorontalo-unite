@@ -46,6 +46,7 @@ export const WEB_CATEGORY_GROUPS: ReadonlyArray<{ title: string; categories: Rea
     { key: "culture", label: "Culture" },
     { key: "people", label: "People" },
     { key: "life", label: "Lifestyle" },
+    { key: "news", label: "Regional" },
   ] },
 ] ;
 
@@ -87,6 +88,16 @@ function normalizedCategory(value: string) {
     .trim();
 }
 
+function matchesWebCategoryTerms(article: WebCategoryArticle, key: string) {
+  const haystack = [article.category, ...(article.categories ?? []), ...(article.tags ?? []), article.title, article.excerpt ?? ""]
+    .join(" ")
+    .toLocaleLowerCase("id-ID");
+  return (WEB_CATEGORY_TERMS[key] ?? []).some((term) => {
+    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, "i").test(haystack);
+  });
+}
+
 export function articleBelongsToWebCategory(article: WebCategoryArticle, key: string) {
   const selected = [article.category, ...(article.categories ?? [])].map(normalizedCategory);
   const category = WEB_CATEGORIES.find((item) => item.key === key);
@@ -98,13 +109,15 @@ export function articleBelongsToWebCategory(article: WebCategoryArticle, key: st
   if (key === "culinary" && selected.some((value) => value === "food & drink" || value === "food-drink")) return true;
   if (explicitKeys.length) return explicitKeys.includes(key);
 
-  const haystack = [article.category, ...(article.categories ?? []), ...(article.tags ?? []), article.title, article.excerpt ?? ""]
-    .join(" ")
-    .toLocaleLowerCase("id-ID");
-  return (WEB_CATEGORY_TERMS[key] ?? []).some((term) => {
-    const escaped = term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-    return new RegExp(`(^|[^a-z0-9])${escaped}([^a-z0-9]|$)`, "i").test(haystack);
-  });
+  if (key === "news") {
+    // Regional is the catch-all desk: articles that don't explicitly or
+    // by content match any other web category land here by default —
+    // this is what replaces the old generic "Umum" category.
+    const matchesOtherDesk = WEB_CATEGORIES.some((item) => item.key !== "news" && matchesWebCategoryTerms(article, item.key));
+    return matchesWebCategoryTerms(article, "news") || !matchesOtherDesk;
+  }
+
+  return matchesWebCategoryTerms(article, key);
 }
 
 export const CAT_COLOR: Record<string, { badge: string; text: string; bg: string }> = {
