@@ -9,7 +9,7 @@ interface RightPanelProps {
 
 const cityGuideItems = [
   {
-    href: "/wisata",
+    href: "/city-guide",
     label: "Wisata",
     description: "Direktori tempat pilihan",
     icon: (

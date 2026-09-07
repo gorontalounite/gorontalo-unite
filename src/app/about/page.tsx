@@ -38,7 +38,7 @@ const COVERAGE = [
   {
     title: "Destinasi Wisata",
     desc: "Menjelajahi keindahan alam dari pesisir hingga pegunungan Gorontalo.",
-    href: "/wisata",
+    href: "/city-guide",
   },
   {
     title: "Kekayaan Budaya",
