@@ -27,13 +27,6 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
   const hasCoords = typeof place.latitude === "number" && typeof place.longitude === "number";
   const paragraphs: string[] = String(place.description ?? "").split(/\n\s*\n/).filter(Boolean);
 
-  const highlights: DetailItem[] = [
-    place.price_range ? { label: "Kisaran harga", value: place.price_range } : null,
-    place.opening_hours ? { label: "Jam buka", value: place.opening_hours } : null,
-    (place.address || place.location) ? { label: "Lokasi", value: place.address || place.location } : null,
-    place.subcategory ? { label: "Kategori", value: place.subcategory } : null,
-  ].filter((item): item is DetailItem => item !== null);
-
   const faqs: DetailItem[] = [
     place.price_range ? { label: `Berapa harga masuk ${place.name}?`, value: place.price_range } : null,
     place.opening_hours ? { label: `Jam berapa ${place.name} buka?`, value: place.opening_hours } : null,
@@ -56,28 +49,25 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
         </div> : <div className={styles.heroSingle}>{place.image_url && <Image src={place.image_url} alt={place.name} fill priority unoptimized style={{ objectFit: "cover" }} />}</div>}
       </div>
 
-      <div className={styles.titleRow}>
-        <div>
-          <h1 className={styles.name}>{place.name}</h1>
-          <div className={styles.metaList}>
-            {(place.address || place.location) && <div className={styles.metaRow}><span>{place.address || place.location}</span>{place.maps_url && <a className={styles.link} href={place.maps_url} target="_blank" rel="noreferrer">Lihat Peta</a>}</div>}
-            {place.opening_hours && <div className={styles.metaRow}><span className={styles.metaLabel}>Jam buka:</span><span>{place.opening_hours}</span></div>}
-            {place.contact && <div className={styles.metaRow}><span className={styles.metaLabel}>Kontak:</span><span>{place.contact}</span></div>}
-          </div>
-        </div>
-        <aside className={styles.priceCard}>
-          <div className={styles.priceLine}>
-            <p className={styles.from}>{place.price_range ? "Kisaran harga" : "Mulai dari"}</p>
-            <p className={styles.amount}>{place.price_range || "Gratis"}</p>
-          </div>
-          {place.maps_url && <a className={styles.cta} href={place.maps_url} target="_blank" rel="noreferrer">Buka di Peta</a>}
-        </aside>
+      <div className={styles.titleTop}>
+        <h1 className={styles.name}>{place.name}</h1>
+        <p className={styles.priceInline}>{place.price_range || "Gratis"}</p>
       </div>
 
-      {highlights.length > 0 && <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Highlight</h2>
-        <ul className={styles.highlightList}>{highlights.map((item) => <li key={item.label}><span className={styles.metaLabel}>{item.label}:</span> {item.value}</li>)}</ul>
-      </section>}
+      {(place.address || place.location || place.opening_hours || place.contact) && <div className={styles.highlightCard}>
+        <div className={styles.highlightGrid}>
+          {(place.address || place.location) && <div className={styles.highlightBox}>
+            <span>{place.address || place.location}</span>
+            {place.maps_url && <a className={styles.link} href={place.maps_url} target="_blank" rel="noreferrer">Lihat Peta</a>}
+          </div>}
+          {place.opening_hours && <div className={styles.highlightBox}>
+            <span><span className={styles.metaLabel}>Jam buka:</span> {place.opening_hours}</span>
+          </div>}
+        </div>
+        {place.contact && <div className={`${styles.highlightBox} ${styles.highlightFull}`}>
+          <span><span className={styles.metaLabel}>Kontak:</span> {place.contact}</span>
+        </div>}
+      </div>}
 
       <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Description</h2>
