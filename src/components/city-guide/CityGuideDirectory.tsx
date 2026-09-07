@@ -73,7 +73,7 @@ export default function CityGuideDirectory({ places, events }: { places: CityGui
       const key = (Object.keys(SECTION_META) as SectionKey[]).find((k) => SECTION_META[k].category === place.category) ?? "explore";
       map.get(key)!.push({
         id: place.id,
-        href: `/wisata/${place.slug}`,
+        href: `/city-guide/${place.slug}`,
         title: place.name,
         imageUrl: place.image_url,
         eyebrow: `${SECTION_META[key].label} · ${place.location || place.address || "Gorontalo"}`,
