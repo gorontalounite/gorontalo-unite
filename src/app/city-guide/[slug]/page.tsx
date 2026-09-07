@@ -24,9 +24,15 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
 
   const gallery = Array.from(new Set([place.image_url, ...(place.gallery ?? [])].filter((image): image is string => Boolean(image))));
   const remaining = gallery.length - 5;
-  const tags = Array.isArray(place.tags) ? place.tags.filter((tag: unknown): tag is string => typeof tag === "string" && tag.trim().length > 0) : [];
   const hasCoords = typeof place.latitude === "number" && typeof place.longitude === "number";
   const paragraphs: string[] = String(place.description ?? "").split(/\n\s*\n/).filter(Boolean);
+
+  const highlights: DetailItem[] = [
+    place.price_range ? { label: "Kisaran harga", value: place.price_range } : null,
+    place.opening_hours ? { label: "Jam buka", value: place.opening_hours } : null,
+    (place.address || place.location) ? { label: "Lokasi", value: place.address || place.location } : null,
+    place.subcategory ? { label: "Kategori", value: place.subcategory } : null,
+  ].filter((item): item is DetailItem => item !== null);
 
   const faqs: DetailItem[] = [
     place.price_range ? { label: `Berapa harga masuk ${place.name}?`, value: place.price_range } : null,
@@ -68,12 +74,25 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
         </aside>
       </div>
 
-      {(place.subcategory || tags.length > 0) && <section className={styles.section}>
+      {highlights.length > 0 && <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Highlight</h2>
-        <div className={styles.chipRow}>
-          {place.subcategory && <span className={styles.chip}>{place.subcategory}</span>}
-          {tags.map((tag: string) => <span key={tag} className={styles.chip}>{tag}</span>)}
-        </div>
+        <ul className={styles.highlightList}>{highlights.map((item) => <li key={item.label}><span className={styles.metaLabel}>{item.label}:</span> {item.value}</li>)}</ul>
+      </section>}
+
+      <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Description</h2>
+        <div className={styles.reviewText} style={{ lineHeight: 1.7 }}>{paragraphs.map((paragraph) => <p key={paragraph} style={{ margin: "0 0 .9rem" }}>{paragraph}</p>)}</div>
+      </section>
+
+      {hasCoords && <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>Location</h2>
+        {(place.address || place.location) && <p className={styles.reviewText} style={{ marginBottom: ".75rem" }}>{place.address || place.location}</p>}
+        <div className={styles.mapFrame}><iframe title={`Peta ${place.name}`} src={mapEmbedUrl(place.latitude as number, place.longitude as number)} loading="lazy" /></div>
+      </section>}
+
+      {faqs.length > 0 && <section className={styles.section}>
+        <h2 className={styles.sectionTitle}>FAQ</h2>
+        <div className={styles.faq}>{faqs.map((faq) => <details key={faq.label} className={styles.faqItem}><summary>{faq.label}</summary><div className={styles.faqAnswer}>{faq.value}</div></details>)}</div>
       </section>}
 
       <section className={styles.section}>
@@ -86,22 +105,6 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
           <p className={styles.reviewText}>Belum ada ulasan untuk tempat ini.</p>
         </div>}
       </section>
-
-      {hasCoords && <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Location</h2>
-        {(place.address || place.location) && <p className={styles.reviewText} style={{ marginBottom: ".75rem" }}>{place.address || place.location}</p>}
-        <div className={styles.mapFrame}><iframe title={`Peta ${place.name}`} src={mapEmbedUrl(place.latitude as number, place.longitude as number)} loading="lazy" /></div>
-      </section>}
-
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Description</h2>
-        <div className={styles.reviewText} style={{ lineHeight: 1.7 }}>{paragraphs.map((paragraph) => <p key={paragraph} style={{ margin: "0 0 .9rem" }}>{paragraph}</p>)}</div>
-      </section>
-
-      {faqs.length > 0 && <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>FAQ</h2>
-        <div className={styles.faq}>{faqs.map((faq) => <details key={faq.label} className={styles.faqItem}><summary>{faq.label}</summary><div className={styles.faqAnswer}>{faq.value}</div></details>)}</div>
-      </section>}
 
       {related.length > 0 && <section className={styles.section}>
         <h2 className={styles.sectionTitle}>Kamu Mungkin Suka Ini</h2>
