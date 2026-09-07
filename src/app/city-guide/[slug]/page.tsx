@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import ListingHeroBar from "@/components/city-guide/ListingHeroBar";
+import ExpandableText from "@/components/city-guide/ExpandableText";
 import styles from "./detail.module.css";
 
 export const dynamic = "force-dynamic";
@@ -13,96 +16,186 @@ function mapEmbedUrl(lat: number, lon: number) {
   return `https://www.openstreetmap.org/export/embed.html?bbox=${bbox}&layer=mapnik&marker=${lat}%2C${lon}`;
 }
 
+function Icon({ path }: { path: string }) {
+  return <svg className={styles.icon} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true"><path d={path} /></svg>;
+}
+
+const ICON = {
+  pin: "M12 21s7-5.2 7-12a7 7 0 10-14 0c0 6.8 7 12 7 12Z M12 11.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5Z",
+  clock: "M12 21a9 9 0 100-18 9 9 0 000 18Z M12 7v5l3 2",
+  phone: "M6 3h3l2 5-2.5 1.5a12 12 0 006 6L16 13l5 2v3a2 2 0 01-2.2 2A17 17 0 014 6.2 2 2 0 016 4V3Z",
+  globe: "M12 21a9 9 0 100-18 9 9 0 000 18Z M3 12h18 M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3Z",
+  ticket: "M4 8a2 2 0 012-2h12a2 2 0 012 2v1.5a2.5 2.5 0 000 5V16a2 2 0 01-2 2H6a2 2 0 01-2-2v-1.5a2.5 2.5 0 000-5V8Z M14 6v12",
+  photo: "M4 6h16v12H4z M4 15l4.5-4.5 4 4L16 11l4 4",
+  star: "M12 4l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4L4.2 9.7l5.4-.8L12 4Z",
+} as const;
+
 export default async function TourismDetail({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const supabase = await createClient();
   const { data: place } = await supabase.from("tourism_places").select("*").eq("slug", slug).eq("published", true).single();
   if (!place) notFound();
 
-  const { data: relatedRaw } = await supabase.from("tourism_places").select("id, name, slug, image_url, category").eq("published", true).eq("category", place.category).neq("id", place.id).limit(4);
+  const { data: relatedRaw } = await supabase.from("tourism_places").select("id, name, slug, image_url, category, location").eq("published", true).eq("category", place.category).neq("id", place.id).limit(6);
   const related = relatedRaw ?? [];
 
   const gallery = Array.from(new Set([place.image_url, ...(place.gallery ?? [])].filter((image): image is string => Boolean(image))));
-  const remaining = gallery.length - 5;
   const hasCoords = typeof place.latitude === "number" && typeof place.longitude === "number";
-  const paragraphs: string[] = String(place.description ?? "").split(/\n\s*\n/).filter(Boolean);
+  const paragraphs: string[] = String(place.description ?? "").split(/\n\s*\n/).map((text) => text.trim()).filter(Boolean);
+  const tags: string[] = Array.isArray(place.tags) ? (place.tags as unknown[]).filter((tag): tag is string => typeof tag === "string" && tag.length > 0) : [];
+  const address = place.address || place.location;
+  const hasRating = typeof place.rating === "number" && place.review_count > 0;
+  // Only worth clamping when the copy actually runs past the fold on a phone.
+  const isLongDescription = paragraphs.join(" ").length > 420;
+
+  // Falls back to the same coordinates the embedded map already uses — no invented location data.
+  const mapLink = place.maps_url || (hasCoords ? `https://www.google.com/maps/search/?api=1&query=${place.latitude}%2C${place.longitude}` : null);
 
   const faqs: DetailItem[] = [
     place.price_range ? { label: `Berapa harga masuk ${place.name}?`, value: place.price_range } : null,
     place.opening_hours ? { label: `Jam berapa ${place.name} buka?`, value: place.opening_hours } : null,
-    place.address ? { label: `Di mana lokasi ${place.name}?`, value: place.address } : null,
+    address ? { label: `Di mana lokasi ${place.name}?`, value: address } : null,
     place.contact ? { label: `Bagaimana cara menghubungi pengelola ${place.name}?`, value: place.contact } : null,
   ].filter((item): item is DetailItem => item !== null);
 
   return <main className={styles.page}>
     <div className={styles.wrap}>
-      <div className={styles.galleryWrap}>
-        {gallery.length > 1 ? <div className={styles.gallery}>
-          <div className={`${styles.tile} ${styles.main}`}><Image src={gallery[0]} alt={place.name} fill priority unoptimized style={{ objectFit: "cover" }} /></div>
-          {gallery.slice(1, 5).map((image, index) => {
-            const isLast = index === gallery.slice(1, 5).length - 1;
-            return <div key={image} className={styles.tile}>
-              <Image src={image} alt={`${place.name} ${index + 2}`} fill unoptimized style={{ objectFit: "cover" }} />
-              {isLast && remaining > 0 && <div className={styles.more}>Lihat {remaining} Foto Lagi</div>}
-            </div>;
-          })}
-        </div> : <div className={styles.heroSingle}>{place.image_url && <Image src={place.image_url} alt={place.name} fill priority unoptimized style={{ objectFit: "cover" }} />}</div>}
-      </div>
 
-      <div className={styles.titleTop}>
-        <h1 className={styles.name}>{place.name}</h1>
-        <p className={styles.priceInline}>{place.price_range || "Gratis"}</p>
-      </div>
-
-      {(place.address || place.location || place.opening_hours || place.contact) && <div className={styles.highlightCard}>
-        <div className={styles.highlightGrid}>
-          {(place.address || place.location) && <div className={styles.highlightBox}>
-            <span>{place.address || place.location}</span>
-            {place.maps_url && <a className={styles.link} href={place.maps_url} target="_blank" rel="noreferrer">Lihat Peta</a>}
-          </div>}
-          {place.opening_hours && <div className={styles.highlightBox}>
-            <span><span className={styles.metaLabel}>Jam buka:</span> {place.opening_hours}</span>
-          </div>}
+      {/* A — Hero gallery: swipeable on mobile, mosaic on desktop */}
+      {gallery.length > 0 && <div className={styles.heroWrap}>
+        <div className={styles.gallery}>
+          {gallery.map((image, index) => <div key={image} className={styles.slide}>
+            <Image src={image} alt={index === 0 ? place.name : `${place.name} — foto ${index + 1}`} fill priority={index === 0} unoptimized sizes="(min-width: 768px) 50vw, 100vw" style={{ objectFit: "cover" }} />
+          </div>)}
         </div>
-        {place.contact && <div className={`${styles.highlightBox} ${styles.highlightFull}`}>
-          <span><span className={styles.metaLabel}>Kontak:</span> {place.contact}</span>
-        </div>}
+        <ListingHeroBar name={place.name} className={styles.heroBar} />
+        {gallery.length > 1 && <p className={`${styles.galleryCount}${gallery.length > 5 ? "" : ` ${styles.mobileOnly}`}`}><Icon path={ICON.photo} />{gallery.length} Foto</p>}
       </div>}
 
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Description</h2>
-        <div className={styles.reviewText} style={{ lineHeight: 1.7 }}>{paragraphs.map((paragraph) => <p key={paragraph} style={{ margin: "0 0 .9rem" }}>{paragraph}</p>)}</div>
+      {/* B — Primary information */}
+      <section className={styles.block}>
+        <nav className={styles.crumbs} aria-label="Breadcrumb">
+          <Link href="/city-guide">City Guide</Link>
+          {place.category && <><span aria-hidden="true">›</span><span>{place.category}</span></>}
+          {place.subcategory && <><span aria-hidden="true">›</span><span>{place.subcategory}</span></>}
+        </nav>
+
+        <h1 className={styles.name}>{place.name}</h1>
+
+        {/* C — Rating summary, only when a real review source has filled it in */}
+        {hasRating && <p className={styles.ratingChip}>
+          <Icon path={ICON.star} />
+          <strong>{Number(place.rating).toFixed(1)}</strong><span>/5</span>
+          <span className={styles.ratingCount}>{place.review_count} ulasan</span>
+        </p>}
+
+        {tags.length > 0 && <ul className={styles.tags}>
+          {tags.map((tag) => <li key={tag}>{tag}</li>)}
+        </ul>}
+
+        <dl className={styles.infoList}>
+          {place.price_range && <div className={styles.infoRow}>
+            <Icon path={ICON.ticket} />
+            <div className={styles.infoBody}>
+              <dt>Harga masuk</dt>
+              <dd className={styles.price}>{place.price_range}</dd>
+            </div>
+          </div>}
+
+          {address && <div className={styles.infoRow}>
+            <Icon path={ICON.pin} />
+            <div className={styles.infoBody}>
+              <dt>Lokasi</dt>
+              <dd>{address}</dd>
+            </div>
+            {mapLink && <a className={styles.rowLink} href={mapLink} target="_blank" rel="noreferrer">Lihat Peta</a>}
+          </div>}
+
+          {place.opening_hours && <div className={styles.infoRow}>
+            <Icon path={ICON.clock} />
+            <div className={styles.infoBody}>
+              <dt>Jam buka</dt>
+              <dd>{place.opening_hours}</dd>
+            </div>
+          </div>}
+
+          {place.contact && <div className={styles.infoRow}>
+            <Icon path={ICON.phone} />
+            <div className={styles.infoBody}>
+              <dt>Kontak</dt>
+              <dd>{place.contact}</dd>
+            </div>
+          </div>}
+
+          {place.website_url && <div className={styles.infoRow}>
+            <Icon path={ICON.globe} />
+            <div className={styles.infoBody}>
+              <dt>Website</dt>
+              <dd className={styles.truncate}><a className={styles.inlineLink} href={place.website_url} target="_blank" rel="noreferrer">{place.website_url}</a></dd>
+            </div>
+          </div>}
+        </dl>
       </section>
 
-      {hasCoords && <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Location</h2>
-        {(place.address || place.location) && <p className={styles.reviewText} style={{ marginBottom: ".75rem" }}>{place.address || place.location}</p>}
-        <div className={styles.mapFrame}><iframe title={`Peta ${place.name}`} src={mapEmbedUrl(place.latitude as number, place.longitude as number)} loading="lazy" /></div>
+      {/* E — Description */}
+      {paragraphs.length > 0 && <section className={styles.block}>
+        <h2 className={styles.blockTitle}>Tentang {place.name}</h2>
+        {isLongDescription
+          ? <ExpandableText className={styles.prose} clampClassName={styles.clamp} toggleClassName={styles.moreButton} lines={7}>
+              {paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+            </ExpandableText>
+          : <div className={styles.prose}>{paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>}
       </section>}
 
-      {faqs.length > 0 && <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>FAQ</h2>
-        <div className={styles.faq}>{faqs.map((faq) => <details key={faq.label} className={styles.faqItem}><summary>{faq.label}</summary><div className={styles.faqAnswer}>{faq.value}</div></details>)}</div>
+      {/* G — Location */}
+      {(hasCoords || address) && <section className={styles.block}>
+        <h2 className={styles.blockTitle}>Lokasi</h2>
+        {hasCoords && <div className={styles.mapFrame}>
+          <iframe title={`Peta ${place.name}`} src={mapEmbedUrl(place.latitude as number, place.longitude as number)} loading="lazy" />
+        </div>}
+        {address && <p className={styles.mapAddress}><Icon path={ICON.pin} />{address}</p>}
+        {mapLink && <a className={styles.mapCta} href={mapLink} target="_blank" rel="noreferrer">Lihat Peta</a>}
       </section>}
 
-      <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Reviews</h2>
-        {place.rating && place.review_count > 0 ? <div className={styles.reviewBox}>
-          <div className={styles.reviewScore}>{Number(place.rating).toFixed(1)}</div>
-          <p className={styles.reviewText}>Dari {place.review_count} ulasan pengunjung.</p>
-        </div> : <div className={styles.reviewBox}>
-          <div className={styles.reviewScore}>–</div>
-          <p className={styles.reviewText}>Belum ada ulasan untuk tempat ini.</p>
+      {/* H — FAQ */}
+      {faqs.length > 0 && <section className={styles.block}>
+        <h2 className={styles.blockTitle}>Pertanyaan Seputar {place.name}</h2>
+        <div className={styles.faq}>
+          {faqs.map((faq) => <details key={faq.label} className={styles.faqItem}>
+            <summary>{faq.label}<span className={styles.chevron} aria-hidden="true" /></summary>
+            <div className={styles.faqAnswer}>{faq.value}</div>
+          </details>)}
+        </div>
+      </section>}
+
+      {/* I — Reviews */}
+      <section className={styles.block}>
+        <h2 className={styles.blockTitle}>Ulasan</h2>
+        {hasRating ? <div className={styles.reviewSummary}>
+          <p className={styles.reviewScore}>{Number(place.rating).toFixed(1)}<span>/5</span></p>
+          <p className={styles.reviewMeta}>Dari {place.review_count} ulasan pengunjung.</p>
+        </div> : <div className={styles.emptyState}>
+          <p className={styles.emptyTitle}>Belum ada ulasan</p>
+          <p className={styles.emptyBody}>Tempat ini belum memiliki ulasan pengunjung di Gorontalo Unite.</p>
         </div>}
       </section>
 
-      {related.length > 0 && <section className={styles.section}>
-        <h2 className={styles.sectionTitle}>Kamu Mungkin Suka Ini</h2>
-        <div className={styles.relatedGrid}>{related.map((item) => <a key={item.id} href={`/city-guide/${item.slug}`} className={styles.relatedCard}>
-          <div className={styles.relatedThumb}>{item.image_url && <Image src={item.image_url} alt={item.name} fill unoptimized style={{ objectFit: "cover" }} />}</div>
-          <p className={styles.relatedName}>{item.name}</p>
-        </a>)}</div>
+      {/* J — Related, from the same category */}
+      {related.length > 0 && <section className={styles.block}>
+        <h2 className={styles.blockTitle}>Kamu Mungkin Suka Ini</h2>
+        <div className={styles.relatedRow}>
+          {related.map((item) => <Link key={item.id} href={`/city-guide/${item.slug}`} className={styles.relatedCard}>
+            <div className={styles.relatedThumb}>
+              {item.image_url && <Image src={item.image_url} alt={item.name} fill unoptimized sizes="(min-width: 640px) 18rem, 60vw" style={{ objectFit: "cover" }} />}
+            </div>
+            <div className={styles.relatedBody}>
+              <p className={styles.relatedName}>{item.name}</p>
+              {(item.location || item.category) && <p className={styles.relatedMeta}>{item.location || item.category}</p>}
+            </div>
+          </Link>)}
+        </div>
       </section>}
+
     </div>
   </main>;
 }
