@@ -5,7 +5,7 @@ import CityGuideRichEditor from "@/components/city-guide/CityGuideRichEditor";
 import type { Block } from "@/components/editor/types";
 
 type Item = Record<string, unknown> & { id: string; slug: string; published: boolean; featured: boolean; archived?: boolean };
-type Kind = "wisata" | "event";
+type Kind = "place" | "event";
 type Status = "draft" | "published" | "archived";
 const tourismCategories = ["Atraksi & Wisata", "Akomodasi", "Kuliner", "Belanja", "Layanan Publik & Transportasi"];
 
@@ -24,13 +24,13 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
   const titleField = isEvent ? "title" : "name";
   const form = useMemo(() => ({
     [titleField]: "", slug: "", description: "", category: isEvent ? "" : "Atraksi & Wisata", subcategory: "", listing_details: "{}", content_blocks: "[]", image_url: "", location: "", address: "", maps_url: "", latitude: "", longitude: "", tags: "", contact: "", featured: false, published: false, archived: false,
-    ...(isEvent ? { venue: "", organizer: "", registration_url: "", price_label: "", starts_at: localDateTime(), ends_at: "" } : { opening_hours: "", website_url: "", price_range: "" }),
+    ...(isEvent ? { venue: "", organizer: "", registration_url: "", price_label: "", starts_at: localDateTime(), ends_at: "" } : { opening_hours: "", website_url: "", price_range: "", gallery: "[]" }),
   }), [isEvent, titleField]);
   const [values, setValues] = useState<Record<string, string | boolean>>(form);
 
   function start(item?: Item) {
     setEditing(item ?? null); setError("");
-    setValues(item ? Object.fromEntries(Object.entries(form).map(([key, fallback]) => [key, key === "listing_details" ? JSON.stringify(item[key] ?? {}) : key === "content_blocks" ? JSON.stringify((item.listing_details as Record<string, unknown> | null)?.content_blocks ?? []) : key === "tags" ? (Array.isArray(item.tags) ? (item.tags as string[]).join(", ") : "") : key === "featured" || key === "published" || key === "archived" ? Boolean(item[key] ?? fallback) : key === "starts_at" || key === "ends_at" ? (item[key] ? String(item[key]).slice(0, 16) : "") : String(item[key] ?? fallback)])) as Record<string, string | boolean> : form);
+    setValues(item ? Object.fromEntries(Object.entries(form).map(([key, fallback]) => [key, key === "listing_details" ? JSON.stringify(item[key] ?? {}) : key === "content_blocks" ? JSON.stringify((item.listing_details as Record<string, unknown> | null)?.content_blocks ?? []) : key === "gallery" ? JSON.stringify(Array.isArray(item.gallery) ? item.gallery : []) : key === "tags" ? (Array.isArray(item.tags) ? (item.tags as string[]).join(", ") : "") : key === "featured" || key === "published" || key === "archived" ? Boolean(item[key] ?? fallback) : key === "starts_at" || key === "ends_at" ? (item[key] ? String(item[key]).slice(0, 16) : "") : String(item[key] ?? fallback)])) as Record<string, string | boolean> : form);
     setOpen(true);
   }
   function change(key: string, value: string | boolean) {
@@ -39,12 +39,29 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
   function setStatus(status: Status) {
     setValues((current) => ({ ...current, published: status === "published", archived: status === "archived" }));
   }
+  async function uploadImage(file: File): Promise<string | null> {
+    const data = new FormData(); data.append("file", file);
+    const response = await fetch("/api/admin/upload", { method: "POST", body: data });
+    const result = await response.json();
+    if (!response.ok) { setError(result.error ?? "Unggahan gambar gagal."); return null; }
+    return String(result.url);
+  }
   async function upload(event: ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0]; if (!file) return;
-    const data = new FormData(); data.append("file", file); setSaving(true); setError("");
-    const response = await fetch("/api/admin/upload", { method: "POST", body: data }); const result = await response.json(); setSaving(false);
-    if (!response.ok) return setError(result.error ?? "Unggahan gambar gagal.");
-    change("image_url", result.url);
+    setSaving(true); setError("");
+    const url = await uploadImage(file); setSaving(false);
+    if (url) change("image_url", url);
+  }
+  async function uploadGallery(event: ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(event.target.files ?? []); if (files.length === 0) return;
+    setSaving(true); setError("");
+    const uploaded: string[] = [];
+    for (const file of files) { const url = await uploadImage(file); if (url) uploaded.push(url); }
+    setSaving(false); event.target.value = "";
+    if (uploaded.length > 0) change("gallery", JSON.stringify([...parseGallery(String(values.gallery ?? "[]")), ...uploaded]));
+  }
+  function removeGalleryImage(url: string) {
+    change("gallery", JSON.stringify(parseGallery(String(values.gallery ?? "[]")).filter((item) => item !== url)));
   }
   async function submit(event: FormEvent) {
     event.preventDefault(); setSaving(true); setError("");
@@ -54,14 +71,14 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
     if (!isEvent) { try { contentBlocks = JSON.parse(String(values.content_blocks || "[]")); } catch { setSaving(false); return setError("Konten listing tidak dapat dibaca."); } }
     const plainDescription = contentBlocks.map((block) => block.content || (Array.isArray(block.attrs?.items) ? block.attrs.items.join(" ") : "")).join(" ").trim();
     const tags = String(values.tags || "").split(",").map((tag) => tag.trim()).filter(Boolean);
-    const baseValues = Object.fromEntries(Object.entries(values).filter(([key]) => key !== "content_blocks" && key !== "listing_details" && key !== "tags"));
+    const baseValues = Object.fromEntries(Object.entries(values).filter(([key]) => key !== "content_blocks" && key !== "listing_details" && key !== "tags" && key !== "gallery"));
     const payload = {
       ...baseValues,
       tags,
       latitude: values.latitude ? Number(values.latitude) : null,
       longitude: values.longitude ? Number(values.longitude) : null,
       listing_details: !isEvent ? { ...listingDetails, content_blocks: contentBlocks } : listingDetails,
-      ...(!isEvent ? { description: plainDescription } : {}),
+      ...(!isEvent ? { description: plainDescription, gallery: parseGallery(String(values.gallery ?? "[]")) } : {}),
       ...(isEvent ? { starts_at: new Date(String(values.starts_at)).toISOString(), ends_at: values.ends_at ? new Date(String(values.ends_at)).toISOString() : null } : {}),
     };
     const response = await fetch(endpoint, { method: editing ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing ? { id: editing.id, ...payload } : payload) });
@@ -76,6 +93,7 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
     else setError("Tidak dapat menghapus item.");
   }
 
+  const galleryImages = parseGallery(String(values.gallery ?? "[]"));
   const pageLabel = isEvent ? "Event" : "City Guide";
   const itemWord = isEvent ? "event" : "tempat";
   return <div className="p-6 max-w-6xl">
@@ -103,6 +121,7 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
       <Field label="Kontak" value={String(values.contact)} onChange={(v) => change("contact", v)} />
       <Field label="Tags (pisahkan koma)" value={String(values.tags)} onChange={(v) => change("tags", v)} placeholder="keluarga, outdoor, gratis" />
       <div><label className="mb-1 block text-sm font-medium text-gray-700">Gambar utama</label><input type="file" accept="image/jpeg,image/png,image/webp,image/avif" onChange={upload} className="block w-full text-sm" />{values.image_url && <img src={String(values.image_url)} alt="Pratinjau" className="mt-2 h-20 w-32 rounded-lg object-cover" />}</div>
+      {!isEvent && <div className="sm:col-span-2"><label className="mb-1 block text-sm font-medium text-gray-700">Galeri foto</label><p className="mb-2 text-xs text-gray-500">Foto tambahan untuk galeri di halaman listing. Gambar utama selalu tampil pertama.</p><input type="file" multiple accept="image/jpeg,image/png,image/webp,image/avif" onChange={uploadGallery} className="block w-full text-sm" />{galleryImages.length > 0 && <div className="mt-3 flex flex-wrap gap-3">{galleryImages.map((url) => <div key={url} className="relative"><img src={url} alt="" className="h-20 w-28 rounded-lg object-cover" /><button type="button" onClick={() => removeGalleryImage(url)} aria-label="Hapus foto dari galeri" className="absolute -right-2 -top-2 h-6 w-6 rounded-full bg-white text-sm font-bold leading-none text-red-600 shadow ring-1 ring-gray-200">×</button></div>)}</div>}</div>}
       <SocialLinksFields value={String(values.listing_details || "{}")} onChange={(value) => change("listing_details", value)} label={isEvent ? "Media sosial & promosi" : "Media Instagram & sosial"} />
     </div><div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-5"><div className="flex flex-wrap items-center gap-4"><StatusField value={statusOf(Boolean(values.published), Boolean(values.archived))} onChange={setStatus} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(values.featured)} onChange={(e) => change("featured", e.target.checked)} />Tampilkan di beranda</label></div><button disabled={saving} className="rounded-xl bg-amber-400 px-5 py-2.5 text-sm font-semibold text-gray-950 disabled:opacity-50">{saving ? "Menyimpan…" : "Simpan"}</button></div></form></div></div>}
   </div>;
@@ -120,6 +139,7 @@ function StatusField({ value, onChange }: { value: Status; onChange: (status: St
 }
 
 function CategoryField({ value, onChange }: { value: string; onChange: (value: string) => void }) { return <label><span className="mb-1 block text-sm font-medium text-gray-700">Kategori utama</span><select value={value} onChange={(event) => onChange(event.target.value)} className="w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-amber-400">{tourismCategories.map((category) => <option key={category}>{category}</option>)}</select></label>; }
+function parseGallery(value: string): string[] { try { const parsed = JSON.parse(value); return Array.isArray(parsed) ? parsed.filter((item): item is string => typeof item === "string") : []; } catch { return []; } }
 function parseBlocks(value: string): Block[] { try { const parsed = JSON.parse(value); return Array.isArray(parsed) ? parsed : []; } catch { return []; } }
 
 const SOCIAL_PLATFORMS = [

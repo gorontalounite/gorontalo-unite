@@ -8,7 +8,7 @@ const navItems = [
   { href: "/admin",                  icon: "⊞",  label: "Dashboard",     exact: true },
   { href: "/admin/news",             icon: "📰", label: "News" },
   { href: "/admin/reels",            icon: "▶",  label: "Reels" },
-  { href: "/admin/wisata",           icon: "🧭", label: "City Guide" },
+  { href: "/admin/city-guide",       icon: "🧭", label: "City Guide" },
   { href: "/admin/event",            icon: "📅", label: "Event" },
   { href: "/admin/users",            icon: "👥", label: "Pengguna" },
 ];
