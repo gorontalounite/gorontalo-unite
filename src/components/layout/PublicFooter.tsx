@@ -28,7 +28,7 @@ export default function PublicFooter() {
             <p className="mb-2 text-base font-bold text-gray-900 dark:text-white">Gorontalo Unite</p>
             <p className="max-w-xs text-sm leading-relaxed text-gray-600 dark:text-gray-400">Independent local media covering the stories, people, culture, and life of Gorontalo.</p>
           </div>
-          <FooterColumn title="Explore" links={[["News", "/"], ["City Guide", "/city-guide"], ["Reels", "/reels"], ["Destinations", "/wisata"], ["Events", "/event"]]} />
+          <FooterColumn title="Explore" links={[["News", "/"], ["City Guide", "/city-guide"], ["Reels", "/reels"], ["Destinations", "/city-guide"], ["Events", "/event"]]} />
           <FooterColumn title="About" links={[["About us", "/about"], ["Services", "/services"], ["Contact", "/about#kontak"], ["Media Kit", "/media-kit"]]} />
           <FooterColumn title="Legal" links={[["Privacy Policy", "/privacy-policy"], ["Terms", "/terms"], ["Pedoman Media", "/pedoman-media-siber"]]} />
         </div>
