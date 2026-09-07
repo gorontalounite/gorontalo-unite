@@ -12,6 +12,31 @@ export type Database = {
   __InternalSupabase: {
     PostgrestVersion: "14.5"
   }
+  graphql_public: {
+    Tables: {
+      [_ in never]: never
+    }
+    Views: {
+      [_ in never]: never
+    }
+    Functions: {
+      graphql: {
+        Args: {
+          extensions?: Json
+          operationName?: string
+          query?: string
+          variables?: Json
+        }
+        Returns: Json
+      }
+    }
+    Enums: {
+      [_ in never]: never
+    }
+    CompositeTypes: {
+      [_ in never]: never
+    }
+  }
   public: {
     Tables: {
       affiliate_clicks: {
@@ -102,6 +127,7 @@ export type Database = {
           created_at: string
           excerpt: string | null
           extra_images: string[]
+          focus_keyword: string | null
           id: string
           image_prompt: string | null
           image_url: string | null
@@ -110,6 +136,7 @@ export type Database = {
           project_url: string | null
           published: boolean
           published_at: string | null
+          schema_type: string
           seo_description: string | null
           seo_title: string | null
           slug: string
@@ -133,6 +160,7 @@ export type Database = {
           created_at?: string
           excerpt?: string | null
           extra_images?: string[]
+          focus_keyword?: string | null
           id?: string
           image_prompt?: string | null
           image_url?: string | null
@@ -141,6 +169,7 @@ export type Database = {
           project_url?: string | null
           published?: boolean
           published_at?: string | null
+          schema_type?: string
           seo_description?: string | null
           seo_title?: string | null
           slug: string
@@ -164,6 +193,7 @@ export type Database = {
           created_at?: string
           excerpt?: string | null
           extra_images?: string[]
+          focus_keyword?: string | null
           id?: string
           image_prompt?: string | null
           image_url?: string | null
@@ -172,6 +202,7 @@ export type Database = {
           project_url?: string | null
           published?: boolean
           published_at?: string | null
+          schema_type?: string
           seo_description?: string | null
           seo_title?: string | null
           slug?: string
@@ -191,6 +222,44 @@ export type Database = {
             columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      categories: {
+        Row: {
+          created_at: string
+          desk_key: string | null
+          id: string
+          name: string
+          parent_id: string | null
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          desk_key?: string | null
+          id?: string
+          name: string
+          parent_id?: string | null
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          desk_key?: string | null
+          id?: string
+          name?: string
+          parent_id?: string | null
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "categories_parent_id_fkey"
+            columns: ["parent_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
         ]
@@ -278,6 +347,116 @@ export type Database = {
           {
             foreignKeyName: "conversations_user_id_fkey"
             columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          address: string | null
+          archived: boolean
+          author_id: string | null
+          category: string | null
+          contact: string | null
+          created_at: string
+          description: string
+          ends_at: string | null
+          featured: boolean
+          gallery: string[]
+          id: string
+          image_url: string | null
+          latitude: number | null
+          listing_details: Json
+          longitude: number | null
+          maps_url: string | null
+          organizer: string | null
+          price_label: string | null
+          published: boolean
+          rating: number | null
+          registration_url: string | null
+          review_count: number
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          starts_at: string
+          subcategory: string | null
+          tags: string[]
+          title: string
+          updated_at: string
+          venue: string | null
+        }
+        Insert: {
+          address?: string | null
+          archived?: boolean
+          author_id?: string | null
+          category?: string | null
+          contact?: string | null
+          created_at?: string
+          description?: string
+          ends_at?: string | null
+          featured?: boolean
+          gallery?: string[]
+          id?: string
+          image_url?: string | null
+          latitude?: number | null
+          listing_details?: Json
+          longitude?: number | null
+          maps_url?: string | null
+          organizer?: string | null
+          price_label?: string | null
+          published?: boolean
+          rating?: number | null
+          registration_url?: string | null
+          review_count?: number
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          starts_at: string
+          subcategory?: string | null
+          tags?: string[]
+          title: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Update: {
+          address?: string | null
+          archived?: boolean
+          author_id?: string | null
+          category?: string | null
+          contact?: string | null
+          created_at?: string
+          description?: string
+          ends_at?: string | null
+          featured?: boolean
+          gallery?: string[]
+          id?: string
+          image_url?: string | null
+          latitude?: number | null
+          listing_details?: Json
+          longitude?: number | null
+          maps_url?: string | null
+          organizer?: string | null
+          price_label?: string | null
+          published?: boolean
+          rating?: number | null
+          registration_url?: string | null
+          review_count?: number
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          starts_at?: string
+          subcategory?: string | null
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          venue?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_author_id_fkey"
+            columns: ["author_id"]
             isOneToOne: false
             referencedRelation: "user_profiles"
             referencedColumns: ["id"]
@@ -394,6 +573,193 @@ export type Database = {
           },
         ]
       }
+      reels: {
+        Row: {
+          account_username: string
+          author_id: string | null
+          category: string
+          comments: number
+          created_at: string
+          description: string
+          display_order: number
+          featured: boolean
+          follows: number
+          id: string
+          likes: number
+          permalink: string
+          post_type: string
+          publish_time: string
+          reach: number
+          saves: number
+          shares: number
+          sponsored: boolean
+          status: string
+          thumbnail_url: string | null
+          updated_at: string
+          views: number
+        }
+        Insert: {
+          account_username: string
+          author_id?: string | null
+          category?: string
+          comments?: number
+          created_at?: string
+          description?: string
+          display_order?: number
+          featured?: boolean
+          follows?: number
+          id?: string
+          likes?: number
+          permalink: string
+          post_type?: string
+          publish_time: string
+          reach?: number
+          saves?: number
+          shares?: number
+          sponsored?: boolean
+          status?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          views?: number
+        }
+        Update: {
+          account_username?: string
+          author_id?: string | null
+          category?: string
+          comments?: number
+          created_at?: string
+          description?: string
+          display_order?: number
+          featured?: boolean
+          follows?: number
+          id?: string
+          likes?: number
+          permalink?: string
+          post_type?: string
+          publish_time?: string
+          reach?: number
+          saves?: number
+          shares?: number
+          sponsored?: boolean
+          status?: string
+          thumbnail_url?: string | null
+          updated_at?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reels_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      tourism_places: {
+        Row: {
+          address: string | null
+          archived: boolean
+          author_id: string | null
+          category: string | null
+          contact: string | null
+          created_at: string
+          description: string
+          featured: boolean
+          gallery: string[]
+          id: string
+          image_url: string | null
+          latitude: number | null
+          listing_details: Json
+          location: string | null
+          longitude: number | null
+          maps_url: string | null
+          name: string
+          opening_hours: string | null
+          price_range: string | null
+          published: boolean
+          rating: number | null
+          review_count: number
+          seo_description: string | null
+          seo_title: string | null
+          slug: string
+          subcategory: string | null
+          tags: string[]
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          address?: string | null
+          archived?: boolean
+          author_id?: string | null
+          category?: string | null
+          contact?: string | null
+          created_at?: string
+          description?: string
+          featured?: boolean
+          gallery?: string[]
+          id?: string
+          image_url?: string | null
+          latitude?: number | null
+          listing_details?: Json
+          location?: string | null
+          longitude?: number | null
+          maps_url?: string | null
+          name: string
+          opening_hours?: string | null
+          price_range?: string | null
+          published?: boolean
+          rating?: number | null
+          review_count?: number
+          seo_description?: string | null
+          seo_title?: string | null
+          slug: string
+          subcategory?: string | null
+          tags?: string[]
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          address?: string | null
+          archived?: boolean
+          author_id?: string | null
+          category?: string | null
+          contact?: string | null
+          created_at?: string
+          description?: string
+          featured?: boolean
+          gallery?: string[]
+          id?: string
+          image_url?: string | null
+          latitude?: number | null
+          listing_details?: Json
+          location?: string | null
+          longitude?: number | null
+          maps_url?: string | null
+          name?: string
+          opening_hours?: string | null
+          price_range?: string | null
+          published?: boolean
+          rating?: number | null
+          review_count?: number
+          seo_description?: string | null
+          seo_title?: string | null
+          slug?: string
+          subcategory?: string | null
+          tags?: string[]
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tourism_places_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "user_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_profiles: {
         Row: {
           avatar_url: string | null
@@ -420,18 +786,6 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
-      }
-      tourism_places: {
-        Row: { id: string; name: string; slug: string; description: string; image_url: string | null; gallery: string[]; category: string | null; location: string | null; address: string | null; maps_url: string | null; opening_hours: string | null; contact: string | null; website_url: string | null; seo_title: string | null; seo_description: string | null; listing_details: Json; featured: boolean; published: boolean; author_id: string | null; created_at: string; updated_at: string }
-        Insert: { id?: string; name: string; slug: string; description?: string; image_url?: string | null; gallery?: string[]; category?: string | null; location?: string | null; address?: string | null; maps_url?: string | null; opening_hours?: string | null; contact?: string | null; website_url?: string | null; seo_title?: string | null; seo_description?: string | null; listing_details?: Json; featured?: boolean; published?: boolean; author_id?: string | null; created_at?: string; updated_at?: string }
-        Update: { id?: string; name?: string; slug?: string; description?: string; image_url?: string | null; gallery?: string[]; category?: string | null; location?: string | null; address?: string | null; maps_url?: string | null; opening_hours?: string |null; contact?: string | null; website_url?: string | null; seo_title?: string | null; seo_description?: string | null; listing_details?: Json; featured?: boolean; published?: boolean; author_id?: string | null; created_at?: string; updated_at?: string }
-        Relationships: [{ foreignKeyName: "tourism_places_author_id_fkey"; columns: ["author_id"]; isOneToOne: false; referencedRelation: "user_profiles"; referencedColumns: ["id"] }]
-      }
-      events: {
-        Row: { id: string; title: string; slug: string; description: string; image_url: string | null; gallery: string[]; category: string | null; venue: string | null; address: string | null; maps_url: string | null; organizer: string | null; registration_url: string | null; contact: string | null; price_label: string | null; starts_at: string; ends_at: string | null; seo_title: string | null; seo_description: string | null; featured: boolean; published: boolean; author_id: string | null; created_at: string; updated_at: string }
-        Insert: { id?: string; title: string; slug: string; description?: string; image_url?: string | null; gallery?: string[]; category?: string | null; venue?: string | null; address?: string | null; maps_url?: string | null; organizer?: string | null; registration_url?: string | null; contact?: string | null; price_label?: string | null; starts_at: string; ends_at?: string | null; seo_title?: string | null; seo_description?: string | null; featured?: boolean; published?: boolean; author_id?: string | null; created_at?: string; updated_at?: string }
-        Update: { id?: string; title?: string; slug?: string; description?: string; image_url?: string | null; gallery?: string[]; category?: string | null; venue?: string | null; address?: string | null; maps_url?: string | null; organizer?: string | null; registration_url?: string | null; contact?: string | null; price_label?: string | null; starts_at?: string; ends_at?: string | null; seo_title?: string | null; seo_description?: string | null; featured?: boolean; published?: boolean; author_id?: string | null; created_at?: string; updated_at?: string }
-        Relationships: [{ foreignKeyName: "events_author_id_fkey"; columns: ["author_id"]; isOneToOne: false; referencedRelation: "user_profiles"; referencedColumns: ["id"] }]
       }
     }
     Views: {
@@ -461,12 +815,12 @@ export type Tables<
   DefaultSchemaTableNameOrOptions extends
     | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof (DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
         DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -490,11 +844,11 @@ export type TablesInsert<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -515,11 +869,11 @@ export type TablesUpdate<
   DefaultSchemaTableNameOrOptions extends
     | keyof DefaultSchema["Tables"]
     | { schema: keyof DatabaseWithoutInternals },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
+  TableName extends (DefaultSchemaTableNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaTableNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -540,11 +894,11 @@ export type Enums<
   DefaultSchemaEnumNameOrOptions extends
     | keyof DefaultSchema["Enums"]
     | { schema: keyof DatabaseWithoutInternals },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
+  EnumName extends (DefaultSchemaEnumNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
+    : never) = never,
 > = DefaultSchemaEnumNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -557,11 +911,11 @@ export type CompositeTypes<
   PublicCompositeTypeNameOrOptions extends
     | keyof DefaultSchema["CompositeTypes"]
     | { schema: keyof DatabaseWithoutInternals },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
+  CompositeTypeName extends (PublicCompositeTypeNameOrOptions extends {
     schema: keyof DatabaseWithoutInternals
   }
     ? keyof DatabaseWithoutInternals[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
+    : never) = never,
 > = PublicCompositeTypeNameOrOptions extends {
   schema: keyof DatabaseWithoutInternals
 }
@@ -571,6 +925,9 @@ export type CompositeTypes<
     : never
 
 export const Constants = {
+  graphql_public: {
+    Enums: {},
+  },
   public: {
     Enums: {
       app_role: ["user", "editor", "admin"],
