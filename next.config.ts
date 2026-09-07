@@ -18,6 +18,7 @@ const nextConfig: NextConfig = {
       { source: "/berita", destination: "/", permanent: true },
       { source: "/wisata", destination: "/city-guide", permanent: true },
       { source: "/wisata/:slug", destination: "/city-guide/:slug", permanent: true },
+      { source: "/admin/wisata", destination: "/admin/city-guide", permanent: true },
     ];
   },
   images: {

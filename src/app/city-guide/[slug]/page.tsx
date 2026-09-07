@@ -4,6 +4,9 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import ListingHeroBar from "@/components/city-guide/ListingHeroBar";
 import ExpandableText from "@/components/city-guide/ExpandableText";
+import InstagramEmbedGrid from "@/components/city-guide/InstagramEmbedGrid";
+import BlockRenderer from "@/components/ui/BlockRenderer";
+import type { Block } from "@/components/editor/types";
 import styles from "./detail.module.css";
 
 export const dynamic = "force-dynamic";
@@ -26,6 +29,7 @@ const ICON = {
   phone: "M6 3h3l2 5-2.5 1.5a12 12 0 006 6L16 13l5 2v3a2 2 0 01-2.2 2A17 17 0 014 6.2 2 2 0 016 4V3Z",
   globe: "M12 21a9 9 0 100-18 9 9 0 000 18Z M3 12h18 M12 3c2.5 2.6 3.8 5.7 3.8 9S14.5 18.4 12 21c-2.5-2.6-3.8-5.7-3.8-9S9.5 5.6 12 3Z",
   ticket: "M4 8a2 2 0 012-2h12a2 2 0 012 2v1.5a2.5 2.5 0 000 5V16a2 2 0 01-2 2H6a2 2 0 01-2-2v-1.5a2.5 2.5 0 000-5V8Z M14 6v12",
+  share: "M18 8a2.5 2.5 0 100-5 2.5 2.5 0 000 5Z M6 14.5a2.5 2.5 0 100-5 2.5 2.5 0 000 5Z M18 21a2.5 2.5 0 100-5 2.5 2.5 0 000 5Z M8.2 11.2l7.6-3.9 M8.2 12.8l7.6 3.9",
   photo: "M4 6h16v12H4z M4 15l4.5-4.5 4 4L16 11l4 4",
   star: "M12 4l2.4 4.9 5.4.8-3.9 3.8.9 5.4-4.8-2.6-4.8 2.6.9-5.4L4.2 9.7l5.4-.8L12 4Z",
 } as const;
@@ -47,6 +51,19 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
   const hasRating = typeof place.rating === "number" && place.review_count > 0;
   // Only worth clamping when the copy actually runs past the fold on a phone.
   const isLongDescription = paragraphs.join(" ").length > 420;
+
+  // listing_details is what the City Guide admin form writes: rich content blocks,
+  // social profile links, and specific Instagram posts for this listing.
+  const details = (place.listing_details ?? {}) as Record<string, unknown>;
+  const blocks: Block[] = Array.isArray(details.content_blocks) ? (details.content_blocks as Block[]) : [];
+  const instagramPosts: string[] = Array.isArray(details.instagram_posts)
+    ? (details.instagram_posts as unknown[]).filter((post): post is string => typeof post === "string" && post.length > 0)
+    : [];
+  const socials: { label: string; url: string }[] = [
+    { label: "Instagram", value: details.instagram_url },
+    { label: "Facebook", value: details.facebook_url },
+    { label: "TikTok", value: details.tiktok_url },
+  ].flatMap(({ label, value }) => (typeof value === "string" && value.length > 0 ? [{ label, url: value }] : []));
 
   // Falls back to the same coordinates the embedded map already uses — no invented location data.
   const mapLink = place.maps_url || (hasCoords ? `https://www.google.com/maps/search/?api=1&query=${place.latitude}%2C${place.longitude}` : null);
@@ -134,17 +151,27 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
               <dd className={styles.truncate}><a className={styles.inlineLink} href={place.website_url} target="_blank" rel="noreferrer">{place.website_url}</a></dd>
             </div>
           </div>}
+
+          {socials.length > 0 && <div className={styles.infoRow}>
+            <Icon path={ICON.share} />
+            <div className={styles.infoBody}>
+              <dt>Media sosial</dt>
+              <dd className={styles.socialLinks}>{socials.map(({ label, url }) => <a key={label} className={styles.inlineLink} href={url} target="_blank" rel="noreferrer">{label}</a>)}</dd>
+            </div>
+          </div>}
         </dl>
       </section>
 
       {/* E — Description */}
-      {paragraphs.length > 0 && <section className={styles.block}>
+      {(blocks.length > 0 || paragraphs.length > 0) && <section className={styles.block}>
         <h2 className={styles.blockTitle}>Tentang {place.name}</h2>
-        {isLongDescription
-          ? <ExpandableText className={styles.prose} clampClassName={styles.clamp} toggleClassName={styles.moreButton} lines={7}>
-              {paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
-            </ExpandableText>
-          : <div className={styles.prose}>{paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>}
+        {blocks.length > 0
+          ? <BlockRenderer blocks={blocks} className={styles.prose} />
+          : isLongDescription
+            ? <ExpandableText className={styles.prose} clampClassName={styles.clamp} toggleClassName={styles.moreButton} lines={7}>
+                {paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
+              </ExpandableText>
+            : <div className={styles.prose}>{paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}</div>}
       </section>}
 
       {/* G — Location */}
@@ -179,6 +206,11 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
           <p className={styles.emptyBody}>Tempat ini belum memiliki ulasan pengunjung di Gorontalo Unite.</p>
         </div>}
       </section>
+
+      {instagramPosts.length > 0 && <section className={styles.block}>
+        <h2 className={styles.blockTitle}>Dari Instagram</h2>
+        <InstagramEmbedGrid posts={instagramPosts} />
+      </section>}
 
       {/* J — Related, from the same category */}
       {related.length > 0 && <section className={styles.block}>
