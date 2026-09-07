@@ -28,6 +28,22 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
           })}
         </div> : <div className={styles.heroSingle}>{place.image_url && <Image src={place.image_url} alt={place.name} fill priority unoptimized style={{ objectFit: "cover" }} />}</div>}
       </div>
+
+      <div className={styles.titleRow}>
+        <div>
+          <h1 className={styles.name}>{place.name}</h1>
+          <div className={styles.metaList}>
+            {(place.address || place.location) && <div className={styles.metaRow}><span>{place.address || place.location}</span>{place.maps_url && <a className={styles.link} href={place.maps_url} target="_blank" rel="noreferrer">Lihat Peta</a>}</div>}
+            {place.opening_hours && <div className={styles.metaRow}><span className={styles.metaLabel}>Jam buka:</span><span>{place.opening_hours}</span></div>}
+            {place.contact && <div className={styles.metaRow}><span className={styles.metaLabel}>Kontak:</span><span>{place.contact}</span></div>}
+          </div>
+        </div>
+        <aside className={styles.priceCard}>
+          <p className={styles.from}>{place.price_range ? "Kisaran harga" : "Mulai dari"}</p>
+          <p className={styles.amount}>{place.price_range || "Gratis"}</p>
+          {place.maps_url && <a className={styles.cta} href={place.maps_url} target="_blank" rel="noreferrer">Buka di Google Maps</a>}
+        </aside>
+      </div>
     </div>
   </main>;
 }
