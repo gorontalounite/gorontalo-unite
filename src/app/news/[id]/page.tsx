@@ -118,12 +118,12 @@ export async function NewsDetailPage({ params }: Props) {
     ? (article.blocks as Block[]) : [];
 
   const publishedDate = article.published_at
-    ? new Date(article.published_at).toLocaleDateString("id-ID", {
+    ? `${new Intl.DateTimeFormat("id-ID", {
         weekday: "long", day: "numeric", month: "long", year: "numeric",
-      })
+        hour: "2-digit", minute: "2-digit", timeZone: "Asia/Makassar",
+      }).format(new Date(article.published_at))} WITA`
     : null;
 
-  const viewCount:  number  = (article.view_count  as number  | null) ?? 0;
   const isTrending: boolean = (article.is_trending as boolean | null) ?? false;
   const allowComments: boolean = (article.allow_comments as boolean | null) ?? false;
   const isSponsored: boolean = (article.is_sponsored as boolean | null) ?? false;
@@ -204,7 +204,6 @@ export async function NewsDetailPage({ params }: Props) {
       <article>
         <ArticleHero
           title={article.title}
-          excerpt={displayExcerpt}
           imageUrl={(article.image_url as string | null) ?? null}
           categories={heroCategories}
           isTrending={isTrending}
@@ -212,12 +211,18 @@ export async function NewsDetailPage({ params }: Props) {
           sponsorName={sponsorName}
           sponsorLogoUrl={sponsorLogoUrl}
           publishedDate={publishedDate}
-          viewCount={viewCount}
           shareUrl={canonicalUrl}
           readMinutes={readMinutes}
         />
 
       <div className="mx-auto max-w-5xl px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8">
+        {/* Standfirst, set as a quote at the head of the story rather than over the photo. */}
+        {displayExcerpt && (
+          <p className="mx-auto mb-7 max-w-3xl border-l-4 border-[#F5C400] pl-4 font-serif text-lg leading-[1.6] text-stone-600 dark:border-yellow-500 dark:text-zinc-300 sm:mb-9 sm:pl-5 sm:text-xl lg:text-[1.35rem]">
+            {displayExcerpt}
+          </p>
+        )}
+
         {/* Content */}
         <div className="article-body mx-auto max-w-3xl text-[17px] leading-[1.75] sm:text-lg sm:leading-[1.82]">
           {blocks.length > 0
