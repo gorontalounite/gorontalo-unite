@@ -217,10 +217,15 @@ export async function NewsDetailPage({ params }: Props) {
 
       <div className="mx-auto max-w-5xl px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8">
         {isSponsored && sponsorName && (
-          <div className="mb-4 flex items-center gap-2 text-[11px] text-stone-500 dark:text-zinc-400 sm:text-xs">
-            <span>in collaboration with: <strong className="font-semibold text-stone-700 dark:text-zinc-200">{sponsorName}</strong></span>
-            {sponsorLogoUrl && <Image src={sponsorLogoUrl} alt={`Logo ${sponsorName}`} width={72} height={20} className="h-4 w-auto max-w-16 object-contain sm:h-5 sm:max-w-[72px]" sizes="72px" />}
-          </div>
+          <aside className="mx-auto mb-6 max-w-3xl rounded-xl border border-stone-200 bg-stone-50 px-4 py-3 dark:border-zinc-800 dark:bg-zinc-900/60">
+            <p className="text-[10px] font-bold uppercase tracking-[.14em] text-stone-400 dark:text-zinc-500">
+              In collaboration with
+            </p>
+            <div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-2">
+              <span className="text-sm font-semibold text-stone-800 dark:text-zinc-100">{sponsorName}</span>
+              {sponsorLogoUrl && <Image src={sponsorLogoUrl} alt={`Logo ${sponsorName}`} width={72} height={20} className="h-5 w-auto max-w-[72px] object-contain" sizes="72px" />}
+            </div>
+          </aside>
         )}
 
         {/* Content */}
