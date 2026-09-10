@@ -10,7 +10,7 @@ import ShareButtons       from "@/components/ui/ShareButtons";
 import RelatedPosts, { type RelatedItem } from "@/components/ui/RelatedPosts";
 import ViewTracker        from "@/components/ui/ViewTracker";
 import CommentSection     from "@/components/ui/CommentSection";
-import ArticleHeroImage   from "@/components/ui/ArticleHeroImage";
+import ArticleHero        from "@/components/ui/ArticleHero";
 import ReaderRevenueManager from "@/components/google/ReaderRevenueManager";
 import { blocksToText, type Block } from "@/components/editor/types";
 
@@ -155,6 +155,15 @@ export async function NewsDetailPage({ params }: Props) {
 
   const canonicalUrl = `${BASE}/${slug}`;
 
+  const heroCategories = ((article.categories as string[] | null)?.length
+    ? (article.categories as string[])
+    : [article.category]
+  ).map((label: string) => ({
+    label,
+    href: `/category/${CAT_LABEL_TO_KEY[label] ?? label.toLowerCase()}`,
+    className: CATEGORY_COLORS[label] ?? "bg-gray-100 text-gray-700",
+  }));
+
   // User info for CommentSection
   const authUser = user
     ? { id: user.id, name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Pengguna" }
@@ -182,8 +191,7 @@ export async function NewsDetailPage({ params }: Props) {
   return (
     <>
     <ReaderRevenueManager />
-    <div className="bg-white py-6 pb-20 text-[#101018] dark:bg-zinc-950 dark:text-white sm:py-10">
-      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+    <div className="bg-white pb-20 text-[#101018] dark:bg-zinc-950 dark:text-white">
       {/* Schema.org */}
       <script
         type="application/ld+json"
@@ -194,72 +202,22 @@ export async function NewsDetailPage({ params }: Props) {
       <ViewTracker slug={slug} />
 
       <article>
-        {/* Category and disclosure */}
-        <div className="mb-4 flex flex-wrap items-center gap-2 sm:mb-5">
-          {((article.categories as string[] | null)?.length
-            ? (article.categories as string[])
-            : [article.category]
-          ).map((cat: string) => {
-            const catKey = CAT_LABEL_TO_KEY[cat] ?? cat.toLowerCase();
-            const cls = CATEGORY_COLORS[cat] ?? "bg-gray-100 text-gray-700";
-            return (
-              <Link key={cat} href={`/category/${catKey}`}
-                className={`rounded px-2.5 py-1 text-[10px] font-bold uppercase tracking-[.13em] ${cls}`}>
-                {cat}
-              </Link>
-            );
-          })}
-          {isTrending && (
-            <span className="rounded bg-orange-100 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[.13em] text-orange-600 dark:bg-orange-900/30 dark:text-orange-300">
-              Trending
-            </span>
-          )}
-          {isSponsored && (
-            <span className="rounded bg-orange-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[.13em] text-orange-600 dark:bg-orange-950/40 dark:text-orange-300">
-              Sponsored
-            </span>
-          )}
-        </div>
+        <ArticleHero
+          title={article.title}
+          excerpt={displayExcerpt}
+          imageUrl={(article.image_url as string | null) ?? null}
+          categories={heroCategories}
+          isTrending={isTrending}
+          isSponsored={isSponsored}
+          sponsorName={sponsorName}
+          sponsorLogoUrl={sponsorLogoUrl}
+          publishedDate={publishedDate}
+          viewCount={viewCount}
+          shareUrl={canonicalUrl}
+          readMinutes={readMinutes}
+        />
 
-        {/* Title */}
-        <h1 className="max-w-4xl font-display text-2xl font-semibold leading-[1.15] tracking-[-.025em] text-[#101018] dark:text-white sm:text-5xl sm:leading-[1.08] lg:text-[3.5rem]">
-          {article.title}
-        </h1>
-
-        {/* Excerpt */}
-        {displayExcerpt && (
-          <p className="my-5 max-w-4xl text-xs leading-[1.7] text-stone-600 dark:text-zinc-300 sm:my-7 sm:text-xl lg:text-[1.35rem]">
-            {displayExcerpt}
-          </p>
-        )}
-
-        {/* Compact interaction toolbar, following the supplied reference. */}
-        <div className="mt-5 sm:mt-7">
-          <ShareButtons url={canonicalUrl} title={article.title} compact readMinutes={readMinutes} />
-        </div>
-
-        {/* Author and publishing metadata */}
-        <div className="my-4 flex flex-wrap items-center gap-x-2 gap-y-2 text-[11px] text-stone-500 dark:text-zinc-400 sm:my-5 sm:gap-x-3 sm:text-sm">
-          <Image src="/logo-gu.png" alt="Logo Gorontalo Unite" width={32} height={32} className="h-7 w-7 rounded-full object-cover sm:h-8 sm:w-8" />
-          <Link href="/author/gorontalounite" className="font-medium text-[#101018] hover:text-brand dark:text-zinc-100">@gorontalounite</Link>
-          {publishedDate && <><span aria-hidden="true">•</span><time>{publishedDate}</time></>}
-          {viewCount > 0 && <><span aria-hidden="true">•</span><span>{viewCount.toLocaleString("id-ID")} kali dilihat</span></>}
-        </div>
-
-        {isSponsored && sponsorName && (
-          <div className="mb-4 flex items-center gap-2 text-[11px] text-stone-500 dark:text-zinc-400 sm:text-xs">
-            <span>in collaboration with: <strong className="font-semibold text-stone-700 dark:text-zinc-200">{sponsorName}</strong></span>
-            {sponsorLogoUrl && <Image src={sponsorLogoUrl} alt={`Logo ${sponsorName}`} width={72} height={20} className="h-4 w-auto max-w-16 object-contain sm:h-5 sm:max-w-[72px]" sizes="72px" />}
-          </div>
-        )}
-
-        {/* Featured image remains 16:9 regardless of source dimensions. */}
-        {article.image_url && (
-          <div className="mt-6 mb-8">
-            <ArticleHeroImage src={article.image_url} alt={article.title} />
-          </div>
-        )}
-
+      <div className="mx-auto max-w-5xl px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8">
         {/* Content */}
         <div className="article-body mx-auto max-w-3xl text-[17px] leading-[1.75] sm:text-lg sm:leading-[1.82]">
           {blocks.length > 0
@@ -312,8 +270,10 @@ export async function NewsDetailPage({ params }: Props) {
           <ShareButtons url={canonicalUrl} title={article.title} compact readMinutes={readMinutes} />
         </div>
         </div>
+      </div>
       </article>
 
+      <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
       {/* Author profile */}
       <section className="mx-auto mt-10 flex max-w-3xl items-center gap-3 border-y border-stone-200 py-5 dark:border-zinc-800 sm:gap-4">
         <Image src="/logo-gu.png" alt="Logo Gorontalo Unite" width={52} height={52} className="h-11 w-11 shrink-0 rounded-full object-cover sm:h-13 sm:w-13" />

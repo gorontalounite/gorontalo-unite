@@ -3,22 +3,32 @@
 import { useState } from "react";
 import Image from "next/image";
 
-export default function ArticleHeroImage({ src, alt }: { src: string; alt: string }) {
+/**
+ * Backdrop for the article hero: the featured image plus the scrim that keeps
+ * the overlaid headline readable. Decorative on purpose — the headline above it
+ * already carries the meaning, so announcing the image would just repeat it.
+ * If the source 404s this drops out and the hero falls back to its solid ground.
+ */
+export default function ArticleHeroImage({ src }: { src: string }) {
   const [failed, setFailed] = useState(false);
 
   if (failed) return null;
 
   return (
-    <figure className="relative aspect-video overflow-hidden rounded-xl bg-stone-100 dark:bg-zinc-900">
+    <div className="absolute inset-0">
       <Image
         src={src}
-        alt={alt}
+        alt=""
         fill
-        className="object-cover"
-        sizes="(max-width: 1024px) 100vw, 896px"
         priority
+        sizes="100vw"
+        className="object-cover"
         onError={() => setFailed(true)}
       />
-    </figure>
+      <div
+        className="absolute inset-0"
+        style={{ background: "linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.74) 34%, rgba(0,0,0,.36) 62%, rgba(0,0,0,.10) 100%)" }}
+      />
+    </div>
   );
 }
