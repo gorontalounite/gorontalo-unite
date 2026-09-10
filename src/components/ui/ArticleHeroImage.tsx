@@ -27,7 +27,10 @@ export default function ArticleHeroImage({ src }: { src: string }) {
       />
       <div
         className="absolute inset-0"
-        style={{ background: "linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.74) 34%, rgba(0,0,0,.36) 62%, rgba(0,0,0,.10) 100%)" }}
+        style={{ // Dark at the foot for the headline, and again at the very top so the
+          // section labels riding the top edge stay legible over a bright frame.
+          background:
+            "linear-gradient(to top, rgba(0,0,0,.92) 0%, rgba(0,0,0,.74) 32%, rgba(0,0,0,.30) 60%, rgba(0,0,0,.22) 84%, rgba(0,0,0,.55) 100%)" }}
       />
     </div>
   );

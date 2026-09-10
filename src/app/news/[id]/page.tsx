@@ -118,12 +118,12 @@ export async function NewsDetailPage({ params }: Props) {
     ? (article.blocks as Block[]) : [];
 
   const publishedDate = article.published_at
-    ? new Date(article.published_at).toLocaleDateString("id-ID", {
+    ? `${new Intl.DateTimeFormat("id-ID", {
         weekday: "long", day: "numeric", month: "long", year: "numeric",
-      })
+        hour: "2-digit", minute: "2-digit", timeZone: "Asia/Makassar",
+      }).format(new Date(article.published_at))} WITA`
     : null;
 
-  const viewCount:  number  = (article.view_count  as number  | null) ?? 0;
   const isTrending: boolean = (article.is_trending as boolean | null) ?? false;
   const allowComments: boolean = (article.allow_comments as boolean | null) ?? false;
   const isSponsored: boolean = (article.is_sponsored as boolean | null) ?? false;
@@ -211,7 +211,6 @@ export async function NewsDetailPage({ params }: Props) {
           sponsorName={sponsorName}
           sponsorLogoUrl={sponsorLogoUrl}
           publishedDate={publishedDate}
-          viewCount={viewCount}
           shareUrl={canonicalUrl}
           readMinutes={readMinutes}
         />

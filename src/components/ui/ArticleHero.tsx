@@ -19,23 +19,23 @@ interface Props {
   sponsorName: string | null;
   sponsorLogoUrl: string | null;
   publishedDate: string | null;
-  viewCount: number;
   shareUrl: string;
   readMinutes: number;
 }
 
 /**
- * Article masthead. With a featured image it becomes a full-bleed photo hero
- * carrying the eyebrow, headline and byline, on a fixed ratio per breakpoint so
- * the crop stays the same whatever the headline's length. Without an image it
- * falls back to the same order set on the page ground, so imageless posts keep
- * a complete header instead of an empty frame.
+ * Article masthead. With a featured image it becomes a full-bleed photo hero on
+ * a fixed ratio per breakpoint, so the crop stays the same whatever the
+ * headline's length: the section labels ride the top edge and the headline and
+ * byline sit at the foot. Without an image it falls back to the same running
+ * order on the page ground, so imageless posts keep a complete header.
  */
 export default function ArticleHero(props: Props) {
   if (!props.imageUrl) {
     return (
       <header className="mx-auto max-w-5xl px-4 pt-6 sm:px-6 sm:pt-10 lg:px-8">
-        <HeroContent {...props} onPhoto={false} />
+        <Labels {...props} onPhoto={false} />
+        <Masthead {...props} onPhoto={false} />
       </header>
     );
   }
@@ -43,52 +43,59 @@ export default function ArticleHero(props: Props) {
   return (
     <header className="relative aspect-[4/5] overflow-hidden bg-zinc-900 text-white sm:aspect-[4/3] lg:aspect-[16/9]">
       <ArticleHeroImage src={props.imageUrl} />
-      <div className="relative mx-auto flex min-h-full max-w-5xl flex-col justify-end px-4 pb-6 pt-20 sm:px-6 sm:pb-8 sm:pt-24 lg:px-8">
-        <HeroContent {...props} onPhoto />
+      <div className="relative mx-auto flex min-h-full max-w-5xl flex-col justify-between gap-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+        <Labels {...props} onPhoto />
+        <div>
+          <Masthead {...props} onPhoto />
+        </div>
       </div>
     </header>
   );
 }
 
-function HeroContent({
-  title, categories, isTrending, isSponsored, sponsorName, sponsorLogoUrl,
-  publishedDate, viewCount, shareUrl, readMinutes, onPhoto,
-}: Props & { onPhoto: boolean }) {
+function Labels({ categories, isTrending, isSponsored, onPhoto }: Props & { onPhoto: boolean }) {
   const flagClass = onPhoto
     ? "bg-white/15 text-white ring-1 ring-inset ring-white/30"
     : "bg-orange-100 text-orange-600 dark:bg-orange-900/30 dark:text-orange-300";
 
   return (
-    <>
-      <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-        {categories.map((category) => (
-          <Link
-            key={category.label}
-            href={category.href}
-            className={
-              onPhoto
-                ? "text-[11px] font-bold uppercase tracking-[.14em] text-white underline decoration-amber-400 decoration-2 underline-offset-[6px] transition hover:decoration-white sm:text-xs"
-                : `rounded px-2.5 py-1 text-[10px] font-bold uppercase tracking-[.13em] ${category.className}`
-            }
-          >
-            {category.label}
-          </Link>
-        ))}
-        {isTrending && (
-          <span className={`rounded px-2.5 py-1 text-[10px] font-bold uppercase tracking-[.13em] ${flagClass}`}>
-            Trending
-          </span>
-        )}
-        {isSponsored && (
-          <span className={`rounded px-2.5 py-1 text-[10px] font-bold uppercase tracking-[.13em] ${flagClass}`}>
-            Sponsored
-          </span>
-        )}
-      </div>
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+      {categories.map((category) => (
+        <Link
+          key={category.label}
+          href={category.href}
+          className={
+            onPhoto
+              ? "text-[10px] font-bold uppercase tracking-[.12em] text-white underline decoration-amber-400 decoration-2 underline-offset-[5px] transition hover:decoration-white"
+              : `rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-[.12em] ${category.className}`
+          }
+        >
+          {category.label}
+        </Link>
+      ))}
+      {isTrending && (
+        <span className={`rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-[.12em] ${flagClass}`}>
+          Trending
+        </span>
+      )}
+      {isSponsored && (
+        <span className={`rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-[.12em] ${flagClass}`}>
+          Sponsored
+        </span>
+      )}
+    </div>
+  );
+}
 
+function Masthead({
+  title, isSponsored, sponsorName, sponsorLogoUrl,
+  publishedDate, shareUrl, readMinutes, onPhoto,
+}: Props & { onPhoto: boolean }) {
+  return (
+    <>
       <h1
-        className={`mt-3 max-w-4xl font-display text-[1.75rem] font-bold leading-[1.12] tracking-[-.025em] sm:mt-4 sm:text-5xl sm:leading-[1.06] lg:text-[3.4rem] ${
-          onPhoto ? "text-white" : "text-[#101018] dark:text-white"
+        className={`max-w-4xl font-display text-[1.75rem] font-bold leading-[1.12] tracking-[-.025em] sm:text-5xl sm:leading-[1.06] lg:text-[3.4rem] ${
+          onPhoto ? "text-white" : "mt-3 text-[#101018] dark:text-white sm:mt-4"
         }`}
       >
         {title}
@@ -130,11 +137,11 @@ function HeroContent({
             >
               @gorontalounite
             </Link>
-            <p className={`mt-0.5 text-[11px] sm:text-xs ${onPhoto ? "text-white/75" : "text-stone-500 dark:text-zinc-400"}`}>
-              {publishedDate}
-              {publishedDate && viewCount > 0 && <span aria-hidden="true"> · </span>}
-              {viewCount > 0 && `${viewCount.toLocaleString("id-ID")} kali dilihat`}
-            </p>
+            {publishedDate && (
+              <p className={`mt-0.5 text-[11px] sm:text-xs ${onPhoto ? "text-white/75" : "text-stone-500 dark:text-zinc-400"}`}>
+                {publishedDate}
+              </p>
+            )}
           </div>
         </div>
       </div>
