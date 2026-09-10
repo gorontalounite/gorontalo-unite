@@ -8,6 +8,8 @@ interface Props {
   title: string;
   compact?: boolean;
   readMinutes?: number;
+  /** "dark" sits the bar on a photo hero; "surface" is the default page ground. */
+  tone?: "surface" | "dark";
 }
 
 const subscribeToBrowserCapabilities = () => () => {};
@@ -26,7 +28,7 @@ function SocialIcon({ src, alt }: { src: string; alt: string }) {
   return <Image src={src} alt={alt} width={24} height={24} className="h-5 w-5 object-contain sm:h-6 sm:w-6" />;
 }
 
-export default function ShareButtons({ url, title, readMinutes }: Props) {
+export default function ShareButtons({ url, title, readMinutes, tone = "surface" }: Props) {
   const [copied, setCopied] = useState(false);
   const canNativeShare = useSyncExternalStore(
     subscribeToBrowserCapabilities,
@@ -79,8 +81,16 @@ export default function ShareButtons({ url, title, readMinutes }: Props) {
 
   const iconClass = "grid h-8 w-8 shrink-0 place-items-center rounded-md bg-white text-black transition hover:bg-stone-200 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-500 sm:h-10 sm:w-10";
 
+  const onDark = tone === "dark";
+  const barClass = onDark
+    ? "border border-white/20 bg-black/25 backdrop-blur-sm"
+    : "bg-stone-100 dark:bg-zinc-900";
+  const readClass = onDark
+    ? "border-white/25 text-white/85"
+    : "border-stone-300 text-stone-600 dark:border-zinc-700 dark:text-zinc-400";
+
   return (
-    <div className="flex min-h-12 items-center justify-between gap-2 overflow-hidden rounded-xl bg-stone-100 px-2 py-2 dark:bg-zinc-900 sm:min-h-16 sm:px-4">
+    <div className={`flex min-h-12 items-center justify-between gap-2 overflow-hidden rounded-xl px-2 py-2 sm:min-h-16 sm:px-4 ${barClass}`}>
       <div className="flex min-w-0 items-center gap-0.5 sm:gap-1">
         <button type="button" onClick={nativeShare} className={iconClass} aria-label="Share article">
           <SocialIcon src="/social-icons/share.png" alt="Share" />
@@ -105,7 +115,7 @@ export default function ShareButtons({ url, title, readMinutes }: Props) {
         </button>
       </div>
       {readMinutes != null ? (
-        <div className="flex shrink-0 items-center border-l border-stone-300 pl-2 text-[10px] font-medium tracking-[.04em] text-stone-600 dark:border-zinc-700 dark:text-zinc-400 sm:pl-4 sm:text-xs">
+        <div className={`flex shrink-0 items-center border-l pl-2 text-[10px] font-medium tracking-[.04em] sm:pl-4 sm:text-xs ${readClass}`}>
           {readMinutes} min read
         </div>
       ) : null}
