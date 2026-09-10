@@ -17,6 +17,8 @@ interface Props {
   categories: ArticleHeroCategory[];
   isTrending: boolean;
   isSponsored: boolean;
+  sponsorName: string | null;
+  sponsorLogoUrl: string | null;
   publishedDate: string | null;
   viewCount: number;
   shareUrl: string;
@@ -49,7 +51,7 @@ export default function ArticleHero(props: Props) {
 }
 
 function HeroContent({
-  title, excerpt, categories, isTrending, isSponsored,
+  title, excerpt, categories, isTrending, isSponsored, sponsorName, sponsorLogoUrl,
   publishedDate, viewCount, shareUrl, readMinutes, onPhoto,
 }: Props & { onPhoto: boolean }) {
   const flagClass = onPhoto
@@ -100,6 +102,18 @@ function HeroContent({
         >
           {excerpt}
         </p>
+      )}
+
+      {isSponsored && sponsorName && (
+        <div className={`mt-4 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs ${onPhoto ? "text-white/75" : "text-stone-500 dark:text-zinc-400"}`}>
+          <span>
+            in collaboration with:{" "}
+            <strong className={`font-semibold ${onPhoto ? "text-white" : "text-stone-700 dark:text-zinc-200"}`}>{sponsorName}</strong>
+          </span>
+          {sponsorLogoUrl && (
+            <Image src={sponsorLogoUrl} alt={`Logo ${sponsorName}`} width={72} height={20} className="h-4 w-auto max-w-16 object-contain sm:h-5 sm:max-w-[72px]" sizes="72px" />
+          )}
+        </div>
       )}
 
       <div className="mt-5 flex flex-col gap-4 sm:mt-7 sm:flex-row-reverse sm:items-center sm:justify-between sm:gap-6">
