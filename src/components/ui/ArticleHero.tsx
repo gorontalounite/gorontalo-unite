@@ -41,9 +41,9 @@ export default function ArticleHero(props: Props) {
   }
 
   return (
-    <header className="relative aspect-[4/5] overflow-hidden bg-zinc-900 text-white sm:aspect-[4/3] lg:aspect-[16/9]">
+    <header className="relative flex aspect-[4/5] w-full flex-col overflow-hidden bg-zinc-900 text-white sm:aspect-[4/3] lg:aspect-[16/9] lg:max-h-[78vh]">
       <ArticleHeroImage src={props.imageUrl} />
-      <div className="relative mx-auto flex min-h-full max-w-5xl flex-col justify-between gap-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+      <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col justify-between gap-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
         <Labels {...props} onPhoto />
         <div>
           <Masthead {...props} onPhoto />
