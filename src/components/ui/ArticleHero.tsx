@@ -12,7 +12,6 @@ export interface ArticleHeroCategory {
 
 interface Props {
   title: string;
-  excerpt: string | null;
   imageUrl: string | null;
   categories: ArticleHeroCategory[];
   isTrending: boolean;
@@ -27,9 +26,10 @@ interface Props {
 
 /**
  * Article masthead. With a featured image it becomes a full-bleed photo hero
- * carrying the eyebrow, headline, standfirst and byline; without one it falls
- * back to the same order set on the page ground, so imageless posts keep a
- * complete header instead of an empty frame.
+ * carrying the eyebrow, headline and byline, on a fixed ratio per breakpoint so
+ * the crop stays the same whatever the headline's length. Without an image it
+ * falls back to the same order set on the page ground, so imageless posts keep
+ * a complete header instead of an empty frame.
  */
 export default function ArticleHero(props: Props) {
   if (!props.imageUrl) {
@@ -41,9 +41,9 @@ export default function ArticleHero(props: Props) {
   }
 
   return (
-    <header className="relative overflow-hidden bg-zinc-900 text-white">
+    <header className="relative aspect-[4/5] overflow-hidden bg-zinc-900 text-white sm:aspect-[4/3] lg:aspect-[16/9]">
       <ArticleHeroImage src={props.imageUrl} />
-      <div className="relative mx-auto flex min-h-[30rem] max-w-5xl flex-col justify-end px-4 pb-6 pt-24 sm:min-h-[34rem] sm:px-6 sm:pb-8 sm:pt-32 lg:min-h-[38rem] lg:px-8">
+      <div className="relative mx-auto flex min-h-full max-w-5xl flex-col justify-end px-4 pb-6 pt-20 sm:px-6 sm:pb-8 sm:pt-24 lg:px-8">
         <HeroContent {...props} onPhoto />
       </div>
     </header>
@@ -51,7 +51,7 @@ export default function ArticleHero(props: Props) {
 }
 
 function HeroContent({
-  title, excerpt, categories, isTrending, isSponsored, sponsorName, sponsorLogoUrl,
+  title, categories, isTrending, isSponsored, sponsorName, sponsorLogoUrl,
   publishedDate, viewCount, shareUrl, readMinutes, onPhoto,
 }: Props & { onPhoto: boolean }) {
   const flagClass = onPhoto
@@ -93,16 +93,6 @@ function HeroContent({
       >
         {title}
       </h1>
-
-      {excerpt && (
-        <p
-          className={`mt-3 max-w-3xl font-serif text-[1.0625rem] leading-[1.6] sm:mt-4 sm:text-xl lg:text-[1.4rem] ${
-            onPhoto ? "text-white/90" : "text-stone-600 dark:text-zinc-300"
-          }`}
-        >
-          {excerpt}
-        </p>
-      )}
 
       {isSponsored && sponsorName && (
         <div className={`mt-4 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs ${onPhoto ? "text-white/75" : "text-stone-500 dark:text-zinc-400"}`}>
