@@ -38,7 +38,7 @@ function HeroEyebrow({ article, deskMap }: { article: HeroArticleData; deskMap: 
 
 function HeroImage({ article, className, priority = false, sizes }: { article: HeroArticleData; className: string; priority?: boolean; sizes: string }) {
   return (
-    <div className={`bg-[#e8e4dc] ${className}`}>
+    <div className={`bg-[#e8e4dc] dark:bg-zinc-800 ${className}`}>
       {article.image_url ? (
         <Image src={article.image_url} alt="" fill priority={priority} loading={priority ? "eager" : "lazy"} unoptimized sizes={sizes} className="object-cover" />
       ) : (

@@ -111,7 +111,7 @@ function deskLabel(article: Article, deskMap: DeskMap = {}) {
 
 function ArticleImage({ article, className, priority = false, sizes = "(max-width: 768px) 100vw, 50vw" }: { article: Article; className: string; priority?: boolean; sizes?: string }) {
   return (
-    <div className={`relative overflow-hidden rounded-[4px] bg-[#e8e4dc] ${className}`}>
+    <div className={`relative overflow-hidden rounded-[4px] bg-[#e8e4dc] dark:bg-zinc-800 ${className}`}>
       {article.image_url ? (
         <Image
           src={article.image_url}
@@ -132,8 +132,8 @@ function ArticleImage({ article, className, priority = false, sizes = "(max-widt
 
 function Eyebrow({ article, light = false, deskMap = {} }: { article: Article; light?: boolean; deskMap?: DeskMap }) {
   return (
-    <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#77736b]"}`}>
-      <span className={light ? "text-[#f5c400]" : "text-[#9b7513]"}>{deskLabel(article, deskMap)}</span>
+    <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#77736b] dark:text-zinc-400"}`}>
+      <span className={light ? "text-[#f5c400]" : "text-[#9b7513] dark:text-amber-400"}>{deskLabel(article, deskMap)}</span>
       <span aria-hidden>•</span>
       <time dateTime={articleDate(article)}>{displayDate(articleDate(article))}</time>
     </div>
@@ -148,7 +148,7 @@ function SectionTitle({ id, title, dark = false, showViewAll = true }: { id: str
         <span>{title}</span>
         <span className="text-[#f5c400]" aria-hidden>/</span>
       </h2>
-      {showViewAll ? <Link href={`/category/${id}`} className={`inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold ${dark ? "text-white" : "text-[#302f2c]"}`}>View all <span aria-hidden>→</span></Link> : null}
+      {showViewAll ? <Link href={`/category/${id}`} className={`inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold ${dark ? "text-white" : "text-[#302f2c] dark:text-zinc-50"}`}>View all <span aria-hidden>→</span></Link> : null}
     </div>
   );
 }
@@ -161,7 +161,7 @@ function StoryCard({ article, large = false, deskMap = {} }: { article: Article;
         <div className="pt-4">
           <Eyebrow article={article} deskMap={deskMap} />
           <h3 className={`mt-2 font-display font-extrabold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#9b7513] ${large ? "text-[22px] sm:text-[30px]" : "text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
-          {article.excerpt ? <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#6d6961]">{article.excerpt}</p> : null}
+          {article.excerpt ? <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{article.excerpt}</p> : null}
         </div>
       </Link>
     </article>
@@ -170,7 +170,7 @@ function StoryCard({ article, large = false, deskMap = {} }: { article: Article;
 
 function CompactStory({ article, deskMap = {} }: { article: Article; deskMap?: DeskMap }) {
   return (
-    <article className="group border-b border-[#d7d1c6] pb-4 last:border-0 last:pb-0">
+    <article className="group border-b border-[#d7d1c6] dark:border-zinc-800 pb-4 last:border-0 last:pb-0">
       <Link href={`/${article.slug}`} className="grid grid-cols-[1fr_108px] gap-4">
         <div>
           <Eyebrow article={article} deskMap={deskMap} />
@@ -210,16 +210,16 @@ const QUICK_LINKS = [
 function DeskNav() {
   const navDesks = NAV_ORDER.map((key) => DESKS.find((desk) => desk.key === key)).filter((desk): desk is (typeof DESKS)[number] => Boolean(desk));
   return (
-    <nav aria-label="Rubrik berita" className="border-y border-[#d7d1c6]">
+    <nav aria-label="Rubrik berita" className="border-y border-[#d7d1c6] dark:border-zinc-800">
       <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex min-w-0 gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {navDesks.map((desk) => <Link key={desk.key} href={`/category/${desk.key}`} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] transition hover:text-[#9b7513]">{desk.label}</Link>)}
-          <a href="#latest" className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] transition hover:text-[#9b7513]">Latest News</a>
+          {navDesks.map((desk) => <Link key={desk.key} href={`/category/${desk.key}`} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover:text-[#9b7513]">{desk.label}</Link>)}
+          <a href="#latest" className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover:text-[#9b7513]">Latest News</a>
         </div>
         <div className="hidden shrink-0 items-center gap-2 lg:flex">
-          <span className="text-[10px] font-bold uppercase tracking-[.1em] text-[#a8a29e]">Quick Links</span>
+          <span className="text-[10px] font-bold uppercase tracking-[.1em] text-[#a8a29e] dark:text-zinc-500">Quick Links</span>
           {QUICK_LINKS.map((link) => (
-            <Link key={link.href} href={link.href} className="rounded-full bg-[#f6f6f6] px-3 py-1.5 text-[11px] font-bold text-[#302f2c] transition hover:bg-[#ececec]">{link.label}</Link>
+            <Link key={link.href} href={link.href} className="rounded-full bg-[#f6f6f6] dark:bg-zinc-900 px-3 py-1.5 text-[11px] font-bold text-[#302f2c] dark:text-zinc-50 transition hover:bg-[#ececec]">{link.label}</Link>
           ))}
         </div>
       </div>
@@ -229,7 +229,7 @@ function DeskNav() {
 
 function EmptyDesk({ dark = false }: { dark?: boolean }) {
   return (
-    <div className={`border border-dashed px-6 py-14 text-center ${dark ? "border-white/25 bg-white/[.03] text-white/65" : "border-[#bbb3a5] bg-white/20 text-[#77736b]"}`}>
+    <div className={`border border-dashed px-6 py-14 text-center ${dark ? "border-white/25 bg-white dark:bg-zinc-950/[.03] text-white/65" : "border-[#bbb3a5] dark:border-zinc-700 bg-white dark:bg-zinc-950/20 text-[#77736b] dark:text-zinc-400"}`}>
       <p className="font-display text-[18px] font-bold">Cerita pilihan sedang disiapkan.</p>
       <p className="mt-2 text-xs">Rubrik ini akan diisi setelah lolos kurasi redaksi.</p>
     </div>
@@ -272,22 +272,22 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
     const title = search ? `Hasil untuk “${search}”` : activeDesk?.label ?? "Berita";
     const description = search ? `${displayedArticles.length} artikel ditemukan.` : activeDesk?.description;
     return (
-      <div className="min-h-screen bg-white text-[#302f2c]">
+      <div className="min-h-screen bg-white dark:bg-zinc-950 text-[#302f2c] dark:text-zinc-50">
         <DeskNav />
         <main className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
-          <div className="mb-10 border-b border-[#302f2c] pb-7">
-            <Link href="/category" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#9b7513]">← All categories</Link>
+          <div className="mb-10 border-b border-[#302f2c] dark:border-zinc-100 pb-7">
+            <Link href="/category" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#9b7513] dark:text-amber-400">← All categories</Link>
             <h1 className="mt-4 font-display text-[40px] font-extrabold tracking-[-.04em] sm:text-[56px]">{title}</h1>
-            {description ? <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#6d6961]">{description}</p> : null}
+            {description ? <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{description}</p> : null}
           </div>
           {displayedArticles.length ? (
             <div className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
               {displayedArticles.map((article, index) => <StoryCard key={article.id} article={article} large={index === 0} deskMap={deskMap} />)}
             </div>
           ) : (
-            <div className="border border-dashed border-[#bbb3a5] px-6 py-24 text-center">
+            <div className="border border-dashed border-[#bbb3a5] dark:border-zinc-700 px-6 py-24 text-center">
               <p className="font-display text-2xl font-bold">Belum ada cerita di rubrik ini.</p>
-              <p className="mt-2 text-sm text-[#77736b]">Redaksi sedang menyiapkan pilihan yang relevan untukmu.</p>
+              <p className="mt-2 text-sm text-[#77736b] dark:text-zinc-400">Redaksi sedang menyiapkan pilihan yang relevan untukmu.</p>
             </div>
           )}
         </main>
@@ -297,9 +297,9 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
 
   if (!articles.length) {
     return (
-      <div className="min-h-[70vh] bg-white px-4 pt-36 text-center text-[#302f2c]">
+      <div className="min-h-[70vh] bg-white dark:bg-zinc-950 px-4 pt-36 text-center text-[#302f2c] dark:text-zinc-50">
         <h1 className="font-display text-4xl font-extrabold">Berita sedang disiapkan</h1>
-        <p className="mt-3 text-sm text-[#77736b]">Silakan kembali beberapa saat lagi.</p>
+        <p className="mt-3 text-sm text-[#77736b] dark:text-zinc-400">Silakan kembali beberapa saat lagi.</p>
       </div>
     );
   }
@@ -322,14 +322,14 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
   const life = articlesFor(remaining, "life", 5, deskMap);
 
   return (
-    <div className="min-h-screen bg-white text-[#302f2c]">
+    <div className="min-h-screen bg-white dark:bg-zinc-950 text-[#302f2c] dark:text-zinc-50">
       <DeskNav />
       <main>
         <section className="mx-auto max-w-[1280px] px-4 pb-12 pt-6 sm:px-6 sm:pb-16 sm:pt-8 lg:px-8">
           <HeroCarousel pool={heroPool} deskMap={deskMap} />
         </section>
 
-        <section id="culture" className="scroll-mt-24 border-t border-[#d7d1c6] bg-white py-12 sm:py-16">
+        <section id="culture" className="scroll-mt-24 border-t border-[#d7d1c6] dark:border-zinc-800 bg-white dark:bg-zinc-950 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="culture" title="Culture" />
             {culture.length ? <div className="grid gap-8 sm:grid-cols-3">{culture.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</div> : <EmptyDesk />}
@@ -346,7 +346,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           </div>
         </section>
 
-        <section id="culinary" className="scroll-mt-24 border-y border-[#dedede] bg-[#f6f6f6] py-12 sm:py-16">
+        <section id="culinary" className="scroll-mt-24 border-y border-[#dedede] dark:border-zinc-800 bg-[#f6f6f6] dark:bg-zinc-900 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="culinary" title="Culinary" />
             {culinary.length ? <div className="grid gap-8 sm:grid-cols-3">{culinary.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</div> : <EmptyDesk />}
@@ -363,7 +363,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           </div>
         </section>
 
-        <section id="people" className="scroll-mt-24 border-y border-[#dedede] bg-[#f7f7f7] py-12 sm:py-16">
+        <section id="people" className="scroll-mt-24 border-y border-[#dedede] dark:border-zinc-800 bg-[#f7f7f7] dark:bg-zinc-900 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="people" title="People" />
             {people.length ? <div className="flex snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">

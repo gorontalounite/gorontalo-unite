@@ -6,7 +6,7 @@ import Image from "next/image";
 import RightPanel from "./RightPanel";
 import ThemeToggle from "./ThemeToggle";
 import NavSearch from "./NavSearch";
-import { PRIMARY_NAV } from "./navigation";
+import { HEADER_NAV } from "./navigation";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -14,9 +14,10 @@ export default function Navbar() {
   return (
     <>
       <nav className="sticky top-0 z-30 border-b border-gray-100 bg-white/80 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-950/80">
-        <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between px-4 sm:px-6 lg:px-8">
+        <div className="mx-auto flex h-14 max-w-[1280px] items-center justify-between gap-6 px-4 sm:px-6 lg:px-8">
+          <div className="flex min-w-0 items-center gap-8">
           {/* Brand */}
-          <Link href="/" className="flex select-none items-center gap-2.5">
+          <Link href="/" className="flex shrink-0 select-none items-center gap-2.5">
             <Image src="/logo.png" alt="" width={120} height={32} className="h-8 w-auto object-contain" priority />
             <span className="font-display text-lg leading-none tracking-[.01em] text-gray-900 dark:text-white">
               Gorontalo Unite
@@ -25,7 +26,7 @@ export default function Navbar() {
 
           {/* Desktop navigation */}
           <nav aria-label="Navigasi utama" className="hidden items-center gap-1 md:flex">
-            {PRIMARY_NAV.map((item) => (
+            {HEADER_NAV.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
@@ -35,6 +36,7 @@ export default function Navbar() {
               </Link>
             ))}
           </nav>
+          </div>
 
           {/* Search + theme + menu */}
           <div className="flex items-center gap-1">
