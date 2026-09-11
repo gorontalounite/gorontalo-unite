@@ -38,8 +38,9 @@ type DirectoryItem = {
   href: string;
   title: string;
   imageUrl: string | null;
-  eyebrow: string;
-  detail: string;
+  badge: string;
+  place: string;
+  dek: string;
   featured: boolean;
   searchable: string;
 };
@@ -55,7 +56,17 @@ const SECTION_META: Record<SectionKey, { label: string; category: string | null;
 
 const SECTION_ORDER: SectionKey[] = ["explore", "eat", "stay", "shop", "services", "events"];
 
+// Places load six at a time — two full rows on desktop, three on phones.
+const PAGE_SIZE = 6;
+const DEK_WORDS = 10;
+
 const normalize = (value: string) => value.toLocaleLowerCase("id-ID").trim();
+
+function toDek(text: string) {
+  const words = String(text ?? "").replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+  if (words.length === 0) return "";
+  return words.slice(0, DEK_WORDS).join(" ") + (words.length > DEK_WORDS ? "…" : "");
+}
 
 function eventDate(value: string) {
   return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" }).format(new Date(value));
@@ -76,8 +87,9 @@ export default function CityGuideDirectory({ places, events }: { places: CityGui
         href: `/city-guide/${place.slug}`,
         title: place.name,
         imageUrl: place.image_url,
-        eyebrow: `${SECTION_META[key].label} · ${place.location || place.address || "Gorontalo"}`,
-        detail: place.opening_hours || "Lihat info kunjungan",
+        badge: SECTION_META[key].label,
+        place: place.location || place.address || "Gorontalo",
+        dek: toDek(place.description),
         featured: place.featured,
         searchable: normalize([place.name, place.description, place.category, place.location, place.address].filter(Boolean).join(" ")),
       });
@@ -89,8 +101,9 @@ export default function CityGuideDirectory({ places, events }: { places: CityGui
         href: `/event/${event.slug}`,
         title: event.title,
         imageUrl: event.image_url,
-        eyebrow: eventDate(event.starts_at),
-        detail: event.venue || event.address || "Gorontalo",
+        badge: eventDate(event.starts_at),
+        place: event.venue || event.address || "Gorontalo",
+        dek: toDek(event.description),
         featured: event.featured,
         searchable: normalize([event.title, event.description, event.category, event.venue, event.address].filter(Boolean).join(" ")),
       });
@@ -140,8 +153,8 @@ export default function CityGuideDirectory({ places, events }: { places: CityGui
             </button>
           </div>
 
-          <div className="mt-5 flex gap-5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Kategori direktori">
-            <TabButton active={tab === "all"} onClick={() => setTab("all")}>Semua</TabButton>
+          <div className="mt-5 flex gap-5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Directory categories">
+            <TabButton active={tab === "all"} onClick={() => setTab("all")}>All</TabButton>
             {SECTION_ORDER.map((key) => (
               <TabButton key={key} active={tab === key} onClick={() => setTab(key)}>{SECTION_META[key].label}</TabButton>
             ))}
@@ -152,21 +165,20 @@ export default function CityGuideDirectory({ places, events }: { places: CityGui
       {needle && totalMatches === 0 ? (
         <div className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8">
           <div className="rounded border border-dashed border-[#d7d1c6] bg-white px-6 py-16 text-center dark:border-zinc-700 dark:bg-zinc-900">
-            <h3 className="font-display text-lg font-bold">Tidak ada hasil untuk &ldquo;{query}&rdquo;</h3>
-            <p className="mt-2 text-sm text-[#78716c] dark:text-zinc-400">Coba kata kunci lain, atau reset pencarian.</p>
+            <h3 className="font-display text-lg font-bold">No results for &ldquo;{query}&rdquo;</h3>
+            <p className="mt-2 text-sm text-[#78716c] dark:text-zinc-400">Try another keyword, or reset the search.</p>
             <button type="button" onClick={() => setQuery("")} className="mt-5 rounded bg-[#302f2c] px-5 py-2.5 text-sm font-bold text-white dark:bg-amber-300 dark:text-zinc-950">
-              Reset pencarian
+              Reset search
             </button>
           </div>
         </div>
       ) : (
         sectionsToRender.map((key, index) => (
           <Section
-            key={key}
+            key={`${key}-${needle}`}
             sectionKey={key}
             items={filteredSections.get(key) ?? []}
             band={key === "events" ? "dark" : index % 2 === 1 ? "light" : "plain"}
-            layout={tab === "all" ? "rail" : "grid"}
             onViewAll={() => setTab(key)}
             showViewAll={tab === "all"}
           />
@@ -196,20 +208,27 @@ function Section({
   sectionKey,
   items,
   band,
-  layout,
   onViewAll,
   showViewAll,
 }: {
   sectionKey: SectionKey;
   items: DirectoryItem[];
   band: "plain" | "light" | "dark";
-  layout: "rail" | "grid";
   onViewAll: () => void;
   showViewAll: boolean;
 }) {
   const meta = SECTION_META[sectionKey];
   const isDark = band === "dark";
+  // Events stay a slider with a View All; every place section pages instead.
+  const isRail = sectionKey === "events";
   const bandClass = band === "dark" ? "bg-[#17191d] text-white" : band === "light" ? "border-y border-[#dedede] bg-[#f6f6f6] dark:border-zinc-800 dark:bg-zinc-900" : "";
+
+  // Paging resets by remount — the parent keys each Section on the active
+  // search, so a new query always starts back at the first page.
+  const [visible, setVisible] = useState(PAGE_SIZE);
+
+  const shown = isRail ? items : items.slice(0, visible);
+  const remaining = items.length - shown.length;
 
   return (
     <section className={`py-12 sm:py-16 ${bandClass}`} aria-labelledby={`section-${sectionKey}`}>
@@ -218,9 +237,9 @@ function Section({
           <h2 id={`section-${sectionKey}`} className="font-display text-[20px] font-extrabold tracking-[-.025em] sm:text-[24px]">
             / {meta.label} /
           </h2>
-          {showViewAll && (
+          {isRail && showViewAll && (
             <button type="button" onClick={onViewAll} className={`shrink-0 min-h-11 text-xs font-bold ${isDark ? "text-white hover:text-[#f5c400]" : "hover:text-[#9b7513]"}`}>
-              Lihat semua →
+              View All →
             </button>
           )}
         </div>
@@ -228,36 +247,53 @@ function Section({
         {items.length === 0 ? (
           <div className={`rounded border border-dashed px-6 py-14 text-center ${isDark ? "border-white/15" : "border-[#d7d1c6] dark:border-zinc-700"}`}>
             <p className={`text-sm ${isDark ? "text-white/60" : "text-[#78716c] dark:text-zinc-400"}`}>
-              Belum ada listing {meta.label.toLowerCase()} yang dipublikasikan.
+              No {meta.label.toLowerCase()} listings published yet.
             </p>
           </div>
-        ) : layout === "rail" ? (
+        ) : isRail ? (
           <div className="-mx-4 flex gap-5 overflow-x-auto px-4 pb-1 [scroll-snap-type:x_mandatory] sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {items.map((item) => (
-              <DirectoryCard key={item.id} item={item} sectionKey={sectionKey} isDark={isDark} className="w-[15.5rem] shrink-0 [scroll-snap-align:start]" />
+            {shown.map((item) => (
+              <EventCard key={item.id} item={item} isDark={isDark} className="w-[15.5rem] shrink-0 [scroll-snap-align:start]" />
             ))}
           </div>
         ) : (
-          <div className="grid grid-cols-2 gap-5 sm:grid-cols-3 lg:grid-cols-4">
-            {items.map((item) => (
-              <DirectoryCard key={item.id} item={item} sectionKey={sectionKey} isDark={isDark} />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
+              {shown.map((item) => (
+                <PlaceCard key={item.id} item={item} sectionKey={sectionKey} isDark={isDark} />
+              ))}
+            </div>
+            {remaining > 0 && (
+              <div className="mt-9 flex justify-center">
+                <button
+                  type="button"
+                  onClick={() => setVisible((current) => current + PAGE_SIZE)}
+                  className="min-h-11 rounded border border-[#302f2c] px-7 text-xs font-bold uppercase tracking-[.12em] transition hover:bg-[#302f2c] hover:text-white dark:border-zinc-600 dark:hover:bg-amber-300 dark:hover:text-zinc-950 dark:hover:border-amber-300"
+                >
+                  Load more ({remaining})
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </section>
   );
 }
 
-function DirectoryCard({ item, sectionKey, isDark, className = "" }: { item: DirectoryItem; sectionKey: SectionKey; isDark: boolean; className?: string }) {
-  const isPoster = sectionKey === "events";
+function PlaceCard({ item, sectionKey, isDark }: { item: DirectoryItem; sectionKey: SectionKey; isDark: boolean }) {
   return (
-    <Link href={item.href} className={`group block ${className}`}>
-      <div
-        className={`relative overflow-hidden rounded-[4px] ${isPoster ? "aspect-[9/16]" : "aspect-[4/3]"} ${isDark ? "bg-[#23262c]" : "bg-[#e8e4dc] dark:bg-zinc-800"}`}
-      >
+    <Link href={item.href} className="group block">
+      <div className={`relative overflow-hidden rounded-[4px] aspect-[4/3] ${isDark ? "bg-[#23262c]" : "bg-[#e8e4dc] dark:bg-zinc-800"}`}>
         {item.imageUrl ? (
-          <Image src={item.imageUrl} alt={item.title} fill unoptimized sizes="(max-width: 639px) 45vw, 20vw" className="object-cover" />
+          <Image
+            src={item.imageUrl}
+            alt={item.title}
+            fill
+            unoptimized
+            sizes="(max-width: 639px) 46vw, (max-width: 1279px) 31vw, 400px"
+            className="object-cover"
+          />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={`h-8 w-8 ${isDark ? "text-[#4b4536]" : "text-[#a08a5c]"}`}>
@@ -265,12 +301,62 @@ function DirectoryCard({ item, sectionKey, isDark, className = "" }: { item: Dir
             </svg>
           </div>
         )}
+
+        {/* Category and location ride on the photo, so they never shout over the name. */}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-2.5 pb-2.5 pt-9">
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+            <span className="rounded-full border border-white/45 bg-black/25 px-2 py-[3px] text-[9px] font-bold uppercase leading-none tracking-[.1em] text-white">
+              {item.badge}
+            </span>
+            {/* Wraps rather than truncates: these values end on the kecamatan as
+                often as the kabupaten, so a cut would hide the useful half. */}
+            <span className="line-clamp-2 min-w-0 text-[10px] font-medium uppercase leading-[1.35] tracking-[.05em] text-white/85">
+              {item.place}
+            </span>
+          </div>
+        </div>
       </div>
-      <p className={`mt-2.5 text-[11px] font-bold uppercase tracking-[.08em] ${isDark ? "text-[#f5c400]/90" : "text-[#9b7513]"}`}>{item.eyebrow}</p>
+
+      <h3 className={`mt-3 text-[15px] font-semibold leading-snug transition sm:text-base ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
+        {item.title}
+      </h3>
+
+      {/* Two fixed lines, so the Read more links stay on one baseline across a row. */}
+      {item.dek && (
+        <p className={`mt-1.5 line-clamp-2 min-h-10 text-xs leading-relaxed ${isDark ? "text-zinc-400" : "text-[#78716c] dark:text-zinc-400"}`}>
+          {item.dek}
+        </p>
+      )}
+
+      <span className={`mt-2 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[.08em] ${isDark ? "text-[#f5c400]" : "text-[#9b7513] dark:text-amber-300"}`}>
+        Read more
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-3 w-3 transition group-hover:translate-x-0.5" aria-hidden="true">
+          <path d="M5 12h13M13 6l6 6-6 6" />
+        </svg>
+      </span>
+    </Link>
+  );
+}
+
+function EventCard({ item, isDark, className = "" }: { item: DirectoryItem; isDark: boolean; className?: string }) {
+  return (
+    <Link href={item.href} className={`group block ${className}`}>
+      <div className={`relative aspect-[9/16] overflow-hidden rounded-[4px] ${isDark ? "bg-[#23262c]" : "bg-[#e8e4dc] dark:bg-zinc-800"}`}>
+        {item.imageUrl ? (
+          <Image src={item.imageUrl} alt={item.title} fill unoptimized sizes="(max-width: 639px) 45vw, 20vw" className="object-cover" />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={`h-8 w-8 ${isDark ? "text-[#4b4536]" : "text-[#a08a5c]"}`}>
+              {SECTION_META.events.icon}
+            </svg>
+          </div>
+        )}
+      </div>
+      <p className={`mt-2.5 text-[11px] font-bold uppercase tracking-[.08em] ${isDark ? "text-[#f5c400]/90" : "text-[#9b7513]"}`}>{item.badge}</p>
       <h3 className={`mt-1 text-sm font-extrabold leading-snug tracking-[.01em] transition ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
         {item.title}
       </h3>
-      <p className={`mt-1 text-xs ${isDark ? "text-zinc-400" : "text-[#78716c] dark:text-zinc-400"}`}>{item.detail}</p>
+      <p className={`mt-1 text-xs ${isDark ? "text-zinc-400" : "text-[#78716c] dark:text-zinc-400"}`}>{item.place}</p>
     </Link>
   );
 }
