@@ -15,6 +15,18 @@ export interface NavLink {
   description?: string;
 }
 
+/**
+ * The header's own menu. Kept separate from PRIMARY_NAV because the footer
+ * reads that one and is due to be rewritten later — changing it here would
+ * drag the footer along before that work starts.
+ */
+export const HEADER_NAV: NavLink[] = [
+  { href: "/", label: "Good News" },
+  { href: "/city-guide", label: "Explore" },
+  { href: "/reels", label: "Reels" },
+  { href: "/about", label: "About Us" },
+];
+
 /** Main destinations of the site. */
 export const PRIMARY_NAV: NavLink[] = [
   { href: "/", label: "Berita", description: "Kabar terbaru dari Gorontalo" },
