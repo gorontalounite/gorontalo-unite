@@ -119,7 +119,7 @@ export default function CityGuideDirectory({ places, events }: { places: CityGui
       <div className="border-b border-[#d7d1c6] dark:border-zinc-800">
         <div className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 sm:py-8 lg:px-8">
           <p className="text-[11px] font-bold uppercase tracking-[.18em] text-[#555149] dark:text-zinc-400">Gorontalo Unite</p>
-          <h1 className="mt-2 font-display text-[34px] font-extrabold tracking-[-.02em] sm:text-[42px]">City Guide</h1>
+          <h1 className="mt-2 font-display text-[34px] font-extrabold tracking-[.01em] sm:text-[42px]">City Guide</h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#78716c] dark:text-zinc-400">
             Satu direktori untuk menjawab: mau ke mana, makan di mana, menginap di mana, dan event apa yang berlangsung di Gorontalo minggu ini.
           </p>
@@ -267,7 +267,7 @@ function DirectoryCard({ item, sectionKey, isDark, className = "" }: { item: Dir
         )}
       </div>
       <p className={`mt-2.5 text-[11px] font-bold uppercase tracking-[.08em] ${isDark ? "text-[#f5c400]/90" : "text-[#9b7513]"}`}>{item.eyebrow}</p>
-      <h3 className={`mt-1 text-sm font-extrabold leading-snug tracking-[-.01em] transition ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
+      <h3 className={`mt-1 text-sm font-extrabold leading-snug tracking-[.01em] transition ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
         {item.title}
       </h3>
       <p className={`mt-1 text-xs ${isDark ? "text-zinc-400" : "text-[#78716c] dark:text-zinc-400"}`}>{item.detail}</p>

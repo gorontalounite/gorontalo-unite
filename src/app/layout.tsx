@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Golos_Text, Space_Grotesk, Instrument_Serif } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import Navbar                 from "@/components/layout/Navbar";
 import BottomNav              from "@/components/layout/BottomNav";
@@ -8,24 +8,30 @@ import MainContent            from "@/components/layout/MainContent";
 import ServiceWorkerRegister  from "@/components/layout/ServiceWorkerRegister";
 import { ThemeProvider, themeInitScript } from "@/components/layout/ThemeProvider";
 
-const golosText = Golos_Text({
+/* Instrument Serif ships a single weight, so any bold utility would render as a
+   smeared fake of the 400. This has to bypass the stylesheet: the Tailwind v4
+   compiler drops font-synthesis from globals.css, longhand and shorthand alike,
+   so it never reaches the page. Inlining it here also covers the homepage,
+   which is off-limits to edit. */
+const fontSynthesisReset = "html{font-synthesis:none}";
+
+// Both families ship real italics. Golos Text and Space Grotesk shipped none,
+// so every <em> and blockquote on the site was a browser-synthesised slant.
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
+// Instrument Serif ships a single weight, 400, with a real italic. Anything
+// asking for bold would be synthesised, so headings switch weight synthesis off
+// and render the genuine 400 — which is also the slimmer look that was wanted.
+const instrumentSerif = Instrument_Serif({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-serif",
-  subsets: ["latin"],
   weight: ["400"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
@@ -98,8 +104,9 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className={`${golosText.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="id" className={`${inter.variable} ${instrumentSerif.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
+        <style dangerouslySetInnerHTML={{ __html: fontSynthesisReset }} />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground font-sans">
