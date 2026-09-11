@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Golos_Text, Space_Grotesk, Instrument_Serif } from "next/font/google";
+import { Inter, Playfair } from "next/font/google";
 import "./globals.css";
 import Navbar                 from "@/components/layout/Navbar";
 import BottomNav              from "@/components/layout/BottomNav";
@@ -8,24 +8,24 @@ import MainContent            from "@/components/layout/MainContent";
 import ServiceWorkerRegister  from "@/components/layout/ServiceWorkerRegister";
 import { ThemeProvider, themeInitScript } from "@/components/layout/ThemeProvider";
 
-const golosText = Golos_Text({
+// Both families ship real italics. Golos Text and Space Grotesk shipped none,
+// so every <em> and blockquote on the site was a browser-synthesised slant.
+const inter = Inter({
   variable: "--font-sans",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
   display: "swap",
 });
 
-const spaceGrotesk = Space_Grotesk({
+// Playfair, not Playfair Display: only this cut carries the optical-size axis,
+// so the headline thickens its strokes at small sizes and keeps the high
+// contrast for large ones. Browsers drive it automatically via
+// font-optical-sizing: auto.
+const playfair = Playfair({
   variable: "--font-display",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
-  display: "swap",
-});
-
-const instrumentSerif = Instrument_Serif({
-  variable: "--font-serif",
-  subsets: ["latin"],
-  weight: ["400"],
+  style: ["normal", "italic"],
+  axes: ["opsz"],
   display: "swap",
 });
 
@@ -98,7 +98,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className={`${golosText.variable} ${spaceGrotesk.variable} ${instrumentSerif.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="id" className={`${inter.variable} ${playfair.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>

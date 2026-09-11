@@ -42,7 +42,7 @@
   --color-brand:          var(--brand);
   --font-sans:    var(--font-sans);
   --font-display: var(--font-display);
-  --font-serif:   var(--font-serif);
+  --font-serif:   var(--font-display);
 }
 
 html { color-scheme: light; }
@@ -55,11 +55,18 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-display), system-ui, sans-serif;
+  font-family: var(--font-display), Georgia, serif;
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
 }
 
-.font-display { font-family: var(--font-display), system-ui, sans-serif; }
-.font-serif   { font-family: var(--font-serif), Georgia, serif; }
+.font-display {
+  -webkit-font-smoothing: auto;
+  -moz-osx-font-smoothing: auto;
+}
+
+.font-display { font-family: var(--font-display), Georgia, serif; }
+.font-serif   { font-family: var(--font-display), Georgia, serif; }
 
 /* Chat scrollbar */
 .chat-scroll::-webkit-scrollbar { width: 4px; }
@@ -181,7 +188,7 @@ html { transition: background-color 0.2s ease, color 0.2s ease; }
   min-height: 55vh;
   outline: none;
   color: #27272a;
-  font-family: var(--font-serif), Georgia, serif;
+  font-family: var(--font-display), Georgia, serif;
   font-size: 1.125rem;
   line-height: 1.9;
 }
