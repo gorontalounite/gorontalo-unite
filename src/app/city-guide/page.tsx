@@ -13,7 +13,12 @@ export const metadata: Metadata = {
   alternates: { canonical: "/city-guide" },
 };
 
-export default async function CityGuidePage() {
+export default async function CityGuidePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tab?: string }>;
+}) {
+  const { tab } = await searchParams;
   const supabase = await createClient();
   const [placesResult, eventsResult] = await Promise.all([
     supabase
@@ -35,6 +40,7 @@ export default async function CityGuidePage() {
     <CityGuideDirectory
       places={(placesResult.data ?? []) as CityGuidePlace[]}
       events={(eventsResult.data ?? []) as CityGuideEvent[]}
+      initialTab={tab}
     />
   );
 }

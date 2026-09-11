@@ -72,9 +72,18 @@ function eventDate(value: string) {
   return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" }).format(new Date(value));
 }
 
-export default function CityGuideDirectory({ places, events }: { places: CityGuidePlace[]; events: CityGuideEvent[] }) {
+export default function CityGuideDirectory({
+  places,
+  events,
+  initialTab,
+}: {
+  places: CityGuidePlace[];
+  events: CityGuideEvent[];
+  initialTab?: string;
+}) {
   const [query, setQuery] = useState("");
-  const [tab, setTab] = useState<"all" | SectionKey>("all");
+  const opening = SECTION_ORDER.find((key) => key === initialTab) ?? "all";
+  const [tab, setTab] = useState<"all" | SectionKey>(opening);
 
   const bySections = useMemo(() => {
     const map = new Map<SectionKey, DirectoryItem[]>();
