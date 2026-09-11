@@ -43,8 +43,8 @@ export default function NavSearch() {
       </button>
 
       {open && (
-        <div className="absolute inset-x-0 top-full border-b border-gray-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950">
-          <form onSubmit={submit} className="mx-auto flex max-w-6xl gap-2">
+        <div className="absolute inset-x-0 top-full border-b border-gray-100 bg-white px-4 py-3 dark:border-zinc-800 dark:bg-zinc-950 sm:px-6 lg:px-8">
+          <form onSubmit={submit} className="mx-auto flex max-w-[1280px] gap-2">
             <input
               ref={inputRef}
               value={term}
