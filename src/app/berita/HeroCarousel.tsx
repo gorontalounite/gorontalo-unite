@@ -87,7 +87,7 @@ export default function HeroCarousel({ pool, deskMap }: { pool: HeroArticleData[
   return (
     <div className="grid gap-4 lg:grid-cols-[1.7fr_.8fr]">
       <article
-        className="group relative min-h-[440px] overflow-hidden rounded-[4px] bg-black sm:min-h-[570px]"
+        className="group relative aspect-[4/5] overflow-hidden rounded-[4px] bg-black sm:aspect-auto sm:min-h-[570px]"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
@@ -98,7 +98,7 @@ export default function HeroCarousel({ pool, deskMap }: { pool: HeroArticleData[
             <div className="max-w-3xl text-white">
               <HeroEyebrow article={hero} deskMap={deskMap} />
               <h1 className="mt-3 font-display text-[30px] font-extrabold leading-[1.02] sm:text-[46px]">{hero.title}</h1>
-              {hero.excerpt ? <p className="mt-4 hidden max-w-2xl text-sm leading-relaxed text-white/75 sm:line-clamp-2">{hero.excerpt}</p> : null}
+              {hero.excerpt ? <p className="mt-3 line-clamp-2 max-w-2xl text-[13px] leading-relaxed text-white/75 sm:mt-4 sm:text-sm">{hero.excerpt}</p> : null}
             </div>
           </Link>
         </div>
@@ -113,7 +113,7 @@ export default function HeroCarousel({ pool, deskMap }: { pool: HeroArticleData[
 
       <div className="grid grid-cols-2 gap-4 lg:grid-cols-1">
         {sides.map((article) => (
-          <article key={article.id} className="group relative min-h-[240px] overflow-hidden rounded-[4px] bg-black sm:min-h-[275px]">
+          <article key={article.id} className="group relative aspect-[4/5] overflow-hidden rounded-[4px] bg-black sm:aspect-auto sm:min-h-[275px]">
             <HeroImage article={article} className="absolute inset-0 h-full w-full" sizes="(max-width: 1024px) 50vw, 30vw" />
             <div className="absolute inset-0 bg-gradient-to-t from-black via-black/25 to-transparent" />
             <Link href={`/${article.slug}`} className="absolute inset-0 flex items-end p-4 sm:p-6">
