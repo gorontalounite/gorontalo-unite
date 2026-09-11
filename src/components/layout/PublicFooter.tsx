@@ -12,7 +12,7 @@ const hiddenPrefixes = ["/admin", "/sign-in", "/sign-up", "/auth"];
 function FooterColumn({ title, links }: { title: string; links: NavLink[] }) {
   return (
     <div>
-      <p className="mb-4 font-display text-[22px] leading-tight text-gray-900 dark:text-white">{title}</p>
+      <p className="mb-4 font-heading text-[22px] leading-tight text-gray-900 dark:text-white">{title}</p>
       <ul className="space-y-3">
         {links.map(({ label, href }) => (
           <li key={href}>
