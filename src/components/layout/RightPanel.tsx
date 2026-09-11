@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { CHANNELS } from "./navigation";
+import { PANEL_TAGS } from "./navigation";
 
 interface RightPanelProps {
   open: boolean;
@@ -21,7 +21,7 @@ const cityGuideItems = [
     ),
   },
   {
-    href: "/event",
+    href: "/city-guide?tab=events",
     label: "Event",
     description: "What is happening in Gorontalo",
     icon: (
@@ -34,32 +34,32 @@ const cityGuideItems = [
 
 const kabarBaikItems = [
   {
-    href: "/category/inspire",
-    label: "Inspire",
-    desc: "Inspiring stories from Gorontalo",
+    href: "/category/travel",
+    label: "Tourism",
+    desc: "Where to go around Gorontalo",
     icon: (
       <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 18l5-7 4 5 3-4 6 6M8 7a2 2 0 100-4 2 2 0 000 4z" />
       </svg>
     ),
   },
   {
-    href: "/category/insight",
-    label: "Insight",
-    desc: "Insight and analysis",
+    href: "/category/culture",
+    label: "Culture",
+    desc: "Traditions, craft, and heritage",
     icon: (
       <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6" />
       </svg>
     ),
   },
   {
-    href: "/category/interest",
-    label: "Interest",
-    desc: "Topics worth your time",
+    href: "/category/culinary",
+    label: "Culinary",
+    desc: "What to eat, and where",
     icon: (
       <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 3v7a2 2 0 002 2v9M6 3v7M10 3v9M18 3c-2 0-3 2-3 4v4h3v9" />
       </svg>
     ),
   },
@@ -196,12 +196,12 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
               Channels
             </p>
             <div className="flex flex-wrap gap-2 px-3">
-              {CHANNELS.map((channel) => (
+              {PANEL_TAGS.map((channel) => (
                 <Link
                   key={channel.href}
                   href={channel.href}
                   onClick={onClose}
-                  className="rounded-full border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-brand hover:text-brand dark:border-zinc-700 dark:text-gray-300 dark:hover:border-yellow-400 dark:hover:text-yellow-400"
+                  className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-brand hover:text-brand dark:border-zinc-700 dark:text-gray-300 dark:hover:border-yellow-400 dark:hover:text-yellow-400"
                 >
                   {channel.label}
                 </Link>

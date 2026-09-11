@@ -52,6 +52,16 @@ export const KABAR_BAIK: NavLink[] = [
   { href: "/category/interest", label: "Interest", description: "Topics worth your time" },
 ];
 
+/** Tags in the menu panel. The three desks featured above it are not repeated
+ *  here; the curated reading channels join them instead. CHANNELS itself is
+ *  left alone because the footer's Top Categories column renders it. */
+export const PANEL_TAGS: NavLink[] = [
+  { href: "/category/whats-on", label: "What’s On" },
+  { href: "/category/people", label: "People" },
+  { href: "/category/life", label: "Lifestyle" },
+  ...KABAR_BAIK.map(({ href, label }) => ({ href, label })),
+];
+
 export const ABOUT_LINKS: NavLink[] = [
   { href: "/about", label: "About us" },
   { href: "/#layanan", label: "Services" },
