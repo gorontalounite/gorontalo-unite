@@ -218,11 +218,6 @@ export async function NewsDetailPage({ params }: Props) {
 
       <div className="article-snap mx-auto max-w-5xl scroll-mt-14 px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8">
         {/* Standfirst, set as a quote at the head of the story rather than over the photo. */}
-        {displayExcerpt && (
-          <p className="mx-auto mb-7 hidden max-w-3xl border-l-4 border-[#F5C400] pl-4 font-serif text-xl italic leading-[1.55] sm:block text-stone-600 dark:border-yellow-500 dark:text-zinc-300 sm:mb-9 sm:pl-5 sm:text-2xl lg:text-[1.6rem]">
-            {displayExcerpt}
-          </p>
-        )}
 
         {/* Content */}
         <div className="article-body mx-auto max-w-3xl text-base leading-[1.75] sm:text-[17px] sm:leading-[1.8]">

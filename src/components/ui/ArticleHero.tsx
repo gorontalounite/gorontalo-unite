@@ -54,6 +54,13 @@ export default function ArticleHero(props: Props) {
   );
 }
 
+const DEK_WORDS = 30;
+
+function toDek(text: string) {
+  const words = text.replace(/\s+/g, " ").trim().split(" ").filter(Boolean);
+  return words.slice(0, DEK_WORDS).join(" ") + (words.length > DEK_WORDS ? "…" : "");
+}
+
 function Labels({ categories, isTrending, isSponsored, onPhoto }: Props & { onPhoto: boolean }) {
   const flagClass = onPhoto
     ? "bg-white/15 text-white ring-1 ring-inset ring-white/30"
@@ -103,11 +110,9 @@ function Masthead({
       </h1>
 
       {excerpt && onPhoto && (
-        <div className="sm:hidden">
-          <p className="mt-3 line-clamp-3 max-w-2xl text-[13px] leading-relaxed text-white/80">
-            {excerpt}
-          </p>
-        </div>
+        <p className="mt-3 line-clamp-3 max-w-2xl text-[13px] leading-relaxed text-white/80 sm:mt-4 sm:text-[15px] lg:text-base">
+          {toDek(excerpt)}
+        </p>
       )}
 
       {isSponsored && sponsorName && (
