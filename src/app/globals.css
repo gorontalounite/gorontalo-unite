@@ -287,3 +287,12 @@ html { transition: background-color 0.2s ease, color 0.2s ease; }
 .article-body .prose-links ol { list-style-type: decimal; }
 .article-body li { padding-left: 0.25rem; }
 .article-body li + li { margin-top: 0.5rem; }
+
+/* Article reading flow on phones: the hero fills the screen, and a swipe lands
+   on the story rather than stopping halfway. Proximity, not mandatory — only
+   these two points snap, so scrolling through the body stays free. Desktop is
+   untouched; the hero keeps its ratio there. */
+@media (max-width: 639px) {
+  html:has(.article-snap) { scroll-snap-type: y proximity; }
+  .article-snap { scroll-snap-align: start; }
+}
