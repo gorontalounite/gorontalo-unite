@@ -61,7 +61,7 @@ export const ABOUT_LINKS: NavLink[] = [
 
 export const LEGAL_LINKS: NavLink[] = [
   { href: "/privacy-policy", label: "Privacy Policy" },
-  { href: "/terms", label: "Terms" },
+  { href: "/terms", label: "Terms & Conditions" },
   { href: "/pedoman-media-siber", label: "Pedoman Media Siber" }, // formal document name, left as-is
 ];
 
@@ -101,9 +101,13 @@ export const SOCIAL_LINKS: SocialLink[] = [
   },
 ];
 
-/** Small print beside the copyright line. */
-export const UTILITY_LINKS: NavLink[] = [
-  { href: "/about#kontak", label: "Contact" },
+/**
+ * Footer's Quick Link column: the header menu plus the two pages that used to
+ * sit in the small print. Kept apart from HEADER_NAV so they do not also
+ * appear in the header.
+ */
+export const FOOTER_QUICK_LINKS: NavLink[] = [
+  ...HEADER_NAV,
   { href: "/media-kit", label: "Media Kit" },
   { href: "/#layanan", label: "Services" },
 ];

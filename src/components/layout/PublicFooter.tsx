@@ -4,7 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import {
-  HEADER_NAV, CHANNELS, LEGAL_LINKS, SOCIAL_LINKS, UTILITY_LINKS, type NavLink,
+  FOOTER_QUICK_LINKS, CHANNELS, LEGAL_LINKS, SOCIAL_LINKS, type NavLink,
 } from "./navigation";
 
 const hiddenPrefixes = ["/admin", "/sign-in", "/sign-up", "/auth"];
@@ -54,7 +54,7 @@ export default function PublicFooter() {
             </p>
           </div>
 
-          <FooterColumn title="Quick Link" links={HEADER_NAV} />
+          <FooterColumn title="Quick Link" links={FOOTER_QUICK_LINKS} />
           <FooterColumn title="Top Categories" links={CHANNELS} />
         </div>
 
@@ -85,7 +85,7 @@ export default function PublicFooter() {
         <div className="mt-6 flex flex-col items-start justify-between gap-3 border-t border-gray-200 pt-6 text-xs text-gray-500 dark:border-zinc-800 dark:text-gray-500 sm:flex-row-reverse sm:items-center">
           <p>© {new Date().getFullYear()} Gorontalo Unite. All rights reserved.</p>
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1">
-            {[...UTILITY_LINKS, ...LEGAL_LINKS].map(({ label, href }) => (
+            {LEGAL_LINKS.map(({ label, href }) => (
               <li key={href}>
                 <Link href={href} className="font-semibold text-gray-700 transition-colors hover:text-brand dark:text-gray-300 dark:hover:text-yellow-400">
                   {label}
