@@ -121,7 +121,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
         <div className="relative mx-auto flex max-w-4xl flex-col items-center px-5 py-12 text-center sm:px-8 sm:py-16">
           <span className={`h-4 w-4 rounded-full ${colors.bg} ring-4 ring-white shadow-sm dark:ring-zinc-950`} />
           <p className="mt-5 text-[10px] font-bold uppercase tracking-[.2em] text-stone-400 dark:text-zinc-500">Category</p>
-          <h1 className={`mt-2 text-3xl font-semibold tracking-[-.025em] sm:text-4xl ${colors.text}`}>
+          <h1 className={`font-heading mt-2 text-3xl font-semibold tracking-[-.025em] sm:text-4xl ${colors.text}`}>
             {cat.label}
           </h1>
           <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-600 dark:text-zinc-300 sm:text-base">
@@ -140,7 +140,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
 
         {articles.length === 0 ? (
           <div className="mx-auto flex max-w-2xl flex-col items-center rounded-2xl border border-dashed border-stone-300 bg-white px-6 py-16 text-center dark:border-zinc-700 dark:bg-zinc-900">
-            <h2 className="text-xl font-semibold text-stone-700 dark:text-zinc-200">No articles yet</h2>
+            <h2 className="font-heading text-xl font-semibold text-stone-700 dark:text-zinc-200">No articles yet</h2>
             <p className="mt-2 max-w-sm text-sm leading-relaxed text-stone-400 dark:text-zinc-500">
               Stories for {cat.label} will appear here.
             </p>
@@ -183,7 +183,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
                       <span className={`w-fit rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[.1em] sm:text-[10px] ${articleColors.badge}`}>
                         {articleCategory}
                       </span>
-                      <h2 className="mt-3 line-clamp-3 text-sm font-semibold leading-snug tracking-[-.015em] text-[#101018] transition group-hover:text-brand dark:text-white sm:text-lg">
+                      <h2 className="font-heading mt-3 line-clamp-3 text-sm font-semibold leading-snug tracking-[-.015em] text-[#101018] transition group-hover:text-brand dark:text-white sm:text-lg">
                         {article.title}
                       </h2>
                       <time dateTime={publishedAt} className="mt-4 text-[10px] text-stone-400 dark:text-zinc-500 sm:text-xs">

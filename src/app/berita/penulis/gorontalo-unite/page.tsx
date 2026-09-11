@@ -81,7 +81,7 @@ export default async function GorontaloUniteAuthorPage() {
           </div>
 
           <p className="mt-6 text-[10px] font-bold uppercase tracking-[.2em] text-stone-400 dark:text-zinc-500">Author</p>
-          <h1 className="mt-2 text-3xl font-semibold tracking-[-.025em] sm:text-4xl">gorontalounite</h1>
+          <h1 className="font-heading mt-2 text-3xl font-semibold tracking-[-.025em] sm:text-4xl">gorontalounite</h1>
           <p className="mt-1 text-[11px] font-medium text-stone-500 dark:text-zinc-400">@gorontalounite</p>
           <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-600 dark:text-zinc-300 sm:text-base">
             Editorial team and curator of stories, information, and good news from Gorontalo.
@@ -127,7 +127,7 @@ export default async function GorontaloUniteAuthorPage() {
                       <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotColor}`} />
                       <span className="truncate">{category}</span>
                     </div>
-                    <h2 className="mt-3 line-clamp-3 text-sm font-semibold leading-snug tracking-[-.015em] text-[#101018] group-hover:text-brand dark:text-white sm:text-xl">
+                    <h2 className="font-heading mt-3 line-clamp-3 text-sm font-semibold leading-snug tracking-[-.015em] text-[#101018] group-hover:text-brand dark:text-white sm:text-xl">
                       {article.title}
                     </h2>
                     <time dateTime={publishedAt} className="mt-4 text-[10px] text-stone-400 dark:text-zinc-500 sm:text-xs">

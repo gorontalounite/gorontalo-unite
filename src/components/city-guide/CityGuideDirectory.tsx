@@ -132,7 +132,7 @@ export default function CityGuideDirectory({ places, events }: { places: CityGui
       <div className="border-b border-[#d7d1c6] dark:border-zinc-800">
         <div className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 sm:py-8 lg:px-8">
           <p className="text-[11px] font-bold uppercase tracking-[.18em] text-[#555149] dark:text-zinc-400">Gorontalo Unite</p>
-          <h1 className="mt-2 text-[34px] font-bold tracking-[.01em] sm:text-[42px]">City Guide</h1>
+          <h1 className="font-heading mt-2 text-[34px] font-bold tracking-[.01em] sm:text-[42px]">City Guide</h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#78716c] dark:text-zinc-400">
             Satu direktori untuk menjawab: mau ke mana, makan di mana, menginap di mana, dan event apa yang berlangsung di Gorontalo minggu ini.
           </p>
@@ -165,7 +165,7 @@ export default function CityGuideDirectory({ places, events }: { places: CityGui
       {needle && totalMatches === 0 ? (
         <div className="mx-auto max-w-[1280px] px-4 py-16 sm:px-6 lg:px-8">
           <div className="rounded border border-dashed border-[#d7d1c6] bg-white px-6 py-16 text-center dark:border-zinc-700 dark:bg-zinc-900">
-            <h3 className="text-lg font-bold">No results for &ldquo;{query}&rdquo;</h3>
+            <h3 className="font-heading text-lg font-bold">No results for &ldquo;{query}&rdquo;</h3>
             <p className="mt-2 text-sm text-[#78716c] dark:text-zinc-400">Try another keyword, or reset the search.</p>
             <button type="button" onClick={() => setQuery("")} className="mt-5 rounded bg-[#302f2c] px-5 py-2.5 text-sm font-bold text-white dark:bg-amber-300 dark:text-zinc-950">
               Reset search
@@ -234,7 +234,7 @@ function Section({
     <section className={`py-12 sm:py-16 ${bandClass}`} aria-labelledby={`section-${sectionKey}`}>
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center justify-between gap-4">
-          <h2 id={`section-${sectionKey}`} className="text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
+          <h2 id={`section-${sectionKey}`} className="font-heading text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
             / {meta.label} /
           </h2>
           {isRail && showViewAll && (
@@ -317,7 +317,7 @@ function PlaceCard({ item, sectionKey, isDark }: { item: DirectoryItem; sectionK
         </div>
       </div>
 
-      <h3 className={`mt-3 text-[15px] font-bold leading-snug transition sm:text-base ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
+      <h3 className={`font-heading mt-3 text-[15px] font-bold leading-snug transition sm:text-base ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
         {item.title}
       </h3>
 
@@ -353,7 +353,7 @@ function EventCard({ item, isDark, className = "" }: { item: DirectoryItem; isDa
         )}
       </div>
       <p className={`mt-2.5 text-[11px] font-bold uppercase tracking-[.08em] ${isDark ? "text-[#f5c400]/90" : "text-[#9b7513]"}`}>{item.badge}</p>
-      <h3 className={`mt-1 text-sm font-bold leading-snug tracking-[.01em] transition ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
+      <h3 className={`font-heading mt-1 text-sm font-bold leading-snug tracking-[.01em] transition ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
         {item.title}
       </h3>
       <p className={`mt-1 text-xs ${isDark ? "text-zinc-400" : "text-[#78716c] dark:text-zinc-400"}`}>{item.place}</p>

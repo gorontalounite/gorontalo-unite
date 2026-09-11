@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Instrument_Serif } from "next/font/google";
+import { Inter, Instrument_Serif, Fira_Sans_Extra_Condensed } from "next/font/google";
 import "./globals.css";
 import Navbar                 from "@/components/layout/Navbar";
 import BottomNav              from "@/components/layout/BottomNav";
@@ -32,6 +32,16 @@ const instrumentSerif = Instrument_Serif({
   subsets: ["latin"],
   weight: ["400"],
   style: ["normal", "italic"],
+  display: "swap",
+});
+
+// Headline face for the editorial surfaces. Extra Condensed at 400 fits a long
+// Indonesian headline in far less width than Inter Bold without shouting: the
+// same card title measures 326px against Inter 700's 427px at 15px.
+const firaCondensed = Fira_Sans_Extra_Condensed({
+  variable: "--font-heading",
+  subsets: ["latin"],
+  weight: ["400"],
   display: "swap",
 });
 
@@ -104,7 +114,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className={`${inter.variable} ${instrumentSerif.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="id" className={`${inter.variable} ${instrumentSerif.variable} ${firaCondensed.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <style dangerouslySetInnerHTML={{ __html: fontSynthesisReset }} />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
