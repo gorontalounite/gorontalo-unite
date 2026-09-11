@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
+import CityGuideLanding from "@/components/city-guide/CityGuideLanding";
 import CityGuideDirectory, {
   type CityGuideEvent,
   type CityGuidePlace,
@@ -16,9 +17,9 @@ export const metadata: Metadata = {
 export default async function CityGuidePage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string; region?: string }>;
+  searchParams: Promise<{ tab?: string; region?: string; q?: string }>;
 }) {
-  const { tab, region } = await searchParams;
+  const { tab, region, q } = await searchParams;
   const supabase = await createClient();
   const [placesResult, eventsResult] = await Promise.all([
     supabase
@@ -36,12 +37,18 @@ export default async function CityGuidePage({
       .order("starts_at", { ascending: true }),
   ]);
 
+  const places = (placesResult.data ?? []) as CityGuidePlace[];
+
   return (
-    <CityGuideDirectory
-      places={(placesResult.data ?? []) as CityGuidePlace[]}
-      events={(eventsResult.data ?? []) as CityGuideEvent[]}
-      initialTab={tab}
-      initialRegion={region}
-    />
+    <main className="bg-white text-[#302f2c] dark:bg-zinc-950 dark:text-zinc-50">
+      <CityGuideLanding places={places} />
+      <CityGuideDirectory
+        places={places}
+        events={(eventsResult.data ?? []) as CityGuideEvent[]}
+        initialTab={tab}
+        initialRegion={region}
+        initialQuery={q}
+      />
+    </main>
   );
 }

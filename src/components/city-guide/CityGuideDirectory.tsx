@@ -79,13 +79,15 @@ export default function CityGuideDirectory({
   events,
   initialTab,
   initialRegion,
+  initialQuery,
 }: {
   places: CityGuidePlace[];
   events: CityGuideEvent[];
   initialTab?: string;
   initialRegion?: string;
+  initialQuery?: string;
 }) {
-  const [query, setQuery] = useState("");
+  const [query, setQuery] = useState(initialQuery ?? "");
   const opening = SECTION_ORDER.find((key) => key === initialTab) ?? "all";
   const [tab, setTab] = useState<"all" | SectionKey>(opening);
   const openingRegion = REGIONS.find((r) => r.slug === initialRegion)?.slug ?? null;
@@ -176,31 +178,25 @@ export default function CityGuideDirectory({
   );
 
   return (
-    <main className="bg-white text-[#302f2c] dark:bg-zinc-950 dark:text-zinc-50">
-      <div className="border-b border-[#d7d1c6] dark:border-zinc-800">
-        <div className="mx-auto max-w-[1280px] px-4 pt-7 pb-5 sm:px-6 sm:pt-8 sm:pb-6 lg:px-8">
-          <h1 className="font-heading text-[34px] font-bold tracking-[.01em] sm:text-[42px]">City Guide</h1>
-          <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#78716c] dark:text-zinc-400">
-            One directory for where to go, where to eat, where to stay, and what is on in Gorontalo this week.
-          </p>
+    <div className="bg-white text-[#302f2c] dark:bg-zinc-950 dark:text-zinc-50">
+      <div id="browse" className="scroll-mt-16 border-y border-[#d7d1c6] dark:border-zinc-800">
+        <div className="mx-auto max-w-[1280px] px-4 pt-6 pb-5 sm:px-6 sm:pb-6 lg:px-8">
+          {needle && (
+            <div className="mb-4 flex items-center gap-2 text-sm">
+              <span className="text-[#78716c] dark:text-zinc-400">Searching for</span>
+              <button
+                type="button"
+                onClick={() => setQuery("")}
+                className="inline-flex min-h-8 items-center gap-2 rounded-md border border-[#302f2c] px-3 text-xs font-semibold dark:border-amber-300"
+              >
+                {query}
+                <span aria-hidden="true">&times;</span>
+                <span className="sr-only">Clear search</span>
+              </button>
+            </div>
+          )}
 
-          <div className="mt-5 flex max-w-xl gap-2">
-            <input
-              value={query}
-              onChange={(event) => setQuery(event.target.value)}
-              placeholder="Search places, food, or events…"
-              aria-label="Search City Guide"
-              className="min-h-11 min-w-0 flex-1 rounded border border-[#d7d1c6] bg-white px-3.5 text-sm outline-none placeholder:text-[#a8a29e] focus-visible:border-[#9b7513] dark:border-zinc-700 dark:bg-zinc-900"
-            />
-            <button
-              type="button"
-              className="min-h-11 shrink-0 rounded bg-[#302f2c] px-5 text-sm font-bold text-white dark:bg-amber-300 dark:text-zinc-950"
-            >
-              Search
-            </button>
-          </div>
-
-          <div className="mt-5 flex gap-5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Directory categories">
+          <div className="flex gap-5 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden" role="tablist" aria-label="Directory categories">
             <TabButton active={tab === "all"} onClick={() => setTab("all")}>All</TabButton>
             {SECTION_ORDER.map((key) => (
               <TabButton key={key} active={tab === key} onClick={() => setTab(key)}>{SECTION_META[key].label}</TabButton>
@@ -253,7 +249,7 @@ export default function CityGuideDirectory({
           />
         ))
       )}
-    </main>
+    </div>
   );
 }
 
