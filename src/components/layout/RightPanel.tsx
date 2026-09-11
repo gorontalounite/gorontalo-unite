@@ -12,7 +12,7 @@ const cityGuideItems = [
   {
     href: "/city-guide",
     label: "City Guide",
-    description: "Direktori tempat pilihan",
+    description: "A curated directory of places",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
@@ -23,7 +23,7 @@ const cityGuideItems = [
   {
     href: "/event",
     label: "Event",
-    description: "Agenda seru di Gorontalo",
+    description: "What is happening in Gorontalo",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -36,7 +36,7 @@ const kabarBaikItems = [
   {
     href: "/category/inspire",
     label: "Inspire",
-    desc: "Kisah inspiratif Gorontalo",
+    desc: "Inspiring stories from Gorontalo",
     icon: (
       <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
@@ -46,7 +46,7 @@ const kabarBaikItems = [
   {
     href: "/category/insight",
     label: "Insight",
-    desc: "Wawasan & analisis",
+    desc: "Insight and analysis",
     icon: (
       <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -56,7 +56,7 @@ const kabarBaikItems = [
   {
     href: "/category/interest",
     label: "Interest",
-    desc: "Topik menarik pilihan",
+    desc: "Topics worth your time",
     icon: (
       <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -163,7 +163,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
           {/* ── KABAR BAIK ── */}
           <div className="px-4 pt-4 pb-3">
             <p className="text-[11px] font-semibold tracking-widest text-gray-400 dark:text-zinc-500 uppercase mb-2">
-              Kabar Baik
+              Good News
             </p>
             <div className="space-y-0.5">
               {kabarBaikItems.map((item) => (
@@ -193,7 +193,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
           {/* ── KANAL EDITORIAL ── */}
           <div className="px-4 pt-4">
             <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-zinc-500">
-              Kanal
+              Channels
             </p>
             <div className="flex flex-wrap gap-2 px-3">
               {CHANNELS.map((channel) => (
@@ -228,9 +228,9 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
-                  Tentang Gorontalo Unite
+                  About Gorontalo Unite
                 </p>
-                <p className="text-xs text-gray-400 dark:text-zinc-500">Platform media hyperlokal Gorontalo</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500">Gorontalo hyperlocal media platform</p>
               </div>
               <svg className="w-4 h-4 text-gray-300 dark:text-zinc-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -252,8 +252,8 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
                 </svg>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-gray-800 dark:text-gray-100">Akun</p>
-                <p className="text-xs text-gray-400 dark:text-zinc-500">Masuk atau lihat profil</p>
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-100">Account</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500">Sign in or view profile</p>
               </div>
               <svg className="h-4 w-4 flex-shrink-0 text-gray-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

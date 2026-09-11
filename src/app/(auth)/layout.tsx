@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Akun | Gorontalo Unite",
+  title: "Account | Gorontalo Unite",
 };
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {

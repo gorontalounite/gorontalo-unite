@@ -58,7 +58,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
         body:    JSON.stringify({ content }),
       });
       const json = await res.json();
-      if (!res.ok) { setError(json.error ?? "Gagal mengirim komentar"); return; }
+      if (!res.ok) { setError(json.error ?? "Could not post your comment"); return; }
       setContent("");
       setSubmitted(true);
     } finally {
@@ -69,7 +69,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
   return (
     <section className="mt-12 pt-8 border-t border-gray-100 dark:border-zinc-800">
       <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-6">
-        Komentar{comments.length > 0 ? ` (${comments.length})` : ""}
+        Comments{comments.length > 0 ? ` (${comments.length})` : ""}
       </h2>
 
       {/* Comment list */}
@@ -87,7 +87,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
         </div>
       ) : comments.length === 0 ? (
         <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">
-          Belum ada komentar. Jadilah yang pertama!
+          No comments yet. Be the first.
         </p>
       ) : (
         <div className="space-y-4 mb-8">
@@ -114,11 +114,11 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
       {/* Comment form */}
       {!allowComments ? (
         <p className="text-xs text-gray-400 dark:text-gray-500 italic">
-          Komentar dinonaktifkan untuk artikel ini.
+          Comments are closed on this article.
         </p>
       ) : submitted ? (
         <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl px-4 py-3 text-sm text-emerald-700 dark:text-emerald-300">
-          ✓ Komentar terkirim — menunggu moderasi sebelum tampil.
+          ✓ Comment submitted — awaiting moderation before it appears.
         </div>
       ) : !user ? (
         <div className="bg-gray-50 dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 px-4 py-4 text-sm text-center">
@@ -142,7 +142,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
               <textarea
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Tulis komentar kamu..."
+                placeholder="Write your comment…"
                 rows={3}
                 maxLength={2000}
                 className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white outline-none focus:border-[#F5C400] dark:focus:border-yellow-500 resize-none transition-colors"
@@ -155,7 +155,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
                   disabled={submitting || !content.trim()}
                   className="text-xs bg-[#F5C400] text-black font-medium px-4 py-1.5 rounded-lg hover:bg-[#c9a000] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
-                  {submitting ? "Mengirim…" : "Kirim Komentar"}
+                  {submitting ? "Sending…" : "Post Comment"}
                 </button>
               </div>
             </div>

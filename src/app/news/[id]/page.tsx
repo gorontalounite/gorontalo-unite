@@ -40,7 +40,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq("published", true)
     .neq("category", "Portfolio")
     .single();
-  if (!data) return { title: "Artikel | Gorontalo Unite" };
+  if (!data) return { title: "Article | Gorontalo Unite" };
 
   const title = data.seo_title || data.title;
   const desc  = data.seo_description || data.excerpt;
@@ -166,7 +166,7 @@ export async function NewsDetailPage({ params }: Props) {
 
   // User info for CommentSection
   const authUser = user
-    ? { id: user.id, name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Pengguna" }
+    ? { id: user.id, name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Reader" }
     : null;
 
   // ── Schema.org JSON-LD ──────────────────────────────────────
@@ -233,11 +233,11 @@ export async function NewsDetailPage({ params }: Props) {
         {/* Extra images (legacy gallery) */}
         {Array.isArray(article.extra_images) && article.extra_images.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-widest sm:text-sm">Galeri</h2>
+            <h2 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-widest sm:text-sm">Gallery</h2>
             <div className="grid grid-cols-2 gap-3">
               {article.extra_images.map((url: string, i: number) => (
                 <div key={i} className="aspect-video relative rounded-xl overflow-hidden">
-                  <Image src={url} alt={`Foto ${i + 1}`} fill className="object-cover" />
+                  <Image src={url} alt={`Photo ${i + 1}`} fill className="object-cover" />
                 </div>
               ))}
             </div>
@@ -247,7 +247,7 @@ export async function NewsDetailPage({ params }: Props) {
         {/* Source attribution */}
         {sourceUrl && (
           <div className="mt-6 text-[9px] text-gray-400 dark:text-gray-500 sm:text-xs">
-            Sumber:{" "}
+            Source:{" "}
             <a
               href={sourceUrl}
               target="_blank"
@@ -281,7 +281,7 @@ export async function NewsDetailPage({ params }: Props) {
       <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
       {/* Author profile */}
       <section className="mx-auto mt-10 flex max-w-3xl items-center gap-3 border-y border-stone-200 py-5 dark:border-zinc-800 sm:gap-4">
-        <Image src="/logo-gu.png" alt="Logo Gorontalo Unite" width={52} height={52} className="h-11 w-11 shrink-0 rounded-full object-cover sm:h-13 sm:w-13" />
+        <Image src="/logo-gu.png" alt="Gorontalo Unite logo" width={52} height={52} className="h-11 w-11 shrink-0 rounded-full object-cover sm:h-13 sm:w-13" />
         <div>
           <p className="text-[9px] font-bold uppercase tracking-[.15em] text-stone-400 sm:text-xs">Author</p>
           <Link href="/author/gorontalounite" className="mt-1 block text-xs font-semibold text-stone-900 hover:text-brand dark:text-white sm:text-base">@gorontalounite</Link>

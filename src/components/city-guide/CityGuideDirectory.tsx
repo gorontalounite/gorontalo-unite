@@ -128,15 +128,15 @@ export default function CityGuideDirectory({ places, events }: { places: CityGui
             <input
               value={query}
               onChange={(event) => setQuery(event.target.value)}
-              placeholder="Cari tempat, kuliner, atau event…"
-              aria-label="Cari City Guide"
+              placeholder="Search places, food, or events…"
+              aria-label="Search City Guide"
               className="min-h-11 min-w-0 flex-1 rounded border border-[#d7d1c6] bg-white px-3.5 text-sm outline-none placeholder:text-[#a8a29e] focus-visible:border-[#9b7513] dark:border-zinc-700 dark:bg-zinc-900"
             />
             <button
               type="button"
               className="min-h-11 shrink-0 rounded bg-[#302f2c] px-5 text-sm font-bold text-white dark:bg-amber-300 dark:text-zinc-950"
             >
-              Cari
+              Search
             </button>
           </div>
 

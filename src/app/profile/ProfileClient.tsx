@@ -162,7 +162,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
         disabled={loggingOut}
         className="w-full text-sm border border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-gray-400 py-2.5 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-800 disabled:opacity-50 transition-colors"
       >
-        {loggingOut ? "Keluar…" : "Keluar (Sign Out)"}
+        {loggingOut ? "Signing out…" : "Sign Out"}
       </button>
     </div>
   );

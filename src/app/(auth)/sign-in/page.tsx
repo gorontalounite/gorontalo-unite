@@ -45,7 +45,7 @@ function SignInForm() {
       <button type="button" onClick={handleGoogle} disabled={loading}
         className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-800">
         {loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" aria-label="Memuat" /> : <GoogleIcon />}
-        {loading ? "Mengarahkan ke Google…" : "Masuk dengan Google"}
+        {loading ? "Mengarahkan ke Google…" : "Sign in with Google"}
       </button>
       <p className="text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400">
         Belum memiliki akun? Akun akan dibuat otomatis saat pertama kali masuk dengan Google.
