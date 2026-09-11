@@ -54,11 +54,23 @@ body {
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
+/* Instrument Serif is a display face: one weight, high stroke contrast, drawn
+   for large sizes. It holds from about 20px up, so it stays the default for
+   headings — page titles, section headings, and headings inside a story.
+   Card and list titles run 15–18px on a phone, where its thin strokes break
+   up; those carry `font-sans` and set in Inter instead. */
 h1, h2, h3, h4, h5, h6 {
   font-family: var(--font-display), Georgia, serif;
   letter-spacing: .01em;
   -webkit-font-smoothing: auto;
   -moz-osx-font-smoothing: auto;
+}
+
+/* The rule above is unlayered, so it outranks Tailwind's layered `font-sans`
+   no matter the specificity. This lets a heading opt back into Inter. */
+h1.font-sans, h2.font-sans, h3.font-sans,
+h4.font-sans, h5.font-sans, h6.font-sans {
+  font-family: var(--font-sans), system-ui, sans-serif;
 }
 
 .font-display {

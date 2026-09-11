@@ -160,7 +160,7 @@ function StoryCard({ article, large = false, deskMap = {} }: { article: Article;
         <ArticleImage article={article} className={large ? "aspect-[16/10]" : "aspect-[4/3]"} sizes={large ? "(max-width: 768px) 100vw, 55vw" : "(max-width: 768px) 82vw, 30vw"} />
         <div className="pt-4">
           <Eyebrow article={article} deskMap={deskMap} />
-          <h3 className={`mt-2 font-display font-extrabold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#9b7513] ${large ? "text-[22px] sm:text-[30px]" : "text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
+          <h3 className={`mt-2 font-extrabold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#9b7513] ${large ? "font-display text-[22px] sm:text-[30px]" : "font-sans text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
           {article.excerpt ? <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{article.excerpt}</p> : null}
         </div>
       </Link>
@@ -174,7 +174,7 @@ function CompactStory({ article, deskMap = {} }: { article: Article; deskMap?: D
       <Link href={`/${article.slug}`} className="grid grid-cols-[1fr_108px] gap-4">
         <div>
           <Eyebrow article={article} deskMap={deskMap} />
-          <h3 className="mt-2 line-clamp-3 font-display text-[15px] font-extrabold leading-[1.16] tracking-[-.015em] transition group-hover:text-[#9b7513] sm:text-[17px]">{article.title}</h3>
+          <h3 className="mt-2 line-clamp-3 font-sans text-[15px] font-extrabold leading-[1.16] tracking-[-.015em] transition group-hover:text-[#9b7513] sm:text-[17px]">{article.title}</h3>
         </div>
         <div className="relative">
           <ArticleImage article={article} className="aspect-square" sizes="108px" />

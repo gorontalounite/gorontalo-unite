@@ -317,7 +317,7 @@ function PlaceCard({ item, sectionKey, isDark }: { item: DirectoryItem; sectionK
         </div>
       </div>
 
-      <h3 className={`mt-3 text-[15px] font-semibold leading-snug transition sm:text-base ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
+      <h3 className={`mt-3 font-sans text-[15px] font-semibold leading-snug transition sm:text-base ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
         {item.title}
       </h3>
 
@@ -353,7 +353,7 @@ function EventCard({ item, isDark, className = "" }: { item: DirectoryItem; isDa
         )}
       </div>
       <p className={`mt-2.5 text-[11px] font-bold uppercase tracking-[.08em] ${isDark ? "text-[#f5c400]/90" : "text-[#9b7513]"}`}>{item.badge}</p>
-      <h3 className={`mt-1 text-sm font-extrabold leading-snug tracking-[.01em] transition ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
+      <h3 className={`mt-1 font-sans text-sm font-extrabold leading-snug tracking-[.01em] transition ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
         {item.title}
       </h3>
       <p className={`mt-1 text-xs ${isDark ? "text-zinc-400" : "text-[#78716c] dark:text-zinc-400"}`}>{item.place}</p>

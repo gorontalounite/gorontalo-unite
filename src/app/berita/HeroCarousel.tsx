@@ -119,7 +119,7 @@ export default function HeroCarousel({ pool, deskMap }: { pool: HeroArticleData[
             <Link href={`/${article.slug}`} className="absolute inset-0 flex items-end p-4 sm:p-6">
               <div className="text-white">
                 <HeroEyebrow article={article} deskMap={deskMap} />
-                <h2 className="mt-2 line-clamp-3 font-display text-[16px] font-extrabold leading-[1.08] sm:text-[20px]">{article.title}</h2>
+                <h2 className="mt-2 line-clamp-3 font-sans text-[16px] font-extrabold leading-[1.08] sm:text-[20px]">{article.title}</h2>
               </div>
             </Link>
           </article>
