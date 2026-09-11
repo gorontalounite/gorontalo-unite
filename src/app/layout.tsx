@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter, Playfair } from "next/font/google";
+import { Inter, Instrument_Serif } from "next/font/google";
 import "./globals.css";
 import Navbar                 from "@/components/layout/Navbar";
 import BottomNav              from "@/components/layout/BottomNav";
@@ -17,15 +17,14 @@ const inter = Inter({
   display: "swap",
 });
 
-// Playfair, not Playfair Display: only this cut carries the optical-size axis,
-// so the headline thickens its strokes at small sizes and keeps the high
-// contrast for large ones. Browsers drive it automatically via
-// font-optical-sizing: auto.
-const playfair = Playfair({
+// Instrument Serif ships a single weight, 400, with a real italic. Anything
+// asking for bold would be synthesised, so headings switch weight synthesis off
+// and render the genuine 400 — which is also the slimmer look that was wanted.
+const instrumentSerif = Instrument_Serif({
   variable: "--font-display",
   subsets: ["latin"],
+  weight: ["400"],
   style: ["normal", "italic"],
-  axes: ["opsz"],
   display: "swap",
 });
 
@@ -98,7 +97,7 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="id" className={`${inter.variable} ${playfair.variable} h-full antialiased`} suppressHydrationWarning>
+    <html lang="id" className={`${inter.variable} ${instrumentSerif.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
