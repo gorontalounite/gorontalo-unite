@@ -97,7 +97,7 @@ export default function HeroCarousel({ pool, deskMap }: { pool: HeroArticleData[
           <Link href={`/${hero.slug}`} className="absolute inset-0 flex items-end p-6 sm:p-10">
             <div className="max-w-3xl text-white">
               <HeroEyebrow article={hero} deskMap={deskMap} />
-              <h1 className="mt-3 font-display text-[30px] font-extrabold leading-[1.02] sm:text-[46px]">{hero.title}</h1>
+              <h1 className="mt-3 text-[30px] font-bold leading-[1.02] sm:text-[46px]">{hero.title}</h1>
               {hero.excerpt ? <p className="mt-3 line-clamp-2 max-w-2xl text-[13px] leading-relaxed text-white/75 sm:mt-4 sm:text-sm">{hero.excerpt}</p> : null}
             </div>
           </Link>
@@ -119,7 +119,7 @@ export default function HeroCarousel({ pool, deskMap }: { pool: HeroArticleData[
             <Link href={`/${article.slug}`} className="absolute inset-0 flex items-end p-4 sm:p-6">
               <div className="text-white">
                 <HeroEyebrow article={article} deskMap={deskMap} />
-                <h2 className="mt-2 line-clamp-3 font-sans text-[16px] font-extrabold leading-[1.08] sm:text-[20px]">{article.title}</h2>
+                <h2 className="mt-2 line-clamp-3 text-[16px] font-bold leading-[1.08] sm:text-[20px]">{article.title}</h2>
               </div>
             </Link>
           </article>

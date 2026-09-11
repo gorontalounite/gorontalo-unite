@@ -143,7 +143,7 @@ function Eyebrow({ article, light = false, deskMap = {} }: { article: Article; l
 function SectionTitle({ id, title, dark = false, showViewAll = true }: { id: string; title: string; dark?: boolean; showViewAll?: boolean }) {
   return (
     <div className="mb-6 flex items-center justify-between gap-4">
-      <h2 className="flex items-center gap-2 font-display text-[20px] font-extrabold tracking-[-.025em] sm:text-[24px]">
+      <h2 className="flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
         <span className="text-[#f5c400]" aria-hidden>/</span>
         <span>{title}</span>
         <span className="text-[#f5c400]" aria-hidden>/</span>
@@ -160,7 +160,7 @@ function StoryCard({ article, large = false, deskMap = {} }: { article: Article;
         <ArticleImage article={article} className={large ? "aspect-[16/10]" : "aspect-[4/3]"} sizes={large ? "(max-width: 768px) 100vw, 55vw" : "(max-width: 768px) 82vw, 30vw"} />
         <div className="pt-4">
           <Eyebrow article={article} deskMap={deskMap} />
-          <h3 className={`mt-2 font-extrabold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#9b7513] ${large ? "font-display text-[22px] sm:text-[30px]" : "font-sans text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
+          <h3 className={`mt-2 font-bold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#9b7513] ${large ? "text-[22px] sm:text-[30px]" : "text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
           {article.excerpt ? <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{article.excerpt}</p> : null}
         </div>
       </Link>
@@ -174,7 +174,7 @@ function CompactStory({ article, deskMap = {} }: { article: Article; deskMap?: D
       <Link href={`/${article.slug}`} className="grid grid-cols-[1fr_108px] gap-4">
         <div>
           <Eyebrow article={article} deskMap={deskMap} />
-          <h3 className="mt-2 line-clamp-3 font-sans text-[15px] font-extrabold leading-[1.16] tracking-[-.015em] transition group-hover:text-[#9b7513] sm:text-[17px]">{article.title}</h3>
+          <h3 className="mt-2 line-clamp-3 text-[15px] font-bold leading-[1.16] tracking-[-.015em] transition group-hover:text-[#9b7513] sm:text-[17px]">{article.title}</h3>
         </div>
         <div className="relative">
           <ArticleImage article={article} className="aspect-square" sizes="108px" />
@@ -192,7 +192,7 @@ function DarkFeature({ article, deskMap = {} }: { article: Article; deskMap?: De
       <Link href={`/${article.slug}`} className="absolute inset-0 flex items-end p-6 sm:p-9">
         <div className="max-w-3xl text-white">
           <Eyebrow article={article} light deskMap={deskMap} />
-          <h3 className="mt-3 font-display text-[26px] font-extrabold leading-[1.04] tracking-[-.035em] sm:text-[38px]">{article.title}</h3>
+          <h3 className="mt-3 text-[26px] font-bold leading-[1.04] tracking-[-.035em] sm:text-[38px]">{article.title}</h3>
           {article.excerpt ? <p className="mt-4 hidden max-w-2xl text-sm leading-relaxed text-white/75 sm:line-clamp-2">{article.excerpt}</p> : null}
         </div>
       </Link>
@@ -230,7 +230,7 @@ function DeskNav() {
 function EmptyDesk({ dark = false }: { dark?: boolean }) {
   return (
     <div className={`border border-dashed px-6 py-14 text-center ${dark ? "border-white/25 bg-white dark:bg-zinc-950/[.03] text-white/65" : "border-[#bbb3a5] dark:border-zinc-700 bg-white dark:bg-zinc-950/20 text-[#77736b] dark:text-zinc-400"}`}>
-      <p className="font-display text-[18px] font-bold">Cerita pilihan sedang disiapkan.</p>
+      <p className="text-[18px] font-bold">Cerita pilihan sedang disiapkan.</p>
       <p className="mt-2 text-xs">Rubrik ini akan diisi setelah lolos kurasi redaksi.</p>
     </div>
   );
@@ -277,7 +277,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
         <main className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           <div className="mb-10 border-b border-[#302f2c] dark:border-zinc-100 pb-7">
             <Link href="/category" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#9b7513] dark:text-amber-400">← All categories</Link>
-            <h1 className="mt-4 font-display text-[40px] font-extrabold tracking-[-.04em] sm:text-[56px]">{title}</h1>
+            <h1 className="mt-4 text-[40px] font-bold tracking-[-.04em] sm:text-[56px]">{title}</h1>
             {description ? <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{description}</p> : null}
           </div>
           {displayedArticles.length ? (
@@ -286,7 +286,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
             </div>
           ) : (
             <div className="border border-dashed border-[#bbb3a5] dark:border-zinc-700 px-6 py-24 text-center">
-              <p className="font-display text-2xl font-bold">Belum ada cerita di rubrik ini.</p>
+              <p className="text-2xl font-bold">Belum ada cerita di rubrik ini.</p>
               <p className="mt-2 text-sm text-[#77736b] dark:text-zinc-400">Redaksi sedang menyiapkan pilihan yang relevan untukmu.</p>
             </div>
           )}
@@ -298,7 +298,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
   if (!articles.length) {
     return (
       <div className="min-h-[70vh] bg-white dark:bg-zinc-950 px-4 pt-36 text-center text-[#302f2c] dark:text-zinc-50">
-        <h1 className="font-display text-4xl font-extrabold">Berita sedang disiapkan</h1>
+        <h1 className="text-4xl font-bold">Berita sedang disiapkan</h1>
         <p className="mt-3 text-sm text-[#77736b] dark:text-zinc-400">Silakan kembali beberapa saat lagi.</p>
       </div>
     );

@@ -181,7 +181,7 @@ export default function ReelsFeed({ reels, initialCategory = "Semua", initialPer
     <section className="flex h-[calc(100svh-7.5rem)] min-h-[560px] flex-col overflow-hidden bg-[#f5f4ef] text-neutral-950 dark:bg-[#090909] dark:text-white md:h-[calc(100svh-3.5rem)] md:min-h-[640px]">
       <header className="shrink-0 border-b border-black/10 bg-[#f5f4ef]/95 px-4 py-4 backdrop-blur dark:border-white/10 dark:bg-[#090909]/95 md:px-8 md:py-5">
         <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <h1 className="font-display text-xl font-bold tracking-tight md:text-2xl">
+          <h1 className="text-xl font-bold tracking-tight md:text-2xl">
             <span className="mr-2 text-[#d6aa00]">/</span>Reels<span className="ml-2 text-[#d6aa00]">/</span>
           </h1>
           <p className="hidden text-[11px] font-semibold uppercase tracking-[.18em] text-neutral-500 md:block">Scroll untuk melihat berikutnya ↓</p>

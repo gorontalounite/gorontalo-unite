@@ -81,7 +81,7 @@ export default async function GorontaloUniteAuthorPage() {
           </div>
 
           <p className="mt-6 text-[10px] font-bold uppercase tracking-[.2em] text-stone-400 dark:text-zinc-500">Author</p>
-          <h1 className="mt-2 font-display text-3xl font-semibold tracking-[-.025em] sm:text-4xl">gorontalounite</h1>
+          <h1 className="mt-2 text-3xl font-semibold tracking-[-.025em] sm:text-4xl">gorontalounite</h1>
           <p className="mt-1 text-[11px] font-medium text-stone-500 dark:text-zinc-400">@gorontalounite</p>
           <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-600 dark:text-zinc-300 sm:text-base">
             Editorial team and curator of stories, information, and good news from Gorontalo.
