@@ -12,6 +12,7 @@ export interface ArticleHeroCategory {
 
 interface Props {
   title: string;
+  excerpt: string | null;
   imageUrl: string | null;
   categories: ArticleHeroCategory[];
   isTrending: boolean;
@@ -41,9 +42,9 @@ export default function ArticleHero(props: Props) {
   }
 
   return (
-    <header className="article-snap relative flex min-h-[calc(100svh-3.5rem)] scroll-mt-14 w-full flex-col overflow-hidden bg-zinc-900 text-white sm:min-h-0 sm:aspect-[4/3] lg:aspect-[16/9] lg:max-h-[78vh]">
+    <header className="article-snap relative flex min-h-[82svh] scroll-mt-14 w-full flex-col overflow-hidden bg-zinc-900 text-white sm:min-h-0 sm:aspect-[4/3] lg:aspect-[16/9] lg:max-h-[78vh]">
       <ArticleHeroImage src={props.imageUrl} />
-      <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col justify-between gap-6 px-4 pb-24 pt-5 sm:px-6 sm:pb-6 sm:pt-6 lg:px-8">
+      <div className="relative mx-auto flex w-full max-w-5xl flex-1 flex-col justify-between gap-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
         <Labels {...props} onPhoto />
         <div>
           <Masthead {...props} onPhoto />
@@ -88,7 +89,7 @@ function Labels({ categories, isTrending, isSponsored, onPhoto }: Props & { onPh
 }
 
 function Masthead({
-  title, isSponsored, sponsorName, sponsorLogoUrl,
+  title, excerpt, isSponsored, sponsorName, sponsorLogoUrl,
   publishedDate, shareUrl, readMinutes, onPhoto,
 }: Props & { onPhoto: boolean }) {
   return (
@@ -100,6 +101,14 @@ function Masthead({
       >
         {title}
       </h1>
+
+      {excerpt && onPhoto && (
+        <div className="sm:hidden">
+          <p className="mt-3 line-clamp-3 max-w-2xl text-[13px] leading-relaxed text-white/80">
+            {excerpt}
+          </p>
+        </div>
+      )}
 
       {isSponsored && sponsorName && (
         <div className={`mt-4 flex flex-wrap items-center gap-2 text-[11px] sm:text-xs ${onPhoto ? "text-white/75" : "text-stone-500 dark:text-zinc-400"}`}>
