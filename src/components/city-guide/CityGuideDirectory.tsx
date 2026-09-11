@@ -139,11 +139,10 @@ export default function CityGuideDirectory({
   return (
     <main className="bg-white text-[#302f2c] dark:bg-zinc-950 dark:text-zinc-50">
       <div className="border-b border-[#d7d1c6] dark:border-zinc-800">
-        <div className="mx-auto max-w-[1280px] px-4 py-7 sm:px-6 sm:py-8 lg:px-8">
-          <p className="text-[11px] font-bold uppercase tracking-[.18em] text-[#555149] dark:text-zinc-400">Gorontalo Unite</p>
-          <h1 className="font-heading mt-2 text-[34px] font-bold tracking-[.01em] sm:text-[42px]">City Guide</h1>
+        <div className="mx-auto max-w-[1280px] px-4 pt-7 pb-5 sm:px-6 sm:pt-8 sm:pb-6 lg:px-8">
+          <h1 className="font-heading text-[34px] font-bold tracking-[.01em] sm:text-[42px]">City Guide</h1>
           <p className="mt-2 max-w-xl text-sm leading-relaxed text-[#78716c] dark:text-zinc-400">
-            Satu direktori untuk menjawab: mau ke mana, makan di mana, menginap di mana, dan event apa yang berlangsung di Gorontalo minggu ini.
+            One directory for where to go, where to eat, where to stay, and what is on in Gorontalo this week.
           </p>
 
           <div className="mt-5 flex max-w-xl gap-2">
@@ -188,6 +187,7 @@ export default function CityGuideDirectory({
             sectionKey={key}
             items={filteredSections.get(key) ?? []}
             band={key === "events" ? "dark" : index % 2 === 1 ? "light" : "plain"}
+            first={index === 0}
             onViewAll={() => setTab(key)}
             showViewAll={tab === "all"}
           />
@@ -217,12 +217,14 @@ function Section({
   sectionKey,
   items,
   band,
+  first,
   onViewAll,
   showViewAll,
 }: {
   sectionKey: SectionKey;
   items: DirectoryItem[];
   band: "plain" | "light" | "dark";
+  first: boolean;
   onViewAll: () => void;
   showViewAll: boolean;
 }) {
@@ -240,7 +242,10 @@ function Section({
   const remaining = items.length - shown.length;
 
   return (
-    <section className={`py-12 sm:py-16 ${bandClass}`} aria-labelledby={`section-${sectionKey}`}>
+    <section
+      className={`pb-12 sm:pb-16 ${first ? "pt-6 sm:pt-8" : "pt-12 sm:pt-16"} ${bandClass}`}
+      aria-labelledby={`section-${sectionKey}`}
+    >
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
         <div className="mb-6 flex items-center justify-between gap-4">
           <h2 id={`section-${sectionKey}`} className="font-heading text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
