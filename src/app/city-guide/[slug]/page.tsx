@@ -166,7 +166,7 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
       {(blocks.length > 0 || paragraphs.length > 0) && <section className={styles.block}>
         <h2 className={styles.blockTitle}>About {place.name}</h2>
         {blocks.length > 0
-          ? <BlockRenderer blocks={blocks} className={styles.prose} headingFace="sans" />
+          ? <BlockRenderer blocks={blocks} className={styles.prose} />
           : isLongDescription
             ? <ExpandableText className={styles.prose} clampClassName={styles.clamp} toggleClassName={styles.moreButton} lines={7}>
                 {paragraphs.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
