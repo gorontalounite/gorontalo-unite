@@ -82,7 +82,7 @@ export default function PublicFooter() {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col items-start justify-between gap-3 border-t border-gray-200 pt-6 text-xs text-gray-500 dark:border-zinc-800 dark:text-gray-500 sm:flex-row-reverse sm:items-center">
+        <div className="mt-6 flex flex-col-reverse items-start justify-between gap-3 border-t border-gray-200 pt-6 text-xs text-gray-500 dark:border-zinc-800 dark:text-gray-500 sm:flex-row-reverse sm:items-center">
           <p>© {new Date().getFullYear()} Gorontalo Unite. All rights reserved.</p>
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1">
             {LEGAL_LINKS.map(({ label, href }) => (
