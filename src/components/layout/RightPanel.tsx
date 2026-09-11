@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { CHANNELS } from "./navigation";
 
 interface RightPanelProps {
   open: boolean;
@@ -10,7 +11,7 @@ interface RightPanelProps {
 const cityGuideItems = [
   {
     href: "/city-guide",
-    label: "Wisata",
+    label: "City Guide",
     description: "Direktori tempat pilihan",
     icon: (
       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -124,7 +125,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
-          <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Web Category</span>
+          <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">Menu</span>
           <div className="w-8" />
         </div>
 
@@ -188,6 +189,27 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
           </div>
 
           <div className="mx-4 border-t border-gray-100 dark:border-zinc-800" />
+
+          {/* ── KANAL EDITORIAL ── */}
+          <div className="px-4 pt-4">
+            <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-zinc-500">
+              Kanal
+            </p>
+            <div className="flex flex-wrap gap-2 px-3">
+              {CHANNELS.map((channel) => (
+                <Link
+                  key={channel.href}
+                  href={channel.href}
+                  onClick={onClose}
+                  className="rounded-full border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-brand hover:text-brand dark:border-zinc-700 dark:text-gray-300 dark:hover:border-yellow-400 dark:hover:text-yellow-400"
+                >
+                  {channel.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div className="mx-4 mt-4 border-t border-gray-100 dark:border-zinc-800" />
 
           {/* ── ABOUT US (direct link) ── */}
           <div className="px-4 pt-4">

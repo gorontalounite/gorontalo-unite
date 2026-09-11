@@ -6,10 +6,12 @@ import Image from "next/image";
 import LeftDrawer from "./LeftDrawer";
 import RightPanel from "./RightPanel";
 import ThemeToggle from "./ThemeToggle";
+import { PRIMARY_NAV } from "./navigation";
 
 export default function Navbar() {
-  const [leftOpen, setLeftOpen] = useState(false);
-  const [rightOpen, setRightOpen] = useState(false);
+  const [panel, setPanel] = useState<"left" | "right" | null>(null);
+  const leftOpen = panel === "left";
+  const rightOpen = panel === "right";
 
   return (
     <>
@@ -18,7 +20,7 @@ export default function Navbar() {
           {/* Left: Hamburger + Logo */}
           <div className="flex items-center gap-2">
             <button
-              onClick={() => setLeftOpen(true)}
+              onClick={() => setPanel("left")}
               className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
               aria-label="Buka menu"
             >
@@ -30,6 +32,19 @@ export default function Navbar() {
               <Image src="/logo.png" alt="Gorontalo Unite" width={120} height={32} className="h-8 w-auto object-contain" priority />
             </Link>
           </div>
+
+          {/* Desktop navigation */}
+          <nav aria-label="Navigasi utama" className="hidden items-center gap-1 md:flex">
+            {PRIMARY_NAV.map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 transition-colors hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-zinc-800 dark:hover:text-white"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
 
           {/* Right: Get Started + Theme + Book */}
           <div className="flex items-center gap-1">
@@ -44,7 +59,7 @@ export default function Navbar() {
             </Link>
             <ThemeToggle />
             <button
-              onClick={() => setRightOpen(true)}
+              onClick={() => setPanel("right")}
               className="w-9 h-9 flex items-center justify-center rounded-xl text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800 transition-colors"
               aria-label="Buka panel kategori"
             >
@@ -56,8 +71,8 @@ export default function Navbar() {
         </div>
       </nav>
 
-      <LeftDrawer open={leftOpen} onClose={() => setLeftOpen(false)} />
-      <RightPanel open={rightOpen} onClose={() => setRightOpen(false)} />
+      <LeftDrawer open={leftOpen} onClose={() => setPanel(null)} />
+      <RightPanel open={rightOpen} onClose={() => setPanel(null)} />
     </>
   );
 }
