@@ -238,6 +238,29 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
             </Link>
           </div>
 
+          {/* ── AKUN ── */}
+          <div className="mx-4 mt-4 border-t border-gray-100 dark:border-zinc-800" />
+          <div className="px-4 pt-4">
+            <Link
+              href="/profile"
+              onClick={onClose}
+              className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-zinc-900"
+            >
+              <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-yellow-50 dark:bg-yellow-950/40">
+                <svg className="h-5 w-5 text-brand" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14c-4 0-7 2-7 4.5V21h14v-2.5C19 16 16 14 12 14z" />
+                </svg>
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-100">Akun</p>
+                <p className="text-xs text-gray-400 dark:text-zinc-500">Masuk atau lihat profil</p>
+              </div>
+              <svg className="h-4 w-4 flex-shrink-0 text-gray-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+              </svg>
+            </Link>
+          </div>
+
           {/* ── LEGAL LINKS (always visible) ── */}
           <div className="mx-4 mt-4 border-t border-gray-100 dark:border-zinc-800" />
           <div className="px-4 pt-3 pb-6 space-y-0.5">
