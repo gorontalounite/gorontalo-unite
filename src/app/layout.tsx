@@ -8,6 +8,13 @@ import MainContent            from "@/components/layout/MainContent";
 import ServiceWorkerRegister  from "@/components/layout/ServiceWorkerRegister";
 import { ThemeProvider, themeInitScript } from "@/components/layout/ThemeProvider";
 
+/* Instrument Serif ships a single weight, so any bold utility would render as a
+   smeared fake of the 400. This has to bypass the stylesheet: the Tailwind v4
+   compiler drops font-synthesis from globals.css, longhand and shorthand alike,
+   so it never reaches the page. Inlining it here also covers the homepage,
+   which is off-limits to edit. */
+const fontSynthesisReset = "html{font-synthesis:none}";
+
 // Both families ship real italics. Golos Text and Space Grotesk shipped none,
 // so every <em> and blockquote on the site was a browser-synthesised slant.
 const inter = Inter({
@@ -99,6 +106,7 @@ export default function RootLayout({
   return (
     <html lang="id" className={`${inter.variable} ${instrumentSerif.variable} h-full antialiased`} suppressHydrationWarning>
       <head>
+        <style dangerouslySetInnerHTML={{ __html: fontSynthesisReset }} />
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground font-sans">

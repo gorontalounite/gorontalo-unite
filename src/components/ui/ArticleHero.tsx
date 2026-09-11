@@ -94,7 +94,7 @@ function Masthead({
   return (
     <>
       <h1
-        className={`max-w-4xl font-display text-[1.75rem] font-bold leading-[1.12] tracking-[-.025em] sm:text-5xl sm:leading-[1.06] lg:text-[3.4rem] ${
+        className={`max-w-4xl font-display text-[1.75rem] font-bold leading-[1.14] tracking-[.01em] sm:text-5xl sm:leading-[1.06] lg:text-[3.4rem] ${
           onPhoto ? "text-white" : "mt-3 text-[#101018] dark:text-white sm:mt-4"
         }`}
       >
