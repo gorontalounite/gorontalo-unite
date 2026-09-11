@@ -13,17 +13,17 @@ export default function MarkdownContent({ content, className = "" }: Props) {
       <ReactMarkdown
         components={{
           h1: ({ children }) => (
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4 leading-tight">
+            <h1 className="font-display text-2xl font-bold text-gray-900 dark:text-white mt-8 mb-4 leading-tight">
               {children}
             </h1>
           ),
           h2: ({ children }) => (
-            <h2 className="text-xl font-bold text-gray-900 dark:text-white mt-6 mb-3 leading-tight">
+            <h2 className="font-display text-xl font-bold text-gray-900 dark:text-white mt-6 mb-3 leading-tight">
               {children}
             </h2>
           ),
           h3: ({ children }) => (
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mt-5 mb-2">
+            <h3 className="font-display text-lg font-semibold text-gray-800 dark:text-gray-200 mt-5 mb-2">
               {children}
             </h3>
           ),

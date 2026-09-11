@@ -1,8 +1,13 @@
 import type { Block } from "@/components/editor/types";
 
+type HeadingFace = "display" | "sans";
+
 interface Props {
   blocks: Block[];
   className?: string;
+  /** An opened article sets its headings in the display serif; every other
+   *  surface that renders blocks stays on Inter. */
+  headingFace?: HeadingFace;
 }
 
 function getYouTubeId(url: string) {
@@ -10,7 +15,7 @@ function getYouTubeId(url: string) {
   return m?.[1] ?? null;
 }
 
-function RenderBlock({ block }: { block: Block }) {
+function RenderBlock({ block, headingFace }: { block: Block; headingFace: HeadingFace }) {
   switch (block.type) {
     /* ── Paragraph ────────────────────────────────── */
     case "paragraph": {
@@ -38,14 +43,15 @@ function RenderBlock({ block }: { block: Block }) {
       const alignCls =
         align === "center" ? "text-center" :
         align === "right"  ? "text-right"  : "";
+      const serif = headingFace === "display" ? "font-display " : "";
       const sizeCls = [
         "",
-        "text-4xl font-bold mt-10 mb-4",
-        "text-3xl font-bold mt-8 mb-3",
-        "text-2xl font-semibold mt-6 mb-2",
-        "text-xl font-semibold mt-5 mb-2",
-        "text-lg font-medium mt-4 mb-1",
-        "text-base font-medium mt-4 mb-1",
+        serif + "text-4xl font-bold mt-10 mb-4",
+        serif + "text-3xl font-bold mt-8 mb-3",
+        serif + "text-2xl font-semibold mt-6 mb-2",
+        serif + "text-xl font-semibold mt-5 mb-2",
+        serif + "text-lg font-medium mt-4 mb-1",
+        serif + "text-base font-medium mt-4 mb-1",
       ][level];
       const HTag = `h${level}` as "h1"|"h2"|"h3"|"h4"|"h5"|"h6";
       return (
@@ -191,12 +197,12 @@ function RenderBlock({ block }: { block: Block }) {
   }
 }
 
-export default function BlockRenderer({ blocks, className = "" }: Props) {
+export default function BlockRenderer({ blocks, className = "", headingFace = "display" }: Props) {
   if (!blocks?.length) return null;
   return (
     <div className={className}>
       {blocks.map((block) => (
-        <RenderBlock key={block.id} block={block} />
+        <RenderBlock key={block.id} block={block} headingFace={headingFace} />
       ))}
     </div>
   );
