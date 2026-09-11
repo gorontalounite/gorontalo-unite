@@ -96,21 +96,21 @@ export default function ShareButtons({ url, title, readMinutes, tone = "surface"
           type="button"
           onClick={nativeShare}
           className={iconClass}
-          aria-label={copied ? "Tautan disalin" : "Bagikan artikel"}
-          title={copied ? "Tautan disalin" : "Bagikan"}
+          aria-label={copied ? "Link copied" : "Share article"}
+          title={copied ? "Link copied" : "Share"}
         >
           <Glyph name="share" />
         </button>
-        <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="Bagikan ke Facebook">
+        <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`} target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="Share on Facebook">
           <Glyph name="facebook" />
         </a>
-        <a href={`https://www.threads.net/intent/post?text=${shareText}`} target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="Bagikan ke Threads">
+        <a href={`https://www.threads.net/intent/post?text=${shareText}`} target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="Share on Threads">
           <Glyph name="threads" />
         </a>
-        <a href={`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`} target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="Bagikan ke X">
+        <a href={`https://twitter.com/intent/tweet?text=${encodedTitle}&url=${encodedUrl}`} target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="Share on X">
           <Glyph name="x" />
         </a>
-        <a href={`https://api.whatsapp.com/send?text=${shareText}`} target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="Bagikan ke WhatsApp">
+        <a href={`https://api.whatsapp.com/send?text=${shareText}`} target="_blank" rel="noopener noreferrer" className={iconClass} aria-label="Share on WhatsApp">
           <Glyph name="whatsapp" />
         </a>
       </div>

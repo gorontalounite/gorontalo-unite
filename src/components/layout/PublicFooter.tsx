@@ -12,7 +12,7 @@ const hiddenPrefixes = ["/admin", "/sign-in", "/sign-up", "/auth"];
 function FooterColumn({ title, links }: { title: string; links: NavLink[] }) {
   return (
     <div>
-      <p className="mb-4 font-display text-lg text-gray-900 dark:text-white">{title}</p>
+      <p className="mb-4 font-display text-[22px] leading-tight text-gray-900 dark:text-white">{title}</p>
       <ul className="space-y-3">
         {links.map(({ label, href }) => (
           <li key={href}>
@@ -36,8 +36,8 @@ export default function PublicFooter() {
   return (
     <footer className="relative shrink-0 border-t border-gray-200 bg-white dark:border-zinc-800 dark:bg-zinc-950">
       <div className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6 lg:px-8 lg:py-16">
-        <div className="grid gap-10 md:grid-cols-2 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:gap-12">
-          <div>
+        <div className="grid grid-cols-2 gap-x-6 gap-y-10 lg:grid-cols-[1.4fr_1fr_1fr_1fr] lg:gap-12">
+          <div className="col-span-2 lg:col-span-1">
             <Image src="/logo.png" alt="" width={120} height={32} className="h-9 w-auto object-contain" />
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-gray-600 dark:text-gray-400">
               Independent local media covering the stories, people, culture, and life of Gorontalo.
@@ -49,8 +49,8 @@ export default function PublicFooter() {
           <FooterColumn title="Legal" links={LEGAL_LINKS} />
         </div>
 
-        <div className="mt-12 flex flex-col gap-4 border-t border-gray-200 pt-6 dark:border-zinc-800 sm:flex-row sm:items-center sm:justify-end">
-          <div className="flex items-center gap-3">
+        <div className="mt-12 flex flex-wrap items-center justify-between gap-4 border-t border-gray-200 pt-6 dark:border-zinc-800">
+          <div className="ml-auto flex items-center gap-3">
             <span className="text-sm font-semibold text-gray-900 dark:text-white">Follow Us</span>
             <span aria-hidden="true" className="h-4 w-px bg-gray-300 dark:bg-zinc-700" />
             <ul className="flex items-center gap-1">
@@ -73,7 +73,7 @@ export default function PublicFooter() {
           </div>
         </div>
 
-        <div className="mt-6 flex flex-col items-start justify-between gap-3 border-t border-gray-200 pt-6 text-xs text-gray-500 dark:border-zinc-800 dark:text-gray-500 sm:flex-row sm:items-center">
+        <div className="mt-6 flex flex-col items-start justify-between gap-3 border-t border-gray-200 pt-6 text-xs text-gray-500 dark:border-zinc-800 dark:text-gray-500 sm:flex-row-reverse sm:items-center">
           <p>© {new Date().getFullYear()} Gorontalo Unite. All rights reserved.</p>
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1">
             {UTILITY_LINKS.map(({ label, href }) => (

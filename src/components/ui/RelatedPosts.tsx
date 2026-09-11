@@ -21,7 +21,7 @@ export default function RelatedPosts({ items, basePath }: Props) {
   return (
     <section className="mt-12 pt-8 border-t border-gray-100 dark:border-zinc-800">
       <h2 className="text-sm font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-widest mb-5">
-        Baca Juga
+        Also Read
       </h2>
 
       <div className="grid sm:grid-cols-3 gap-4">

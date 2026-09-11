@@ -105,8 +105,8 @@ export default function HeroCarousel({ pool, deskMap }: { pool: HeroArticleData[
 
         {total > 1 && (
           <div className="absolute right-4 top-4 z-10 flex gap-2 sm:right-6 sm:top-6">
-            <CarouselArrow label="Berita sebelumnya" onClick={() => go(-1)} d="M15 18l-6-6 6-6" />
-            <CarouselArrow label="Berita berikutnya" onClick={() => go(1)} d="M9 6l6 6-6 6" />
+            <CarouselArrow label="Previous story" onClick={() => go(-1)} d="M15 18l-6-6 6-6" />
+            <CarouselArrow label="Next story" onClick={() => go(1)} d="M9 6l6 6-6 6" />
           </div>
         )}
       </article>

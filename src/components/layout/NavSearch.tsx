@@ -31,7 +31,7 @@ export default function NavSearch() {
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
-        aria-label={open ? "Tutup pencarian" : "Cari artikel"}
+        aria-label={open ? "Close search" : "Search articles"}
         aria-expanded={open}
         className="flex h-9 w-9 items-center justify-center rounded-xl text-gray-500 transition-colors hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-zinc-800"
       >
@@ -51,15 +51,15 @@ export default function NavSearch() {
               onChange={(event) => setTerm(event.target.value)}
               onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }}
               type="search"
-              placeholder="Cari berita…"
-              aria-label="Kata kunci pencarian"
+              placeholder="Search news…"
+              aria-label="Search keyword"
               className="min-h-11 min-w-0 flex-1 rounded-xl border border-gray-200 bg-white px-4 text-sm outline-none focus-visible:border-brand dark:border-zinc-700 dark:bg-zinc-900"
             />
             <button
               type="submit"
               className="min-h-11 shrink-0 rounded-xl bg-gray-900 px-5 text-sm font-semibold text-white hover:bg-gray-800 dark:bg-amber-300 dark:text-zinc-950 dark:hover:bg-amber-200"
             >
-              Cari
+              Search
             </button>
           </form>
         </div>

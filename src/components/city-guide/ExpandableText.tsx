@@ -20,7 +20,7 @@ export default function ExpandableText({ children, lines = 6, className, toggleC
       {children}
     </div>
     <button type="button" onClick={() => setOpen((value) => !value)} className={toggleClassName} aria-expanded={open}>
-      {open ? "Tampilkan lebih sedikit" : "Selengkapnya"}
+      {open ? "Show less" : "Read more"}
     </button>
   </div>;
 }

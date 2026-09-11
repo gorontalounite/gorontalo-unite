@@ -29,10 +29,10 @@ export const HEADER_NAV: NavLink[] = [
 
 /** Main destinations of the site. */
 export const PRIMARY_NAV: NavLink[] = [
-  { href: "/", label: "Berita", description: "Kabar terbaru dari Gorontalo" },
-  { href: "/city-guide", label: "City Guide", description: "Direktori tempat pilihan" },
-  { href: "/event", label: "Event", description: "Agenda seru di Gorontalo" },
-  { href: "/reels", label: "Reels", description: "Video pendek pilihan" },
+  { href: "/", label: "Good News", description: "The latest from Gorontalo" },
+  { href: "/city-guide", label: "City Guide", description: "A curated directory of places" },
+  { href: "/event", label: "Event", description: "What is happening in Gorontalo" },
+  { href: "/reels", label: "Reels", description: "Short videos worth watching" },
 ];
 
 /** Editorial desks, matching the homepage sections. Names stay as branded. */
@@ -47,9 +47,9 @@ export const CHANNELS: NavLink[] = [
 
 /** Curated reading channels surfaced in the category panel. */
 export const KABAR_BAIK: NavLink[] = [
-  { href: "/category/inspire", label: "Inspire", description: "Kisah inspiratif Gorontalo" },
-  { href: "/category/insight", label: "Insight", description: "Wawasan & analisis" },
-  { href: "/category/interest", label: "Interest", description: "Topik menarik pilihan" },
+  { href: "/category/inspire", label: "Inspire", description: "Inspiring stories from Gorontalo" },
+  { href: "/category/insight", label: "Insight", description: "Insight and analysis" },
+  { href: "/category/interest", label: "Interest", description: "Topics worth your time" },
 ];
 
 export const ABOUT_LINKS: NavLink[] = [

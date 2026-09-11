@@ -69,10 +69,10 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
   const mapLink = place.maps_url || (hasCoords ? `https://www.google.com/maps/search/?api=1&query=${place.latitude}%2C${place.longitude}` : null);
 
   const faqs: DetailItem[] = [
-    place.price_range ? { label: `Berapa harga masuk ${place.name}?`, value: place.price_range } : null,
-    place.opening_hours ? { label: `Jam berapa ${place.name} buka?`, value: place.opening_hours } : null,
-    address ? { label: `Di mana lokasi ${place.name}?`, value: address } : null,
-    place.contact ? { label: `Bagaimana cara menghubungi pengelola ${place.name}?`, value: place.contact } : null,
+    place.price_range ? { label: `How much is admission to ${place.name}?`, value: place.price_range } : null,
+    place.opening_hours ? { label: `What are ${place.name} opening hours?`, value: place.opening_hours } : null,
+    address ? { label: `Where is ${place.name} located?`, value: address } : null,
+    place.contact ? { label: `How do I contact ${place.name}?`, value: place.contact } : null,
   ].filter((item): item is DetailItem => item !== null);
 
   return <main className={styles.page}>
@@ -82,11 +82,11 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
       {gallery.length > 0 && <div className={styles.heroWrap}>
         <div className={styles.gallery}>
           {gallery.map((image, index) => <div key={image} className={styles.slide}>
-            <Image src={image} alt={index === 0 ? place.name : `${place.name} — foto ${index + 1}`} fill priority={index === 0} unoptimized sizes="(min-width: 768px) 50vw, 100vw" style={{ objectFit: "cover" }} />
+            <Image src={image} alt={index === 0 ? place.name : `${place.name} — photo ${index + 1}`} fill priority={index === 0} unoptimized sizes="(min-width: 768px) 50vw, 100vw" style={{ objectFit: "cover" }} />
           </div>)}
         </div>
         <ListingHeroBar name={place.name} className={styles.heroBar} />
-        {gallery.length > 1 && <p className={`${styles.galleryCount}${gallery.length > 5 ? "" : ` ${styles.mobileOnly}`}`}><Icon path={ICON.photo} />{gallery.length} Foto</p>}
+        {gallery.length > 1 && <p className={`${styles.galleryCount}${gallery.length > 5 ? "" : ` ${styles.mobileOnly}`}`}><Icon path={ICON.photo} />{gallery.length} Photos</p>}
       </div>}
 
       {/* B — Primary information */}
@@ -114,7 +114,7 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
           {place.price_range && <div className={styles.infoRow}>
             <Icon path={ICON.ticket} />
             <div className={styles.infoBody}>
-              <dt>Harga masuk</dt>
+              <dt>Admission</dt>
               <dd className={styles.price}>{place.price_range}</dd>
             </div>
           </div>}
@@ -122,16 +122,16 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
           {address && <div className={styles.infoRow}>
             <Icon path={ICON.pin} />
             <div className={styles.infoBody}>
-              <dt>Lokasi</dt>
+              <dt>Location</dt>
               <dd>{address}</dd>
             </div>
-            {mapLink && <a className={styles.rowLink} href={mapLink} target="_blank" rel="noreferrer">Lihat Peta</a>}
+            {mapLink && <a className={styles.rowLink} href={mapLink} target="_blank" rel="noreferrer">View map</a>}
           </div>}
 
           {place.opening_hours && <div className={styles.infoRow}>
             <Icon path={ICON.clock} />
             <div className={styles.infoBody}>
-              <dt>Jam buka</dt>
+              <dt>Opening hours</dt>
               <dd>{place.opening_hours}</dd>
             </div>
           </div>}
@@ -139,7 +139,7 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
           {place.contact && <div className={styles.infoRow}>
             <Icon path={ICON.phone} />
             <div className={styles.infoBody}>
-              <dt>Kontak</dt>
+              <dt>Contact</dt>
               <dd>{place.contact}</dd>
             </div>
           </div>}
@@ -155,7 +155,7 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
           {socials.length > 0 && <div className={styles.infoRow}>
             <Icon path={ICON.share} />
             <div className={styles.infoBody}>
-              <dt>Media sosial</dt>
+              <dt>Social media</dt>
               <dd className={styles.socialLinks}>{socials.map(({ label, url }) => <a key={label} className={styles.inlineLink} href={url} target="_blank" rel="noreferrer">{label}</a>)}</dd>
             </div>
           </div>}
@@ -164,7 +164,7 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
 
       {/* E — Description */}
       {(blocks.length > 0 || paragraphs.length > 0) && <section className={styles.block}>
-        <h2 className={styles.blockTitle}>Tentang {place.name}</h2>
+        <h2 className={styles.blockTitle}>About {place.name}</h2>
         {blocks.length > 0
           ? <BlockRenderer blocks={blocks} className={styles.prose} />
           : isLongDescription
@@ -176,17 +176,17 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
 
       {/* G — Location */}
       {(hasCoords || address) && <section className={styles.block}>
-        <h2 className={styles.blockTitle}>Lokasi</h2>
+        <h2 className={styles.blockTitle}>Location</h2>
         {hasCoords && <div className={styles.mapFrame}>
-          <iframe title={`Peta ${place.name}`} src={mapEmbedUrl(place.latitude as number, place.longitude as number)} loading="lazy" />
+          <iframe title={`Map of ${place.name}`} src={mapEmbedUrl(place.latitude as number, place.longitude as number)} loading="lazy" />
         </div>}
         {address && <p className={styles.mapAddress}><Icon path={ICON.pin} />{address}</p>}
-        {mapLink && <a className={styles.mapCta} href={mapLink} target="_blank" rel="noreferrer">Lihat Peta</a>}
+        {mapLink && <a className={styles.mapCta} href={mapLink} target="_blank" rel="noreferrer">View map</a>}
       </section>}
 
       {/* H — FAQ */}
       {faqs.length > 0 && <section className={styles.block}>
-        <h2 className={styles.blockTitle}>Pertanyaan Seputar {place.name}</h2>
+        <h2 className={styles.blockTitle}>Frequently Asked Questions</h2>
         <div className={styles.faq}>
           {faqs.map((faq) => <details key={faq.label} className={styles.faqItem}>
             <summary>{faq.label}<span className={styles.chevron} aria-hidden="true" /></summary>
@@ -197,24 +197,24 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
 
       {/* I — Reviews */}
       <section className={styles.block}>
-        <h2 className={styles.blockTitle}>Ulasan</h2>
+        <h2 className={styles.blockTitle}>Reviews</h2>
         {hasRating ? <div className={styles.reviewSummary}>
           <p className={styles.reviewScore}>{Number(place.rating).toFixed(1)}<span>/5</span></p>
           <p className={styles.reviewMeta}>Dari {place.review_count} ulasan pengunjung.</p>
         </div> : <div className={styles.emptyState}>
-          <p className={styles.emptyTitle}>Belum ada ulasan</p>
-          <p className={styles.emptyBody}>Tempat ini belum memiliki ulasan pengunjung di Gorontalo Unite.</p>
+          <p className={styles.emptyTitle}>No reviews yet</p>
+          <p className={styles.emptyBody}>This place has no visitor reviews on Gorontalo Unite yet.</p>
         </div>}
       </section>
 
       {instagramPosts.length > 0 && <section className={styles.block}>
-        <h2 className={styles.blockTitle}>Dari Instagram</h2>
+        <h2 className={styles.blockTitle}>From Instagram</h2>
         <InstagramEmbedGrid posts={instagramPosts} />
       </section>}
 
       {/* J — Related, from the same category */}
       {related.length > 0 && <section className={styles.block}>
-        <h2 className={styles.blockTitle}>Kamu Mungkin Suka Ini</h2>
+        <h2 className={styles.blockTitle}>You Might Also Like</h2>
         <div className={styles.relatedRow}>
           {related.map((item) => <Link key={item.id} href={`/city-guide/${item.slug}`} className={styles.relatedCard}>
             <div className={styles.relatedThumb}>
