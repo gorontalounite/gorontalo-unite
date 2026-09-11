@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import { REGIONS, regionOf, type RegionSlug } from "@/lib/city-guide/regions";
 
 export type CityGuidePlace = {
   id: string;
@@ -41,6 +42,7 @@ type DirectoryItem = {
   badge: string;
   place: string;
   dek: string;
+  region: RegionSlug | null;
   featured: boolean;
   searchable: string;
 };
@@ -76,14 +78,18 @@ export default function CityGuideDirectory({
   places,
   events,
   initialTab,
+  initialRegion,
 }: {
   places: CityGuidePlace[];
   events: CityGuideEvent[];
   initialTab?: string;
+  initialRegion?: string;
 }) {
   const [query, setQuery] = useState("");
   const opening = SECTION_ORDER.find((key) => key === initialTab) ?? "all";
   const [tab, setTab] = useState<"all" | SectionKey>(opening);
+  const openingRegion = REGIONS.find((r) => r.slug === initialRegion)?.slug ?? null;
+  const [region, setRegion] = useState<RegionSlug | null>(openingRegion);
 
   const bySections = useMemo(() => {
     const map = new Map<SectionKey, DirectoryItem[]>();
@@ -99,6 +105,7 @@ export default function CityGuideDirectory({
         badge: SECTION_META[key].label,
         place: place.location || place.address || "Gorontalo",
         dek: toDek(place.description),
+        region: regionOf(place),
         featured: place.featured,
         searchable: normalize([place.name, place.description, place.category, place.location, place.address].filter(Boolean).join(" ")),
       });
@@ -113,6 +120,7 @@ export default function CityGuideDirectory({
         badge: eventDate(event.starts_at),
         place: event.venue || event.address || "Gorontalo",
         dek: toDek(event.description),
+        region: regionOf({ location: event.venue, address: event.address }),
         featured: event.featured,
         searchable: normalize([event.title, event.description, event.category, event.venue, event.address].filter(Boolean).join(" ")),
       });
@@ -123,7 +131,7 @@ export default function CityGuideDirectory({
   }, [places, events]);
 
   const needle = normalize(query);
-  const filteredSections = useMemo(() => {
+  const searchedSections = useMemo(() => {
     const result = new Map<SectionKey, DirectoryItem[]>();
     for (const key of SECTION_ORDER) {
       const items = bySections.get(key) ?? [];
@@ -132,9 +140,40 @@ export default function CityGuideDirectory({
     return result;
   }, [bySections, needle]);
 
+  // Counted over the sections the active tab actually shows, so switching to
+  // Eat drops Boalemo to zero rather than advertising places it has none of.
+  const regionCounts = useMemo(() => {
+    const counts = new Map<RegionSlug, number>();
+    for (const r of REGIONS) counts.set(r.slug, 0);
+    let all = 0;
+    for (const key of tab === "all" ? SECTION_ORDER : [tab]) {
+      for (const item of searchedSections.get(key) ?? []) {
+        all++;
+        if (item.region) counts.set(item.region, (counts.get(item.region) ?? 0) + 1);
+      }
+    }
+    return { counts, all };
+  }, [searchedSections, tab]);
+
+  const filteredSections = useMemo(() => {
+    const result = new Map<SectionKey, DirectoryItem[]>();
+    for (const key of SECTION_ORDER) {
+      const items = searchedSections.get(key) ?? [];
+      result.set(key, region ? items.filter((item) => item.region === region) : items);
+    }
+    return result;
+  }, [searchedSections, region]);
+
   const totalMatches = useMemo(() => SECTION_ORDER.reduce((sum, key) => sum + (filteredSections.get(key)?.length ?? 0), 0), [filteredSections]);
 
-  const sectionsToRender = tab === "all" ? SECTION_ORDER : [tab];
+  // Browsing unfiltered shows every section, empty ones included, so the shape
+  // of the guide is visible. Once a search or an area narrows things down, an
+  // empty section is just noise — picking Boalemo would otherwise return four
+  // places under four empty boxes.
+  const narrowed = Boolean(needle) || region !== null;
+  const sectionsToRender = (tab === "all" ? SECTION_ORDER : [tab]).filter(
+    (key) => !narrowed || (filteredSections.get(key)?.length ?? 0) > 0,
+  );
 
   return (
     <main className="bg-white text-[#302f2c] dark:bg-zinc-950 dark:text-zinc-50">
@@ -167,6 +206,27 @@ export default function CityGuideDirectory({
               <TabButton key={key} active={tab === key} onClick={() => setTab(key)}>{SECTION_META[key].label}</TabButton>
             ))}
           </div>
+
+          <div className="mt-4 flex flex-wrap gap-2" role="group" aria-label="Filter by area">
+            <RegionChip active={region === null} count={regionCounts.all} onClick={() => setRegion(null)}>
+              All areas
+            </RegionChip>
+            {REGIONS.map((area) => {
+              const count = regionCounts.counts.get(area.slug) ?? 0;
+              return (
+                <RegionChip
+                  key={area.slug}
+                  active={region === area.slug}
+                  count={count}
+                  disabled={count === 0}
+                  title={`${area.label} — ibu kota ${area.seat}`}
+                  onClick={() => setRegion(area.slug)}
+                >
+                  {area.short}
+                </RegionChip>
+              );
+            })}
+          </div>
         </div>
       </div>
 
@@ -183,7 +243,7 @@ export default function CityGuideDirectory({
       ) : (
         sectionsToRender.map((key, index) => (
           <Section
-            key={`${key}-${needle}`}
+            key={`${key}-${needle}-${region ?? "all"}`}
             sectionKey={key}
             items={filteredSections.get(key) ?? []}
             band={key === "events" ? "dark" : index % 2 === 1 ? "light" : "plain"}
@@ -194,6 +254,44 @@ export default function CityGuideDirectory({
         ))
       )}
     </main>
+  );
+}
+
+function RegionChip({
+  active,
+  count,
+  disabled = false,
+  title,
+  onClick,
+  children,
+}: {
+  active: boolean;
+  count: number;
+  disabled?: boolean;
+  title?: string;
+  onClick: () => void;
+  children: React.ReactNode;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      title={title}
+      aria-pressed={active}
+      className={`inline-flex min-h-9 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition ${
+        active
+          ? "border-[#302f2c] bg-[#302f2c] text-white dark:border-amber-300 dark:bg-amber-300 dark:text-zinc-950"
+          : disabled
+            ? "cursor-not-allowed border-[#e7e2d8] text-[#b5aea2] dark:border-zinc-800 dark:text-zinc-600"
+            : "border-[#d7d1c6] text-[#555149] hover:border-[#9b7513] hover:text-[#9b7513] dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-amber-300 dark:hover:text-amber-300"
+      }`}
+    >
+      {children}
+      <span className={active ? "text-white/70 dark:text-zinc-950/60" : "text-[#a8a29e] dark:text-zinc-500"}>
+        {count}
+      </span>
+    </button>
   );
 }
 

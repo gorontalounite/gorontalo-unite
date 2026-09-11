@@ -16,9 +16,9 @@ export const metadata: Metadata = {
 export default async function CityGuidePage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; region?: string }>;
 }) {
-  const { tab } = await searchParams;
+  const { tab, region } = await searchParams;
   const supabase = await createClient();
   const [placesResult, eventsResult] = await Promise.all([
     supabase
@@ -41,6 +41,7 @@ export default async function CityGuidePage({
       places={(placesResult.data ?? []) as CityGuidePlace[]}
       events={(eventsResult.data ?? []) as CityGuideEvent[]}
       initialTab={tab}
+      initialRegion={region}
     />
   );
 }
