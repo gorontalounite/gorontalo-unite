@@ -1,11 +1,61 @@
 "use client";
 
-import { ChangeEvent, FormEvent, useMemo, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { ChangeEvent, FormEvent, useCallback, useMemo, useRef, useState, useTransition } from "react";
 import CityGuideRichEditor from "@/components/city-guide/CityGuideRichEditor";
 import type { Block } from "@/components/editor/types";
 
 type Item = Record<string, unknown> & { id: string; slug: string; published: boolean; featured: boolean; archived?: boolean };
 type Kind = "place" | "event";
+
+export type SortField = "title" | "section" | "date";
+export type SortDir = "asc" | "desc";
+
+export interface AdminRow {
+  id: string;
+  kind: Kind;
+  title: string;
+  slug: string;
+  section: string;
+  imageUrl: string | null;
+  published: boolean;
+  archived: boolean;
+  date: string;
+  href: string;
+  raw: Record<string, unknown>;
+}
+
+const SECTION_COLORS: Record<string, string> = {
+  Explore: "bg-sky-50 text-sky-700",
+  Eat: "bg-amber-50 text-amber-800",
+  Stay: "bg-emerald-50 text-emerald-700",
+  Shop: "bg-purple-50 text-purple-700",
+  Services: "bg-slate-100 text-slate-700",
+  Events: "bg-rose-50 text-rose-700",
+};
+
+function SortIcon({ field, activeField, direction }: { field: SortField; activeField: SortField; direction: SortDir }) {
+  return field === activeField
+    ? <span className="ml-0.5 text-[10px]">{direction === "asc" ? "▲" : "▼"}</span>
+    : <span className="ml-0.5 text-[10px] text-gray-300">⬍</span>;
+}
+
+interface Props {
+  rows: AdminRow[];
+  totalCount: number;
+  allCount: number;
+  publishedCount: number;
+  draftCount: number;
+  page: number;
+  pageSize: number;
+  q: string;
+  section: string;
+  status: string;
+  sortField: SortField;
+  sortDir: SortDir;
+  sections: string[];
+}
 type Status = "draft" | "published" | "archived";
 const tourismCategories = ["Atraksi & Wisata", "Akomodasi", "Kuliner", "Belanja", "Layanan Publik & Transportasi"];
 
@@ -13,10 +63,20 @@ const slugify = (value: string) => value.toLowerCase().trim().normalize("NFD").r
 const localDateTime = () => new Date(Date.now() + 8 * 60 * 60 * 1000).toISOString().slice(0, 16);
 const statusOf = (published: boolean, archived: boolean): Status => (archived ? "archived" : published ? "published" : "draft");
 
-export default function CityGuideManager({ kind, initialItems }: { kind: Kind; initialItems: Item[] }) {
+export default function CityGuideManager({
+  rows, totalCount, allCount, publishedCount, draftCount,
+  page, pageSize, q, section, status, sortField, sortDir, sections,
+}: Props) {
+  const router = useRouter();
+  const [, startT] = useTransition();
+  const [searchVal, setSearchVal] = useState(q);
+  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // The form is shared by both tables, so its shape follows the row being
+  // edited rather than the page it sits on.
+  const [kind, setKind] = useState<Kind>("place");
   const isEvent = kind === "event";
   const endpoint = isEvent ? "/api/admin/events" : "/api/admin/tourism";
-  const [items, setItems] = useState(initialItems);
   const [editing, setEditing] = useState<Item | null>(null);
   const [open, setOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -28,8 +88,8 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
   }), [isEvent, titleField]);
   const [values, setValues] = useState<Record<string, string | boolean>>(form);
 
-  function start(item?: Item) {
-    setEditing(item ?? null); setError("");
+  function start(item?: Item, itemKind: Kind = "place") {
+    setKind(itemKind); setEditing(item ?? null); setError("");
     setValues(item ? Object.fromEntries(Object.entries(form).map(([key, fallback]) => [key, key === "listing_details" ? JSON.stringify(item[key] ?? {}) : key === "content_blocks" ? JSON.stringify((item.listing_details as Record<string, unknown> | null)?.content_blocks ?? []) : key === "gallery" ? JSON.stringify(Array.isArray(item.gallery) ? item.gallery : []) : key === "tags" ? (Array.isArray(item.tags) ? (item.tags as string[]).join(", ") : "") : key === "featured" || key === "published" || key === "archived" ? Boolean(item[key] ?? fallback) : key === "starts_at" || key === "ends_at" ? (item[key] ? String(item[key]).slice(0, 16) : "") : String(item[key] ?? fallback)])) as Record<string, string | boolean> : form);
     setOpen(true);
   }
@@ -84,30 +144,200 @@ export default function CityGuideManager({ kind, initialItems }: { kind: Kind; i
     const response = await fetch(endpoint, { method: editing ? "PATCH" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(editing ? { id: editing.id, ...payload } : payload) });
     const result = await response.json(); setSaving(false);
     if (!response.ok) return setError(result.error ?? "Tidak dapat menyimpan.");
-    setItems((current) => editing ? current.map((item) => item.id === editing.id ? result.data : item) : [result.data, ...current]); setOpen(false);
+    setOpen(false); router.refresh();
   }
-  async function remove(item: Item) {
-    if (!window.confirm(`Hapus ${item[titleField]}? Tindakan ini tidak dapat dibatalkan.`)) return;
-    const response = await fetch(endpoint, { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: item.id }) });
-    if (response.ok) setItems((current) => current.filter((row) => row.id !== item.id));
+  async function remove(row: AdminRow) {
+    if (!window.confirm(`Hapus ${row.title}? Tindakan ini tidak dapat dibatalkan.`)) return;
+    const response = await fetch(row.kind === "event" ? "/api/admin/events" : "/api/admin/tourism", {
+      method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: row.id }),
+    });
+    if (response.ok) router.refresh();
     else setError("Tidak dapat menghapus item.");
   }
 
   const galleryImages = parseGallery(String(values.gallery ?? "[]"));
-  const pageLabel = isEvent ? "Event" : "City Guide";
   const itemWord = isEvent ? "event" : "tempat";
-  return <div className="p-6 max-w-6xl">
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between mb-8">
-      <div><p className="text-xs font-semibold uppercase tracking-[.2em] text-amber-600">City Guide</p><h1 className="mt-1 text-3xl font-bold text-gray-900">{pageLabel}</h1><p className="mt-2 text-sm text-gray-500">{isEvent ? "Kelola agenda, detail acara, dan tautan pendaftaran." : "Kelola direktori Explore, Eat, Stay, Shop, dan Services."}</p></div>
-      <button onClick={() => start()} className="rounded-xl bg-amber-400 px-4 py-2.5 text-sm font-semibold text-gray-950 hover:bg-amber-300">+ Tambah {itemWord}</button>
+  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
+  const filtering = Boolean(q) || Boolean(section) || status !== "all";
+
+  const nav = useCallback((params: Record<string, string>) => {
+    const sp = new URLSearchParams({
+      q, section, status,
+      page: String(page), pageSize: String(pageSize),
+      sort: sortField, dir: sortDir,
+      ...params,
+    });
+    for (const [key, value] of [...sp.entries()]) {
+      if (!value || value === "all" || (key === "page" && value === "1")) sp.delete(key);
+    }
+    startT(() => router.push("/admin/city-guide?" + sp.toString()));
+  }, [q, section, status, page, pageSize, sortField, sortDir, router, startT]);
+
+  const toggleSort = (field: SortField) =>
+    nav(field === sortField
+      ? { sort: field, dir: sortDir === "asc" ? "desc" : "asc", page: "1" }
+      : { sort: field, dir: "asc", page: "1" });
+
+  const handleSearch = (value: string) => {
+    setSearchVal(value);
+    if (searchTimer.current) clearTimeout(searchTimer.current);
+    searchTimer.current = setTimeout(() => nav({ q: value, page: "1" }), 400);
+  };
+
+  return <div className="p-6">
+    <div className="mb-6 flex items-center justify-between gap-4">
+      <div>
+        <h1 className="text-xl font-bold text-gray-900">City Guide</h1>
+        <p className="text-sm text-gray-500">
+          {allCount.toLocaleString("id-ID")} total entri
+          {filtering
+            ? ` · ${totalCount.toLocaleString("id-ID")} cocok dengan filter`
+            : <> · <span className="font-medium text-green-600">{publishedCount} publik</span> · <span className="text-gray-400">{draftCount} draft</span></>}
+        </p>
+      </div>
+      <div className="flex shrink-0 items-center gap-2">
+        <button onClick={() => start(undefined, "place")} className="rounded-xl px-4 py-2 text-sm font-semibold" style={{ backgroundColor: "#F5C400", color: "#000" }}>+ Tempat</button>
+        <button onClick={() => start(undefined, "event")} className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">+ Event</button>
+      </div>
     </div>
+
     {error && <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
-    <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-      {items.length === 0 ? <div className="px-6 py-16 text-center text-sm text-gray-400">Belum ada {itemWord}. Tambahkan entri pertama dari tombol di atas.</div> : <div className="divide-y divide-gray-100">{items.map((item) => {
-        const status = statusOf(item.published, Boolean(item.archived));
-        return <div key={item.id} className="flex items-center gap-4 px-5 py-4"><div className="h-12 w-16 overflow-hidden rounded-lg bg-gray-100">{item.image_url ? <img src={String(item.image_url)} alt="" className="h-full w-full object-cover" /> : null}</div><div className="min-w-0 flex-1"><p className="truncate text-sm font-semibold text-gray-900">{String(item[titleField])}</p><p className="mt-0.5 truncate text-xs text-gray-400">/{item.slug}{!isEvent && item.category ? ` · ${String(item.category)}` : ""}{isEvent && item.starts_at ? ` · ${new Intl.DateTimeFormat("id-ID", { dateStyle: "medium", timeZone: "Asia/Makassar" }).format(new Date(String(item.starts_at)))}` : ""}</p></div><StatusBadge status={status} /><button onClick={() => start(item)} className="text-sm font-medium text-amber-700">Edit</button><button onClick={() => remove(item)} className="text-sm text-gray-400 hover:text-red-600">Hapus</button></div>;
-      })}</div>}
+
+    <div className="mb-4 flex flex-wrap gap-3">
+      <div className="relative min-w-48 flex-1">
+        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">🔍</span>
+        <input
+          type="text"
+          value={searchVal}
+          onChange={(e) => handleSearch(e.target.value)}
+          placeholder="Cari nama atau slug…"
+          className="w-full rounded-xl border border-gray-200 py-2 pl-8 pr-3 text-sm outline-none focus:border-[#F5C400]"
+        />
+        {searchVal && (
+          <button onClick={() => { setSearchVal(""); nav({ q: "", page: "1" }); }}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600">✕</button>
+        )}
+      </div>
+
+      <select value={section} onChange={(e) => nav({ section: e.target.value, page: "1" })}
+        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]">
+        <option value="">Semua kategori</option>
+        {sections.map((name) => <option key={name} value={name}>{name}</option>)}
+      </select>
+
+      <select value={status} onChange={(e) => nav({ status: e.target.value, page: "1" })}
+        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]">
+        <option value="all">Semua status</option>
+        <option value="published">Publik</option>
+        <option value="draft">Draft</option>
+        <option value="archived">Arsip</option>
+      </select>
+
+      <select value={pageSize} onChange={(e) => nav({ pageSize: e.target.value, page: "1" })}
+        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]">
+        {[10, 25, 50].map((size) => <option key={size} value={size}>{size} / halaman</option>)}
+      </select>
     </div>
+
+    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+      {rows.length === 0 ? (
+        <div className="py-16 text-center text-sm text-gray-400">
+          {filtering ? "Tidak ada hasil untuk filter ini." : "Belum ada entri. Tambahkan yang pertama dari tombol di atas."}
+        </div>
+      ) : (
+        <table className="w-full text-sm">
+          <thead className="select-none bg-gray-50 text-xs uppercase text-gray-500">
+            <tr>
+              <th className="w-16 px-4 py-3 text-left">Foto</th>
+              <th className="px-4 py-3 text-left">
+                <button type="button" onClick={() => toggleSort("title")} className="flex items-center font-semibold hover:text-gray-800">
+                  Nama <SortIcon field="title" activeField={sortField} direction={sortDir} />
+                </button>
+              </th>
+              <th className="hidden px-4 py-3 text-left md:table-cell">
+                <button type="button" onClick={() => toggleSort("section")} className="flex items-center font-semibold hover:text-gray-800">
+                  Kategori <SortIcon field="section" activeField={sortField} direction={sortDir} />
+                </button>
+              </th>
+              <th className="hidden px-4 py-3 text-left lg:table-cell">
+                <button type="button" onClick={() => toggleSort("date")} className="flex items-center font-semibold hover:text-gray-800">
+                  Tanggal <SortIcon field="date" activeField={sortField} direction={sortDir} />
+                </button>
+              </th>
+              <th className="px-4 py-3 text-left">Status</th>
+              <th className="px-4 py-3 text-right">Aksi</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-50">
+            {rows.map((row) => {
+              const rowStatus = statusOf(row.published, row.archived);
+              return (
+                <tr key={`${row.kind}-${row.id}`} className="transition-colors hover:bg-gray-50/50">
+                  <td className="px-4 py-3">
+                    <div className="h-10 w-14 overflow-hidden rounded-lg bg-gray-100">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      {row.imageUrl ? <img src={row.imageUrl} alt="" className="h-full w-full object-cover" /> : null}
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <p className="max-w-xs truncate font-medium text-gray-900">{row.title}</p>
+                    <p className="truncate text-xs text-gray-400">/{row.slug}</p>
+                  </td>
+                  <td className="hidden px-4 py-3 md:table-cell">
+                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${SECTION_COLORS[row.section] ?? "bg-gray-100 text-gray-600"}`}>
+                      {row.section}
+                    </span>
+                  </td>
+                  <td className="hidden px-4 py-3 text-xs text-gray-400 lg:table-cell">
+                    {row.date
+                      ? new Date(row.date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })
+                      : "—"}
+                  </td>
+                  <td className="px-4 py-3"><StatusBadge status={rowStatus} /></td>
+                  <td className="px-4 py-3 text-right">
+                    <div className="flex items-center justify-end gap-3">
+                      <button onClick={() => start(row.raw as Item, row.kind)} className="text-xs font-medium text-amber-700 hover:underline">Edit</button>
+                      <Link href={row.href} target="_blank" className="hidden text-xs text-gray-400 hover:underline lg:inline">Lihat →</Link>
+                      <button onClick={() => remove(row)} className="text-xs text-red-400 hover:underline">Hapus</button>
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
+          </tbody>
+        </table>
+      )}
+    </div>
+
+    {totalPages > 1 && (
+      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+        <p className="text-xs text-gray-500">
+          Menampilkan {((page - 1) * pageSize + 1).toLocaleString("id-ID")}–{Math.min(page * pageSize, totalCount).toLocaleString("id-ID")} dari {totalCount.toLocaleString("id-ID")} entri
+        </p>
+        <div className="flex items-center gap-1">
+          <button onClick={() => nav({ page: "1" })} disabled={page === 1}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-40">«</button>
+          <button onClick={() => nav({ page: String(page - 1) })} disabled={page === 1}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40">‹</button>
+          {Array.from({ length: totalPages }, (_, i) => i + 1)
+            .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
+            .reduce<(number | "…")[]>((acc, p, i, arr) => {
+              if (i > 0 && (p as number) - (arr[i - 1] as number) > 1) acc.push("…");
+              acc.push(p);
+              return acc;
+            }, [])
+            .map((p, i) => p === "…"
+              ? <span key={`e${i}`} className="w-8 text-center text-xs text-gray-400">…</span>
+              : <button key={p} onClick={() => nav({ page: String(p) })}
+                  className={`h-8 w-8 rounded-lg border text-xs transition-colors ${page === p ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>{p}</button>)}
+          <button onClick={() => nav({ page: String(page + 1) })} disabled={page === totalPages}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40">›</button>
+          <button onClick={() => nav({ page: String(totalPages) })} disabled={page === totalPages}
+            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-40">»</button>
+        </div>
+      </div>
+    )}
+
     {open && <div className="fixed inset-0 z-50 overflow-y-auto bg-black/35 p-4"><div className="mx-auto my-8 max-w-3xl rounded-2xl bg-white shadow-2xl"><form onSubmit={submit} className="p-6"><div className="mb-6 flex items-start justify-between"><div><h2 className="text-xl font-bold text-gray-900">{editing ? `Edit ${itemWord}` : `Tambah ${itemWord}`}</h2><p className="mt-1 text-sm text-gray-500">Simpan sebagai draft dahulu atau terbitkan saat siap.</p></div><button type="button" onClick={() => setOpen(false)} className="text-2xl text-gray-400">×</button></div><div className="grid gap-4 sm:grid-cols-2">
       <Field label={isEvent ? "Nama event" : "Nama tempat"} value={String(values[titleField])} onChange={(v) => change(titleField, v)} required />
       <Field label="Permalink" value={String(values.slug)} onChange={(v) => change("slug", slugify(v))} required prefix="/" />
