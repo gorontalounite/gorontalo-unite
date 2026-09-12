@@ -4,15 +4,23 @@ import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { DEFAULT_REEL_CATEGORIES, type ReelItem } from "./data";
 
-type CategoryFilter = "Semua" | string;
+type CategoryFilter = "All" | string;
 type PeriodFilter = "all" | string;
 
+const CATEGORY_ACCENT: Record<string, string> = {
+  Tourism: "bg-sky-500",
+  Culinary: "bg-amber-500",
+  Event: "bg-rose-500",
+  Sponsored: "bg-violet-500",
+  Culture: "bg-fuchsia-500",
+  Destination: "bg-teal-500",
+  Lifestyle: "bg-lime-600",
+  News: "bg-slate-500",
+  "Untold Story": "bg-indigo-500",
+};
+
 function categoryAccent(category: string) {
-  if (category === "Wisata") return "bg-sky-500";
-  if (category === "Food") return "bg-amber-500";
-  if (category === "Event") return "bg-rose-500";
-  if (category === "Brand") return "bg-violet-500";
-  return "bg-emerald-500";
+  return CATEGORY_ACCENT[category] ?? "bg-emerald-500";
 }
 
 const number = new Intl.NumberFormat("id-ID", { notation: "compact", maximumFractionDigits: 1 });
@@ -56,11 +64,11 @@ function CategoryTabs({ active, onChange, reels, vertical = false }: {
   reels: ReelItem[];
   vertical?: boolean;
 }) {
-  const categories: CategoryFilter[] = ["Semua", ...orderedCategories(reels)];
+  const categories: CategoryFilter[] = ["All", ...orderedCategories(reels)];
   return (
     <div className={vertical ? "space-y-1" : "no-scrollbar flex gap-2 overflow-x-auto px-4 pb-3"}>
       {categories.map((category) => {
-        const count = category === "Semua" ? reels.length : reels.filter((item) => item.category === category).length;
+        const count = category === "All" ? reels.length : reels.filter((item) => item.category === category).length;
         const selected = active === category;
         return (
           <button
@@ -106,7 +114,7 @@ function FilterSelect({ label, value, onChange, children, active = false }: {
   );
 }
 
-export default function ReelsFeed({ reels, initialCategory = "Semua", initialPeriod = "all" }: {
+export default function ReelsFeed({ reels, initialCategory = "All", initialPeriod = "all" }: {
   reels: ReelItem[];
   initialCategory?: CategoryFilter;
   initialPeriod?: PeriodFilter;
@@ -118,12 +126,12 @@ export default function ReelsFeed({ reels, initialCategory = "Semua", initialPer
   const categories = useMemo(() => orderedCategories(reels), [reels]);
   const filtered = useMemo(
     () => reels.filter((item) => (
-      (category === "Semua" || item.category === category) && matchesPeriod(item, period)
+      (category === "All" || item.category === category) && matchesPeriod(item, period)
     )),
     [category, period, reels],
   );
   const periodGroups = useMemo(() => {
-    const categoryReels = category === "Semua" ? reels : reels.filter((item) => item.category === category);
+    const categoryReels = category === "All" ? reels : reels.filter((item) => item.category === category);
     const years = [...new Set(categoryReels.map(reelYear))].sort((a, b) => b.localeCompare(a));
     return years.map((year) => ({
       year,
@@ -148,7 +156,7 @@ export default function ReelsFeed({ reels, initialCategory = "Semua", initialPer
 
   function updateUrl(nextCategory: CategoryFilter, nextPeriod: PeriodFilter) {
     const params = new URLSearchParams();
-    if (nextCategory !== "Semua") params.set("kategori", nextCategory.toLowerCase());
+    if (nextCategory !== "All") params.set("kategori", nextCategory.toLowerCase());
     if (nextPeriod !== "all") params.set("periode", nextPeriod);
     window.history.replaceState(null, "", params.size ? `/reels?${params}` : "/reels");
   }
@@ -159,7 +167,7 @@ export default function ReelsFeed({ reels, initialCategory = "Semua", initialPer
   }
 
   function selectCategory(next: CategoryFilter) {
-    const categoryItems = next === "Semua" ? reels : reels.filter((item) => item.category === next);
+    const categoryItems = next === "All" ? reels : reels.filter((item) => item.category === next);
     const nextPeriod = period === "all" || categoryItems.some((item) => matchesPeriod(item, period)) ? period : "all";
     setCategory(next);
     setPeriod(nextPeriod);
@@ -171,7 +179,7 @@ export default function ReelsFeed({ reels, initialCategory = "Semua", initialPer
   function selectPeriod(next: PeriodFilter) {
     setPeriod(next);
     const nextItems = reels.filter((item) => (
-      (category === "Semua" || item.category === category) && matchesPeriod(item, next)
+      (category === "All" || item.category === category) && matchesPeriod(item, next)
     ));
     resetFeed(nextItems);
     updateUrl(category, next);
@@ -189,10 +197,10 @@ export default function ReelsFeed({ reels, initialCategory = "Semua", initialPer
             <FilterSelect
               label="Kategori"
               value={category}
-              active={category !== "Semua"}
+              active={category !== "All"}
               onChange={(value) => selectCategory(value as CategoryFilter)}
             >
-              <option value="Semua">Semua kategori</option>
+              <option value="All">All categories</option>
               {categories.map((item) => <option key={item} value={item}>{item}</option>)}
             </FilterSelect>
             <FilterSelect

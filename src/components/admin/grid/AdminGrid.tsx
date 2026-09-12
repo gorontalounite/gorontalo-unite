@@ -12,7 +12,8 @@ export interface GridColumn<T> {
   /** Sort key handed back to `onSort`; omit to make the header inert. */
   sort?: string;
   align?: "left" | "center";
-  render: (row: T) => ReactNode;
+  /** `index` is the row's position on the current page, from 0. */
+  render: (row: T, index: number) => ReactNode;
 }
 
 interface Props<T> {
@@ -109,7 +110,7 @@ export default function AdminGrid<T>({
             </thead>
 
             <tbody>
-              {rows.map((row) => {
+              {rows.map((row, rowIndex) => {
                 const id = rowKey(row);
                 const isSelected = selected.has(id);
                 const isSaving = savingIds?.has(id) ?? false;
@@ -154,7 +155,7 @@ export default function AdminGrid<T>({
                         } ${column.align === "center" ? "text-center" : ""}`}
                         style={column.frozen ? { left: offsets.get(column.key) } : undefined}
                       >
-                        {column.render(row)}
+                        {column.render(row, rowIndex)}
                       </td>
                     ))}
                   </tr>
