@@ -148,6 +148,7 @@ export type Database = {
           tags: string[]
           title: string
           updated_at: string
+          video_url: string | null
           view_count: number
         }
         Insert: {
@@ -181,6 +182,7 @@ export type Database = {
           tags?: string[]
           title: string
           updated_at?: string
+          video_url?: string | null
           view_count?: number
         }
         Update: {
@@ -214,6 +216,7 @@ export type Database = {
           tags?: string[]
           title?: string
           updated_at?: string
+          video_url?: string | null
           view_count?: number
         }
         Relationships: [
@@ -595,6 +598,7 @@ export type Database = {
           sponsored: boolean
           status: string
           thumbnail_url: string | null
+          title: string | null
           updated_at: string
           views: number
         }
@@ -619,6 +623,7 @@ export type Database = {
           sponsored?: boolean
           status?: string
           thumbnail_url?: string | null
+          title?: string | null
           updated_at?: string
           views?: number
         }
@@ -643,6 +648,7 @@ export type Database = {
           sponsored?: boolean
           status?: string
           thumbnail_url?: string | null
+          title?: string | null
           updated_at?: string
           views?: number
         }

@@ -2,7 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 const STATUSES = new Set(["draft", "published"]);
-const LIST_COLUMNS = "id, account_username, description, publish_time, permalink, post_type, category, sponsored, thumbnail_url, status, display_order, featured, views, reach, likes, shares, follows, comments, saves, created_at, updated_at";
+const LIST_COLUMNS = "id, title, account_username, description, publish_time, permalink, post_type, category, sponsored, thumbnail_url, status, display_order, featured, views, reach, likes, shares, follows, comments, saves, created_at, updated_at";
 
 type Authorized = Awaited<ReturnType<typeof authorizeUser>>;
 
@@ -109,6 +109,8 @@ async function normalizeBody(auth: NonNullable<Authorized>, body: Record<string,
   if (!thumbnailUrl) thumbnailUrl = await fetchAndStoreThumbnail(auth, permalink);
 
   return {
+    // Omitted entirely when the caller has no title column to write to.
+    ...("title" in body ? { title: String(body.title ?? "").trim() || null } : {}),
     account_username: accountUsername,
     description,
     publish_time: new Date(publishTime).toISOString(),
@@ -128,6 +130,27 @@ async function normalizeBody(auth: NonNullable<Authorized>, body: Record<string,
     comments: nonNegativeInteger(body.comments, "Comments"),
     saves: nonNegativeInteger(body.saves, "Saves"),
   };
+}
+
+/** Fields the admin grid may change in place. Anything else needs the form. */
+function inlineValues(body: Record<string, unknown>) {
+  const values: Record<string, unknown> = {};
+  if ("title" in body) values.title = String(body.title ?? "").trim() || null;
+  if ("status" in body) {
+    const status = String(body.status);
+    if (!STATUSES.has(status)) throw new Error("Status tidak valid.");
+    values.status = status;
+  }
+  if ("category" in body) {
+    const category = String(body.category).trim();
+    if (!/^[\p{L}\p{N}&+'\u2019/ -]{2,50}$/u.test(category)) throw new Error("Kategori harus terdiri dari 2\u201350 karakter.");
+    values.category = category;
+  }
+  if ("featured" in body) values.featured = Boolean(body.featured);
+  if ("sponsored" in body) values.sponsored = Boolean(body.sponsored);
+  if ("display_order" in body) values.display_order = nonNegativeInteger(body.display_order, "Urutan tampil");
+  if (Object.keys(values).length === 0) throw new Error("Tidak ada perubahan yang dapat disimpan.");
+  return values;
 }
 
 export async function GET(req: NextRequest) {
@@ -168,7 +191,9 @@ export async function PATCH(req: NextRequest) {
     const body = await req.json() as Record<string, unknown>;
     const id = String(body.id ?? "");
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-    const values = await normalizeBody(auth, body);
+    // Grid cells patch a single field, so they skip the whole-record validation
+    // (which would reject a body that carries no permalink or caption).
+    const values = body.inline ? inlineValues(body) : await normalizeBody(auth, body);
     const { data, error } = await auth.supabase
       .from("reels")
       .update(values)

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
-import NewsAdminList from "./NewsAdminList";
+import NewsAdminList, { type NewsRow } from "./NewsAdminList";
+import { selectWithOptional } from "@/lib/supabase/optional-columns";
 import { resolveWebCategoryLabel, buildCategoryDeskMap, WEB_CATEGORIES, type CategoryRow } from "@/app/berita/categories";
 
 export const dynamic  = "force-dynamic";
@@ -14,6 +15,24 @@ const CATEGORY_FILTER_ORDER = ["culture", "travel", "culinary", "life", "people"
 const CATEGORY_OPTIONS = CATEGORY_FILTER_ORDER
   .map((key) => WEB_CATEGORIES.find((item) => item.key === key)?.label)
   .filter((label): label is string => Boolean(label));
+
+interface ArticleRow {
+  id:           string;
+  title:        string;
+  slug:         string;
+  category:     string | null;
+  categories:   string[] | null;
+  tags:         string[] | null;
+  excerpt:      string | null;
+  image_url:    string | null;
+  /** Optional until the admin-grid migration has run. */
+  video_url?:   string | null;
+  is_trending:  boolean | null;
+  author_id:    string | null;
+  published:    boolean;
+  published_at: string | null;
+  created_at:   string;
+}
 
 interface PageProps {
   searchParams: Promise<{
@@ -40,28 +59,35 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
 
   const admin = await createClient();
 
-  let qb = admin
-    .from("articles")
-    .select("id, title, slug, category, categories, tags, excerpt, published, published_at, created_at")
-    .neq("category", "Portfolio")
-    .limit(1000);
-  if (q)                      qb = qb.or(`title.ilike.%${q}%,slug.ilike.%${q}%`);
-  if (status === "published") qb = qb.eq("published", true);
-  if (status === "draft")     qb = qb.eq("published", false);
+  const runArticles = (columns: string) => {
+    let qb = admin.from("articles").select(columns).neq("category", "Portfolio").limit(1000);
+    if (q)                      qb = qb.or(`title.ilike.%${q}%,slug.ilike.%${q}%`);
+    if (status === "published") qb = qb.eq("published", true);
+    if (status === "draft")     qb = qb.eq("published", false);
+    // The column list is built at runtime, so supabase-js cannot infer the row.
+    return qb as unknown as PromiseLike<{ data: ArticleRow[] | null; error: { code?: string; message?: string } | null }>;
+  };
 
-  const [{ data: rows }, { data: categoryRows }] = await Promise.all([
-    qb,
+  const [articles, { data: categoryRows }, { data: profileRows }] = await Promise.all([
+    selectWithOptional<ArticleRow>(
+      runArticles,
+      ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "is_trending", "author_id", "published", "published_at", "created_at"],
+      ["video_url"],
+    ),
     admin.from("categories").select("id, name, parent_id, desk_key"),
+    // Staff can read every profile under RLS; the Author cell picks from them.
+    admin.from("user_profiles").select("id, full_name, role"),
   ]);
+  const rows = articles.rows;
   const deskMap = buildCategoryDeskMap((categoryRows ?? []) as CategoryRow[]);
-  const withCanonicalCategory = (rows ?? []).map((row) => ({
+  const withCanonicalCategory = rows.map((row) => ({
     ...row,
     canonicalCategory: resolveWebCategoryLabel({
-      category:   row.category as string,
-      categories: row.categories as string[] | null,
-      tags:       row.tags as string[] | null,
-      title:      row.title as string,
-      excerpt:    row.excerpt as string | null,
+      category:   row.category ?? "",
+      categories: row.categories,
+      tags:       row.tags,
+      title:      row.title,
+      excerpt:    row.excerpt,
     }, deskMap),
   }));
 
@@ -78,22 +104,35 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     return sortDir === "asc" ? cmp : -cmp;
   });
 
+  const authors = (profileRows ?? [])
+    .map((row) => ({ id: String(row.id), name: (row.full_name as string | null) ?? "Tanpa nama" }))
+    .sort((a, b) => a.name.localeCompare(b.name, "id"));
+
   const totalCount = sorted.length;
   const start      = (page - 1) * pageSize;
-  const items = sorted.slice(start, start + pageSize).map((row) => ({
-    id: row.id as string,
-    title: row.title as string,
-    slug: row.slug as string,
-    category: row.canonicalCategory,
-    published: row.published as boolean,
-    published_at: row.published_at as string | null,
-    created_at: row.created_at as string,
+  const items: NewsRow[] = sorted.slice(start, start + pageSize).map((row) => ({
+    id: row.id,
+    title: row.title,
+    slug: row.slug,
+    category: row.category ?? "",
+    canonicalCategory: row.canonicalCategory,
+    excerpt: row.excerpt,
+    image_url: row.image_url,
+    video_url: row.video_url ?? null,
+    is_trending: Boolean(row.is_trending),
+    author_id: row.author_id,
+    published: row.published,
+    published_at: row.published_at,
+    created_at: row.created_at,
   }));
 
   return (
     <NewsAdminList
       initialItems={items}
       totalCount={totalCount}
+      allCount={withCanonicalCategory.length}
+      publishedCount={withCanonicalCategory.filter((row) => row.published).length}
+      draftCount={withCanonicalCategory.filter((row) => !row.published).length}
       page={page}
       pageSize={pageSize}
       q={q}
@@ -102,6 +141,8 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
       sortField={sortField}
       sortDir={sortDir}
       allCategories={CATEGORY_OPTIONS}
+      authors={authors}
+      videoColumnReady={!articles.missing.includes("video_url")}
     />
   );
 }

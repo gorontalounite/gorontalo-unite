@@ -1,10 +1,17 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { ChangeEvent, FormEvent, useCallback, useMemo, useRef, useState, useTransition } from "react";
+import { ChangeEvent, FormEvent, useCallback, useMemo, useState, useTransition } from "react";
 import CityGuideRichEditor from "@/components/city-guide/CityGuideRichEditor";
 import type { Block } from "@/components/editor/types";
+import AdminGrid, { type GridColumn } from "@/components/admin/grid/AdminGrid";
+import {
+  DateCell, EditableTextCell, GalleryCell, PillSelectCell, StatusCell, SwitchCell, TextCell, ThumbCell,
+} from "@/components/admin/grid/cells";
+import {
+  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar,
+} from "@/components/admin/grid/GridChrome";
+import { useRowEditor } from "@/components/admin/grid/useRowEditor";
 
 type Item = Record<string, unknown> & { id: string; slug: string; published: boolean; featured: boolean; archived?: boolean };
 type Kind = "place" | "event";
@@ -21,25 +28,31 @@ export interface AdminRow {
   imageUrl: string | null;
   published: boolean;
   archived: boolean;
+  featured: boolean;
+  description: string | null;
+  gallery: string[];
+  mapsUrl: string | null;
+  location: string | null;
+  subcategory: string | null;
   date: string;
   href: string;
   raw: Record<string, unknown>;
 }
 
-const SECTION_COLORS: Record<string, string> = {
-  Explore: "bg-sky-50 text-sky-700",
-  Eat: "bg-amber-50 text-amber-800",
-  Stay: "bg-emerald-50 text-emerald-700",
-  Shop: "bg-purple-50 text-purple-700",
-  Services: "bg-slate-100 text-slate-700",
-  Events: "bg-rose-50 text-rose-700",
+/** Editing the Category cell writes the real column that sits behind a section. */
+const CATEGORY_OF_SECTION: Record<string, string> = {
+  Explore: "Atraksi & Wisata",
+  Eat: "Kuliner",
+  Stay: "Akomodasi",
+  Shop: "Belanja",
+  Services: "Layanan Publik & Transportasi",
 };
 
-function SortIcon({ field, activeField, direction }: { field: SortField; activeField: SortField; direction: SortDir }) {
-  return field === activeField
-    ? <span className="ml-0.5 text-[10px]">{direction === "asc" ? "▲" : "▼"}</span>
-    : <span className="ml-0.5 text-[10px] text-gray-300">⬍</span>;
-}
+const STATUS_OPTIONS = [
+  { value: "published", label: "Live",  tone: "bg-[#e3f6ec] text-[#0f8a52]" },
+  { value: "draft",     label: "Draft", tone: "bg-[#f1f0ee] text-gray-600" },
+  { value: "archived",  label: "Arsip", tone: "bg-[#ece9e3] text-stone-600" },
+];
 
 interface Props {
   rows: AdminRow[];
@@ -69,8 +82,27 @@ export default function CityGuideManager({
 }: Props) {
   const router = useRouter();
   const [, startT] = useTransition();
-  const [searchVal, setSearchVal] = useState(q);
-  const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<"draft" | "delete" | null>(null);
+  const [bulkRunning, setBulkRunning] = useState(false);
+
+  const endpointOf = (row: AdminRow) => row.kind === "event" ? "/api/admin/events" : "/api/admin/tourism";
+  const { rows: gridRows, update, savingIds, error: rowError, setError: setRowError } = useRowEditor<AdminRow>(rows, {
+    endpointFor: endpointOf,
+    // Grid fields are named for the editor, not for the two tables underneath.
+    bodyFor: (row, patch) => {
+      const body: Record<string, unknown> = {};
+      if ("published" in patch) body.published = patch.published;
+      if ("archived" in patch) body.archived = patch.archived;
+      if ("featured" in patch) body.featured = patch.featured;
+      if ("mapsUrl" in patch) body.maps_url = patch.mapsUrl;
+      if ("subcategory" in patch) body.subcategory = patch.subcategory;
+      // An event records a venue where a place records its area.
+      if ("location" in patch) body[row.kind === "event" ? "venue" : "location"] = patch.location;
+      if ("section" in patch) body.category = CATEGORY_OF_SECTION[String(patch.section)] ?? patch.section;
+      return body;
+    },
+  });
 
   // The form is shared by both tables, so its shape follows the row being
   // edited rather than the page it sits on.
@@ -146,18 +178,8 @@ export default function CityGuideManager({
     if (!response.ok) return setError(result.error ?? "Tidak dapat menyimpan.");
     setOpen(false); router.refresh();
   }
-  async function remove(row: AdminRow) {
-    if (!window.confirm(`Hapus ${row.title}? Tindakan ini tidak dapat dibatalkan.`)) return;
-    const response = await fetch(row.kind === "event" ? "/api/admin/events" : "/api/admin/tourism", {
-      method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: row.id }),
-    });
-    if (response.ok) router.refresh();
-    else setError("Tidak dapat menghapus item.");
-  }
-
   const galleryImages = parseGallery(String(values.gallery ?? "[]"));
   const itemWord = isEvent ? "event" : "tempat";
-  const totalPages = Math.max(1, Math.ceil(totalCount / pageSize));
   const filtering = Boolean(q) || Boolean(section) || status !== "all";
 
   const nav = useCallback((params: Record<string, string>) => {
@@ -173,169 +195,202 @@ export default function CityGuideManager({
     startT(() => router.push("/admin/city-guide?" + sp.toString()));
   }, [q, section, status, page, pageSize, sortField, sortDir, router, startT]);
 
-  const toggleSort = (field: SortField) =>
+  const toggleSort = (field: string) =>
     nav(field === sortField
       ? { sort: field, dir: sortDir === "asc" ? "desc" : "asc", page: "1" }
       : { sort: field, dir: "asc", page: "1" });
 
-  const handleSearch = (value: string) => {
-    setSearchVal(value);
-    if (searchTimer.current) clearTimeout(searchTimer.current);
-    searchTimer.current = setTimeout(() => nav({ q: value, page: "1" }), 400);
-  };
+  const toggleRow = (id: string) => setSelected((current) => {
+    const next = new Set(current);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const toggleAll = () => setSelected((current) =>
+    gridRows.every((row) => current.has(row.id)) ? new Set() : new Set(gridRows.map((row) => row.id)));
+
+  async function runBulk(action: "draft" | "delete") {
+    setBulkRunning(true);
+    const targets = gridRows.filter((row) => selected.has(row.id));
+    await Promise.all(targets.map((row) => fetch(endpointOf(row), {
+      method: action === "delete" ? "DELETE" : "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(action === "delete" ? { id: row.id } : { id: row.id, published: false }),
+    })));
+    setBulkRunning(false);
+    setBulkAction(null);
+    setSelected(new Set());
+    router.refresh();
+  }
+
+  const statusValue = (row: AdminRow) => row.archived ? "archived" : row.published ? "published" : "draft";
+  const knownLocations = [...new Set(gridRows.map((row) => row.location).filter((value): value is string => Boolean(value)))].sort();
+
+  const columns: GridColumn<AdminRow>[] = [
+    {
+      key: "thumbnail", header: "Thumbnail", width: 84, frozen: true,
+      render: (row) => <ThumbCell src={row.imageUrl} alt={row.title} />,
+    },
+    {
+      key: "title", header: "Title", width: 240, frozen: true, sort: "title",
+      render: (row) => (
+        <button
+          type="button"
+          onClick={() => start(row.raw as Item, row.kind)}
+          title={row.title}
+          className="block w-full min-w-0 text-left"
+        >
+          <span className="block truncate font-medium text-gray-900 hover:underline">{row.title || "Tanpa nama"}</span>
+          <span className="block truncate text-[11px] text-gray-400">/{row.slug}</span>
+        </button>
+      ),
+    },
+    {
+      key: "status", header: "Status", width: 108,
+      render: (row) => (
+        <StatusCell
+          value={statusValue(row)}
+          options={STATUS_OPTIONS}
+          onChange={(next) => update(row, { published: next === "published", archived: next === "archived" })}
+        />
+      ),
+    },
+    {
+      key: "featured", header: "Featured?", width: 96,
+      render: (row) => (
+        <SwitchCell
+          checked={row.featured}
+          label={`Tampilkan ${row.title} di beranda`}
+          onChange={(next) => update(row, { featured: next })}
+        />
+      ),
+    },
+    {
+      key: "description", header: "Description", width: 230,
+      render: (row) => <TextCell value={row.description} muted />,
+    },
+    {
+      key: "date", header: "Date", width: 116, sort: "date",
+      render: (row) => <DateCell value={row.date} />,
+    },
+    {
+      key: "gallery", header: "Galery Foto", width: 110,
+      render: (row) => <GalleryCell images={row.gallery} />,
+    },
+    {
+      key: "maps", header: "Maps URL", width: 170,
+      render: (row) => (
+        <EditableTextCell
+          value={row.mapsUrl}
+          placeholder="Tambah URL"
+          onSave={(next) => update(row, { mapsUrl: next || null })}
+        />
+      ),
+    },
+    {
+      key: "location", header: "Location", width: 170,
+      render: (row) => (
+        <EditableTextCell
+          value={row.location}
+          options={knownLocations}
+          placeholder={row.kind === "event" ? "Tambah venue" : "Tambah lokasi"}
+          onSave={(next) => update(row, { location: next || null })}
+        />
+      ),
+    },
+    {
+      key: "category", header: "Category", width: 150, sort: "section",
+      render: (row) => row.kind === "event"
+        // Events live in their own table, so the section is fixed for them.
+        ? <span className="inline-flex rounded-md bg-[#f1f0ee] px-2 py-0.5 text-[12px] text-gray-700">Events</span>
+        : (
+          <PillSelectCell
+            value={row.section}
+            options={Object.keys(CATEGORY_OF_SECTION)}
+            onChange={(next) => update(row, { section: next })}
+          />
+        ),
+    },
+    {
+      key: "subcategory", header: "Sub Category", width: 150,
+      render: (row) => (
+        <EditableTextCell
+          value={row.subcategory}
+          placeholder="Tambah"
+          onSave={(next) => update(row, { subcategory: next || null })}
+        />
+      ),
+    },
+  ];
 
   return <div className="p-6">
-    <div className="mb-6 flex items-center justify-between gap-4">
-      <div>
-        <h1 className="text-xl font-bold text-gray-900">City Guide</h1>
-        <p className="text-sm text-gray-500">
-          {allCount.toLocaleString("id-ID")} total entri
-          {filtering
-            ? ` · ${totalCount.toLocaleString("id-ID")} cocok dengan filter`
-            : <> · <span className="font-medium text-green-600">{publishedCount} publik</span> · <span className="text-gray-400">{draftCount} draft</span></>}
-        </p>
-      </div>
-      <div className="flex shrink-0 items-center gap-2">
-        <button onClick={() => start(undefined, "place")} className="rounded-xl px-4 py-2 text-sm font-semibold" style={{ backgroundColor: "#F5C400", color: "#000" }}>+ Tempat</button>
-        <button onClick={() => start(undefined, "event")} className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">+ Event</button>
-      </div>
-    </div>
+    <GridHeader
+      title="City Guide"
+      summary={<CountSummary total={allCount} filtered={totalCount} published={publishedCount} draft={draftCount} noun="entri" filtering={filtering} />}
+      actions={<>
+        <button type="button" onClick={() => start(undefined, "place")} className="rounded-xl px-4 py-2 text-sm font-semibold" style={{ backgroundColor: "#F5C400", color: "#000" }}>+ Tempat</button>
+        <button type="button" onClick={() => start(undefined, "event")} className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">+ Event</button>
+      </>}
+    />
 
-    {error && <p className="mb-4 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+    {(error || rowError) && (
+      <p className="mb-4 flex items-center justify-between gap-3 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">
+        {error || rowError}
+        <button type="button" onClick={() => { setError(""); setRowError(null); }} className="text-red-400 hover:text-red-600">✕</button>
+      </p>
+    )}
 
-    <div className="mb-4 flex flex-wrap gap-3">
-      <div className="relative min-w-48 flex-1">
-        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs text-gray-400">🔍</span>
-        <input
-          type="text"
-          value={searchVal}
-          onChange={(e) => handleSearch(e.target.value)}
-          placeholder="Cari nama atau slug…"
-          className="w-full rounded-xl border border-gray-200 py-2 pl-8 pr-3 text-sm outline-none focus:border-[#F5C400]"
-        />
-        {searchVal && (
-          <button onClick={() => { setSearchVal(""); nav({ q: "", page: "1" }); }}
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-gray-400 hover:text-gray-600">✕</button>
-        )}
-      </div>
+    <GridToolbar
+      search={q}
+      onSearch={(value) => nav({ q: value, page: "1" })}
+      placeholder="Cari nama atau slug…"
+      category={section}
+      categories={sections}
+      onCategory={(value) => nav({ section: value, page: "1" })}
+      status={status}
+      statuses={[
+        { value: "all", label: "Semua status" },
+        { value: "published", label: "Publik" },
+        { value: "draft", label: "Draft" },
+        { value: "archived", label: "Arsip" },
+      ]}
+      onStatus={(value) => nav({ status: value, page: "1" })}
+      pageSize={pageSize}
+      onPageSize={(value) => nav({ pageSize: value, page: "1" })}
+    />
 
-      <select value={section} onChange={(e) => nav({ section: e.target.value, page: "1" })}
-        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]">
-        <option value="">Semua kategori</option>
-        {sections.map((name) => <option key={name} value={name}>{name}</option>)}
-      </select>
+    <BulkBar
+      count={selected.size}
+      onDraft={() => setBulkAction("draft")}
+      onDelete={() => setBulkAction("delete")}
+      onClear={() => setSelected(new Set())}
+    />
 
-      <select value={status} onChange={(e) => nav({ status: e.target.value, page: "1" })}
-        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]">
-        <option value="all">Semua status</option>
-        <option value="published">Publik</option>
-        <option value="draft">Draft</option>
-        <option value="archived">Arsip</option>
-      </select>
+    <AdminGrid
+      rows={gridRows}
+      columns={columns}
+      rowKey={(row) => row.id}
+      selected={selected}
+      onToggleRow={toggleRow}
+      onToggleAll={toggleAll}
+      sortField={sortField}
+      sortDir={sortDir}
+      onSort={toggleSort}
+      savingIds={savingIds}
+      empty={filtering ? "Tidak ada hasil untuk filter ini." : "Belum ada entri. Tambahkan yang pertama dari tombol di atas."}
+    />
 
-      <select value={pageSize} onChange={(e) => nav({ pageSize: e.target.value, page: "1" })}
-        className="rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm outline-none focus:border-[#F5C400]">
-        {[10, 25, 50].map((size) => <option key={size} value={size}>{size} / halaman</option>)}
-      </select>
-    </div>
+    <GridPagination page={page} pageSize={pageSize} totalCount={totalCount} noun="entri" onPage={(next) => nav({ page: String(next) })} />
 
-    <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-      {rows.length === 0 ? (
-        <div className="py-16 text-center text-sm text-gray-400">
-          {filtering ? "Tidak ada hasil untuk filter ini." : "Belum ada entri. Tambahkan yang pertama dari tombol di atas."}
-        </div>
-      ) : (
-        <table className="w-full text-sm">
-          <thead className="select-none bg-gray-50 text-xs uppercase text-gray-500">
-            <tr>
-              <th className="w-16 px-4 py-3 text-left">Foto</th>
-              <th className="px-4 py-3 text-left">
-                <button type="button" onClick={() => toggleSort("title")} className="flex items-center font-semibold hover:text-gray-800">
-                  Nama <SortIcon field="title" activeField={sortField} direction={sortDir} />
-                </button>
-              </th>
-              <th className="hidden px-4 py-3 text-left md:table-cell">
-                <button type="button" onClick={() => toggleSort("section")} className="flex items-center font-semibold hover:text-gray-800">
-                  Kategori <SortIcon field="section" activeField={sortField} direction={sortDir} />
-                </button>
-              </th>
-              <th className="hidden px-4 py-3 text-left lg:table-cell">
-                <button type="button" onClick={() => toggleSort("date")} className="flex items-center font-semibold hover:text-gray-800">
-                  Tanggal <SortIcon field="date" activeField={sortField} direction={sortDir} />
-                </button>
-              </th>
-              <th className="px-4 py-3 text-left">Status</th>
-              <th className="px-4 py-3 text-right">Aksi</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
-            {rows.map((row) => {
-              const rowStatus = statusOf(row.published, row.archived);
-              return (
-                <tr key={`${row.kind}-${row.id}`} className="transition-colors hover:bg-gray-50/50">
-                  <td className="px-4 py-3">
-                    <div className="h-10 w-14 overflow-hidden rounded-lg bg-gray-100">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      {row.imageUrl ? <img src={row.imageUrl} alt="" className="h-full w-full object-cover" /> : null}
-                    </div>
-                  </td>
-                  <td className="px-4 py-3">
-                    <p className="max-w-xs truncate font-medium text-gray-900">{row.title}</p>
-                    <p className="truncate text-xs text-gray-400">/{row.slug}</p>
-                  </td>
-                  <td className="hidden px-4 py-3 md:table-cell">
-                    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${SECTION_COLORS[row.section] ?? "bg-gray-100 text-gray-600"}`}>
-                      {row.section}
-                    </span>
-                  </td>
-                  <td className="hidden px-4 py-3 text-xs text-gray-400 lg:table-cell">
-                    {row.date
-                      ? new Date(row.date).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })
-                      : "—"}
-                  </td>
-                  <td className="px-4 py-3"><StatusBadge status={rowStatus} /></td>
-                  <td className="px-4 py-3 text-right">
-                    <div className="flex items-center justify-end gap-3">
-                      <button onClick={() => start(row.raw as Item, row.kind)} className="text-xs font-medium text-amber-700 hover:underline">Edit</button>
-                      <Link href={row.href} target="_blank" className="hidden text-xs text-gray-400 hover:underline lg:inline">Lihat →</Link>
-                      <button onClick={() => remove(row)} className="text-xs text-red-400 hover:underline">Hapus</button>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      )}
-    </div>
-
-    {totalPages > 1 && (
-      <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-        <p className="text-xs text-gray-500">
-          Menampilkan {((page - 1) * pageSize + 1).toLocaleString("id-ID")}–{Math.min(page * pageSize, totalCount).toLocaleString("id-ID")} dari {totalCount.toLocaleString("id-ID")} entri
-        </p>
-        <div className="flex items-center gap-1">
-          <button onClick={() => nav({ page: "1" })} disabled={page === 1}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-40">«</button>
-          <button onClick={() => nav({ page: String(page - 1) })} disabled={page === 1}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40">‹</button>
-          {Array.from({ length: totalPages }, (_, i) => i + 1)
-            .filter((p) => p === 1 || p === totalPages || Math.abs(p - page) <= 2)
-            .reduce<(number | "…")[]>((acc, p, i, arr) => {
-              if (i > 0 && (p as number) - (arr[i - 1] as number) > 1) acc.push("…");
-              acc.push(p);
-              return acc;
-            }, [])
-            .map((p, i) => p === "…"
-              ? <span key={`e${i}`} className="w-8 text-center text-xs text-gray-400">…</span>
-              : <button key={p} onClick={() => nav({ page: String(p) })}
-                  className={`h-8 w-8 rounded-lg border text-xs transition-colors ${page === p ? "border-gray-900 bg-gray-900 text-white" : "border-gray-200 text-gray-600 hover:bg-gray-50"}`}>{p}</button>)}
-          <button onClick={() => nav({ page: String(page + 1) })} disabled={page === totalPages}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-sm text-gray-600 hover:bg-gray-50 disabled:opacity-40">›</button>
-          <button onClick={() => nav({ page: String(totalPages) })} disabled={page === totalPages}
-            className="flex h-8 w-8 items-center justify-center rounded-lg border border-gray-200 text-xs text-gray-600 hover:bg-gray-50 disabled:opacity-40">»</button>
-        </div>
-      </div>
+    {bulkAction && (
+      <ConfirmDialog
+        title={bulkAction === "delete" ? `Hapus ${selected.size} entri?` : `Jadikan ${selected.size} entri draft?`}
+        body={bulkAction === "delete" ? "Tindakan ini tidak dapat dibatalkan." : "Entri yang dipilih akan disembunyikan dari publik."}
+        confirmLabel={bulkAction === "delete" ? "Hapus" : "Jadikan Draft"}
+        danger={bulkAction === "delete"}
+        busy={bulkRunning}
+        onCancel={() => setBulkAction(null)}
+        onConfirm={() => runBulk(bulkAction)}
+      />
     )}
 
     {open && <div className="fixed inset-0 z-50 overflow-y-auto bg-black/35 p-4"><div className="mx-auto my-8 max-w-3xl rounded-2xl bg-white shadow-2xl"><form onSubmit={submit} className="p-6"><div className="mb-6 flex items-start justify-between"><div><h2 className="text-xl font-bold text-gray-900">{editing ? `Edit ${itemWord}` : `Tambah ${itemWord}`}</h2><p className="mt-1 text-sm text-gray-500">Simpan sebagai draft dahulu atau terbitkan saat siap.</p></div><button type="button" onClick={() => setOpen(false)} className="text-2xl text-gray-400">×</button></div><div className="grid gap-4 sm:grid-cols-2">
@@ -355,12 +410,6 @@ export default function CityGuideManager({
       <SocialLinksFields value={String(values.listing_details || "{}")} onChange={(value) => change("listing_details", value)} label={isEvent ? "Media sosial & promosi" : "Media Instagram & sosial"} />
     </div><div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t pt-5"><div className="flex flex-wrap items-center gap-4"><StatusField value={statusOf(Boolean(values.published), Boolean(values.archived))} onChange={setStatus} /><label className="flex items-center gap-2 text-sm"><input type="checkbox" checked={Boolean(values.featured)} onChange={(e) => change("featured", e.target.checked)} />Tampilkan di beranda</label></div><button disabled={saving} className="rounded-xl bg-amber-400 px-5 py-2.5 text-sm font-semibold text-gray-950 disabled:opacity-50">{saving ? "Menyimpan…" : "Simpan"}</button></div></form></div></div>}
   </div>;
-}
-
-function StatusBadge({ status }: { status: Status }) {
-  const styles: Record<Status, string> = { published: "bg-green-50 text-green-700", draft: "bg-gray-100 text-gray-500", archived: "bg-stone-200 text-stone-600" };
-  const labels: Record<Status, string> = { published: "Publik", draft: "Draft", archived: "Diarsipkan" };
-  return <span className={`rounded-full px-2 py-1 text-[11px] font-semibold ${styles[status]}`}>{labels[status]}</span>;
 }
 
 function StatusField({ value, onChange }: { value: Status; onChange: (status: Status) => void }) {
