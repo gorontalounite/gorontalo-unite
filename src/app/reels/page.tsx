@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import ReelsFeed from "./ReelsFeed";
-import { reels as fallbackReels, type ReelItem } from "./data";
+import { DEFAULT_REEL_CATEGORIES, reels as fallbackReels, type ReelItem } from "./data";
 
 export const metadata: Metadata = {
   title: "Reels",
-  description: "Pilihan Reel tentang wisata, kuliner, event, dan kolaborasi dari Gorontalo Unite.",
+  description: "Reel pilihan Gorontalo Unite: Tourism, Culinary, Culture, Event, dan kolaborasi Sponsored.",
   alternates: { canonical: "/reels" },
 };
 
 function getCategory(value: string | string[] | undefined, reels: ReelItem[]): "All" | string {
   const normalized = Array.isArray(value) ? value[0] : value;
-  const category = reels.map((item) => item.category)
-    .find((item) => item.toLowerCase() === normalized?.toLowerCase());
-  return category ?? "All";
+  // Match the whole taxonomy, not only categories that currently have reels —
+  // otherwise a link to an empty category silently lands on All instead.
+  const known = [...DEFAULT_REEL_CATEGORIES, ...reels.map((item) => item.category)];
+  return known.find((item) => item.toLowerCase() === normalized?.toLowerCase()) ?? "All";
 }
 
 function getPeriod(value: string | string[] | undefined): string {
