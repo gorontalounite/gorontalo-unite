@@ -72,70 +72,71 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
             >
               Start browsing
             </Link>
-          </div>
 
-        </div>
-
-        {/* B — Search panel. Area and category are the two axes the data really
-            has, so the panel offers those rather than dates and guest counts. */}
-        <div className="mx-auto mt-5 max-w-[1280px] px-4 sm:-mt-9 sm:px-6 lg:hidden">
-          <form
-            action="/city-guide#browse"
-            className="grid gap-px overflow-hidden rounded-lg border border-[#d7d1c6] bg-[#d7d1c6] shadow-[0_18px_40px_-24px_rgba(0,0,0,.5)] sm:grid-cols-[1.1fr_1fr_1.2fr_auto] dark:border-zinc-700 dark:bg-zinc-700"
-          >
-            <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
-              <span className="sr-only">Area</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
-                <path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11z" />
-                <circle cx="12" cy="10" r="2.5" />
-              </svg>
-              <select name="region" defaultValue="" className="min-w-0 flex-1 bg-transparent text-sm outline-none">
-                <option value="">Anywhere in Gorontalo</option>
-                {REGIONS.map((area) => (
-                  <option key={area.slug} value={area.slug}>
-                    {area.label} ({areaCounts.get(area.slug) ?? 0})
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
-              <span className="sr-only">Looking for</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
-                <rect x="3" y="4" width="18" height="16" rx="2" />
-                <path d="M3 10h18" />
-              </svg>
-              <select name="tab" defaultValue="" className="min-w-0 flex-1 bg-transparent text-sm outline-none">
-                <option value="">Anything</option>
-                {CATEGORY_TILES.map((tile) => (
-                  <option key={tile.tab} value={tile.tab}>{tile.label}</option>
-                ))}
-                <option value="services">Services</option>
-                <option value="events">Events</option>
-              </select>
-            </label>
-
-            <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
-              <span className="sr-only">Keyword</span>
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
-                <circle cx="11" cy="11" r="7" />
-                <path d="M20 20l-3.5-3.5" />
-              </svg>
-              <input
-                name="q"
-                type="search"
-                placeholder="Name, food, or landmark"
-                className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#a8a29e]"
-              />
-            </label>
-
-            <button
-              type="submit"
-              className="min-h-12 bg-[#302f2c] px-8 text-sm font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#9b7513] dark:bg-amber-300 dark:text-zinc-950 dark:hover:bg-amber-200"
+            {/* The search panel sits on the photograph at every width. Area and
+                category are the two axes the data really has, so the panel
+                offers those rather than dates and guest counts. */}
+            {/* The text colour is set explicitly: sitting inside the hero, the
+                fields would otherwise inherit its white type and vanish against
+                their own white background. */}
+            <form
+              action="/city-guide#browse"
+              className="mt-8 grid w-full max-w-3xl gap-px overflow-hidden rounded-lg border border-[#d7d1c6] bg-[#d7d1c6] text-left text-[#302f2c] shadow-[0_18px_40px_-24px_rgba(0,0,0,.6)] sm:max-w-4xl sm:grid-cols-[1.1fr_1fr_1.2fr_auto] dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-100"
             >
-              Search
-            </button>
-          </form>
+              <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
+                <span className="sr-only">Area</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                  <path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11z" />
+                  <circle cx="12" cy="10" r="2.5" />
+                </svg>
+                <select name="region" defaultValue="" className="min-w-0 flex-1 bg-transparent text-sm outline-none">
+                  <option value="">Anywhere in Gorontalo</option>
+                  {REGIONS.map((area) => (
+                    <option key={area.slug} value={area.slug}>
+                      {area.label} ({areaCounts.get(area.slug) ?? 0})
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
+                <span className="sr-only">Looking for</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M3 10h18" />
+                </svg>
+                <select name="tab" defaultValue="" className="min-w-0 flex-1 bg-transparent text-sm outline-none">
+                  <option value="">Anything</option>
+                  {CATEGORY_TILES.map((tile) => (
+                    <option key={tile.tab} value={tile.tab}>{tile.label}</option>
+                  ))}
+                  <option value="services">Services</option>
+                  <option value="events">Events</option>
+                </select>
+              </label>
+
+              <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
+                <span className="sr-only">Keyword</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M20 20l-3.5-3.5" />
+                </svg>
+                <input
+                  name="q"
+                  type="search"
+                  placeholder="Name, food, or landmark"
+                  className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#a8a29e]"
+                />
+              </label>
+
+              <button
+                type="submit"
+                className="min-h-12 bg-[#302f2c] px-8 text-sm font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#9b7513] dark:bg-amber-300 dark:text-zinc-950 dark:hover:bg-amber-200"
+              >
+                Search
+              </button>
+            </form>
+          </div>
         </div>
       </section>
 
