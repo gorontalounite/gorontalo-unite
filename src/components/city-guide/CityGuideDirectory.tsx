@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
-import { REGIONS, regionOf, type RegionSlug } from "@/lib/city-guide/regions";
+import { REGIONS, regionBySlug, regionOf, type RegionSlug } from "@/lib/city-guide/regions";
 
 export type CityGuidePlace = {
   id: string;
@@ -41,6 +41,9 @@ type DirectoryItem = {
   imageUrl: string | null;
   badge: string;
   place: string;
+  /** Short area name, for the meta row. */
+  area: string;
+  hours: string;
   dek: string;
   region: RegionSlug | null;
   featured: boolean;
@@ -106,6 +109,8 @@ export default function CityGuideDirectory({
         imageUrl: place.image_url,
         badge: SECTION_META[key].label,
         place: place.location || place.address || "Gorontalo",
+        area: regionBySlug(regionOf(place))?.short ?? "Gorontalo",
+        hours: place.opening_hours ?? "",
         dek: toDek(place.description),
         region: regionOf(place),
         featured: place.featured,
@@ -121,6 +126,8 @@ export default function CityGuideDirectory({
         imageUrl: event.image_url,
         badge: eventDate(event.starts_at),
         place: event.venue || event.address || "Gorontalo",
+        area: event.venue || "Gorontalo",
+        hours: "",
         dek: toDek(event.description),
         region: regionOf({ location: event.venue, address: event.address }),
         featured: event.featured,
@@ -330,10 +337,12 @@ function Section({
 
   // Paging resets by remount — the parent keys each Section on the active
   // search, so a new query always starts back at the first page.
-  const [visible, setVisible] = useState(PAGE_SIZE);
-
-  const shown = isRail ? items : items.slice(0, visible);
-  const remaining = items.length - shown.length;
+  const [page, setPage] = useState(0);
+  const pageCount = Math.max(1, Math.ceil(items.length / PAGE_SIZE));
+  // Clamped rather than trusted: an area filter can shrink the list under the
+  // page the reader is standing on, which would otherwise render nothing.
+  const current = Math.min(page, pageCount - 1);
+  const shown = isRail ? items : items.slice(current * PAGE_SIZE, (current + 1) * PAGE_SIZE);
 
   return (
     <section
@@ -368,18 +377,26 @@ function Section({
           <>
             <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
               {shown.map((item) => (
-                <PlaceCard key={item.id} item={item} sectionKey={sectionKey} isDark={isDark} />
+                <PlaceCard key={item.id} item={item} sectionKey={sectionKey} />
               ))}
             </div>
-            {remaining > 0 && (
-              <div className="mt-9 flex justify-center">
-                <button
-                  type="button"
-                  onClick={() => setVisible((current) => current + PAGE_SIZE)}
-                  className="min-h-11 rounded border border-[#302f2c] px-7 text-xs font-bold uppercase tracking-[.12em] transition hover:bg-[#302f2c] hover:text-white dark:border-zinc-600 dark:hover:bg-amber-300 dark:hover:text-zinc-950 dark:hover:border-amber-300"
-                >
-                  Load more ({remaining})
-                </button>
+            {pageCount > 1 && (
+              <div className="mt-9 flex items-center justify-center gap-4">
+                <PageArrow
+                  direction="prev"
+                  disabled={current === 0}
+                  onClick={() => setPage(current - 1)}
+                  label={`Previous page of ${meta.label}`}
+                />
+                <p className="text-xs tabular-nums text-[#78716c] dark:text-zinc-400">
+                  {current + 1} / {pageCount}
+                </p>
+                <PageArrow
+                  direction="next"
+                  disabled={current === pageCount - 1}
+                  onClick={() => setPage(current + 1)}
+                  label={`Next page of ${meta.label}`}
+                />
               </div>
             )}
           </>
@@ -389,10 +406,40 @@ function Section({
   );
 }
 
-function PlaceCard({ item, sectionKey, isDark }: { item: DirectoryItem; sectionKey: SectionKey; isDark: boolean }) {
+/** Arrows only — the label is for screen readers, not the page. */
+function PageArrow({
+  direction,
+  disabled,
+  onClick,
+  label,
+}: {
+  direction: "prev" | "next";
+  disabled: boolean;
+  onClick: () => void;
+  label: string;
+}) {
   return (
-    <Link href={item.href} className="group block">
-      <div className={`relative overflow-hidden rounded-[4px] aspect-[4/3] ${isDark ? "bg-[#23262c]" : "bg-[#e8e4dc] dark:bg-zinc-800"}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={label}
+      className="grid h-11 w-11 place-items-center rounded-full border border-[#d7d1c6] transition hover:border-[#302f2c] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-[#d7d1c6] dark:border-zinc-700 dark:hover:border-amber-300 dark:disabled:hover:border-zinc-700"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
+        <path d={direction === "prev" ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"} />
+      </svg>
+    </button>
+  );
+}
+
+function PlaceCard({ item, sectionKey }: { item: DirectoryItem; sectionKey: SectionKey }) {
+  return (
+    <Link
+      href={item.href}
+      className="group flex flex-col overflow-hidden rounded-lg border border-[#e7e2d8] bg-white transition hover:shadow-[0_18px_36px_-24px_rgba(0,0,0,.45)] dark:border-zinc-800 dark:bg-zinc-900"
+    >
+      <div className="relative aspect-[4/3] overflow-hidden bg-[#e8e4dc] dark:bg-zinc-800">
         {item.imageUrl ? (
           <Image
             src={item.imageUrl}
@@ -400,48 +447,50 @@ function PlaceCard({ item, sectionKey, isDark }: { item: DirectoryItem; sectionK
             fill
             unoptimized
             sizes="(max-width: 639px) 46vw, (max-width: 1279px) 31vw, 400px"
-            className="object-cover"
+            className="object-cover transition duration-500 group-hover:scale-105"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={`h-8 w-8 ${isDark ? "text-[#4b4536]" : "text-[#a08a5c]"}`}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-8 w-8 text-[#a08a5c]">
               {SECTION_META[sectionKey].icon}
             </svg>
           </div>
         )}
-
-        {/* Category and location ride on the photo, so they never shout over the name. */}
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent px-2.5 pb-2.5 pt-9">
-          <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-            <span className="rounded-full border border-white/45 bg-black/25 px-2 py-[3px] text-[9px] font-bold uppercase leading-none tracking-[.1em] text-white">
-              {item.badge}
-            </span>
-            {/* Wraps rather than truncates: these values end on the kecamatan as
-                often as the kabupaten, so a cut would hide the useful half. */}
-            <span className="line-clamp-2 min-w-0 text-[10px] font-medium uppercase leading-[1.35] tracking-[.05em] text-white/85">
-              {item.place}
-            </span>
-          </div>
-        </div>
       </div>
 
-      <h3 className={`font-heading mt-3 text-[15px] font-bold leading-snug transition sm:text-base ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
-        {item.title}
-      </h3>
+      {/* Everything sits inside the card now. The category and location used to
+          ride on the photograph; here they read as one block with the name. */}
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#9b7513] sm:text-base">
+          {item.title}
+        </h3>
 
-      {/* Two fixed lines, so the Read more links stay on one baseline across a row. */}
-      {item.dek && (
-        <p className={`mt-1.5 line-clamp-2 min-h-10 text-xs leading-relaxed ${isDark ? "text-zinc-400" : "text-[#78716c] dark:text-zinc-400"}`}>
-          {item.dek}
-        </p>
-      )}
+        {/* Two fixed lines, so the rule below sits on one baseline across a row. */}
+        {item.dek && (
+          <p className="mt-1.5 line-clamp-2 min-h-10 text-xs leading-relaxed text-[#78716c] dark:text-zinc-400">
+            {item.dek}
+          </p>
+        )}
 
-      <span className={`mt-2 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[.08em] ${isDark ? "text-[#f5c400]" : "text-[#9b7513] dark:text-amber-300"}`}>
-        Read more
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-3 w-3 transition group-hover:translate-x-0.5" aria-hidden="true">
-          <path d="M5 12h13M13 6l6 6-6 6" />
-        </svg>
-      </span>
+        <div className="mt-3 flex items-center gap-3 border-t border-[#f0ece4] pt-3 text-[11px] text-[#78716c] dark:border-zinc-800 dark:text-zinc-400">
+          <span className="shrink-0">{item.area}</span>
+          {/* Two columns on a phone leave about 155px of card; opening hours run
+              far past that, so they wait for the wider layout. */}
+          {item.hours && (
+            <>
+              <span aria-hidden="true" className="hidden h-1 w-1 shrink-0 rounded-full bg-[#d7d1c6] sm:block" />
+              <span className="hidden min-w-0 truncate sm:block">{item.hours}</span>
+            </>
+          )}
+        </div>
+
+        <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[.08em] text-[#9b7513] dark:text-amber-300">
+          Read more
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-3 w-3 transition group-hover:translate-x-0.5" aria-hidden="true">
+            <path d="M5 12h13M13 6l6 6-6 6" />
+          </svg>
+        </span>
+      </div>
     </Link>
   );
 }
