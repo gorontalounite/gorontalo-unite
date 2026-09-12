@@ -141,7 +141,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
       </section>
 
       {/* C — Browse by area, the reference's destination rail */}
-      <section className="mx-auto max-w-[1280px] px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8">
+      <section className="mx-auto max-w-[1280px] px-4 pt-10 sm:px-6 sm:pt-14 lg:px-8">
         <div className="sm:flex sm:items-end sm:justify-between sm:gap-8">
           <div className="max-w-md">
             <h2 className="font-heading text-[26px] sm:text-[32px]">Go by area</h2>
@@ -156,26 +156,22 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
         <div className="-mx-4 mt-8 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-3 sm:px-0 lg:grid-cols-6 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {REGIONS.map((area) => {
             const count = areaCounts.get(area.slug) ?? 0;
-            const shot =
-              withRegion.find((x) => x.region === area.slug && isGuidePhoto(x.place.image_url))?.place ??
-              withRegion.find((x) => x.region === area.slug && x.place.image_url)?.place;
             return (
               <Link
                 key={area.slug}
-                href={`/city-guide?region=${area.slug}#browse`}
+                href={`/city-guide/area/${area.slug}`}
                 className="group w-[58vw] shrink-0 snap-start sm:w-auto"
               >
                 <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-[#e8e4dc] dark:bg-zinc-800">
-                  {shot?.image_url && (
-                    <Image
-                      src={shot.image_url}
-                      alt=""
-                      fill
-                      unoptimized
-                      sizes="(max-width: 639px) 58vw, (max-width: 1023px) 30vw, 200px"
-                      className="object-cover transition duration-500 group-hover:scale-105"
-                    />
-                  )}
+                  {/* A landmark that stands for the area, rather than whichever
+                      listing inside it happened to sort first. */}
+                  <Image
+                    src={`/city-guide/areas/${area.slug}.webp`}
+                    alt=""
+                    fill
+                    sizes="(max-width: 639px) 58vw, (max-width: 1023px) 30vw, 200px"
+                    className="object-cover transition duration-500 group-hover:scale-105"
+                  />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
                   <div className="absolute inset-x-0 bottom-0 p-3">
                     <p className="text-sm font-semibold leading-tight text-white">{area.short}</p>
@@ -192,7 +188,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
 
       {/* D — Recently added, in the shape of the reference's tour cards */}
       {recent.length > 0 && (
-        <section className="mx-auto max-w-[1280px] px-4 pt-14 sm:px-6 sm:pt-20 lg:px-8">
+        <section className="mx-auto max-w-[1280px] px-4 pt-10 sm:px-6 sm:pt-14 lg:px-8">
           <h2 className="font-heading text-[26px] sm:text-[32px]">Recently added</h2>
           <span className="mt-3 block h-px w-12 bg-[#9b7513]" />
 
@@ -242,7 +238,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
       )}
 
       {/* E — Full-bleed banner */}
-      <section className="relative mt-14 h-[46vh] min-h-[300px] overflow-hidden bg-[#1b1a17] sm:mt-20 sm:h-[52vh] sm:max-h-[460px]">
+      <section className="relative mt-10 h-[46vh] min-h-[300px] overflow-hidden bg-[#1b1a17] sm:mt-14 sm:h-[52vh] sm:max-h-[460px]">
         {banner?.image_url && (
           <Image src={banner.image_url} alt="" fill unoptimized sizes="100vw" className="object-cover" />
         )}
@@ -268,7 +264,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
           guarantee and 24/7 support; neither is true here, so these three say
           only what the data supports. */}
       <section className="border-y border-[#e7e2d8] bg-[#faf8f4] dark:border-zinc-800 dark:bg-zinc-900">
-        <div className="mx-auto grid max-w-[1280px] gap-8 px-4 py-12 sm:grid-cols-3 sm:px-6 lg:px-8">
+        <div className="mx-auto grid max-w-[1280px] gap-8 px-4 py-10 sm:grid-cols-3 sm:px-6 lg:px-8">
           {[
             { n: `${places.length} places`, d: "Across the city and all five regencies, in one directory." },
             { n: "Photographed on location", d: "Every listing carries its own pictures, not stock photography." },
@@ -283,7 +279,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
       </section>
 
       {/* G — Category tiles */}
-      <section className="mx-auto max-w-[1280px] px-4 py-14 sm:px-6 sm:py-20 lg:px-8">
+      <section className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <h2 className="font-heading text-[26px] sm:text-[32px]">What are you after</h2>
         <span className="mt-3 block h-px w-12 bg-[#9b7513]" />
 
