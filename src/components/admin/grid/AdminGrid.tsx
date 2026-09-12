@@ -53,28 +53,13 @@ export default function AdminGrid<T>({
     offsets.set(column.key, cursor);
     cursor += column.width;
   }
-  const frozenWidth = cursor;
   const totalWidth = columns.reduce((sum, column) => sum + column.width, GUTTER_WIDTH);
 
   const allSelected = rows.length > 0 && rows.every((row) => selected.has(rowKey(row)));
 
   return (
     <div>
-      {/* The two zone labels from the design: what stays put, and what scrolls. */}
-      <div className="flex overflow-hidden rounded-t-xl">
-        <div
-          className="font-display grid shrink-0 place-items-center bg-black py-2 text-[15px] leading-none text-white"
-          style={{ width: frozenWidth }}
-        >
-          Freeze
-        </div>
-        <div className="font-display flex min-w-0 flex-1 items-center gap-2 bg-[#F5C400] px-4 py-2 text-[15px] leading-none text-black">
-          <span aria-hidden="true">←</span>
-          <span className="truncate">Swiped · Geser</span>
-        </div>
-      </div>
-
-      <div className="overflow-x-auto rounded-b-xl border border-t-0 border-gray-200 bg-white">
+      <div className="overflow-x-auto rounded-xl border border-gray-200 bg-white">
         {rows.length === 0 ? (
           <div className="py-16 text-center text-sm text-gray-400">{empty}</div>
         ) : (
