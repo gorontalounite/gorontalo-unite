@@ -43,7 +43,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
     <>
       {/* A — Hero, with the search panel riding its lower edge */}
       <section className="relative">
-        <div className="relative h-[62vh] min-h-[420px] w-full overflow-hidden bg-[#1b1a17] sm:h-[70vh] sm:max-h-[620px]">
+        <div className="relative h-[calc(100svh-3.5rem)] w-full overflow-hidden bg-[#1b1a17] sm:h-[70vh] sm:max-h-[620px]">
           <Image
             src="/city-guide/hero.webp"
             alt=""
@@ -78,7 +78,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
 
         {/* B — Search panel. Area and category are the two axes the data really
             has, so the panel offers those rather than dates and guest counts. */}
-        <div className="mx-auto mt-5 max-w-[1280px] px-4 sm:-mt-9 sm:px-6 lg:px-8">
+        <div className="mx-auto mt-5 max-w-[1280px] px-4 sm:-mt-9 sm:px-6 lg:hidden">
           <form
             action="/city-guide#browse"
             className="grid gap-px overflow-hidden rounded-lg border border-[#d7d1c6] bg-[#d7d1c6] shadow-[0_18px_40px_-24px_rgba(0,0,0,.5)] sm:grid-cols-[1.1fr_1fr_1.2fr_auto] dark:border-zinc-700 dark:bg-zinc-700"
