@@ -2,6 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { REGIONS, regionOf, type RegionSlug } from "@/lib/city-guide/regions";
 import type { CityGuidePlace } from "./CityGuideDirectory";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 /**
  * The marketing half of the City Guide, built on the tour-site reference.
@@ -143,8 +144,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
       <section className="mx-auto max-w-[1280px] px-4 pt-10 sm:px-6 sm:pt-14 lg:px-8">
         <div className="sm:flex sm:items-end sm:justify-between sm:gap-8">
           <div className="max-w-md">
-            <h2 className="font-heading text-[26px] sm:text-[32px]">Go by area</h2>
-            <span className="mt-3 block h-px w-12 bg-[#9b7513]" />
+            <SectionHeading>Go by area</SectionHeading>
             <p className="mt-4 text-sm leading-relaxed text-[#78716c] dark:text-zinc-400">
               Gorontalo is one city and five regencies. Pick one and the whole
               directory narrows to it — places, food and rooms together.
@@ -188,8 +188,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
       {/* D — Recently added, in the shape of the reference's tour cards */}
       {recent.length > 0 && (
         <section className="mx-auto max-w-[1280px] px-4 pt-10 sm:px-6 sm:pt-14 lg:px-8">
-          <h2 className="font-heading text-[26px] sm:text-[32px]">Recently added</h2>
-          <span className="mt-3 block h-px w-12 bg-[#9b7513]" />
+          <SectionHeading>Recently added</SectionHeading>
 
           <div className="mt-8 grid gap-5 sm:grid-cols-3">
             {recent.map((place) => {
@@ -279,8 +278,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
 
       {/* G — Category tiles */}
       <section className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <h2 className="font-heading text-[26px] sm:text-[32px]">What are you after</h2>
-        <span className="mt-3 block h-px w-12 bg-[#9b7513]" />
+        <SectionHeading>What are you after</SectionHeading>
 
         <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
           {CATEGORY_TILES.map((tile) => {

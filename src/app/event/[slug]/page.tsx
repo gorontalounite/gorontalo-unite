@@ -3,6 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import SectionHeading, { PAGE_TITLE_CLASS, SUBHEAD_CLASS } from "@/components/ui/SectionHeading";
 import {
   EVENT_CATEGORIES, eventDayLong, fromEventRow, rupiah, SAMPLE_EVENTS, type EventItem,
 } from "../data";
@@ -100,7 +101,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
           </div>
 
           <div className="min-w-0 self-start">
-            <h1 className="font-heading text-2xl font-bold leading-tight sm:text-3xl">{event.title}</h1>
+            <h1 className={`${PAGE_TITLE_CLASS} leading-tight`}>{event.title}</h1>
             <div className="mt-4 space-y-2.5 text-[13px] leading-relaxed text-white/80">
               {place && <p className="flex gap-2"><Icon path={PIN} />{place}</p>}
               <p className="flex gap-2"><Icon path={CAL} />{eventDayLong(event.startsAt)}</p>
@@ -128,11 +129,11 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
       {/* Detail + tickets */}
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0">
-          <h2 className="font-heading text-xl font-bold">Detail Event</h2>
+          <SectionHeading>Detail Event</SectionHeading>
 
           {event.importantInfo.length > 0 && (
             <div className="mt-4 rounded-xl bg-[#f2f4f8] p-4 dark:bg-zinc-900">
-              <h3 className="font-heading text-[15px] font-semibold">Info Penting</h3>
+              <h3 className={SUBHEAD_CLASS}>Info Penting</h3>
               <ul className="mt-2 list-disc space-y-2 pl-5 text-[13px] leading-relaxed text-neutral-700 dark:text-neutral-300">
                 {event.importantInfo.map((line) => <li key={line}>{line}</li>)}
               </ul>
@@ -147,7 +148,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
 
           {event.terms.length > 0 && (
             <section className="mt-10">
-              <h2 className="font-heading text-xl font-bold">Info Lainnya</h2>
+              <SectionHeading>Info Lainnya</SectionHeading>
               <details className="mt-3 rounded-xl border border-neutral-200 p-4 dark:border-zinc-800" open>
                 <summary className="cursor-pointer text-[15px] font-semibold">Syarat &amp; Ketentuan</summary>
                 <ul className="mt-3 list-disc space-y-2 pl-5 text-[13px] leading-relaxed text-neutral-700 dark:text-neutral-300">

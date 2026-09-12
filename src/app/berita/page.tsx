@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
+import SectionHeading from "@/components/ui/SectionHeading";
 import { createClient } from "@/lib/supabase/server";
 import LatestNewsGrid from "./LatestNewsGrid";
 import HeroCarousel from "./HeroCarousel";
@@ -142,14 +143,11 @@ function Eyebrow({ article, light = false, deskMap = {} }: { article: Article; l
 
 function SectionTitle({ id, title, dark = false, showViewAll = true }: { id: string; title: string; dark?: boolean; showViewAll?: boolean }) {
   return (
-    <div className="mb-6 flex items-center justify-between gap-4">
-      <h2 className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
-        <span className="text-[#f5c400]" aria-hidden>/</span>
-        <span>{title}</span>
-        <span className="text-[#f5c400]" aria-hidden>/</span>
-      </h2>
-      {showViewAll ? <Link href={`/category/${id}`} className={`inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold ${dark ? "text-white" : "text-[#302f2c] dark:text-zinc-50"}`}>View all <span aria-hidden>→</span></Link> : null}
-    </div>
+    <SectionHeading
+      action={showViewAll ? <Link href={`/category/${id}`} className={`inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold ${dark ? "text-white" : "text-[#302f2c] dark:text-zinc-50"}`}>View all <span aria-hidden>→</span></Link> : null}
+    >
+      {title}
+    </SectionHeading>
   );
 }
 

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { REGIONS, regionBySlug, regionOf, type RegionSlug } from "@/lib/city-guide/regions";
+import SectionHeading from "@/components/ui/SectionHeading";
 
 export type CityGuidePlace = {
   id: string;
@@ -306,11 +307,7 @@ function Section({
       aria-labelledby={`section-${sectionKey}`}
     >
       <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-        <div className="mb-6 flex items-center justify-between gap-4">
-          <h2 id={`section-${sectionKey}`} className="font-heading text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
-            / {meta.label} /
-          </h2>
-        </div>
+        <SectionHeading id={`section-${sectionKey}`}>{meta.label}</SectionHeading>
 
         {items.length === 0 ? (
           <div className={`rounded border border-dashed px-6 py-14 text-center ${isDark ? "border-white/15" : "border-[#d7d1c6] dark:border-zinc-700"}`}>
