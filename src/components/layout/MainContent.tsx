@@ -9,7 +9,10 @@ export default function MainContent({ children }: { children: React.ReactNode })
   const isApplication = applicationPrefixes.some((prefix) => pathname === prefix || pathname.startsWith(`${prefix}/`));
 
   return (
-    <main className={isApplication ? "flex min-h-0 flex-1 flex-col pb-16 md:pb-0" : "block min-h-0 pb-16 md:pb-0"}>
+    // Application screens have no footer, so they carry the bottom-nav
+    // clearance themselves. On public pages the footer carries it, otherwise
+    // the padding sits between the content and the footer as an empty band.
+    <main className={isApplication ? "flex min-h-0 flex-1 flex-col pb-16 md:pb-0" : "block min-h-0"}>
       {children}
     </main>
   );
