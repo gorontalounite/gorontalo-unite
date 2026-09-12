@@ -1,5 +1,13 @@
-import { createClient } from "@/lib/supabase/server";
-import CityGuideManager from "../city-guide/CityGuideManager";
+import { redirect } from "next/navigation";
+
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Event | Admin Gorontalo Unite" };
-export default async function EventAdminPage() { const supabase = await createClient(); const { data } = await supabase.from("events").select("*").order("starts_at", { ascending: false }); return <CityGuideManager kind="event" initialItems={(data ?? []) as never[]} />; }
+
+/**
+ * Events are one of the City Guide's six sections, so they are listed and
+ * edited alongside the rest of the guide. This keeps the sidebar link working
+ * by landing on that section already filtered.
+ */
+export default function EventAdminPage() {
+  redirect("/admin/city-guide?section=Events");
+}
