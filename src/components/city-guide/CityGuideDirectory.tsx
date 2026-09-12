@@ -18,21 +18,8 @@ export type CityGuidePlace = {
   featured: boolean;
 };
 
-export type CityGuideEvent = {
-  id: string;
-  title: string;
-  slug: string;
-  description: string;
-  image_url: string | null;
-  category: string | null;
-  venue: string | null;
-  address: string | null;
-  starts_at: string;
-  ends_at: string | null;
-  featured: boolean;
-};
 
-type SectionKey = "explore" | "eat" | "stay" | "shop" | "services" | "events";
+type SectionKey = "explore" | "eat" | "stay" | "shop" | "services";
 
 type DirectoryItem = {
   id: string;
@@ -56,10 +43,9 @@ const SECTION_META: Record<SectionKey, { label: string; category: string | null;
   stay: { label: "Stay", category: "Akomodasi", icon: <path d="M3 19V7m0 12h18M3 19v-4h18v4M7 15V9a2 2 0 012-2h2a2 2 0 012 2v6" /> },
   shop: { label: "Shop", category: "Belanja", icon: <path d="M6 8h12l1 12H5L6 8zM9 8V6a3 3 0 016 0v2" /> },
   services: { label: "Services", category: "Layanan Publik & Transportasi", icon: <path d="M3 16l2-6h14l2 6M5 16v3M19 16v3M7 10V6h10v4" /> },
-  events: { label: "Events", category: null, icon: <path d="M8 3v3M16 3v3M4 9h16M5 6h14a1 1 0 011 1v12a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1z" /> },
 };
 
-const SECTION_ORDER: SectionKey[] = ["explore", "eat", "stay", "shop", "services", "events"];
+const SECTION_ORDER: SectionKey[] = ["explore", "eat", "stay", "shop", "services"];
 
 // Places load six at a time — two full rows on desktop, three on phones.
 const PAGE_SIZE = 6;
@@ -73,19 +59,14 @@ function toDek(text: string) {
   return words.slice(0, DEK_WORDS).join(" ") + (words.length > DEK_WORDS ? "…" : "");
 }
 
-function eventDate(value: string) {
-  return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" }).format(new Date(value));
-}
 
 export default function CityGuideDirectory({
   places,
-  events,
   initialTab,
   initialRegion,
   initialQuery,
 }: {
   places: CityGuidePlace[];
-  events: CityGuideEvent[];
   initialTab?: string;
   initialRegion?: string;
   initialQuery?: string;
@@ -118,26 +99,9 @@ export default function CityGuideDirectory({
       });
     }
 
-    for (const event of events) {
-      map.get("events")!.push({
-        id: event.id,
-        href: `/event/${event.slug}`,
-        title: event.title,
-        imageUrl: event.image_url,
-        badge: eventDate(event.starts_at),
-        place: event.venue || event.address || "Gorontalo",
-        area: event.venue || "Gorontalo",
-        hours: "",
-        dek: toDek(event.description),
-        region: regionOf({ location: event.venue, address: event.address }),
-        featured: event.featured,
-        searchable: normalize([event.title, event.description, event.category, event.venue, event.address].filter(Boolean).join(" ")),
-      });
-    }
-
     for (const list of map.values()) list.sort((a, b) => Number(b.featured) - Number(a.featured));
     return map;
-  }, [places, events]);
+  }, [places]);
 
   const needle = normalize(query);
   const searchedSections = useMemo(() => {
@@ -249,10 +213,8 @@ export default function CityGuideDirectory({
             key={`${key}-${needle}-${region ?? "all"}`}
             sectionKey={key}
             items={filteredSections.get(key) ?? []}
-            band={key === "events" ? "dark" : index % 2 === 1 ? "light" : "plain"}
+            band={index % 2 === 1 ? "light" : "plain"}
             first={index === 0}
-            onViewAll={() => setTab(key)}
-            showViewAll={tab === "all"}
           />
         ))
       )}
@@ -319,20 +281,14 @@ function Section({
   items,
   band,
   first,
-  onViewAll,
-  showViewAll,
 }: {
   sectionKey: SectionKey;
   items: DirectoryItem[];
   band: "plain" | "light" | "dark";
   first: boolean;
-  onViewAll: () => void;
-  showViewAll: boolean;
 }) {
   const meta = SECTION_META[sectionKey];
   const isDark = band === "dark";
-  // Events stay a slider with a View All; every place section pages instead.
-  const isRail = sectionKey === "events";
   const bandClass = band === "dark" ? "bg-[#17191d] text-white" : band === "light" ? "border-y border-[#dedede] bg-[#f6f6f6] dark:border-zinc-800 dark:bg-zinc-900" : "";
 
   // Paging resets by remount — the parent keys each Section on the active
@@ -342,7 +298,7 @@ function Section({
   // Clamped rather than trusted: an area filter can shrink the list under the
   // page the reader is standing on, which would otherwise render nothing.
   const current = Math.min(page, pageCount - 1);
-  const shown = isRail ? items : items.slice(current * PAGE_SIZE, (current + 1) * PAGE_SIZE);
+  const shown = items.slice(current * PAGE_SIZE, (current + 1) * PAGE_SIZE);
 
   return (
     <section
@@ -354,11 +310,6 @@ function Section({
           <h2 id={`section-${sectionKey}`} className="font-heading text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
             / {meta.label} /
           </h2>
-          {isRail && showViewAll && (
-            <button type="button" onClick={onViewAll} className={`shrink-0 min-h-11 text-xs font-bold ${isDark ? "text-white hover:text-[#f5c400]" : "hover:text-[#9b7513]"}`}>
-              View All →
-            </button>
-          )}
         </div>
 
         {items.length === 0 ? (
@@ -366,12 +317,6 @@ function Section({
             <p className={`text-sm ${isDark ? "text-white/60" : "text-[#78716c] dark:text-zinc-400"}`}>
               No {meta.label.toLowerCase()} listings published yet.
             </p>
-          </div>
-        ) : isRail ? (
-          <div className="-mx-4 flex gap-5 overflow-x-auto px-4 pb-1 [scroll-snap-type:x_mandatory] sm:-mx-6 sm:px-6 lg:-mx-8 lg:px-8 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-            {shown.map((item) => (
-              <EventCard key={item.id} item={item} isDark={isDark} className="w-[15.5rem] shrink-0 [scroll-snap-align:start]" />
-            ))}
           </div>
         ) : (
           <>
@@ -495,25 +440,3 @@ function PlaceCard({ item, sectionKey }: { item: DirectoryItem; sectionKey: Sect
   );
 }
 
-function EventCard({ item, isDark, className = "" }: { item: DirectoryItem; isDark: boolean; className?: string }) {
-  return (
-    <Link href={item.href} className={`group block ${className}`}>
-      <div className={`relative aspect-[9/16] overflow-hidden rounded-[4px] ${isDark ? "bg-[#23262c]" : "bg-[#e8e4dc] dark:bg-zinc-800"}`}>
-        {item.imageUrl ? (
-          <Image src={item.imageUrl} alt={item.title} fill unoptimized sizes="(max-width: 639px) 45vw, 20vw" className="object-cover" />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className={`h-8 w-8 ${isDark ? "text-[#4b4536]" : "text-[#a08a5c]"}`}>
-              {SECTION_META.events.icon}
-            </svg>
-          </div>
-        )}
-      </div>
-      <p className={`mt-2.5 text-[11px] font-bold uppercase tracking-[.08em] ${isDark ? "text-[#f5c400]/90" : "text-[#9b7513]"}`}>{item.badge}</p>
-      <h3 className={`font-heading mt-1 text-sm font-bold leading-snug tracking-[.01em] transition ${isDark ? "text-white group-hover:text-[#f5c400]" : "group-hover:text-[#9b7513]"}`}>
-        {item.title}
-      </h3>
-      <p className={`mt-1 text-xs ${isDark ? "text-zinc-400" : "text-[#78716c] dark:text-zinc-400"}`}>{item.place}</p>
-    </Link>
-  );
-}
