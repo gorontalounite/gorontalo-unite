@@ -1,11 +1,18 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import AdminGrid, { type GridColumn } from "@/components/admin/grid/AdminGrid";
+import { DateCell, PillSelectCell, StatusCell, SwitchCell, TextCell, ThumbCell } from "@/components/admin/grid/cells";
+import {
+  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar,
+} from "@/components/admin/grid/GridChrome";
+import { useRowEditor } from "@/components/admin/grid/useRowEditor";
 
 export interface AdminReel {
   id: string;
+  title: string | null;
   account_username: string;
   description: string;
   publish_time: string;
@@ -28,7 +35,7 @@ export interface AdminReel {
   updated_at: string;
 }
 
-type ReelForm = Omit<AdminReel, "id" | "created_at" | "updated_at">;
+type ReelForm = Omit<AdminReel, "id" | "created_at" | "updated_at" | "title"> & { title: string };
 
 const DEFAULT_CATEGORIES = ["Wisata", "Food", "Event", "Brand"];
 const METRICS: Array<{ key: keyof Pick<ReelForm, "views" | "reach" | "likes" | "shares" | "follows" | "comments" | "saves">; label: string }> = [
@@ -41,6 +48,11 @@ const METRICS: Array<{ key: keyof Pick<ReelForm, "views" | "reach" | "likes" | "
   { key: "saves", label: "Saves" },
 ];
 
+const STATUS_OPTIONS = [
+  { value: "published", label: "Live",  tone: "bg-[#e3f6ec] text-[#0f8a52]" },
+  { value: "draft",     label: "Draft", tone: "bg-[#f1f0ee] text-gray-600" },
+];
+
 function datetimeLocal(value: string) {
   const date = new Date(value);
   const pad = (part: number) => String(part).padStart(2, "0");
@@ -49,6 +61,7 @@ function datetimeLocal(value: string) {
 
 function emptyForm(): ReelForm {
   return {
+    title: "",
     account_username: "gorontalo.unite",
     description: "",
     publish_time: datetimeLocal(new Date().toISOString()),
@@ -72,45 +85,89 @@ function emptyForm(): ReelForm {
 
 const fieldClass = "w-full rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-900 outline-none transition focus:border-[#F5C400] focus:ring-2 focus:ring-[#F5C400]/10";
 
-export default function ReelsAdminClient({ initialItems, initialError }: { initialItems: AdminReel[]; initialError: string | null }) {
+interface Props {
+  initialItems: AdminReel[];
+  initialError: string | null;
+  /** False until the admin-grid migration adds reels.title. */
+  titleColumnReady: boolean;
+  totalCount: number;
+  allCount: number;
+  publishedCount: number;
+  draftCount: number;
+  categories: string[];
+  page: number;
+  pageSize: number;
+  q: string;
+  category: string;
+  status: string;
+  sortField: string;
+  sortDir: "asc" | "desc";
+}
+
+export default function ReelsAdminClient({
+  initialItems, initialError, titleColumnReady, totalCount, allCount, publishedCount, draftCount,
+  categories, page, pageSize, q, category, status, sortField, sortDir,
+}: Props) {
   const router = useRouter();
+  const [, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
-  const [items, setItems] = useState(initialItems);
   const [form, setForm] = useState<ReelForm>(emptyForm);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
-  const [error, setError] = useState<string | null>(initialError);
-  const [query, setQuery] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [deleteId, setDeleteId] = useState<string | null>(null);
-  const categories = useMemo(() => [
-    ...DEFAULT_CATEGORIES,
-    ...[...new Set(items.map((item) => item.category))]
-      .filter((category) => !DEFAULT_CATEGORIES.includes(category))
-      .sort(),
-  ], [items]);
+  const [formError, setFormError] = useState<string | null>(initialError);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [bulkAction, setBulkAction] = useState<"draft" | "delete" | null>(null);
+  const [bulkRunning, setBulkRunning] = useState(false);
 
-  const visibleItems = useMemo(() => items.filter((item) => {
-    const needle = query.toLowerCase();
-    const matchesQuery = !needle || item.account_username.toLowerCase().includes(needle) || item.description.toLowerCase().includes(needle);
-    return matchesQuery
-      && (categoryFilter === "all" || item.category === categoryFilter)
-      && (statusFilter === "all" || item.status === statusFilter);
-  }), [categoryFilter, items, query, statusFilter]);
+  const { rows, setRows, update, savingIds, error: rowError, setError: setRowError } = useRowEditor<AdminReel>(initialItems, {
+    endpointFor: () => "/api/admin/reels",
+    // The full-form PATCH revalidates every field; inline cell edits are narrow.
+    bodyFor: (_row, patch) => ({ ...patch, inline: true }),
+  });
+
+  const categoryOptions = useMemo(() => [
+    ...DEFAULT_CATEGORIES,
+    ...categories.filter((name) => !DEFAULT_CATEGORIES.includes(name)),
+  ], [categories]);
+
+  const nav = useCallback((params: Record<string, string>) => {
+    const sp = new URLSearchParams({
+      q, category, status,
+      page: String(page), pageSize: String(pageSize),
+      sort: sortField, dir: sortDir,
+      ...params,
+    });
+    for (const [key, value] of [...sp.entries()]) {
+      if (!value || value === "all" || (key === "page" && value === "1")) sp.delete(key);
+    }
+    startTransition(() => router.push("/admin/reels?" + sp.toString()));
+  }, [q, category, status, page, pageSize, sortField, sortDir, router]);
+
+  const toggleSort = (field: string) => nav(field === sortField
+    ? { sort: field, dir: sortDir === "asc" ? "desc" : "asc", page: "1" }
+    : { sort: field, dir: field === "order" ? "asc" : "desc", page: "1" });
+
+  const toggleRow = (id: string) => setSelected((current) => {
+    const next = new Set(current);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    return next;
+  });
+  const toggleAll = () => setSelected((current) =>
+    rows.every((row) => current.has(row.id)) ? new Set() : new Set(rows.map((row) => row.id)));
 
   function openCreate() {
     setEditingId(null);
     setForm(emptyForm());
-    setError(null);
+    setFormError(null);
     setShowForm(true);
   }
 
   function openEdit(item: AdminReel) {
     setEditingId(item.id);
     setForm({
+      title: item.title ?? "",
       account_username: item.account_username,
       description: item.description,
       publish_time: datetimeLocal(item.publish_time),
@@ -130,74 +187,178 @@ export default function ReelsAdminClient({ initialItems, initialError }: { initi
       comments: item.comments,
       saves: item.saves,
     });
-    setError(null);
+    setFormError(null);
     setShowForm(true);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   async function uploadThumbnail(file: File) {
     setUploading(true);
-    setError(null);
+    setFormError(null);
     const body = new FormData();
     body.append("file", file);
     body.append("folder", "reels");
     const response = await fetch("/api/admin/upload", { method: "POST", body });
     const result = await response.json();
-    if (!response.ok) setError(result.error ?? "Upload thumbnail gagal.");
+    if (!response.ok) setFormError(result.error ?? "Upload thumbnail gagal.");
     else setForm((current) => ({ ...current, thumbnail_url: result.url }));
     setUploading(false);
+  }
+
+  function payloadOf(id: string | null) {
+    const { title, ...rest } = form;
+    const base = titleColumnReady ? { ...rest, title } : rest;
+    return id ? { ...base, id } : base;
   }
 
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setSaving(true);
-    setError(null);
+    setFormError(null);
     const response = await fetch("/api/admin/reels", {
       method: editingId ? "PATCH" : "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify(editingId ? { ...form, id: editingId } : form),
+      body: JSON.stringify(payloadOf(editingId)),
     });
     const result = await response.json();
     if (!response.ok) {
-      setError(result.error ?? "Reel gagal disimpan.");
+      setFormError(result.error ?? "Reel gagal disimpan.");
       setSaving(false);
       return;
     }
-
-    const saved = result.data as AdminReel;
-    setItems((current) => editingId
-      ? current.map((item) => item.id === editingId ? saved : item)
-      : [saved, ...current]);
     setShowForm(false);
     setEditingId(null);
     setSaving(false);
     router.refresh();
   }
 
-  async function remove(id: string) {
-    const response = await fetch("/api/admin/reels", {
-      method: "DELETE",
+  async function runBulk(action: "draft" | "delete") {
+    setBulkRunning(true);
+    const ids = [...selected];
+    await Promise.all(ids.map((id) => fetch("/api/admin/reels", {
+      method: action === "delete" ? "DELETE" : "PATCH",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ id }),
-    });
-    const result = await response.json();
-    if (!response.ok) setError(result.error ?? "Reel gagal dihapus.");
-    else setItems((current) => current.filter((item) => item.id !== id));
-    setDeleteId(null);
+      body: JSON.stringify(action === "delete" ? { id } : { id, status: "draft", inline: true }),
+    })));
+    setBulkRunning(false);
+    setBulkAction(null);
+    setSelected(new Set());
     router.refresh();
   }
 
-  return (
-    <div className="max-w-6xl p-4 sm:p-6">
-      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold text-gray-900">Reels</h1>
-          <p className="mt-1 text-sm text-gray-500">Kelola thumbnail, kategori, status, dan insight Reel pilihan.</p>
-        </div>
-        <button type="button" onClick={openCreate} className="rounded-xl bg-amber-500 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-amber-600">
-          + Tambah Reel
+  /**
+   * Reordering only means anything while the grid is showing display order,
+   * so the handles appear on that view alone. Positions are renumbered across
+   * the visible page and every row that actually moved is saved.
+   */
+  const reorderable = sortField === "order";
+  async function reorder(draggedId: string, targetId: string) {
+    const from = rows.findIndex((row) => row.id === draggedId);
+    const to = rows.findIndex((row) => row.id === targetId);
+    if (from < 0 || to < 0) return;
+
+    const next = [...rows];
+    const [moved] = next.splice(from, 1);
+    next.splice(to, 0, moved);
+
+    const base = Math.min(...rows.map((row) => row.display_order));
+    const renumbered = next.map((row, index) => ({ ...row, display_order: base + index }));
+    setRows(renumbered);
+
+    const changed = renumbered.filter((row) => {
+      const before = rows.find((item) => item.id === row.id);
+      return before && before.display_order !== row.display_order;
+    });
+    const results = await Promise.all(changed.map((row) => fetch("/api/admin/reels", {
+      method: "PATCH",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ id: row.id, display_order: row.display_order, inline: true }),
+    })));
+    if (results.some((response) => !response.ok)) {
+      setRowError("Urutan gagal disimpan seluruhnya.");
+      router.refresh();
+    }
+  }
+
+  const columns: GridColumn<AdminReel>[] = [
+    {
+      key: "title", header: "Title", width: 280, frozen: true, sort: "title",
+      render: (row) => (
+        <button type="button" onClick={() => openEdit(row)} title={row.title ?? row.description} className="block w-full min-w-0 text-left">
+          <span className="block truncate font-medium text-gray-900 hover:underline">{row.title || "Tanpa judul"}</span>
+          <span className="block truncate text-[11px] text-gray-400">@{row.account_username}</span>
         </button>
-      </div>
+      ),
+    },
+    {
+      key: "status", header: "Status", width: 108,
+      render: (row) => (
+        <StatusCell
+          value={row.status}
+          options={STATUS_OPTIONS}
+          onChange={(next) => update(row, { status: next as AdminReel["status"] })}
+        />
+      ),
+    },
+    {
+      key: "featured", header: "Featured?", width: 96,
+      render: (row) => (
+        <SwitchCell
+          checked={row.featured}
+          label={`Jadikan reel @${row.account_username} pilihan`}
+          onChange={(next) => update(row, { featured: next })}
+        />
+      ),
+    },
+    {
+      key: "description", header: "Description", width: 300,
+      render: (row) => <TextCell value={row.description} muted />,
+    },
+    {
+      key: "date", header: "Date", width: 116, sort: "publish_time",
+      render: (row) => <DateCell value={row.publish_time} />,
+    },
+    {
+      key: "permalink", header: "URL Video Reels", width: 150,
+      render: (row) => (
+        <a href={row.permalink} target="_blank" rel="noreferrer" title={row.permalink} className="inline-flex items-center gap-2">
+          <ThumbCell src={row.thumbnail_url} portrait />
+          <span className="text-[11px] text-gray-400 hover:text-gray-600">↗</span>
+        </a>
+      ),
+    },
+    {
+      key: "category", header: "Category", width: 150, sort: "category",
+      render: (row) => (
+        <PillSelectCell
+          value={row.category}
+          options={categoryOptions}
+          onChange={(next) => update(row, { category: next })}
+        />
+      ),
+    },
+  ];
+
+  const filtering = Boolean(q) || Boolean(category) || status !== "all";
+
+  return (
+    <div className="p-6">
+      <GridHeader
+        title="Reels"
+        summary={<CountSummary total={allCount} filtered={totalCount} published={publishedCount} draft={draftCount} noun="reel" filtering={filtering} />}
+        actions={
+          <button type="button" onClick={openCreate} className="rounded-xl px-4 py-2 text-sm font-semibold" style={{ backgroundColor: "#F5C400", color: "#000" }}>
+            + Tambah Reel
+          </button>
+        }
+      />
+
+      {(formError || rowError) && (
+        <p className="mb-4 flex items-center justify-between gap-3 rounded-xl bg-red-50 px-4 py-2.5 text-sm text-red-700">
+          {formError || rowError}
+          <button type="button" onClick={() => { setFormError(null); setRowError(null); }} className="text-red-400 hover:text-red-600">✕</button>
+        </p>
+      )}
 
       {showForm && (
         <form onSubmit={submit} className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
@@ -211,6 +372,11 @@ export default function ReelsAdminClient({ initialItems, initialError }: { initi
 
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
             <div className="space-y-4">
+              {titleColumnReady && <label className="block text-xs font-medium text-gray-700">Judul
+                <input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} className={`${fieldClass} mt-1`} placeholder="Judul singkat untuk dashboard" />
+                <span className="mt-1 block text-[10px] font-normal leading-relaxed text-gray-400">Dipakai di tabel admin. Kosongkan jika caption sudah cukup jelas.</span>
+              </label>}
+
               <div className="grid gap-4 sm:grid-cols-2">
                 <label className="text-xs font-medium text-gray-700">Account username *
                   <input required value={form.account_username} onChange={(e) => setForm({ ...form, account_username: e.target.value })} className={`${fieldClass} mt-1`} placeholder="gorontalo.unite" />
@@ -235,7 +401,7 @@ export default function ReelsAdminClient({ initialItems, initialError }: { initi
                 <label className="text-xs font-medium text-gray-700">Kategori *
                   <input required list="reel-category-options" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={`${fieldClass} mt-1`} placeholder="Wisata" />
                   <datalist id="reel-category-options">
-                    {categories.map((category) => <option key={category} value={category} />)}
+                    {categoryOptions.map((name) => <option key={name} value={name} />)}
                   </datalist>
                   <span className="mt-1 block text-[10px] font-normal leading-relaxed text-gray-400">Pilih kategori yang ada atau ketik kategori baru. Default: Wisata.</span>
                 </label>
@@ -295,7 +461,6 @@ export default function ReelsAdminClient({ initialItems, initialError }: { initi
             </div>
           </div>
 
-          {error && <p className="mt-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
           <div className="mt-6 flex justify-end gap-2 border-t border-gray-100 pt-4">
             <button type="button" onClick={() => setShowForm(false)} className="rounded-xl border border-gray-200 px-4 py-2 text-sm text-gray-600 hover:bg-gray-50">Batal</button>
             <button disabled={saving || uploading} className="rounded-xl bg-gray-900 px-5 py-2 text-sm font-semibold text-white hover:bg-black disabled:opacity-50">
@@ -305,64 +470,60 @@ export default function ReelsAdminClient({ initialItems, initialError }: { initi
         </form>
       )}
 
-      {!showForm && error && <p className="mb-4 rounded-xl bg-red-50 px-3 py-2 text-sm text-red-600">{error}</p>}
+      <GridToolbar
+        search={q}
+        onSearch={(value) => nav({ q: value, page: "1" })}
+        placeholder="Cari judul, username atau deskripsi…"
+        category={category}
+        categories={categoryOptions}
+        onCategory={(value) => nav({ category: value, page: "1" })}
+        status={status}
+        statuses={[{ value: "all", label: "Semua status" }, { value: "published", label: "Published" }, { value: "draft", label: "Draft" }]}
+        onStatus={(value) => nav({ status: value, page: "1" })}
+        pageSize={pageSize}
+        onPageSize={(value) => nav({ pageSize: value, page: "1" })}
+      />
 
-      <div className="mb-4 grid gap-2 sm:grid-cols-[1fr_160px_160px]">
-        <input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Cari username atau deskripsi…" className={fieldClass} />
-        <select value={categoryFilter} onChange={(e) => setCategoryFilter(e.target.value)} className={fieldClass}>
-          <option value="all">Semua kategori</option>
-          {categories.map((category) => <option key={category}>{category}</option>)}
-        </select>
-        <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} className={fieldClass}>
-          <option value="all">Semua status</option>
-          <option value="published">Published</option>
-          <option value="draft">Draft</option>
-        </select>
-      </div>
+      <BulkBar
+        count={selected.size}
+        onDraft={() => setBulkAction("draft")}
+        onDelete={() => setBulkAction("delete")}
+        onClear={() => setSelected(new Set())}
+      />
 
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        {visibleItems.length === 0 ? (
-          <p className="px-5 py-16 text-center text-sm text-gray-400">Belum ada Reel untuk filter ini.</p>
-        ) : (
-          <div className="divide-y divide-gray-100">
-            {visibleItems.map((item) => (
-              <div key={item.id} className="flex items-center gap-3 p-3 sm:gap-4 sm:p-4">
-                <div className="relative h-24 w-[54px] shrink-0 overflow-hidden rounded-lg bg-gray-100">
-                  {item.thumbnail_url && <Image src={item.thumbnail_url} alt="" fill sizes="54px" className="object-cover" unoptimized />}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-sm font-semibold text-gray-900">@{item.account_username}</p>
-                    <span className="rounded-full bg-gray-100 px-2 py-0.5 text-[10px] font-semibold text-gray-600">{item.category}</span>
-                    {item.sponsored && <span className="rounded-full bg-violet-50 px-2 py-0.5 text-[10px] font-semibold text-violet-700">Sponsored</span>}
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-semibold ${item.status === "published" ? "bg-green-50 text-green-700" : "bg-gray-100 text-gray-500"}`}>{item.status === "published" ? "Published" : "Draft"}</span>
-                    {item.featured && <span className="text-[10px] font-semibold text-amber-600">★ Featured</span>}
-                  </div>
-                  <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-gray-500">{item.description}</p>
-                  <p className="mt-2 text-[11px] text-gray-400">{new Date(item.publish_time).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })} · {item.views.toLocaleString("id-ID")} views · {item.reach.toLocaleString("id-ID")} reach · urutan {item.display_order}</p>
-                </div>
-                <div className="flex shrink-0 flex-col items-end gap-2 sm:flex-row">
-                  <button type="button" onClick={() => openEdit(item)} className="text-xs font-medium text-amber-600 hover:underline">Edit</button>
-                  <a href={item.permalink} target="_blank" rel="noreferrer" className="hidden text-xs text-gray-400 hover:underline sm:inline">Instagram ↗</a>
-                  <button type="button" onClick={() => setDeleteId(item.id)} className="text-xs text-red-400 hover:underline">Hapus</button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      {!reorderable && (
+        <p className="mb-2 text-[11px] text-gray-400">
+          Urutan tampil hanya bisa diseret saat tabel diurutkan menurut urutan aslinya — klik ulang header untuk kembali.
+        </p>
+      )}
 
-      {deleteId && (
-        <div className="fixed inset-0 z-50 grid place-items-center bg-black/50 p-4">
-          <div className="w-full max-w-sm rounded-2xl bg-white p-6 text-center shadow-xl">
-            <p className="font-semibold text-gray-900">Hapus Reel ini?</p>
-            <p className="mt-1 text-sm text-gray-500">Data insight akan ikut dihapus.</p>
-            <div className="mt-5 flex gap-2">
-              <button type="button" onClick={() => setDeleteId(null)} className="flex-1 rounded-xl border border-gray-200 py-2 text-sm text-gray-600">Batal</button>
-              <button type="button" onClick={() => remove(deleteId)} className="flex-1 rounded-xl bg-red-500 py-2 text-sm font-semibold text-white">Hapus</button>
-            </div>
-          </div>
-        </div>
+      <AdminGrid
+        rows={rows}
+        columns={columns}
+        rowKey={(row) => row.id}
+        selected={selected}
+        onToggleRow={toggleRow}
+        onToggleAll={toggleAll}
+        sortField={sortField}
+        sortDir={sortDir}
+        onSort={toggleSort}
+        onReorder={reorderable ? reorder : undefined}
+        savingIds={savingIds}
+        empty={filtering ? "Tidak ada Reel untuk filter ini." : "Belum ada Reel."}
+      />
+
+      <GridPagination page={page} pageSize={pageSize} totalCount={totalCount} noun="reel" onPage={(next) => nav({ page: String(next) })} />
+
+      {bulkAction && (
+        <ConfirmDialog
+          title={bulkAction === "delete" ? `Hapus ${selected.size} Reel?` : `Jadikan ${selected.size} Reel draft?`}
+          body={bulkAction === "delete" ? "Data insight akan ikut dihapus." : "Reel yang dipilih akan disembunyikan dari publik."}
+          confirmLabel={bulkAction === "delete" ? "Hapus" : "Jadikan Draft"}
+          danger={bulkAction === "delete"}
+          busy={bulkRunning}
+          onCancel={() => setBulkAction(null)}
+          onConfirm={() => runBulk(bulkAction)}
+        />
       )}
     </div>
   );

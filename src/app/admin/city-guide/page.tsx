@@ -21,6 +21,9 @@ export const SECTIONS = ["Explore", "Eat", "Stay", "Shop", "Services", "Events"]
 
 const SORT_FIELDS: SortField[] = ["title", "section", "date"];
 
+const asStringArray = (value: unknown) =>
+  Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+
 interface PageProps {
   searchParams: Promise<{
     q?: string;
@@ -61,6 +64,12 @@ export default async function CityGuideAdminPage({ searchParams }: PageProps) {
       imageUrl: (item.image_url as string | null) ?? null,
       published: Boolean(item.published),
       archived: Boolean(item.archived),
+      featured: Boolean(item.featured),
+      description: (item.description as string | null) ?? null,
+      gallery: asStringArray(item.gallery),
+      mapsUrl: (item.maps_url as string | null) ?? null,
+      location: (item.location as string | null) ?? null,
+      subcategory: (item.subcategory as string | null) ?? null,
       date: String(item.updated_at ?? item.created_at ?? ""),
       href: `/city-guide/${item.slug}`,
       raw: item as Record<string, unknown>,
@@ -74,6 +83,13 @@ export default async function CityGuideAdminPage({ searchParams }: PageProps) {
       imageUrl: (item.image_url as string | null) ?? null,
       published: Boolean(item.published),
       archived: Boolean(item.archived),
+      featured: Boolean(item.featured),
+      description: (item.description as string | null) ?? null,
+      gallery: asStringArray(item.gallery),
+      mapsUrl: (item.maps_url as string | null) ?? null,
+      // Events record a venue rather than an area; it is the same column to an editor.
+      location: (item.venue as string | null) ?? (item.address as string | null) ?? null,
+      subcategory: (item.subcategory as string | null) ?? null,
       date: String(item.starts_at ?? item.created_at ?? ""),
       href: `/event/${item.slug}`,
       raw: item as Record<string, unknown>,
