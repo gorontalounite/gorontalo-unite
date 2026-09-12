@@ -3,7 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
-import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, type CategoryRow } from "../categories";
+import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, CATEGORY_HERO, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, type CategoryRow } from "../categories";
 import BeritaPagination from "../BeritaPagination";
 import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/app/news/[id]/page";
 
@@ -105,31 +105,39 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
     view_count:   (a.view_count as number) ?? 0,
   }));
 
-  const description = WEB_CATEGORY_DESCRIPTIONS[key] ?? `Berita terkini seputar ${cat.label} di Gorontalo.`;
+  const hero = CATEGORY_HERO[key];
 
   return (
     <div className="min-h-screen bg-[#f7f7f7] pb-24 text-[#101018] dark:bg-zinc-950 dark:text-white md:pb-10">
-      <section className="relative overflow-hidden border-b border-stone-100 bg-white dark:border-zinc-800 dark:bg-zinc-950">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 opacity-60 dark:opacity-20"
-          style={{
-            backgroundImage: "radial-gradient(circle, rgba(120,120,120,.24) 1.2px, transparent 1.2px)",
-            backgroundSize: "22px 22px",
-          }}
-        />
-        <div className="relative mx-auto flex max-w-4xl flex-col items-center px-5 py-12 text-center sm:px-8 sm:py-16">
-          <span className={`h-4 w-4 rounded-full ${colors.bg} ring-4 ring-white shadow-sm dark:ring-zinc-950`} />
-          <p className="mt-5 text-[10px] font-bold uppercase tracking-[.2em] text-stone-400 dark:text-zinc-500">Category</p>
-          <h1 className={`font-heading mt-2 text-3xl font-semibold tracking-[-.025em] sm:text-4xl ${colors.text}`}>
-            {cat.label}
-          </h1>
-          <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-600 dark:text-zinc-300 sm:text-base">
-            {description}
-          </p>
-          <p className="mt-3 text-[11px] text-stone-400 dark:text-zinc-500 sm:text-xs">
-            {totalCount > 0 ? `${totalCount} articles · page ${page} of ${totalPages}` : "No articles yet"}
-          </p>
+      {/* The banner carries the section; the name is the only text it needs. */}
+      <section className="bg-white pt-4 dark:bg-zinc-950 sm:pt-6">
+        <div className="mx-auto max-w-7xl px-4 sm:px-8">
+          <div className="relative flex min-h-[150px] items-end overflow-hidden rounded-2xl aspect-[851/315]">
+            {hero ? (
+              <>
+                <Image
+                  src={hero}
+                  alt=""
+                  fill
+                  priority
+                  sizes="(min-width: 1280px) 1216px, 100vw"
+                  className="object-cover"
+                />
+                <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
+              </>
+            ) : (
+              // No artwork for this section yet — a tinted band rather than
+              // somebody else's photograph.
+              <div aria-hidden="true" className={`absolute inset-0 ${colors.bg}`} />
+            )}
+            <h1
+              className={`font-heading relative px-5 pb-4 text-3xl font-semibold tracking-[-.025em] sm:px-8 sm:pb-6 sm:text-4xl ${
+                hero ? "text-white [text-shadow:0_1px_12px_rgba(0,0,0,.45)]" : colors.text
+              }`}
+            >
+              {cat.label}
+            </h1>
+          </div>
         </div>
       </section>
 
