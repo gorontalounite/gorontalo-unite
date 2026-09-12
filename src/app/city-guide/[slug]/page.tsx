@@ -4,6 +4,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import ListingHeroBar from "@/components/city-guide/ListingHeroBar";
 import ExpandableText from "@/components/city-guide/ExpandableText";
+import GalleryCarousel from "@/components/city-guide/GalleryCarousel";
 import InstagramEmbedGrid from "@/components/city-guide/InstagramEmbedGrid";
 import BlockRenderer from "@/components/ui/BlockRenderer";
 import type { Block } from "@/components/editor/types";
@@ -12,6 +13,9 @@ import styles from "./detail.module.css";
 export const dynamic = "force-dynamic";
 
 type DetailItem = { label: string; value: string };
+
+/** Eat and Stay — the categories whose hero is a slider rather than a mosaic. */
+const SLIDER_CATEGORIES = new Set(["Kuliner", "Akomodasi"]);
 
 function mapEmbedUrl(lat: number, lon: number) {
   const delta = 0.006;
@@ -44,6 +48,9 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
   const related = relatedRaw ?? [];
 
   const gallery = Array.from(new Set([place.image_url, ...(place.gallery ?? [])].filter((image): image is string => Boolean(image))));
+  // Eat and Stay listings carry one photograph today and grow to a handful.
+  // A fixed five-box mosaic leaves holes at that size, so they slide instead.
+  const usesSlider = SLIDER_CATEGORIES.has(String(place.category ?? ""));
   const hasCoords = typeof place.latitude === "number" && typeof place.longitude === "number";
   const paragraphs: string[] = String(place.description ?? "").split(/\n\s*\n/).map((text) => text.trim()).filter(Boolean);
   const tags: string[] = Array.isArray(place.tags) ? (place.tags as unknown[]).filter((tag): tag is string => typeof tag === "string" && tag.length > 0) : [];
@@ -78,15 +85,22 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
   return <main className={styles.page}>
     <div className={styles.wrap}>
 
-      {/* A — Hero gallery: swipeable on mobile, mosaic on desktop */}
+      {/* A — Hero gallery. Eat and Stay run a full-width 16:9 slider; Explore
+          keeps the mosaic, which it has the photographs to fill. */}
       {gallery.length > 0 && <div className={styles.heroWrap}>
-        <div className={styles.gallery}>
-          {gallery.map((image, index) => <div key={image} className={styles.slide}>
-            <Image src={image} alt={index === 0 ? place.name : `${place.name} — photo ${index + 1}`} fill priority={index === 0} unoptimized sizes="(min-width: 768px) 50vw, 100vw" style={{ objectFit: "cover" }} />
-          </div>)}
-        </div>
+        {usesSlider ? (
+          <GalleryCarousel images={gallery} name={place.name} />
+        ) : (
+          <>
+            <div className={styles.gallery}>
+              {gallery.map((image, index) => <div key={image} className={styles.slide}>
+                <Image src={image} alt={index === 0 ? place.name : `${place.name} — photo ${index + 1}`} fill priority={index === 0} unoptimized sizes="(min-width: 768px) 50vw, 100vw" style={{ objectFit: "cover" }} />
+              </div>)}
+            </div>
+            {gallery.length > 1 && <p className={`${styles.galleryCount}${gallery.length > 5 ? "" : ` ${styles.mobileOnly}`}`}><Icon path={ICON.photo} />{gallery.length} Photos</p>}
+          </>
+        )}
         <ListingHeroBar name={place.name} className={styles.heroBar} />
-        {gallery.length > 1 && <p className={`${styles.galleryCount}${gallery.length > 5 ? "" : ` ${styles.mobileOnly}`}`}><Icon path={ICON.photo} />{gallery.length} Photos</p>}
       </div>}
 
       {/* B — Primary information */}
