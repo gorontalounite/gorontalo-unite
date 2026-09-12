@@ -111,7 +111,6 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
                     <option key={tile.tab} value={tile.tab}>{tile.label}</option>
                   ))}
                   <option value="services">Services</option>
-                  <option value="events">Events</option>
                 </select>
               </label>
 

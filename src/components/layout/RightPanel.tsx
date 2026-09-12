@@ -21,7 +21,7 @@ const cityGuideItems = [
     ),
   },
   {
-    href: "/city-guide?tab=events",
+    href: "/event",
     label: "Event",
     description: "What is happening in Gorontalo",
     icon: (
