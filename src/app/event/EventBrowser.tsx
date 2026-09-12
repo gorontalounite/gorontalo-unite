@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
+import SectionHeading from "@/components/ui/SectionHeading";
 import { EVENT_CATEGORIES, eventDay, rupiah, type EventItem } from "./data";
 
 const GRID_STEP = 8;
@@ -150,8 +151,10 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
       {filtering ? (
         <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
           <div className="mb-4 flex flex-wrap items-center gap-3">
-            <h2 className="font-heading text-lg font-bold">
-              {filtered.length} event{category ? ` · ${category}` : ""}{needle ? ` · “${query.trim()}”` : ""}
+            <h2 className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
+              <span className="text-[#f5c400]" aria-hidden="true">/</span>
+              <span>{filtered.length} event{category ? ` · ${category}` : ""}{needle ? ` · “${query.trim()}”` : ""}</span>
+              <span className="text-[#f5c400]" aria-hidden="true">/</span>
             </h2>
             <button
               type="button"
@@ -175,9 +178,7 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
         <>
           {featured.length > 0 && (
             <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
-              <h2 className="font-heading mb-4 flex items-center gap-2 text-lg font-bold">
-                <span aria-hidden="true">🎟️</span> Event Seru Untukmu
-              </h2>
+              <SectionHeading>Event Seru Untukmu</SectionHeading>
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
                 {featured.map((event) => <RailCard key={event.id} event={event} />)}
               </div>
@@ -200,8 +201,10 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
           {rest.length > 0 && (
             <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
               <div className="mb-4 flex items-center justify-between gap-4">
-                <h2 className="font-heading flex items-center gap-2 text-lg font-bold">
-                  <span aria-hidden="true">🗓️</span> Event Lainnya
+                <h2 className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
+                  <span className="text-[#f5c400]" aria-hidden="true">/</span>
+                  <span>Event Lainnya</span>
+                  <span className="text-[#f5c400]" aria-hidden="true">/</span>
                 </h2>
                 {rest.length > shown && (
                   <button type="button" onClick={() => setShown((value) => value + GRID_STEP)} className="text-sm font-semibold text-[#1b4dd8] hover:underline dark:text-sky-400">

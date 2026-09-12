@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { PAGE_TITLE_CLASS, SUBHEAD_CLASS } from "@/components/ui/SectionHeading";
 
 export const metadata: Metadata = {
   title: "Pedoman Pemberitaan Media Siber — Gorontalo Unite",
@@ -23,7 +24,7 @@ export default function PedomanMediaSiberPage() {
       {/* Header */}
       <div className="mb-10">
         <span className="inline-block text-xs font-semibold uppercase tracking-widest text-brand dark:text-yellow-400 mb-3">Dewan Pers</span>
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white leading-tight mb-3">
+        <h1 className={`${PAGE_TITLE_CLASS} text-gray-900 dark:text-white leading-tight mb-3`}>
           Pedoman Pemberitaan Media Siber
         </h1>
         <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -161,7 +162,7 @@ function Section({ number, title, children }: { number: string; title: string; c
         <span className="w-7 h-7 rounded-lg bg-[#F5C400]/10 dark:bg-yellow-900/30 text-brand dark:text-yellow-400 text-xs font-bold flex items-center justify-center flex-shrink-0">
           {number}
         </span>
-        <h2 className="text-sm font-semibold text-gray-900 dark:text-white">{title}</h2>
+        <h2 className={`${SUBHEAD_CLASS} text-gray-900 dark:text-white`}>{title}</h2>
       </div>
       <div className="px-6 py-5">{children}</div>
     </div>
