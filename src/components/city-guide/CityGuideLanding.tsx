@@ -55,13 +55,16 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
           <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/35 to-black/65" />
 
           <div className="relative mx-auto flex h-full max-w-[1280px] flex-col items-center justify-center px-4 text-center text-white sm:px-6 lg:px-8">
-            <p className="text-[11px] font-bold uppercase tracking-[.22em] text-white/85">City Guide</p>
-            <h1 className="font-heading mt-3 max-w-3xl text-[34px] leading-[1.08] sm:text-[52px] lg:text-[60px]">
-              Six areas of Gorontalo, one directory
+            {/* The break is explicit: left to wrap, the line splits after "one"
+                and leaves "directory" stranded at every width tested. */}
+            <h1 className="font-heading max-w-3xl text-[34px] leading-[1.08] sm:text-[52px] lg:text-[60px]">
+              Six areas of Gorontalo,
+              <br />
+              one directory
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
-              {places.length} places to go, eat and stay — photographed on location,
-              from Kota Gorontalo to Kwandang.
+              {places.length} places to go, eat and stay. Pick an area, or search
+              for what you are after.
             </p>
             <Link
               href="#browse"
