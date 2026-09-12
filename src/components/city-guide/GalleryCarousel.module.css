@@ -1,0 +1,85 @@
+/* Full-width 16:9 photo slider for City Guide listings that lead with one
+   strong photograph and grow to a handful — Eat and Stay. The five-box mosaic
+   only looks right when there are five photos to fill it. */
+
+.frame{ position:relative; }
+
+.track{
+  display:flex;
+  overflow-x:auto;
+  scroll-snap-type:x mandatory;
+  overscroll-behavior-x:contain;
+  -ms-overflow-style:none;
+  scrollbar-width:none;
+}
+.track::-webkit-scrollbar{ display:none; }
+
+.slide{
+  position:relative;
+  flex:0 0 100%;
+  aspect-ratio:16/9;
+  scroll-snap-align:center;
+  background:linear-gradient(135deg,#f2d9ad,#f6c199 55%,#e9dcc8);
+}
+
+.arrow{
+  position:absolute;
+  top:50%;
+  translate:0 -50%;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  width:40px; height:40px;
+  padding:0;
+  border:0;
+  border-radius:999px;
+  background:rgba(255,255,255,.92);
+  color:#302f2c;
+  cursor:pointer;
+  box-shadow:0 1px 6px rgba(15,23,42,.18);
+}
+.arrow:disabled{ opacity:0; pointer-events:none; }
+.arrow:focus-visible{ outline:2px solid var(--accent,#9b7513); outline-offset:2px; }
+.arrow svg{ width:1.15rem; height:1.15rem; }
+.prev{ left:.75rem; }
+.next{ right:.75rem; }
+/* Phones swipe; arrows would only cover the photograph. */
+@media (min-width:768px){ .arrow{ display:inline-flex; } }
+
+.dots{
+  position:absolute;
+  left:0; right:0; bottom:.75rem;
+  display:flex;
+  justify-content:center;
+  gap:.35rem;
+  pointer-events:none;
+}
+.dot{
+  pointer-events:auto;
+  width:6px; height:6px;
+  padding:0;
+  border:0;
+  border-radius:999px;
+  background:rgba(255,255,255,.55);
+  cursor:pointer;
+  transition:width .18s ease, background-color .18s ease;
+}
+.dot[aria-current="true"]{ width:18px; background:#fff; }
+.dot:focus-visible{ outline:2px solid #fff; outline-offset:2px; }
+
+.counter{
+  position:absolute;
+  right:.75rem; bottom:.6rem;
+  margin:0;
+  padding:.3rem .6rem;
+  border-radius:999px;
+  background:rgba(15,23,42,.72);
+  color:#fff;
+  font-size:.72rem;
+  font-weight:600;
+  font-variant-numeric:tabular-nums;
+}
+@media (min-width:768px){
+  .dots{ bottom:1rem; }
+  .counter{ right:1rem; bottom:.9rem; }
+}
