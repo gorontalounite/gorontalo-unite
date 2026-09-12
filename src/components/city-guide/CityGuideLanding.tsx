@@ -35,8 +35,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
     if (region) areaCounts.set(region, (areaCounts.get(region) ?? 0) + 1);
   }
 
-  const hero = firstImage(places, (p) => p.category === "Atraksi & Wisata");
-  const banner = firstImage(places, (p) => p.category === "Atraksi & Wisata" && p.id !== hero?.id);
+  const banner = firstImage(places, (p) => p.category === "Atraksi & Wisata");
   // The query already arrives ordered by featured, then most recently updated.
   const recent = places.filter((p) => p.image_url).slice(0, 3);
 
@@ -45,18 +44,15 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
       {/* A — Hero, with the search panel riding its lower edge */}
       <section className="relative">
         <div className="relative h-[62vh] min-h-[420px] w-full overflow-hidden bg-[#1b1a17] sm:h-[70vh] sm:max-h-[620px]">
-          {hero?.image_url && (
-            <Image
-              src={hero.image_url}
-              alt=""
-              fill
-              unoptimized
-              priority
-              sizes="100vw"
-              className="object-cover"
-            />
-          )}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-black/20 to-black/65" />
+          <Image
+            src="/city-guide/hero.webp"
+            alt=""
+            fill
+            priority
+            sizes="100vw"
+            className="object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/35 to-black/65" />
 
           <div className="relative mx-auto flex h-full max-w-[1280px] flex-col items-center justify-center px-4 text-center text-white sm:px-6 lg:px-8">
             <p className="text-[11px] font-bold uppercase tracking-[.22em] text-white/85">City Guide</p>
@@ -75,11 +71,6 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
             </Link>
           </div>
 
-          {hero && (
-            <p className="absolute bottom-3 right-4 text-[10px] uppercase tracking-[.12em] text-white/55">
-              {hero.name}
-            </p>
-          )}
         </div>
 
         {/* B — Search panel. Area and category are the two axes the data really
