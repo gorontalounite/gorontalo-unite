@@ -25,7 +25,8 @@ function categoryAccent(category: string) {
 
 const number = new Intl.NumberFormat("id-ID", { notation: "compact", maximumFractionDigits: 1 });
 const date = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" });
-const month = new Intl.DateTimeFormat("id-ID", { month: "long" });
+// Paired with the category filter above it, so this dropdown reads in English.
+const month = new Intl.DateTimeFormat("en-GB", { month: "long" });
 
 function reelPeriod(reel: ReelItem) {
   return reel.publishedAt.slice(0, 7);
@@ -41,11 +42,14 @@ function matchesPeriod(reel: ReelItem, period: PeriodFilter) {
 }
 
 function orderedCategories(reels: ReelItem[]) {
-  const available = [...new Set(reels.map((item) => item.category))];
-  return [
-    ...DEFAULT_REEL_CATEGORIES.filter((item) => available.includes(item)),
-    ...available.filter((item) => !DEFAULT_REEL_CATEGORIES.includes(item as (typeof DEFAULT_REEL_CATEGORIES)[number])).sort(),
-  ];
+  // The whole taxonomy shows, including categories nothing is filed under yet,
+  // so readers can see the full shape of the archive. Anything still carrying
+  // an older name trails the canonical list rather than disappearing.
+  const canonical: readonly string[] = DEFAULT_REEL_CATEGORIES;
+  const leftovers = [...new Set(reels.map((item) => item.category))]
+    .filter((item) => !canonical.includes(item))
+    .sort();
+  return [...canonical, ...leftovers];
 }
 
 function PlayIcon() {
@@ -209,10 +213,10 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
               active={period !== "all"}
               onChange={selectPeriod}
             >
-              <option value="all">Semua tanggal</option>
+              <option value="all">All dates</option>
               {periodGroups.map(({ year, months }) => (
                 <optgroup key={year} label={year}>
-                  <option value={year}>Semua bulan {year}</option>
+                  <option value={year}>All months {year}</option>
                   {months.map((value) => (
                     <option key={value} value={value}>
                       {month.format(new Date(`${value}-01T00:00:00+08:00`))} {year}
@@ -226,6 +230,29 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
       </header>
 
       <div ref={scrollerRef} className="no-scrollbar min-h-0 flex-1 snap-y snap-mandatory overflow-y-auto overscroll-contain scroll-smooth">
+        {filtered.length === 0 && (
+          <div className="grid h-full place-items-center px-3 py-3 md:px-8 md:py-4">
+            <div className="mx-auto grid h-full w-full max-w-6xl place-items-center gap-7 lg:grid-cols-[170px_minmax(280px,430px)_minmax(260px,360px)]">
+              <aside className="hidden w-full self-center lg:block">
+                <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-neutral-400">Kategori</p>
+                <CategoryTabs active={category} onChange={selectCategory} reels={reels} vertical />
+              </aside>
+              <div className="self-center px-6 text-center lg:col-span-2">
+                <p className="text-base font-semibold">Belum ada Reel di sini.</p>
+                <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
+                  Kategori {category} sudah siap dipakai — Reel-nya muncul di sini begitu ada yang ditandai.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => selectCategory("All")}
+                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-xs font-bold text-white transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] dark:bg-white dark:text-black dark:hover:bg-neutral-200"
+                >
+                  Lihat semua Reel
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {filtered.map((reel, index) => (
           <article
             key={reel.id}
