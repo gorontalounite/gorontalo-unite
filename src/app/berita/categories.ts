@@ -218,6 +218,20 @@ export const CAT_COLOR: Record<string, { badge: string; text: string; bg: string
   "Olahraga":       { badge: "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/20 dark:text-indigo-300", text: "text-indigo-600 dark:text-indigo-400",     bg: "bg-indigo-100 dark:bg-indigo-900/30"     },
 };
 
+/**
+ * Hero banner per category archive, keyed by route segment. Supplied artwork,
+ * 851×315 — categories not listed here fall back to a tinted band, because a
+ * borrowed photograph would misrepresent the section.
+ */
+export const CATEGORY_HERO: Record<string, string> = {
+  culture:  "/category/culture.webp",
+  travel:   "/category/travel.webp",
+  culinary: "/category/culinary.webp",
+  life:     "/category/life.webp",
+  people:   "/category/people.webp",
+  news:     "/category/news.webp",
+};
+
 export const DEFAULT_COLOR = {
   badge: "bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-gray-300",
   text:  "text-gray-600 dark:text-gray-400",
