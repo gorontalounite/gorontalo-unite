@@ -4,11 +4,12 @@ import Image from "next/image";
 import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import AdminGrid, { type GridColumn } from "@/components/admin/grid/AdminGrid";
-import { DateCell, PillSelectCell, StatusCell, SwitchCell, TextCell, ThumbCell } from "@/components/admin/grid/cells";
+import { DateCell, PillSelectCell, StatusCell, TextCell, ThumbCell } from "@/components/admin/grid/cells";
 import {
   BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar,
 } from "@/components/admin/grid/GridChrome";
 import { useRowEditor } from "@/components/admin/grid/useRowEditor";
+import { DEFAULT_REEL_CATEGORIES } from "@/app/reels/data";
 
 export interface AdminReel {
   id: string;
@@ -37,7 +38,7 @@ export interface AdminReel {
 
 type ReelForm = Omit<AdminReel, "id" | "created_at" | "updated_at" | "title"> & { title: string };
 
-const DEFAULT_CATEGORIES = ["Wisata", "Food", "Event", "Brand"];
+
 const METRICS: Array<{ key: keyof Pick<ReelForm, "views" | "reach" | "likes" | "shares" | "follows" | "comments" | "saves">; label: string }> = [
   { key: "views", label: "Views" },
   { key: "reach", label: "Reach" },
@@ -67,7 +68,7 @@ function emptyForm(): ReelForm {
     publish_time: datetimeLocal(new Date().toISOString()),
     permalink: "",
     post_type: "Reel",
-    category: "Wisata",
+    category: "Tourism",
     sponsored: false,
     thumbnail_url: "",
     status: "draft",
@@ -127,9 +128,10 @@ export default function ReelsAdminClient({
     bodyFor: (_row, patch) => ({ ...patch, inline: true }),
   });
 
+  // The canonical list first, then anything older that is still on a row.
   const categoryOptions = useMemo(() => [
-    ...DEFAULT_CATEGORIES,
-    ...categories.filter((name) => !DEFAULT_CATEGORIES.includes(name)),
+    ...DEFAULT_REEL_CATEGORIES,
+    ...categories.filter((name) => !(DEFAULT_REEL_CATEGORIES as readonly string[]).includes(name)),
   ], [categories]);
 
   const nav = useCallback((params: Record<string, string>) => {
@@ -282,7 +284,13 @@ export default function ReelsAdminClient({
 
   const columns: GridColumn<AdminReel>[] = [
     {
-      key: "title", header: "Title", width: 280, frozen: true, sort: "title",
+      // Position on the current page, continuing across pages rather than
+      // restarting — the number an editor reads out loud.
+      key: "no", header: "No", width: 56, frozen: true,
+      render: (_row, index) => <span className="text-gray-500">{(page - 1) * pageSize + index + 1}</span>,
+    },
+    {
+      key: "title", header: "Title", width: 260, frozen: true, sort: "title",
       render: (row) => (
         <button type="button" onClick={() => openEdit(row)} title={row.title ?? row.description} className="block w-full min-w-0 text-left">
           <span className="block truncate font-medium text-gray-900 hover:underline">{row.title || "Tanpa judul"}</span>
@@ -297,16 +305,6 @@ export default function ReelsAdminClient({
           value={row.status}
           options={STATUS_OPTIONS}
           onChange={(next) => update(row, { status: next as AdminReel["status"] })}
-        />
-      ),
-    },
-    {
-      key: "featured", header: "Featured?", width: 96,
-      render: (row) => (
-        <SwitchCell
-          checked={row.featured}
-          label={`Jadikan reel @${row.account_username} pilihan`}
-          onChange={(next) => update(row, { featured: next })}
         />
       ),
     },
@@ -332,9 +330,24 @@ export default function ReelsAdminClient({
       render: (row) => (
         <PillSelectCell
           value={row.category}
-          options={categoryOptions}
+          options={[...categoryOptions]}
           onChange={(next) => update(row, { category: next })}
         />
+      ),
+    },
+    {
+      // Reels have no page of their own, so this opens the public feed
+      // already filtered to the reel's category.
+      key: "view", header: "View Content", width: 130,
+      render: (row) => (
+        <a
+          href={`/reels?kategori=${encodeURIComponent(row.category.toLowerCase())}`}
+          target="_blank"
+          rel="noreferrer"
+          className="text-[12px] text-gray-500 underline-offset-2 hover:text-gray-900 hover:underline"
+        >
+          View ↗
+        </a>
       ),
     },
   ];
@@ -399,11 +412,11 @@ export default function ReelsAdminClient({
                   <input required type="datetime-local" value={form.publish_time} onChange={(e) => setForm({ ...form, publish_time: e.target.value })} className={`${fieldClass} mt-1`} />
                 </label>
                 <label className="text-xs font-medium text-gray-700">Kategori *
-                  <input required list="reel-category-options" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={`${fieldClass} mt-1`} placeholder="Wisata" />
+                  <input required list="reel-category-options" value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className={`${fieldClass} mt-1`} placeholder="Tourism" />
                   <datalist id="reel-category-options">
                     {categoryOptions.map((name) => <option key={name} value={name} />)}
                   </datalist>
-                  <span className="mt-1 block text-[10px] font-normal leading-relaxed text-gray-400">Pilih kategori yang ada atau ketik kategori baru. Default: Wisata.</span>
+                  <span className="mt-1 block text-[10px] font-normal leading-relaxed text-gray-400">Pilih kategori yang ada atau ketik kategori baru. Default: Tourism.</span>
                 </label>
                 <label className="text-xs font-medium text-gray-700">Status *
                   <select value={form.status} onChange={(e) => setForm({ ...form, status: e.target.value as AdminReel["status"] })} className={`${fieldClass} mt-1`}>
@@ -475,7 +488,8 @@ export default function ReelsAdminClient({
         onSearch={(value) => nav({ q: value, page: "1" })}
         placeholder="Cari judul, username atau deskripsi…"
         category={category}
-        categories={categoryOptions}
+        categories={[...categoryOptions]}
+        categoryLabel="All"
         onCategory={(value) => nav({ category: value, page: "1" })}
         status={status}
         statuses={[{ value: "all", label: "Semua status" }, { value: "published", label: "Published" }, { value: "draft", label: "Draft" }]}

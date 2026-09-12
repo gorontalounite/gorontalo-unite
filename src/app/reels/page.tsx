@@ -9,11 +9,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/reels" },
 };
 
-function getCategory(value: string | string[] | undefined, reels: ReelItem[]): "Semua" | string {
+function getCategory(value: string | string[] | undefined, reels: ReelItem[]): "All" | string {
   const normalized = Array.isArray(value) ? value[0] : value;
   const category = reels.map((item) => item.category)
     .find((item) => item.toLowerCase() === normalized?.toLowerCase());
-  return category ?? "Semua";
+  return category ?? "All";
 }
 
 function getPeriod(value: string | string[] | undefined): string {

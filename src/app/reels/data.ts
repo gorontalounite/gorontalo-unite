@@ -1,4 +1,21 @@
-export const DEFAULT_REEL_CATEGORIES = ["Wisata", "Food", "Event", "Brand"] as const;
+/**
+ * The Reels taxonomy, in the order editors see it. Shared by the public feed
+ * and the admin grid so both offer the same vocabulary.
+ *
+ * Tourism, Culinary and Sponsored were renamed from Wisata, Food and Brand by
+ * migration 20260912140000; the rest of the list is new and starts empty.
+ */
+export const DEFAULT_REEL_CATEGORIES = [
+  "Culinary",
+  "Sponsored",
+  "Tourism",
+  "Culture",
+  "Destination",
+  "Lifestyle",
+  "News",
+  "Untold Story",
+  "Event",
+] as const;
 
 export type ReelCategory = string;
 
@@ -20,7 +37,7 @@ export const reels: ReelItem[] = [
   {
     id: "DZpL7hZBRBu",
     username: "rachmatgobel_rg",
-    category: "Wisata",
+    category: "Tourism",
     sponsored: false,
     description: "Melihat perkembangan revitalisasi Menara Pakaya, salah satu wajah dan simbol kebanggaan Gorontalo.",
     publishedAt: "2026-06-16T03:34:00+08:00",
@@ -32,7 +49,7 @@ export const reels: ReelItem[] = [
   {
     id: "DZu2aNEhvkr",
     username: "rachmatgobel_rg",
-    category: "Wisata",
+    category: "Tourism",
     sponsored: false,
     description: "Taman Limboto mulai direvitalisasi sebagai ruang publik untuk kenangan, kebanggaan, dan harapan baru.",
     publishedAt: "2026-06-18T08:24:00+08:00",
@@ -44,7 +61,7 @@ export const reels: ReelItem[] = [
   {
     id: "DZoyaZMhRLO",
     username: "rachmatgobel_rg",
-    category: "Wisata",
+    category: "Tourism",
     sponsored: false,
     description: "Energi baru Pentadio Resort dengan revitalisasi kawasan dan wahana yang semakin menarik untuk dikunjungi.",
     publishedAt: "2026-06-15T23:53:00+08:00",
@@ -56,7 +73,7 @@ export const reels: ReelItem[] = [
   {
     id: "DWDp6ggE872",
     username: "fadelmuhammadofficial",
-    category: "Food",
+    category: "Culinary",
     sponsored: false,
     description: "Milu Pulo dan Ilabulo khas Gorontalo di Rumah Makan Bumela—rasa autentik yang selalu bikin rindu.",
     publishedAt: "2026-03-19T00:13:00+08:00",
@@ -68,7 +85,7 @@ export const reels: ReelItem[] = [
   {
     id: "DVqa7dGD1pB",
     username: "bellasyafiraa_",
-    category: "Food",
+    category: "Culinary",
     sponsored: false,
     description: "Cerita Panada Tore Tinelo dan perjalanan usaha keluarga yang tumbuh dari kerja keras serta doa.",
     publishedAt: "2026-03-09T05:00:00+08:00",
@@ -80,7 +97,7 @@ export const reels: ReelItem[] = [
   {
     id: "DU_c97ck4bX",
     username: "gorontalo.unite",
-    category: "Food",
+    category: "Culinary",
     sponsored: false,
     description: "Tradisi sahur pertama keluarga Gorontalo dan makna ayam sebagai hidangan penyambutan Ramadan.",
     publishedAt: "2026-02-20T11:30:00+08:00",
@@ -128,7 +145,7 @@ export const reels: ReelItem[] = [
   {
     id: "DVyCk6dE4Mr",
     username: "gorontalo.unite",
-    category: "Brand",
+    category: "Sponsored",
     sponsored: true,
     description: "iBox hadir lebih dekat dengan penawaran dan promo spesial untuk perangkat Apple terbaru.",
     publishedAt: "2026-03-12T04:00:00+08:00",
@@ -140,7 +157,7 @@ export const reels: ReelItem[] = [
   {
     id: "Dbav5taTC8j",
     username: "gorontalo.unite",
-    category: "Brand",
+    category: "Sponsored",
     sponsored: true,
     description: "Grand opening Point Coffee di Indomaret Sultan Botutihe dengan promo spesial untuk pengunjung.",
     publishedAt: "2026-07-30T06:03:00+08:00",
@@ -152,7 +169,7 @@ export const reels: ReelItem[] = [
   {
     id: "DVk9FGGT2pg",
     username: "gorontalo.unite",
-    category: "Brand",
+    category: "Sponsored",
     sponsored: true,
     description: "Ramadan Collection dari BUCCHERI dengan pilihan sepatu, sandal, dan tas berbahan kulit.",
     publishedAt: "2026-03-07T01:00:00+08:00",
