@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import { DEFAULT_REEL_CATEGORIES, type ReelItem } from "./data";
 
@@ -31,8 +31,18 @@ const CATEGORY_ACCENT: Record<string, string> = {
 };
 const categoryAccent = (category: string) => CATEGORY_ACCENT[category] ?? "bg-emerald-500";
 
-const number = new Intl.NumberFormat("en-GB", { notation: "compact", maximumFractionDigits: 1 });
+const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const reelYear = (reel: ReelItem) => reel.publishedAt.slice(0, 4);
+/**
+ * The stored timestamp already carries +08:00, so the date written in the
+ * string is the Gorontalo date. Slicing it beats building a Date, which the
+ * server and the browser would render in two different zones and mismatch on
+ * hydration.
+ */
+function reelDate(reel: ReelItem) {
+  const [year, month, day] = reel.publishedAt.slice(0, 10).split("-");
+  return `${Number(day)} ${MONTHS[Number(month) - 1]} ${year}`;
+}
 const reelPeriod = (reel: ReelItem) => reel.publishedAt.slice(0, 7);
 
 function matchesPeriod(reel: ReelItem, period: PeriodFilter) {
@@ -116,9 +126,7 @@ function ReelCard({ reel, wide, rank }: { reel: ReelItem; wide?: boolean; rank?:
         <Poster reel={reel} wide={wide} />
       )}
       <span className="mt-2 block truncate text-xs text-neutral-600 dark:text-neutral-300">{reel.description}</span>
-      <span className="mt-0.5 block text-[11px] text-neutral-400">
-        {number.format(reel.views)} views · {reelYear(reel)}
-      </span>
+      <span className="mt-0.5 block text-[11px] text-neutral-400">{reelDate(reel)}</span>
     </a>
   );
 }
@@ -174,7 +182,7 @@ function Shelf({ title, reels, wide, ranked, onViewAll }: {
       <div
         ref={rail}
         onScroll={readEdges}
-        className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:gap-4 sm:px-0"
+        className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-pl-4 gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:gap-4 sm:scroll-pl-0 sm:px-0"
       >
         {reels.map((reel, index) => (
           <ReelCard key={reel.id} reel={reel} wide={wide} rank={ranked ? index + 1 : undefined} />
@@ -282,6 +290,19 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
   const selectCategory = (next: CategoryFilter) => { setCategory(next); updateUrl(next, period); };
   const selectPeriod = (next: PeriodFilter) => { setPeriod(next); updateUrl(category, next); };
 
+  // Picking a category swaps every shelf for one grid, and the "View all" that
+  // did it is usually far down the page — leaving you dropped into the middle
+  // of the new view. Scroll back to the filter bar so it opens at the first
+  // item. This waits for the paint: the shorter page makes the browser clamp
+  // the old scroll position, and that clamp cancels an animation started any
+  // earlier (a handler call, or even two rAFs, both get eaten).
+  const shelvesTop = useRef<HTMLElement>(null);
+  const settled = useRef(false);
+  useEffect(() => {
+    if (!settled.current) { settled.current = true; return; }
+    shelvesTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [category, period]);
+
   const browsing = category === "All";
 
   return (
@@ -331,7 +352,7 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
       </section>
 
       {/* B — Filters */}
-      <section id="shelves" className="mx-auto max-w-[1280px] scroll-mt-16 px-4 pt-8 sm:px-6 lg:px-8">
+      <section ref={shelvesTop} id="shelves" className="mx-auto max-w-[1280px] scroll-mt-16 px-4 pt-8 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center gap-2">
           <FilterSelect
             name="category"
@@ -398,9 +419,7 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
                 >
                   <Poster reel={reel} wide={reel.orientation === "landscape"} />
                   <span className="mt-2 block truncate text-xs text-neutral-600 dark:text-neutral-300">{reel.description}</span>
-                  <span className="mt-0.5 block text-[11px] text-neutral-400">
-                    {number.format(reel.views)} views · {reelYear(reel)}
-                  </span>
+                  <span className="mt-0.5 block text-[11px] text-neutral-400">{reelDate(reel)}</span>
                 </a>
               ))}
             </div>
