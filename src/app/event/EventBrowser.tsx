@@ -37,12 +37,21 @@ function RailCard({ event }: { event: EventItem }) {
     <Link href={`/event/${event.slug}`} className="group block h-full min-w-0">
       <div className="flex h-full flex-col overflow-hidden rounded-lg border border-[#e7e2d8] bg-white transition hover:shadow-[0_18px_36px_-24px_rgba(0,0,0,.45)] dark:border-zinc-800 dark:bg-zinc-900">
         <Poster event={event} className="aspect-[4/3]" />
-        <div className="flex flex-1 flex-col p-3">
-          <p className="truncate text-[11px] text-neutral-500 dark:text-neutral-400">{event.city ?? "Gorontalo"}</p>
-          <h3 className="font-heading mt-1 line-clamp-2 text-[15px] font-semibold leading-snug group-hover:underline">{event.title}</h3>
-          {event.organizer && <p className="mt-1 truncate text-xs text-neutral-500 dark:text-neutral-400">Oleh {event.organizer}</p>}
-          <div className="mt-auto border-t border-[#f0ece4] pt-3 dark:border-zinc-800">
-            <p className="text-[11px] text-neutral-400">Mulai dari</p>
+        <div className="flex flex-1 flex-col p-4">
+          <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#9b7513] sm:text-base">
+            {event.title}
+          </h3>
+          {/* Two fixed lines, so the rule below lands on one baseline across a row. */}
+          <p className="mt-1.5 line-clamp-2 min-h-10 text-xs leading-relaxed text-[#78716c] dark:text-zinc-400">
+            {event.organizer ? `Oleh ${event.organizer}` : eventDay(event.startsAt)}
+          </p>
+          <div className="mt-3 flex items-center gap-3 border-t border-[#f0ece4] pt-3 text-[11px] text-[#78716c] dark:border-zinc-800 dark:text-zinc-400">
+            <span className="shrink-0">{event.city ?? "Gorontalo"}</span>
+            <span aria-hidden="true" className="hidden h-1 w-1 shrink-0 rounded-full bg-[#d7d1c6] sm:block" />
+            <span className="hidden min-w-0 truncate sm:block">{eventDay(event.startsAt)}</span>
+          </div>
+          <div className="mt-3">
+            <p className="text-[11px] text-[#78716c] dark:text-zinc-400">Mulai dari</p>
             <p className="text-[15px] font-bold">{priceLabel(event)}</p>
           </div>
         </div>
@@ -59,18 +68,25 @@ function GridCard({ event }: { event: EventItem }) {
       className="group flex flex-col overflow-hidden rounded-lg border border-[#e7e2d8] bg-white transition hover:shadow-[0_18px_36px_-24px_rgba(0,0,0,.45)] dark:border-zinc-800 dark:bg-zinc-900"
     >
       <Poster event={event} className="aspect-[4/3]" />
-      <div className="flex flex-1 flex-col p-3">
-        <p className="truncate text-[11px] text-neutral-500 dark:text-neutral-400">{event.category}</p>
-        <h3 className="font-heading mt-1 line-clamp-2 text-[15px] font-semibold leading-snug group-hover:underline">{event.title}</h3>
-        <p className="mt-1 text-[11px] text-neutral-500 dark:text-neutral-400">{eventDay(event.startsAt)}</p>
-        <p className="truncate text-[11px] text-neutral-500 dark:text-neutral-400">{event.venue ?? event.city ?? "Gorontalo"}</p>
-        <div className="mt-auto border-t border-[#f0ece4] pt-3 dark:border-zinc-800">
+      <div className="flex flex-1 flex-col p-4">
+        <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#9b7513] sm:text-base">
+          {event.title}
+        </h3>
+        <p className="mt-1.5 line-clamp-2 min-h-10 text-xs leading-relaxed text-[#78716c] dark:text-zinc-400">
+          {event.venue ?? event.city ?? "Gorontalo"}
+        </p>
+        <div className="mt-3 flex items-center gap-3 border-t border-[#f0ece4] pt-3 text-[11px] text-[#78716c] dark:border-zinc-800 dark:text-zinc-400">
+          <span className="shrink-0">{event.category}</span>
+          <span aria-hidden="true" className="hidden h-1 w-1 shrink-0 rounded-full bg-[#d7d1c6] sm:block" />
+          <span className="hidden min-w-0 truncate sm:block">{eventDay(event.startsAt)}</span>
+        </div>
+        <div className="mt-3">
           {event.soldOut ? (
-            <p className="text-sm font-semibold text-neutral-400">Terjual habis</p>
+            <p className="text-[15px] font-bold text-[#78716c] dark:text-zinc-400">Terjual habis</p>
           ) : (
             <>
-              <p className="text-sm font-bold text-[#c0392b] dark:text-red-400">{priceLabel(event)}</p>
-              <p className="mt-0.5 text-[11px] text-emerald-600 dark:text-emerald-400">Tersedia sekarang</p>
+              <p className="text-[11px] text-[#78716c] dark:text-zinc-400">Mulai dari</p>
+              <p className="text-[15px] font-bold">{priceLabel(event)}</p>
             </>
           )}
         </div>
@@ -206,7 +222,7 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
       </section>
 
       {/* Category strip */}
-      <section id="browse" className="mx-auto max-w-7xl scroll-mt-16 px-4 pt-8 sm:px-6">
+      <section id="browse" className="mx-auto max-w-[1280px] scroll-mt-16 px-4 pt-8 sm:px-6 lg:px-8">
         <div className="no-scrollbar -mx-1 flex gap-1 overflow-x-auto pb-1">
           {EVENT_CATEGORIES.map((item) => {
             const active = category === item.label;
@@ -231,7 +247,7 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
       </section>
 
       {filtering ? (
-        <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+        <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <h2 className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
               <span className="text-[#f5c400]" aria-hidden="true">/</span>
@@ -251,7 +267,7 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
               Tidak ada event yang cocok.
             </p>
           ) : (
-            <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+            <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
               {filtered.map((event) => <GridCard key={event.id} event={event} />)}
             </div>
           )}
@@ -259,15 +275,15 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
       ) : (
         <>
           {featured.length > 0 && (
-            <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+            <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
               <SectionHeading>Event Seru Untukmu</SectionHeading>
-              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
                 {featured.map((event) => <RailCard key={event.id} event={event} />)}
               </div>
             </section>
           )}
 
-          <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+          <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
             <Link
               href="/city-guide"
               className="flex min-h-[120px] items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-[#1b4dd8] to-[#2a7bf0] px-6 py-6 text-white sm:min-h-[170px] sm:px-10"
@@ -281,7 +297,7 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
           </section>
 
           {rest.length > 0 && (
-            <section className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+            <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
               <div className="mb-4 flex items-center justify-between gap-4">
                 <h2 className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
                   <span className="text-[#f5c400]" aria-hidden="true">/</span>
@@ -294,14 +310,14 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
                   </button>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+              <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
                 {rest.slice(0, shown).map((event) => <GridCard key={event.id} event={event} />)}
               </div>
             </section>
           )}
 
           {filtered.length === 0 && (
-            <section className="mx-auto max-w-7xl px-4 pt-10 sm:px-6">
+            <section className="mx-auto max-w-[1280px] px-4 pt-10 sm:px-6 lg:px-8">
               <p className="rounded-xl border border-dashed border-neutral-300 px-6 py-20 text-center text-sm text-neutral-500 dark:border-zinc-700">
                 Belum ada event mendatang. Agenda Gorontalo akan muncul di sini.
               </p>
