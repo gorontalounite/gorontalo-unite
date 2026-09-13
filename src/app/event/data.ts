@@ -38,18 +38,19 @@ export interface EventItem {
   isSample?: boolean;
 }
 
+/** `icon` keys into CategoryIcon; see that file for the drawings. */
 export const EVENT_CATEGORIES = [
-  { label: "Atraksi & Taman Hiburan", icon: "🎡" },
-  { label: "Balapan & Ketahanan", icon: "🏃" },
-  { label: "Festival & Pameran", icon: "🎪" },
-  { label: "Komunitas & Perkumpulan", icon: "🤝" },
-  { label: "Konferensi & Seminar", icon: "🎤" },
-  { label: "Konser", icon: "🎸" },
-  { label: "Pertunjukan & Penampilan", icon: "🎭" },
-  { label: "Sesi Olahraga", icon: "🏅" },
-  { label: "Tur & Perjalanan", icon: "🧭" },
-  { label: "Turnamen & Kompetisi", icon: "🏆" },
-  { label: "Workshop & Pelatihan", icon: "🛠️" },
+  { label: "Atraksi & Taman Hiburan", icon: "attractions" },
+  { label: "Balapan & Ketahanan", icon: "racing" },
+  { label: "Festival & Pameran", icon: "festival" },
+  { label: "Komunitas & Perkumpulan", icon: "community" },
+  { label: "Konferensi & Seminar", icon: "conference" },
+  { label: "Konser", icon: "concert" },
+  { label: "Pertunjukan & Penampilan", icon: "performance" },
+  { label: "Sesi Olahraga", icon: "sports" },
+  { label: "Tur & Perjalanan", icon: "tours" },
+  { label: "Turnamen & Kompetisi", icon: "tournament" },
+  { label: "Workshop & Pelatihan", icon: "workshop" },
 ] as const;
 
 export const rupiah = (value: number) =>

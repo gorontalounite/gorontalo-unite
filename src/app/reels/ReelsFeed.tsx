@@ -23,10 +23,8 @@ function categoryAccent(category: string) {
   return CATEGORY_ACCENT[category] ?? "bg-emerald-500";
 }
 
-const number = new Intl.NumberFormat("id-ID", { notation: "compact", maximumFractionDigits: 1 });
-const date = new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "long", year: "numeric" });
-// Paired with the category filter above it, so this dropdown reads in English.
-const month = new Intl.DateTimeFormat("en-GB", { month: "long" });
+const number = new Intl.NumberFormat("en-GB", { notation: "compact", maximumFractionDigits: 1 });
+const date = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" });
 
 function reelPeriod(reel: ReelItem) {
   return reel.publishedAt.slice(0, 7);
@@ -134,14 +132,11 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
     )),
     [category, period, reels],
   );
-  const periodGroups = useMemo(() => {
+  // Years only. Month-by-month was a long list for an archive this size, and
+  // a year is the grain people actually browse by.
+  const years = useMemo(() => {
     const categoryReels = category === "All" ? reels : reels.filter((item) => item.category === category);
-    const years = [...new Set(categoryReels.map(reelYear))].sort((a, b) => b.localeCompare(a));
-    return years.map((year) => ({
-      year,
-      months: [...new Set(categoryReels.filter((item) => reelYear(item) === year).map(reelPeriod))]
-        .sort((a, b) => b.localeCompare(a)),
-    }));
+    return [...new Set(categoryReels.map(reelYear))].sort((a, b) => b.localeCompare(a));
   }, [category, reels]);
   const activeIndex = Math.max(0, filtered.findIndex((item) => item.id === activeId));
 
@@ -198,10 +193,10 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
             <span>Reels</span>
             <span className="text-[#f5c400]" aria-hidden="true">/</span>
           </h1>
-          <p className="hidden text-[11px] font-semibold uppercase tracking-[.18em] text-neutral-500 md:block">Scroll untuk melihat berikutnya ↓</p>
+          <p className="hidden text-[11px] font-semibold uppercase tracking-[.18em] text-neutral-500 md:block">Scroll for the next one ↓</p>
           <div className="flex items-center gap-1.5 md:hidden">
             <FilterSelect
-              label="Kategori"
+              label="Category"
               value={category}
               active={category !== "All"}
               onChange={(value) => selectCategory(value as CategoryFilter)}
@@ -210,22 +205,13 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
               {categories.map((item) => <option key={item} value={item}>{item}</option>)}
             </FilterSelect>
             <FilterSelect
-              label="Tanggal"
+              label="Date"
               value={period}
               active={period !== "all"}
               onChange={selectPeriod}
             >
-              <option value="all">All dates</option>
-              {periodGroups.map(({ year, months }) => (
-                <optgroup key={year} label={year}>
-                  <option value={year}>All months {year}</option>
-                  {months.map((value) => (
-                    <option key={value} value={value}>
-                      {month.format(new Date(`${value}-01T00:00:00+08:00`))} {year}
-                    </option>
-                  ))}
-                </optgroup>
-              ))}
+              <option value="all">All years</option>
+              {years.map((year) => <option key={year} value={year}>{year}</option>)}
             </FilterSelect>
           </div>
         </div>
@@ -236,20 +222,20 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
           <div className="grid h-full place-items-center px-3 py-3 md:px-8 md:py-4">
             <div className="mx-auto grid h-full w-full max-w-6xl place-items-center gap-7 lg:grid-cols-[170px_minmax(280px,430px)_minmax(260px,360px)]">
               <aside className="hidden w-full self-center lg:block">
-                <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-neutral-400">Kategori</p>
+                <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-neutral-400">Category</p>
                 <CategoryTabs active={category} onChange={selectCategory} reels={reels} vertical />
               </aside>
               <div className="self-center px-6 text-center lg:col-span-2">
-                <p className="text-base font-semibold">Belum ada Reel di sini.</p>
+                <p className="text-base font-semibold">No Reels here yet.</p>
                 <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
-                  Kategori {category} sudah siap dipakai — Reel-nya muncul di sini begitu ada yang ditandai.
+                  {category} is ready to use — Reels will show up here as soon as one is filed under it.
                 </p>
                 <button
                   type="button"
                   onClick={() => selectCategory("All")}
                   className="mt-6 inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-xs font-bold text-white transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] dark:bg-white dark:text-black dark:hover:bg-neutral-200"
                 >
-                  Lihat semua Reel
+                  See all Reels
                 </button>
               </div>
             </div>
@@ -263,7 +249,7 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
           >
             <div className="mx-auto grid h-full w-full max-w-6xl place-items-center gap-7 lg:grid-cols-[170px_minmax(280px,430px)_minmax(260px,360px)]">
               <aside className="hidden w-full self-center lg:block">
-                <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-neutral-400">Kategori</p>
+                <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-neutral-400">Category</p>
                 <CategoryTabs active={category} onChange={selectCategory} reels={reels} vertical />
               </aside>
 
@@ -271,7 +257,7 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
                 href={reel.permalink}
                 target="_blank"
                 rel="noopener noreferrer"
-                aria-label={`Buka Reel ${reel.category} oleh @${reel.username} di Instagram`}
+                aria-label={`Open the ${reel.category} Reel by @${reel.username} on Instagram`}
                 className="group relative block aspect-[9/16] h-full max-h-[760px] w-auto max-w-full shrink-0 overflow-hidden rounded-[10px] bg-neutral-900 shadow-[0_18px_70px_rgba(0,0,0,.18)] ring-1 ring-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] md:max-h-[calc(100svh-9rem)]"
               >
                 <div className="relative h-full w-full">
@@ -294,7 +280,7 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
                     </div>
                     <p className="text-xs font-semibold">@{reel.username}</p>
                     <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/85">{reel.description}</p>
-                    <p className="mt-3 text-[10px] font-semibold uppercase tracking-[.14em] text-[#f5c400]">Buka di Instagram ↗</p>
+                    <p className="mt-3 text-[10px] font-semibold uppercase tracking-[.14em] text-[#f5c400]">Open on Instagram ↗</p>
                   </div>
                 </div>
               </a>
@@ -319,7 +305,7 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
                   rel="noopener noreferrer"
                   className="mt-7 inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-xs font-bold text-white transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] dark:bg-white dark:text-black dark:hover:bg-neutral-200"
                 >
-                  Buka di Instagram
+                  Open on Instagram
                   <span aria-hidden="true">↗</span>
                 </a>
                 <p className="mt-8 text-xs tabular-nums text-neutral-400">
