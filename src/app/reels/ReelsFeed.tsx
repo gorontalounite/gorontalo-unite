@@ -91,7 +91,9 @@ function CategoryTabs({ active, onChange, reels, vertical = false }: {
   );
 }
 
-function FilterSelect({ label, value, onChange, children, active = false }: {
+function FilterSelect({ name, label, value, onChange, children, active = false }: {
+  /** Stable field name for the accessible label; the visible text changes. */
+  name: string;
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -99,13 +101,13 @@ function FilterSelect({ label, value, onChange, children, active = false }: {
   active?: boolean;
 }) {
   return (
-    <label className={`relative inline-flex h-8 items-center rounded-full border px-3 text-[10px] font-bold uppercase tracking-[.08em] shadow-sm ${active ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black" : "border-black/10 bg-white/80 text-neutral-700 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200"}`}>
-      <span>{label}</span>
+    <label className={`relative inline-flex h-8 max-w-[46vw] items-center rounded-full border px-3 text-[10px] font-bold uppercase tracking-[.08em] shadow-sm sm:max-w-none ${active ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black" : "border-black/10 bg-white/80 text-neutral-700 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200"}`}>
+      <span className="truncate">{label}</span>
       <svg className="ml-1.5 h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path fillRule="evenodd" d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
       </svg>
       <select
-        aria-label={`Filter ${label.toLowerCase()}`}
+        aria-label={`Filter ${name}`}
         value={value}
         onChange={(event) => onChange(event.target.value)}
         className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
@@ -196,7 +198,8 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
           <p className="hidden text-[11px] font-semibold uppercase tracking-[.18em] text-neutral-500 md:block">Scroll for the next one ↓</p>
           <div className="flex items-center gap-1.5 md:hidden">
             <FilterSelect
-              label="Category"
+              name="category"
+              label={category === "All" ? "Category" : category}
               value={category}
               active={category !== "All"}
               onChange={(value) => selectCategory(value as CategoryFilter)}
@@ -205,7 +208,8 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
               {categories.map((item) => <option key={item} value={item}>{item}</option>)}
             </FilterSelect>
             <FilterSelect
-              label="Year"
+              name="year"
+              label={period === "all" ? "Year" : period}
               value={period}
               active={period !== "all"}
               onChange={selectPeriod}
