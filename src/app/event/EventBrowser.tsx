@@ -113,8 +113,8 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
       {/* A — Hero, built to the same measurements as the City Guide hero: same
           heights, same overlay, same search panel riding the lower half. The
           gradient stands in until there is an event photograph to put here. */}
-      <section className="relative">
-        <div className="relative h-[calc(100svh-3.5rem)] w-full overflow-hidden bg-[#1b1a17] sm:h-[70vh] sm:max-h-[620px]">
+      <section className="relative mx-auto max-w-[1280px] sm:px-6 sm:pt-8 lg:px-8">
+        <div className="relative h-[calc(100svh-3.5rem)] w-full overflow-hidden bg-[#1b1a17] sm:aspect-[32/15] sm:h-auto">
           <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-[#7b4bd8] via-[#c2417a] to-[#f0a020]" />
           <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,.28),transparent_45%)]" />
           <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/35 to-black/65" />
