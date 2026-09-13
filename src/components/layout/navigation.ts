@@ -23,6 +23,7 @@ export interface NavLink {
 export const HEADER_NAV: NavLink[] = [
   { href: "/", label: "Good News" },
   { href: "/city-guide", label: "Explore" },
+  { href: "/event", label: "Event" },
   { href: "/reels", label: "Reels" },
   { href: "/about", label: "About Us" },
 ];
@@ -107,12 +108,10 @@ export const SOCIAL_LINKS: SocialLink[] = [
 ];
 
 /**
- * Footer's Quick Link column: the header menu plus the two pages that used to
- * sit in the small print. Kept apart from HEADER_NAV so they do not also
- * appear in the header.
+ * Footer's Quick Link column: the header menu plus Services, which has no
+ * place in the header. Kept apart from HEADER_NAV for that reason.
  */
 export const FOOTER_QUICK_LINKS: NavLink[] = [
   ...HEADER_NAV,
-  { href: "/media-kit", label: "Media Kit" },
   { href: "/#layanan", label: "Services" },
 ];
