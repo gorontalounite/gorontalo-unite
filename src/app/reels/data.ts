@@ -27,7 +27,8 @@ export interface ReelItem {
   description: string;
   publishedAt: string;
   permalink: string;
-  thumbnail: string;
+  /** Null when no cover image has been supplied for this reel. */
+  thumbnail: string | null;
   views: number;
   reach?: number;
   likes: number;
