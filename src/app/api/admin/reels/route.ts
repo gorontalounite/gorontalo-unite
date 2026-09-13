@@ -30,42 +30,27 @@ function instagramShortcode(permalink: string) {
   }
 }
 
-function decodeHtmlUrl(value: string) {
-  return value
-    .replaceAll("&amp;", "&")
-    .replaceAll("&#x2F;", "/")
-    .replaceAll("\\u0026", "&")
-    .replaceAll("\\/", "/");
-}
-
-function findInstagramCover(html: string) {
-  const urls = [...html.matchAll(/https:\/\/(?:instagram|scontent)[^"'\\\s<]+?\.jpg[^"'\\\s<]*/g)]
-    .map((match) => decodeHtmlUrl(match[0]));
-  return urls.find((url) => /t51\.\d+-15\//.test(url)) ?? urls[0] ?? null;
-}
+/** Instagram serves the still frame to a browser user agent, not to a bot one. */
+const BROWSER_UA =
+  "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36";
 
 async function fetchAndStoreThumbnail(auth: NonNullable<Authorized>, permalink: string) {
   const shortcode = instagramShortcode(permalink);
   if (!shortcode) throw new Error("Permalink Instagram tidak valid.");
 
-  const embed = await fetch(`https://www.instagram.com/reel/${shortcode}/embed/`, {
-    headers: { "user-agent": "Mozilla/5.0 (compatible; GorontaloUnite/1.0)" },
-    signal: AbortSignal.timeout(12_000),
+  // The /embed/ page used to carry the cover in its markup. It now answers
+  // with a login wall and no image at all, so the cover comes from the media
+  // redirect instead, which still serves the still frame directly.
+  const cover = await fetch(`https://www.instagram.com/p/${shortcode}/media/?size=l`, {
+    headers: { "user-agent": BROWSER_UA },
+    redirect: "follow",
+    signal: AbortSignal.timeout(20_000),
     cache: "no-store",
   });
-  if (!embed.ok) throw new Error(`Instagram mengembalikan status ${embed.status}.`);
-
-  const coverUrl = findInstagramCover(await embed.text());
-  if (!coverUrl) throw new Error("Thumbnail tidak ditemukan pada permalink Instagram.");
-
-  const cover = await fetch(coverUrl, {
-    headers: { "user-agent": "Mozilla/5.0 (compatible; GorontaloUnite/1.0)" },
-    signal: AbortSignal.timeout(12_000),
-    cache: "no-store",
-  });
-  if (!cover.ok) throw new Error(`Gambar Instagram mengembalikan status ${cover.status}.`);
+  if (!cover.ok) throw new Error(`Instagram mengembalikan status ${cover.status}.`);
 
   const contentType = cover.headers.get("content-type")?.split(";")[0] ?? "image/jpeg";
+  if (!contentType.startsWith("image/")) throw new Error("Thumbnail tidak ditemukan pada permalink Instagram.");
   if (!contentType.startsWith("image/")) throw new Error("Respons thumbnail bukan gambar.");
   const bytes = await cover.arrayBuffer();
   if (bytes.byteLength === 0 || bytes.byteLength > 5 * 1024 * 1024) {
