@@ -25,5 +25,7 @@ export default async function EventPage() {
   // clearly labelled, and gone the moment a real event is published.
   const events = published.length > 0 ? published : SAMPLE_EVENTS;
 
-  return <EventBrowser events={events} showingSamples={published.length === 0} />;
+  // The upcoming/finished split is decided from one clock, on the server, so
+  // the client cannot classify an event differently and break hydration.
+  return <EventBrowser events={events} showingSamples={published.length === 0} nowIso={new Date().toISOString()} />;
 }
