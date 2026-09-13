@@ -1,11 +1,22 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
+import SectionHeading from "@/components/ui/SectionHeading";
 import { DEFAULT_REEL_CATEGORIES, type ReelItem } from "./data";
+
+/* ---------------------------------------------------------------------------
+ * The Reels page reads as a video service: a hero, then shelves you push
+ * sideways. It used to be one full-screen snap feed, which only ever showed a
+ * single reel and gave no sense of how much there was.
+ * ------------------------------------------------------------------------ */
 
 type CategoryFilter = "All" | string;
 type PeriodFilter = "all" | string;
+
+/** How many a shelf shows before "View all" is worth offering. */
+const SHELF_SIZE = 6;
+const FEATURED_SIZE = 4;
 
 const CATEGORY_ACCENT: Record<string, string> = {
   Tourism: "bg-sky-500",
@@ -18,21 +29,11 @@ const CATEGORY_ACCENT: Record<string, string> = {
   News: "bg-slate-500",
   "Untold Story": "bg-indigo-500",
 };
-
-function categoryAccent(category: string) {
-  return CATEGORY_ACCENT[category] ?? "bg-emerald-500";
-}
+const categoryAccent = (category: string) => CATEGORY_ACCENT[category] ?? "bg-emerald-500";
 
 const number = new Intl.NumberFormat("en-GB", { notation: "compact", maximumFractionDigits: 1 });
-const date = new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "long", year: "numeric" });
-
-function reelPeriod(reel: ReelItem) {
-  return reel.publishedAt.slice(0, 7);
-}
-
-function reelYear(reel: ReelItem) {
-  return reel.publishedAt.slice(0, 4);
-}
+const reelYear = (reel: ReelItem) => reel.publishedAt.slice(0, 4);
+const reelPeriod = (reel: ReelItem) => reel.publishedAt.slice(0, 7);
 
 function matchesPeriod(reel: ReelItem, period: PeriodFilter) {
   if (period === "all") return true;
@@ -40,9 +41,6 @@ function matchesPeriod(reel: ReelItem, period: PeriodFilter) {
 }
 
 function orderedCategories(reels: ReelItem[]) {
-  // The whole taxonomy shows, including categories nothing is filed under yet,
-  // so readers can see the full shape of the archive. Anything still carrying
-  // an older name trails the canonical list rather than disappearing.
   const canonical: readonly string[] = DEFAULT_REEL_CATEGORIES;
   const leftovers = [...new Set(reels.map((item) => item.category))]
     .filter((item) => !canonical.includes(item))
@@ -50,46 +48,159 @@ function orderedCategories(reels: ReelItem[]) {
   return [...canonical, ...leftovers];
 }
 
-function PlayIcon() {
+function PlayBadge({ small }: { small?: boolean }) {
   return (
-    <span className="grid h-14 w-14 place-items-center rounded-full border border-white/50 bg-black/35 text-white shadow-xl backdrop-blur-md transition-transform group-hover:scale-105 md:h-16 md:w-16">
-      <svg className="ml-1 h-6 w-6" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+    <span className={`grid place-items-center rounded-full border border-white/50 bg-black/35 text-white backdrop-blur-md transition-transform group-hover:scale-105 ${small ? "h-9 w-9" : "h-12 w-12"}`}>
+      <svg className={small ? "ml-0.5 h-4 w-4" : "ml-0.5 h-5 w-5"} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
         <path d="M8 5.14v13.72c0 .78.85 1.26 1.52.86l10.8-6.86a1 1 0 0 0 0-1.72L9.52 4.28A1 1 0 0 0 8 5.14Z" />
       </svg>
     </span>
   );
 }
 
-function CategoryTabs({ active, onChange, reels, vertical = false }: {
-  active: CategoryFilter;
-  onChange: (category: CategoryFilter) => void;
-  reels: ReelItem[];
-  vertical?: boolean;
-}) {
-  const categories: CategoryFilter[] = ["All", ...orderedCategories(reels)];
+/* ------------------------------- the card ------------------------------- */
+
+function Poster({ reel, wide }: { reel: ReelItem; wide?: boolean }) {
   return (
-    <div className={vertical ? "space-y-1" : "no-scrollbar flex gap-2 overflow-x-auto px-4 pb-3"}>
-      {categories.map((category) => {
-        const count = category === "All" ? reels.length : reels.filter((item) => item.category === category).length;
-        const selected = active === category;
-        return (
-          <button
-            key={category}
-            type="button"
-            onClick={() => onChange(category)}
-            className={vertical
-              ? `flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-xs font-semibold uppercase tracking-[.15em] transition ${selected ? "bg-black text-white dark:bg-white dark:text-black" : "text-neutral-500 hover:bg-black/5 dark:text-neutral-400 dark:hover:bg-white/10"}`
-              : `shrink-0 rounded-full border px-3.5 py-1.5 text-[11px] font-semibold transition ${selected ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black" : "border-black/10 bg-white/70 text-neutral-600 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-300"}`}
-            aria-pressed={selected}
-          >
-            <span>{category}</span>
-            {vertical && <span className={selected ? "text-white/60 dark:text-black/50" : "text-neutral-400"}>{count}</span>}
-          </button>
-        );
-      })}
-    </div>
+    <span className={`relative block w-full overflow-hidden rounded-lg bg-neutral-900 ring-1 ring-black/10 dark:ring-white/10 ${wide ? "aspect-video" : "aspect-[9/16]"}`}>
+      {reel.thumbnail ? (
+        <Image
+          src={reel.thumbnail}
+          alt=""
+          fill
+          sizes={wide ? "(max-width: 639px) 78vw, 420px" : "(max-width: 639px) 42vw, 220px"}
+          className="object-cover transition duration-500 group-hover:scale-[1.04]"
+        />
+      ) : (
+        <span className={`absolute inset-0 ${categoryAccent(reel.category)} opacity-90`} />
+      )}
+      <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
+      <span className="absolute inset-0 grid place-items-center opacity-0 transition group-hover:opacity-100">
+        <PlayBadge small={!wide} />
+      </span>
+      <span className="absolute inset-x-0 bottom-0 p-2.5">
+        <span className="flex items-center gap-1.5">
+          <span className={`h-1.5 w-1.5 shrink-0 rounded-full ${categoryAccent(reel.category)}`} />
+          <span className="truncate text-[9px] font-bold uppercase tracking-[.14em] text-white/90">{reel.category}</span>
+        </span>
+        <span className="mt-0.5 block truncate text-[11px] font-semibold text-white">@{reel.username}</span>
+      </span>
+    </span>
   );
 }
+
+function ReelCard({ reel, wide, rank }: { reel: ReelItem; wide?: boolean; rank?: number }) {
+  return (
+    <a
+      href={reel.permalink}
+      target="_blank"
+      rel="noopener noreferrer"
+      aria-label={`Open the ${reel.category} Reel by @${reel.username} on Instagram`}
+      className={`group block shrink-0 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] ${
+        rank ? "w-[62vw] sm:w-[300px]" : wide ? "w-[78vw] sm:w-[420px]" : "w-[42vw] sm:w-[200px]"
+      }`}
+    >
+      {rank ? (
+        // The rank is the point of the top shelf, so it sits beside the poster
+        // at a size you read before the picture.
+        <span className="flex items-end gap-1">
+          <span
+            aria-hidden="true"
+            className="font-heading -mb-3 shrink-0 select-none text-[76px] font-bold leading-[0.72] text-neutral-300 dark:text-zinc-700 sm:text-[96px]"
+          >
+            {rank}
+          </span>
+          <span className="min-w-0 flex-1"><Poster reel={reel} /></span>
+        </span>
+      ) : (
+        <Poster reel={reel} wide={wide} />
+      )}
+      <span className="mt-2 block truncate text-xs text-neutral-600 dark:text-neutral-300">{reel.description}</span>
+      <span className="mt-0.5 block text-[11px] text-neutral-400">
+        {number.format(reel.views)} views · {reelYear(reel)}
+      </span>
+    </a>
+  );
+}
+
+/* ------------------------------- the shelf ------------------------------ */
+
+function Shelf({ title, reels, wide, ranked, onViewAll }: {
+  title: string;
+  reels: ReelItem[];
+  wide?: boolean;
+  ranked?: boolean;
+  onViewAll?: () => void;
+}) {
+  const rail = useRef<HTMLDivElement>(null);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+
+  const readEdges = useCallback(() => {
+    const node = rail.current;
+    if (!node) return;
+    setAtStart(node.scrollLeft <= 2);
+    setAtEnd(node.scrollLeft + node.clientWidth >= node.scrollWidth - 2);
+  }, []);
+
+  const nudge = (direction: -1 | 1) => {
+    const node = rail.current;
+    if (!node) return;
+    node.scrollBy({ left: direction * Math.round(node.clientWidth * 0.85), behavior: "smooth" });
+  };
+
+  if (reels.length === 0) return null;
+
+  return (
+    <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
+      <SectionHeading
+        action={
+          <span className="flex items-center gap-2">
+            {onViewAll && (
+              <button type="button" onClick={onViewAll} className="text-sm font-semibold text-[#1b4dd8] hover:underline dark:text-sky-400">
+                View all ›
+              </button>
+            )}
+            <span className="hidden gap-1 sm:flex">
+              <RailArrow direction="prev" disabled={atStart} onClick={() => nudge(-1)} />
+              <RailArrow direction="next" disabled={atEnd} onClick={() => nudge(1)} />
+            </span>
+          </span>
+        }
+      >
+        {title}
+      </SectionHeading>
+
+      <div
+        ref={rail}
+        onScroll={readEdges}
+        className="no-scrollbar -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:gap-4 sm:px-0"
+      >
+        {reels.map((reel, index) => (
+          <ReelCard key={reel.id} reel={reel} wide={wide} rank={ranked ? index + 1 : undefined} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function RailArrow({ direction, disabled, onClick }: { direction: "prev" | "next"; disabled: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={direction === "prev" ? "Scroll left" : "Scroll right"}
+      className="grid h-9 w-9 place-items-center rounded-full border border-[#d7d1c6] text-[#302f2c] transition hover:border-[#302f2c] disabled:cursor-not-allowed disabled:opacity-35 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-amber-300"
+    >
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+        <path d={direction === "prev" ? "M15 18l-6-6 6-6" : "M9 6l6 6-6 6"} />
+      </svg>
+    </button>
+  );
+}
+
+/* ------------------------------- filters -------------------------------- */
 
 function FilterSelect({ name, label, value, onChange, children, active = false }: {
   /** Stable field name for the accessible label; the visible text changes. */
@@ -101,9 +212,9 @@ function FilterSelect({ name, label, value, onChange, children, active = false }
   active?: boolean;
 }) {
   return (
-    <label className={`relative inline-flex h-8 max-w-[46vw] items-center rounded-full border px-3 text-[10px] font-bold uppercase tracking-[.08em] shadow-sm sm:max-w-none ${active ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black" : "border-black/10 bg-white/80 text-neutral-700 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200"}`}>
+    <label className={`relative inline-flex h-9 max-w-[46vw] items-center rounded-full border px-3.5 text-[10px] font-bold uppercase tracking-[.08em] shadow-sm sm:max-w-none ${active ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black" : "border-black/10 bg-white/80 text-neutral-700 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200"}`}>
       <span className="truncate">{label}</span>
-      <svg className="ml-1.5 h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+      <svg className="ml-1.5 h-3 w-3 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path fillRule="evenodd" d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
       </svg>
       <select
@@ -118,6 +229,8 @@ function FilterSelect({ name, label, value, onChange, children, active = false }
   );
 }
 
+/* --------------------------------- page --------------------------------- */
+
 export default function ReelsFeed({ reels, initialCategory = "All", initialPeriod = "all" }: {
   reels: ReelItem[];
   initialCategory?: CategoryFilter;
@@ -125,35 +238,40 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
 }) {
   const [category, setCategory] = useState<CategoryFilter>(initialCategory);
   const [period, setPeriod] = useState<PeriodFilter>(initialPeriod);
-  const [activeId, setActiveId] = useState<string>(reels[0]?.id ?? "");
-  const scrollerRef = useRef<HTMLDivElement>(null);
-  const categories = useMemo(() => orderedCategories(reels), [reels]);
-  const filtered = useMemo(
-    () => reels.filter((item) => (
-      (category === "All" || item.category === category) && matchesPeriod(item, period)
-    )),
-    [category, period, reels],
-  );
-  // Years only. Month-by-month was a long list for an archive this size, and
-  // a year is the grain people actually browse by.
-  const years = useMemo(() => {
-    const categoryReels = category === "All" ? reels : reels.filter((item) => item.category === category);
-    return [...new Set(categoryReels.map(reelYear))].sort((a, b) => b.localeCompare(a));
-  }, [category, reels]);
-  const activeIndex = Math.max(0, filtered.findIndex((item) => item.id === activeId));
 
-  useEffect(() => {
-    const root = scrollerRef.current;
-    if (!root) return;
-    const observer = new IntersectionObserver((entries) => {
-      const visible = entries
-        .filter((entry) => entry.isIntersecting)
-        .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-      if (visible?.target instanceof HTMLElement) setActiveId(visible.target.dataset.reelId ?? "");
-    }, { root, threshold: [0.55, 0.75] });
-    root.querySelectorAll<HTMLElement>("[data-reel-id]").forEach((item) => observer.observe(item));
-    return () => observer.disconnect();
-  }, [filtered]);
+  const categories = useMemo(() => orderedCategories(reels), [reels]);
+  const years = useMemo(
+    () => [...new Set(reels.map(reelYear))].sort((a, b) => b.localeCompare(a)),
+    [reels],
+  );
+
+  const inPeriod = useMemo(() => reels.filter((reel) => matchesPeriod(reel, period)), [reels, period]);
+  const filtered = useMemo(
+    () => inPeriod.filter((reel) => category === "All" || reel.category === category),
+    [inPeriod, category],
+  );
+
+  // The top shelf is whatever has been ticked Featured. With nothing ticked it
+  // falls back to the most-watched, and says so — an OTT front page without a
+  // top shelf reads as broken, but the label should not claim an editor chose
+  // these when the view count did.
+  const picked = useMemo(() => inPeriod.filter((reel) => reel.featured), [inPeriod]);
+  const topShelf = useMemo(() => (
+    picked.length > 0
+      ? picked.slice(0, FEATURED_SIZE)
+      : [...inPeriod].sort((a, b) => b.views - a.views).slice(0, FEATURED_SIZE)
+  ), [picked, inPeriod]);
+  const topShelfTitle = picked.length > 0 ? "Featured" : "Most watched";
+  const landscape = useMemo(() => inPeriod.filter((reel) => reel.orientation === "landscape"), [inPeriod]);
+
+  // The hero is built from the archive's own covers rather than a stock photo.
+  // A phone-shaped cover stretched across a 32:15 frame would be a blurred
+  // sliver, so the wide layout tiles five of them instead — each shown at
+  // close to its own ratio, and downscaled rather than blown up.
+  const heroReels = useMemo(
+    () => [...inPeriod].filter((reel) => reel.thumbnail).sort((a, b) => b.views - a.views).slice(0, 5),
+    [inPeriod],
+  );
 
   function updateUrl(nextCategory: CategoryFilter, nextPeriod: PeriodFilter) {
     const params = new URLSearchParams();
@@ -161,174 +279,134 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
     if (nextPeriod !== "all") params.set("periode", nextPeriod);
     window.history.replaceState(null, "", params.size ? `/reels?${params}` : "/reels");
   }
+  const selectCategory = (next: CategoryFilter) => { setCategory(next); updateUrl(next, period); };
+  const selectPeriod = (next: PeriodFilter) => { setPeriod(next); updateUrl(category, next); };
 
-  function resetFeed(nextItems: ReelItem[]) {
-    setActiveId(nextItems[0]?.id ?? "");
-    scrollerRef.current?.scrollTo({ top: 0, behavior: "smooth" });
-  }
-
-  function selectCategory(next: CategoryFilter) {
-    const categoryItems = next === "All" ? reels : reels.filter((item) => item.category === next);
-    const nextPeriod = period === "all" || categoryItems.some((item) => matchesPeriod(item, period)) ? period : "all";
-    setCategory(next);
-    setPeriod(nextPeriod);
-    const nextItems = categoryItems.filter((item) => matchesPeriod(item, nextPeriod));
-    resetFeed(nextItems);
-    updateUrl(next, nextPeriod);
-  }
-
-  function selectPeriod(next: PeriodFilter) {
-    setPeriod(next);
-    const nextItems = reels.filter((item) => (
-      (category === "All" || item.category === category) && matchesPeriod(item, next)
-    ));
-    resetFeed(nextItems);
-    updateUrl(category, next);
-  }
+  const browsing = category === "All";
 
   return (
-    <section className="flex h-[calc(100svh-7.5rem)] min-h-[560px] flex-col overflow-hidden bg-[#f5f4ef] text-neutral-950 dark:bg-[#090909] dark:text-white md:h-[calc(100svh-3.5rem)] md:min-h-[640px]">
-      <header className="shrink-0 border-b border-black/10 bg-[#f5f4ef]/95 px-4 py-4 backdrop-blur dark:border-white/10 dark:bg-[#090909]/95 md:px-8 md:py-5">
-        <div className="mx-auto flex max-w-6xl items-center justify-between">
-          <h1 className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
-            <span className="text-[#f5c400]" aria-hidden="true">/</span>
-            <span>Reels</span>
-            <span className="text-[#f5c400]" aria-hidden="true">/</span>
-          </h1>
-          <p className="hidden text-[11px] font-semibold uppercase tracking-[.18em] text-neutral-500 md:block">Scroll for the next one ↓</p>
-          <div className="flex items-center gap-1.5 md:hidden">
-            <FilterSelect
-              name="category"
-              label={category === "All" ? "Category" : category}
-              value={category}
-              active={category !== "All"}
-              onChange={(value) => selectCategory(value as CategoryFilter)}
+    <div className="bg-[#fafafa] pb-10 text-neutral-900 dark:bg-zinc-950 dark:text-white md:pb-12">
+      {/* A — Hero, to the same measurements as the City Guide and Event heroes.
+          No search panel here: a reel is found by browsing, not by typing. */}
+      <section className="relative mx-auto max-w-[1280px] sm:px-6 sm:pt-8 lg:px-8">
+        <div className="relative h-[calc(100svh-3.5rem)] w-full overflow-hidden bg-[#1b1a17] sm:aspect-[32/15] sm:h-auto">
+          {heroReels[0]?.thumbnail && (
+            <Image
+              src={heroReels[0].thumbnail}
+              alt=""
+              fill
+              priority
+              sizes="100vw"
+              className="object-cover sm:hidden"
+            />
+          )}
+          <div aria-hidden="true" className="absolute inset-0 hidden sm:grid sm:grid-cols-5">
+            {heroReels.map((reel) => (
+              <span key={reel.id} className="relative block h-full overflow-hidden">
+                {reel.thumbnail && (
+                  <Image src={reel.thumbnail} alt="" fill priority sizes="(min-width: 1280px) 250px, 20vw" className="object-cover" />
+                )}
+              </span>
+            ))}
+          </div>
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/40 to-black/70" />
+
+          <div className="relative mx-auto flex h-full max-w-[1280px] flex-col items-center justify-center px-4 text-center text-white sm:px-6 lg:px-8">
+            <h1 className="font-heading max-w-3xl text-[34px] leading-[1.08] sm:text-[52px] lg:text-[60px]">
+              Gorontalo, thirty
+              <br />
+              seconds at a time
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
+              {reels.length} reels from across the province. Pick a shelf and keep scrolling.
+            </p>
+            <a
+              href="#shelves"
+              className="mt-7 inline-flex min-h-11 items-center rounded-md bg-white px-7 text-sm font-bold text-[#302f2c] transition hover:bg-amber-300"
             >
-              <option value="All">All categories</option>
-              {categories.map((item) => <option key={item} value={item}>{item}</option>)}
-            </FilterSelect>
-            <FilterSelect
-              name="year"
-              label={period === "all" ? "Year" : period}
-              value={period}
-              active={period !== "all"}
-              onChange={selectPeriod}
-            >
-              <option value="all">All years</option>
-              {years.map((year) => <option key={year} value={year}>{year}</option>)}
-            </FilterSelect>
+              Start watching
+            </a>
           </div>
         </div>
-      </header>
+      </section>
 
-      <div ref={scrollerRef} className="no-scrollbar min-h-0 flex-1 snap-y snap-mandatory overflow-y-auto overscroll-contain scroll-smooth">
-        {filtered.length === 0 && (
-          <div className="grid h-full place-items-center px-3 py-3 md:px-8 md:py-4">
-            <div className="mx-auto grid h-full w-full max-w-6xl place-items-center gap-7 lg:grid-cols-[170px_minmax(280px,430px)_minmax(260px,360px)]">
-              <aside className="hidden w-full self-center lg:block">
-                <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-neutral-400">Category</p>
-                <CategoryTabs active={category} onChange={selectCategory} reels={reels} vertical />
-              </aside>
-              <div className="self-center px-6 text-center lg:col-span-2">
-                <p className="text-base font-semibold">No Reels here yet.</p>
-                <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-neutral-500 dark:text-neutral-400">
-                  {category} is ready to use — Reels will show up here as soon as one is filed under it.
-                </p>
-                <button
-                  type="button"
-                  onClick={() => selectCategory("All")}
-                  className="mt-6 inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-xs font-bold text-white transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] dark:bg-white dark:text-black dark:hover:bg-neutral-200"
-                >
-                  See all Reels
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {filtered.map((reel, index) => (
-          <article
-            key={reel.id}
-            data-reel-id={reel.id}
-            className="grid h-full snap-start snap-always place-items-center px-3 py-3 md:px-8 md:py-4"
+      {/* B — Filters */}
+      <section id="shelves" className="mx-auto max-w-[1280px] scroll-mt-16 px-4 pt-8 sm:px-6 lg:px-8">
+        <div className="flex flex-wrap items-center gap-2">
+          <FilterSelect
+            name="category"
+            label={category === "All" ? "Category" : category}
+            value={category}
+            active={category !== "All"}
+            onChange={(value) => selectCategory(value as CategoryFilter)}
           >
-            <div className="mx-auto grid h-full w-full max-w-6xl place-items-center gap-7 lg:grid-cols-[170px_minmax(280px,430px)_minmax(260px,360px)]">
-              <aside className="hidden w-full self-center lg:block">
-                <p className="mb-3 px-3 text-[10px] font-semibold uppercase tracking-[.18em] text-neutral-400">Category</p>
-                <CategoryTabs active={category} onChange={selectCategory} reels={reels} vertical />
-              </aside>
+            <option value="All">All categories</option>
+            {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+          </FilterSelect>
+          <FilterSelect
+            name="year"
+            label={period === "all" ? "Year" : period}
+            value={period}
+            active={period !== "all"}
+            onChange={selectPeriod}
+          >
+            <option value="all">All years</option>
+            {years.map((year) => <option key={year} value={year}>{year}</option>)}
+          </FilterSelect>
+          {!browsing && (
+            <button type="button" onClick={() => selectCategory("All")} className="text-xs text-neutral-500 underline-offset-2 hover:underline">
+              Back to all shelves
+            </button>
+          )}
+        </div>
+      </section>
 
-              <a
-                href={reel.permalink}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={`Open the ${reel.category} Reel by @${reel.username} on Instagram`}
-                className="group relative block aspect-[9/16] h-full max-h-[760px] w-auto max-w-full shrink-0 overflow-hidden rounded-[10px] bg-neutral-900 shadow-[0_18px_70px_rgba(0,0,0,.18)] ring-1 ring-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] md:max-h-[calc(100svh-9rem)]"
-              >
-                <div className="relative h-full w-full">
-                  {reel.thumbnail ? (
-                    <Image
-                      src={reel.thumbnail}
-                      alt={reel.description}
-                      fill
-                      preload={index === 0}
-                      sizes="(max-width: 767px) 92vw, 430px"
-                      className="object-cover transition duration-500 group-hover:scale-[1.015]"
-                    />
-                  ) : (
-                    // No cover for this one. Instagram stopped serving embed
-                    // images, so rather than hide the post we show its own
-                    // category colour and let the caption below carry it.
-                    <div className={`absolute inset-0 ${categoryAccent(reel.category)} opacity-90`}>
-                      <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,.35),transparent_55%)]" />
-                    </div>
-                  )}
-                  <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/85 md:from-transparent md:to-black/25" />
-                  <div className="absolute inset-0 grid place-items-center"><PlayIcon /></div>
-
-                  <div className="absolute inset-x-0 bottom-0 p-4 text-white md:hidden">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className={`h-2 w-2 rounded-full ${categoryAccent(reel.category)}`} />
-                      <span className="text-[10px] font-bold uppercase tracking-[.17em]">{reel.category}</span>
-                      {reel.sponsored && <span className="rounded-full bg-white/15 px-2 py-0.5 text-[9px] font-semibold uppercase tracking-wider backdrop-blur">Sponsored</span>}
-                    </div>
-                    <p className="text-xs font-semibold">@{reel.username}</p>
-                    <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-white/85">{reel.description}</p>
-                    <p className="mt-3 text-[10px] font-semibold uppercase tracking-[.14em] text-[#f5c400]">Open on Instagram ↗</p>
-                  </div>
-                </div>
-              </a>
-
-              <aside className="hidden self-center md:block">
-                <div className="mb-5 flex items-center gap-2">
-                  <span className={`h-2.5 w-2.5 rounded-full ${categoryAccent(reel.category)}`} />
-                  <p className="text-[11px] font-bold uppercase tracking-[.19em] text-neutral-500 dark:text-neutral-400">{reel.category}</p>
-                  {reel.sponsored && <span className="rounded-full bg-violet-100 px-2 py-1 text-[9px] font-bold uppercase tracking-wider text-violet-700 dark:bg-violet-500/15 dark:text-violet-300">Sponsored</span>}
-                </div>
-                <p className="text-sm font-semibold">@{reel.username}</p>
-                <p className="mt-3 text-base leading-relaxed text-neutral-600 dark:text-neutral-300">{reel.description}</p>
-                <div className="mt-5 flex items-center gap-4 text-xs text-neutral-500 dark:text-neutral-400">
-                  {reel.views > 0 && <span>{number.format(reel.views)} views</span>}
-                  {typeof reel.reach === "number" && reel.reach > 0 && <span>{number.format(reel.reach)} reach</span>}
-                  <span>{number.format(reel.likes)} likes</span>
-                </div>
-                <p className="mt-2 text-xs text-neutral-400">{date.format(new Date(reel.publishedAt))}</p>
+      {browsing ? (
+        <>
+          <Shelf title={topShelfTitle} reels={topShelf} ranked />
+          <Shelf title="Widescreen" reels={landscape.slice(0, SHELF_SIZE)} wide />
+          {categories.map((name) => {
+            const shelf = inPeriod.filter((reel) => reel.category === name);
+            return (
+              <Shelf
+                key={name}
+                title={name}
+                reels={shelf.slice(0, SHELF_SIZE)}
+                onViewAll={shelf.length > SHELF_SIZE ? () => selectCategory(name) : undefined}
+              />
+            );
+          })}
+        </>
+      ) : (
+        // One category, everything in it, as a grid rather than a shelf.
+        <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
+          <SectionHeading>{`${category} · ${filtered.length}`}</SectionHeading>
+          {filtered.length === 0 ? (
+            <p className="rounded-xl border border-dashed border-neutral-300 px-6 py-16 text-center text-sm text-neutral-500 dark:border-zinc-700">
+              No Reels here yet.
+            </p>
+          ) : (
+            <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-4 lg:grid-cols-6">
+              {filtered.map((reel) => (
                 <a
+                  key={reel.id}
                   href={reel.permalink}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-7 inline-flex items-center gap-2 rounded-full bg-black px-5 py-3 text-xs font-bold text-white transition hover:bg-neutral-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] dark:bg-white dark:text-black dark:hover:bg-neutral-200"
+                  aria-label={`Open the ${reel.category} Reel by @${reel.username} on Instagram`}
+                  className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]"
                 >
-                  Open on Instagram
-                  <span aria-hidden="true">↗</span>
+                  <Poster reel={reel} wide={reel.orientation === "landscape"} />
+                  <span className="mt-2 block truncate text-xs text-neutral-600 dark:text-neutral-300">{reel.description}</span>
+                  <span className="mt-0.5 block text-[11px] text-neutral-400">
+                    {number.format(reel.views)} views · {reelYear(reel)}
+                  </span>
                 </a>
-                <p className="mt-8 text-xs tabular-nums text-neutral-400">
-                  {String(activeIndex + 1).padStart(2, "0")} <span className="mx-2 text-neutral-300 dark:text-neutral-700">/</span> {String(filtered.length).padStart(2, "0")}
-                </p>
-              </aside>
+              ))}
             </div>
-          </article>
-        ))}
-      </div>
-    </section>
+          )}
+        </section>
+      )}
+    </div>
   );
 }
