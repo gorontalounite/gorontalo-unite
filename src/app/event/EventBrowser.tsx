@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import SectionHeading from "@/components/ui/SectionHeading";
+import CategoryIcon from "./CategoryIcon";
 import { EVENT_CATEGORIES, eventDay, rupiah, type EventItem } from "./data";
 
 const GRID_STEP = 8;
@@ -11,13 +12,15 @@ const GRID_STEP = 8;
 const SECTION_SIZE = 6;
 
 function Poster({ event, className = "" }: { event: EventItem; className?: string }) {
-  const icon = EVENT_CATEGORIES.find((item) => item.label === event.category)?.icon ?? "🎫";
+  const icon = EVENT_CATEGORIES.find((item) => item.label === event.category)?.icon ?? "festival";
   return (
     <div className={`relative overflow-hidden bg-gradient-to-br from-[#f4e2c2] via-[#efd3ad] to-[#e3c9a8] ${className}`}>
       {event.imageUrl ? (
         <Image src={event.imageUrl} alt={event.title} fill unoptimized sizes="(min-width: 1024px) 300px, 45vw" className="object-cover" />
       ) : (
-        <span aria-hidden="true" className="absolute inset-0 grid place-items-center text-3xl opacity-70">{icon}</span>
+        <span aria-hidden="true" className="absolute inset-0 grid place-items-center text-[#a08a5c]">
+          <CategoryIcon name={icon} className="h-9 w-9" />
+        </span>
       )}
       {event.isSample && (
         <span className="absolute left-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
@@ -261,7 +264,9 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
 
       {/* Category strip */}
       <section id="browse" className="mx-auto max-w-[1280px] scroll-mt-16 px-4 pt-8 sm:px-6 lg:px-8">
-        <div className="no-scrollbar -mx-1 flex gap-1 overflow-x-auto pb-1">
+        {/* Eleven tiles on one row from lg up, and a single scrolling row below
+            it — each tile the same width so the labels line up. */}
+        <div className="no-scrollbar -mx-1 flex gap-1 overflow-x-auto pb-1 lg:grid lg:grid-cols-11 lg:gap-2 lg:overflow-visible">
           {EVENT_CATEGORIES.map((item) => {
             const active = category === item.label;
             return (
@@ -270,12 +275,18 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
                 type="button"
                 onClick={() => { setCategory(active ? null : item.label); setShown(GRID_STEP); }}
                 aria-pressed={active}
-                className={`flex w-[86px] shrink-0 flex-col items-center gap-1.5 rounded-xl px-1 py-2 text-center transition ${
-                  active ? "bg-white shadow-sm ring-1 ring-neutral-200 dark:bg-zinc-900 dark:ring-zinc-700" : "hover:bg-white/70 dark:hover:bg-zinc-900/60"
+                className={`flex w-[84px] shrink-0 flex-col items-center gap-2 rounded-xl px-1 py-3 text-center transition lg:w-auto ${
+                  active
+                    ? "bg-white shadow-sm ring-1 ring-neutral-200 dark:bg-zinc-900 dark:ring-zinc-700"
+                    : "hover:bg-white/70 dark:hover:bg-zinc-900/60"
                 }`}
               >
-                <span aria-hidden="true" className="grid h-11 w-11 place-items-center rounded-xl bg-white text-xl shadow-sm ring-1 ring-neutral-200/70 dark:bg-zinc-800 dark:ring-zinc-700">
-                  {item.icon}
+                <span className={`grid h-11 w-11 place-items-center rounded-full ring-1 transition ${
+                  active
+                    ? "bg-[#302f2c] text-white ring-[#302f2c] dark:bg-amber-300 dark:text-zinc-950 dark:ring-amber-300"
+                    : "bg-white text-[#302f2c] ring-neutral-200/70 dark:bg-zinc-800 dark:text-zinc-200 dark:ring-zinc-700"
+                }`}>
+                  <CategoryIcon name={item.icon} className="h-[22px] w-[22px]" />
                 </span>
                 <span className="text-[10px] leading-tight text-neutral-600 dark:text-neutral-300">{item.label}</span>
               </button>

@@ -31,21 +31,6 @@ const navItems = [
     ),
   },
   {
-    href: "/reels",
-    label: "Reels",
-    icon: (active: boolean) => (
-      <svg
-        className={`w-6 h-6 ${active ? "text-brand dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
-        fill="none" stroke="currentColor" viewBox="0 0 24 24"
-      >
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.5}
-          d="M15.75 5.25 18 3m0 0 2.25 2.25M18 3v5.25M8.25 5.25 6 3M6 3 3.75 5.25M6 3v5.25M9.75 9.75v4.5l4-2.25-4-2.25ZM5.25 21h13.5A2.25 2.25 0 0 0 21 18.75v-7.5A2.25 2.25 0 0 0 18.75 9H5.25A2.25 2.25 0 0 0 3 11.25v7.5A2.25 2.25 0 0 0 5.25 21Z" />
-      </svg>
-    ),
-  },
-  {
-    // Took the slot the chatbot-era profile shortcut used to hold. The profile
-    // page itself is still at /profile, reached from the header menu.
     href: "/event",
     label: "Event",
     icon: (active: boolean) => (
@@ -55,6 +40,19 @@ const navItems = [
       >
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.5}
           d="M8 3v3M16 3v3M4 9h16M5 6h14a1 1 0 011 1v12a1 1 0 01-1 1H5a1 1 0 01-1-1V7a1 1 0 011-1z" />
+      </svg>
+    ),
+  },
+  {
+    href: "/reels",
+    label: "Reels",
+    icon: (active: boolean) => (
+      <svg
+        className={`w-6 h-6 ${active ? "text-brand dark:text-yellow-400" : "text-gray-500 dark:text-gray-400"}`}
+        fill="none" stroke="currentColor" viewBox="0 0 24 24"
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={active ? 2 : 1.5}
+          d="M15.75 5.25 18 3m0 0 2.25 2.25M18 3v5.25M8.25 5.25 6 3M6 3 3.75 5.25M6 3v5.25M9.75 9.75v4.5l4-2.25-4-2.25ZM5.25 21h13.5A2.25 2.25 0 0 0 21 18.75v-7.5A2.25 2.25 0 0 0 18.75 9H5.25A2.25 2.25 0 0 0 3 11.25v7.5A2.25 2.25 0 0 0 5.25 21Z" />
       </svg>
     ),
   },
