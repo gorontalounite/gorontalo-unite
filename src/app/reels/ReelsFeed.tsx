@@ -205,7 +205,7 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
               {categories.map((item) => <option key={item} value={item}>{item}</option>)}
             </FilterSelect>
             <FilterSelect
-              label="Date"
+              label="Year"
               value={period}
               active={period !== "all"}
               onChange={selectPeriod}
@@ -261,14 +261,23 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
                 className="group relative block aspect-[9/16] h-full max-h-[760px] w-auto max-w-full shrink-0 overflow-hidden rounded-[10px] bg-neutral-900 shadow-[0_18px_70px_rgba(0,0,0,.18)] ring-1 ring-black/10 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] md:max-h-[calc(100svh-9rem)]"
               >
                 <div className="relative h-full w-full">
-                  <Image
-                    src={reel.thumbnail}
-                    alt={reel.description}
-                    fill
-                    preload={index === 0}
-                    sizes="(max-width: 767px) 92vw, 430px"
-                    className="object-cover transition duration-500 group-hover:scale-[1.015]"
-                  />
+                  {reel.thumbnail ? (
+                    <Image
+                      src={reel.thumbnail}
+                      alt={reel.description}
+                      fill
+                      preload={index === 0}
+                      sizes="(max-width: 767px) 92vw, 430px"
+                      className="object-cover transition duration-500 group-hover:scale-[1.015]"
+                    />
+                  ) : (
+                    // No cover for this one. Instagram stopped serving embed
+                    // images, so rather than hide the post we show its own
+                    // category colour and let the caption below carry it.
+                    <div className={`absolute inset-0 ${categoryAccent(reel.category)} opacity-90`}>
+                      <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_30%_25%,rgba(255,255,255,.35),transparent_55%)]" />
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-gradient-to-b from-black/10 via-transparent to-black/85 md:from-transparent md:to-black/25" />
                   <div className="absolute inset-0 grid place-items-center"><PlayIcon /></div>
 

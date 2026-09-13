@@ -35,7 +35,6 @@ export default async function ReelsPage({ searchParams }: PageProps<"/reels">) {
     .order("publish_time", { ascending: false });
 
   const databaseReels: ReelItem[] = (data ?? [])
-    .filter((item) => item.thumbnail_url)
     .map((item) => ({
       id: item.id,
       username: item.account_username,
@@ -44,7 +43,7 @@ export default async function ReelsPage({ searchParams }: PageProps<"/reels">) {
       description: item.description,
       publishedAt: item.publish_time,
       permalink: item.permalink,
-      thumbnail: item.thumbnail_url as string,
+      thumbnail: (item.thumbnail_url as string | null) ?? null,
       views: Number(item.views),
       reach: Number(item.reach),
       likes: Number(item.likes),
