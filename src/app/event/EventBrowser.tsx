@@ -7,6 +7,8 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import { EVENT_CATEGORIES, eventDay, rupiah, type EventItem } from "./data";
 
 const GRID_STEP = 8;
+/** Each curated section shows six, then offers the rest. */
+const SECTION_SIZE = 6;
 
 function Poster({ event, className = "" }: { event: EventItem; className?: string }) {
   const icon = EVENT_CATEGORIES.find((item) => item.label === event.category)?.icon ?? "🎫";
@@ -30,6 +32,16 @@ function priceLabel(event: EventItem) {
   if (event.priceFrom === null) return "Cek harga";
   return event.priceFrom === 0 ? "Gratis" : rupiah(event.priceFrom);
 }
+
+const ViewAll = ({ total, expanded, onToggle }: { total: number; expanded: boolean; onToggle: () => void }) => (
+  <button
+    type="button"
+    onClick={onToggle}
+    className="shrink-0 text-sm font-semibold text-[#1b4dd8] hover:underline dark:text-sky-400"
+  >
+    {expanded ? "Tampilkan lebih sedikit" : `View all (${total}) \u203a`}
+  </button>
+);
 
 /** The wide card used by the "Event Seru Untukmu" rail. */
 function RailCard({ event }: { event: EventItem }) {
@@ -95,8 +107,10 @@ function GridCard({ event }: { event: EventItem }) {
   );
 }
 
-export default function EventBrowser({ events, showingSamples }: { events: EventItem[]; showingSamples: boolean }) {
+export default function EventBrowser({ events, showingSamples, nowIso }: { events: EventItem[]; showingSamples: boolean; nowIso: string }) {
   const [query, setQuery] = useState("");
+  const [showAllFeatured, setShowAllFeatured] = useState(false);
+  const [showAllUpcoming, setShowAllUpcoming] = useState(false);
   const [category, setCategory] = useState<string | null>(null);
   const [city, setCity] = useState("");
   const [shown, setShown] = useState(GRID_STEP);
@@ -115,8 +129,32 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
   }), [events, category, city, needle]);
 
   const filtering = Boolean(needle) || Boolean(category) || Boolean(city);
-  const featured = filtered.filter((event) => event.featured).slice(0, 4);
-  const rest = filtered.filter((event) => !featured.includes(event));
+
+  // An event that runs today is still ahead of you, so the boundary is the
+  // start of today rather than the exact moment the page was rendered.
+  const startOfToday = useMemo(() => {
+    const day = new Date(nowIso);
+    day.setHours(0, 0, 0, 0);
+    return day.getTime();
+  }, [nowIso]);
+  const hasFinished = (event: EventItem) =>
+    new Date(event.endsAt ?? event.startsAt).getTime() < startOfToday;
+
+  const upcoming = useMemo(
+    () => filtered.filter((event) => !hasFinished(event))
+      .sort((a, b) => new Date(a.startsAt).getTime() - new Date(b.startsAt).getTime()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filtered, startOfToday],
+  );
+  const finished = useMemo(
+    () => filtered.filter(hasFinished)
+      .sort((a, b) => new Date(b.startsAt).getTime() - new Date(a.startsAt).getTime()),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [filtered, startOfToday],
+  );
+  // Curated picks lead; the rest of what is ahead follows, without repeating them.
+  const featured = upcoming.filter((event) => event.featured);
+  const rest = upcoming.filter((event) => !event.featured);
 
   return (
     <div className="bg-[#fafafa] pb-10 text-neutral-900 dark:bg-zinc-950 dark:text-white md:pb-12">
@@ -276,9 +314,32 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
         <>
           {featured.length > 0 && (
             <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
-              <SectionHeading>Event Seru Untukmu</SectionHeading>
+              <SectionHeading
+                action={featured.length > SECTION_SIZE
+                  ? <ViewAll total={featured.length} expanded={showAllFeatured} onToggle={() => setShowAllFeatured((value) => !value)} />
+                  : null}
+              >
+                Event Seru Untukmu
+              </SectionHeading>
               <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
-                {featured.map((event) => <RailCard key={event.id} event={event} />)}
+                {(showAllFeatured ? featured : featured.slice(0, SECTION_SIZE))
+                  .map((event) => <RailCard key={event.id} event={event} />)}
+              </div>
+            </section>
+          )}
+
+          {rest.length > 0 && (
+            <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
+              <SectionHeading
+                action={rest.length > SECTION_SIZE
+                  ? <ViewAll total={rest.length} expanded={showAllUpcoming} onToggle={() => setShowAllUpcoming((value) => !value)} />
+                  : null}
+              >
+                Event akan datang
+              </SectionHeading>
+              <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
+                {(showAllUpcoming ? rest : rest.slice(0, SECTION_SIZE))
+                  .map((event) => <RailCard key={event.id} event={event} />)}
               </div>
             </section>
           )}
@@ -296,22 +357,19 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
             </Link>
           </section>
 
-          {rest.length > 0 && (
+          {finished.length > 0 && (
             <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
-              <div className="mb-4 flex items-center justify-between gap-4">
-                <h2 className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
-                  <span className="text-[#f5c400]" aria-hidden="true">/</span>
-                  <span>Event Lainnya</span>
-                  <span className="text-[#f5c400]" aria-hidden="true">/</span>
-                </h2>
-                {rest.length > shown && (
-                  <button type="button" onClick={() => setShown((value) => value + GRID_STEP)} className="text-sm font-semibold text-[#1b4dd8] hover:underline dark:text-sky-400">
-                    Lebih Banyak Event ›
-                  </button>
-                )}
-              </div>
+              <SectionHeading
+                className="mb-2"
+                action={finished.length > shown
+                  ? <button type="button" onClick={() => setShown((value) => value + GRID_STEP)} className="shrink-0 text-sm font-semibold text-[#1b4dd8] hover:underline dark:text-sky-400">Lebih Banyak Event ›</button>
+                  : null}
+              >
+                Event Lainnya
+              </SectionHeading>
+              <p className="mb-4 text-xs text-neutral-500 dark:text-neutral-400">Acara yang sudah selesai.</p>
               <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
-                {rest.slice(0, shown).map((event) => <GridCard key={event.id} event={event} />)}
+                {finished.slice(0, shown).map((event) => <GridCard key={event.id} event={event} />)}
               </div>
             </section>
           )}
