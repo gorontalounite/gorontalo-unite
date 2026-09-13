@@ -334,12 +334,12 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
 
           <div className="relative mx-auto flex h-full max-w-[1280px] flex-col items-center justify-center px-4 text-center text-white sm:px-6 lg:px-8">
             <h1 className="font-heading max-w-3xl text-[34px] leading-[1.08] sm:text-[52px] lg:text-[60px]">
-              Gorontalo, thirty
+              Press play
               <br />
-              seconds at a time
+              on Gorontalo
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
-              {reels.length} reels from across the province. Pick a shelf and keep scrolling.
+              Reels from across the province. Pick a shelf and keep scrolling.
             </p>
             <a
               href="#shelves"

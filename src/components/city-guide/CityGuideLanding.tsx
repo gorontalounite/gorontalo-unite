@@ -64,8 +64,8 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
               one directory
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
-              {places.length} places to go, eat and stay. Pick an area, or search
-              for what you are after.
+              Places to go, eat and stay. Pick an area, or search for what you
+              are after.
             </p>
             <Link
               href="#browse"

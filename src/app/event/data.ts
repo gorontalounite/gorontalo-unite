@@ -40,28 +40,28 @@ export interface EventItem {
 
 /** `icon` keys into CategoryIcon; see that file for the drawings. */
 export const EVENT_CATEGORIES = [
-  { label: "Atraksi & Taman Hiburan", icon: "attractions" },
-  { label: "Balapan & Ketahanan", icon: "racing" },
-  { label: "Festival & Pameran", icon: "festival" },
-  { label: "Komunitas & Perkumpulan", icon: "community" },
-  { label: "Konferensi & Seminar", icon: "conference" },
-  { label: "Konser", icon: "concert" },
-  { label: "Pertunjukan & Penampilan", icon: "performance" },
-  { label: "Sesi Olahraga", icon: "sports" },
-  { label: "Tur & Perjalanan", icon: "tours" },
-  { label: "Turnamen & Kompetisi", icon: "tournament" },
-  { label: "Workshop & Pelatihan", icon: "workshop" },
+  { label: "Attractions & Theme Parks", icon: "attractions" },
+  { label: "Community & Meetups", icon: "community" },
+  { label: "Concerts", icon: "concert" },
+  { label: "Conferences & Seminars", icon: "conference" },
+  { label: "Festivals & Fairs", icon: "festival" },
+  { label: "Performances", icon: "performance" },
+  { label: "Racing & Endurance", icon: "racing" },
+  { label: "Sports Sessions", icon: "sports" },
+  { label: "Tournaments & Competitions", icon: "tournament" },
+  { label: "Tours & Trips", icon: "tours" },
+  { label: "Workshops & Training", icon: "workshop" },
 ] as const;
 
 export const rupiah = (value: number) =>
   new Intl.NumberFormat("id-ID", { style: "currency", currency: "IDR", maximumFractionDigits: 0 }).format(value);
 
 export const eventDay = (value: string) =>
-  new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" })
+  new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" })
     .format(new Date(value));
 
 export const eventDayLong = (value: string) =>
-  new Intl.DateTimeFormat("id-ID", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Makassar" })
+  new Intl.DateTimeFormat("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Makassar" })
     .format(new Date(value));
 
 /* ------------------------------------------------------------------ *
@@ -91,7 +91,7 @@ export const SAMPLE_EVENTS: EventItem[] = [
     id: "sample-karawo",
     slug: "contoh-festival-karawo",
     title: "Festival Karawo",
-    category: "Festival & Pameran",
+    category: "Festivals & Fairs",
     organizer: "Dinas Pariwisata Gorontalo",
     venue: "Lapangan Taruna Remaja",
     address: "Jl. Sultan Botutihe, Kota Gorontalo",
@@ -117,7 +117,7 @@ export const SAMPLE_EVENTS: EventItem[] = [
     id: "sample-tumbilotohe",
     slug: "contoh-malam-tumbilotohe",
     title: "Malam Tumbilotohe",
-    category: "Atraksi & Taman Hiburan",
+    category: "Attractions & Theme Parks",
     organizer: "Komunitas Kampung Lampu",
     venue: "Kawasan Danau Limboto",
     address: "Limboto, Kabupaten Gorontalo",
@@ -138,7 +138,7 @@ export const SAMPLE_EVENTS: EventItem[] = [
     id: "sample-pacuan",
     slug: "contoh-pacuan-kuda-tradisional",
     title: "Pacuan Kuda Tradisional",
-    category: "Turnamen & Kompetisi",
+    category: "Tournaments & Competitions",
     organizer: "Pordasi Gorontalo",
     venue: "Arena Pacuan Kuda Bone Bolango",
     address: "Suwawa, Bone Bolango",
@@ -163,7 +163,7 @@ export const SAMPLE_EVENTS: EventItem[] = [
     id: "sample-teluk-tomini",
     slug: "contoh-teluk-tomini-run",
     title: "Teluk Tomini Run 10K",
-    category: "Balapan & Ketahanan",
+    category: "Racing & Endurance",
     organizer: "Gorontalo Runners",
     venue: "Garis start Pantai Indah",
     address: "Kota Gorontalo",
@@ -189,7 +189,7 @@ export const SAMPLE_EVENTS: EventItem[] = [
     id: "sample-konser",
     slug: "contoh-panggung-musik-teluk",
     title: "Panggung Musik Teluk",
-    category: "Konser",
+    category: "Concerts",
     organizer: "Gorontalo Unite",
     venue: "Anjungan Teluk Tomini",
     address: "Kota Gorontalo",
@@ -214,7 +214,7 @@ export const SAMPLE_EVENTS: EventItem[] = [
     id: "sample-seminar",
     slug: "contoh-forum-ekonomi-kreatif",
     title: "Forum Ekonomi Kreatif Gorontalo",
-    category: "Konferensi & Seminar",
+    category: "Conferences & Seminars",
     organizer: "Kadin Gorontalo",
     venue: "Aula Universitas Negeri Gorontalo",
     address: "Kota Gorontalo",
@@ -238,7 +238,7 @@ export const SAMPLE_EVENTS: EventItem[] = [
     id: "sample-workshop",
     slug: "contoh-kelas-kopi-pinogu",
     title: "Kelas Cupping Kopi Pinogu",
-    category: "Workshop & Pelatihan",
+    category: "Workshops & Training",
     organizer: "Rumah Kopi Pinogu",
     venue: "Kedai Pinogu",
     address: "Kota Gorontalo",
@@ -259,7 +259,7 @@ export const SAMPLE_EVENTS: EventItem[] = [
     id: "sample-tur",
     slug: "contoh-tur-hiu-paus-botubarani",
     title: "Tur Hiu Paus Botubarani",
-    category: "Tur & Perjalanan",
+    category: "Tours & Trips",
     organizer: "Pokdarwis Botubarani",
     venue: "Pantai Botubarani",
     address: "Bone Bolango",
