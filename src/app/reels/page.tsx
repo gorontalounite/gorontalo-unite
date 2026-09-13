@@ -28,10 +28,12 @@ export default async function ReelsPage({ searchParams }: PageProps<"/reels">) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("reels")
-    .select("id, account_username, description, publish_time, permalink, category, sponsored, thumbnail_url, views, reach, likes")
+    .select("id, account_username, description, publish_time, permalink, category, sponsored, thumbnail_url, orientation, featured, views, reach, likes")
     .eq("status", "published")
+    // Newest first, with anything ticked Featured pinned above it. Display
+    // order used to sit in between, but every row shares the same value, so it
+    // only ever pushed a reel down — the publish date is the honest handle.
     .order("featured", { ascending: false })
-    .order("display_order")
     .order("publish_time", { ascending: false });
 
   const databaseReels: ReelItem[] = (data ?? [])
@@ -44,6 +46,8 @@ export default async function ReelsPage({ searchParams }: PageProps<"/reels">) {
       publishedAt: item.publish_time,
       permalink: item.permalink,
       thumbnail: (item.thumbnail_url as string | null) ?? null,
+      orientation: (item.orientation as "portrait" | "landscape" | null) ?? "portrait",
+      featured: Boolean(item.featured),
       views: Number(item.views),
       reach: Number(item.reach),
       likes: Number(item.likes),

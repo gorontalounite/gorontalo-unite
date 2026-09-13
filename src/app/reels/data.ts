@@ -29,6 +29,10 @@ export interface ReelItem {
   permalink: string;
   /** Null when no cover image has been supplied for this reel. */
   thumbnail: string | null;
+  /** 9:16 unless the source video is landscape. */
+  orientation: "portrait" | "landscape";
+  /** Pinned to the top shelf. */
+  featured: boolean;
   views: number;
   reach?: number;
   likes: number;
@@ -44,6 +48,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-06-16T03:34:00+08:00",
     permalink: "https://www.instagram.com/reel/DZpL7hZBRBu/",
     thumbnail: "/reels/DZpL7hZBRBu.jpg",
+    orientation: "portrait",
+    featured: true,
     views: 436777,
     likes: 7068,
   },
@@ -56,6 +62,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-06-18T08:24:00+08:00",
     permalink: "https://www.instagram.com/reel/DZu2aNEhvkr/",
     thumbnail: "/reels/DZu2aNEhvkr.jpg",
+    orientation: "portrait",
+    featured: true,
     views: 200007,
     likes: 12631,
   },
@@ -68,6 +76,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-06-15T23:53:00+08:00",
     permalink: "https://www.instagram.com/reel/DZoyaZMhRLO/",
     thumbnail: "/reels/DZoyaZMhRLO.jpg",
+    orientation: "portrait",
+    featured: true,
     views: 142577,
     likes: 8702,
   },
@@ -80,6 +90,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-03-19T00:13:00+08:00",
     permalink: "https://www.instagram.com/reel/DWDp6ggE872/",
     thumbnail: "/reels/DWDp6ggE872.jpg",
+    orientation: "portrait",
+    featured: true,
     views: 30047,
     likes: 1007,
   },
@@ -92,6 +104,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-03-09T05:00:00+08:00",
     permalink: "https://www.instagram.com/reel/DVqa7dGD1pB/",
     thumbnail: "/reels/DVqa7dGD1pB.jpg",
+    orientation: "portrait",
+    featured: false,
     views: 16238,
     likes: 241,
   },
@@ -104,6 +118,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-02-20T11:30:00+08:00",
     permalink: "https://www.instagram.com/reel/DU_c97ck4bX/",
     thumbnail: "/reels/DU_c97ck4bX.jpg",
+    orientation: "portrait",
+    featured: false,
     views: 12577,
     likes: 95,
   },
@@ -116,6 +132,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-03-17T02:41:00+08:00",
     permalink: "https://www.instagram.com/reel/DV-v77ega42/",
     thumbnail: "/reels/DV-v77ega42.jpg",
+    orientation: "portrait",
+    featured: false,
     views: 14239,
     likes: 314,
   },
@@ -128,6 +146,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-07-13T03:55:00+08:00",
     permalink: "https://www.instagram.com/reel/Dauv99eBUFx/",
     thumbnail: "/reels/Dauv99eBUFx.jpg",
+    orientation: "portrait",
+    featured: false,
     views: 13284,
     likes: 94,
   },
@@ -140,6 +160,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-05-09T22:30:00+08:00",
     permalink: "https://www.instagram.com/reel/DYJXI99uALJ/",
     thumbnail: "/reels/DYJXI99uALJ.jpg",
+    orientation: "portrait",
+    featured: false,
     views: 11686,
     likes: 358,
   },
@@ -152,6 +174,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-03-12T04:00:00+08:00",
     permalink: "https://www.instagram.com/reel/DVyCk6dE4Mr/",
     thumbnail: "/reels/DVyCk6dE4Mr.jpg",
+    orientation: "portrait",
+    featured: false,
     views: 14081,
     likes: 300,
   },
@@ -164,6 +188,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-07-30T06:03:00+08:00",
     permalink: "https://www.instagram.com/reel/Dbav5taTC8j/",
     thumbnail: "/reels/Dbav5taTC8j.jpg",
+    orientation: "portrait",
+    featured: false,
     views: 12416,
     likes: 112,
   },
@@ -176,6 +202,8 @@ export const reels: ReelItem[] = [
     publishedAt: "2026-03-07T01:00:00+08:00",
     permalink: "https://www.instagram.com/reel/DVk9FGGT2pg/",
     thumbnail: "/reels/DVk9FGGT2pg.jpg",
+    orientation: "portrait",
+    featured: false,
     views: 12410,
     likes: 58,
   },

@@ -21,6 +21,7 @@ export interface AdminReel {
   post_type: string;
   category: string;
   sponsored: boolean;
+  orientation: "portrait" | "landscape";
   thumbnail_url: string | null;
   status: "draft" | "published";
   display_order: number;
@@ -70,6 +71,7 @@ function emptyForm(): ReelForm {
     post_type: "Reel",
     category: "Tourism",
     sponsored: false,
+    orientation: "portrait",
     thumbnail_url: "",
     status: "draft",
     display_order: 0,
@@ -177,6 +179,7 @@ export default function ReelsAdminClient({
       post_type: item.post_type,
       category: item.category,
       sponsored: item.sponsored,
+      orientation: item.orientation,
       thumbnail_url: item.thumbnail_url,
       status: item.status,
       display_order: item.display_order,
@@ -423,6 +426,13 @@ export default function ReelsAdminClient({
                     <option value="draft">Draft</option>
                     <option value="published">Published</option>
                   </select>
+                </label>
+                <label className="text-xs font-medium text-gray-700">Orientasi *
+                  <select value={form.orientation} onChange={(e) => setForm({ ...form, orientation: e.target.value as AdminReel["orientation"] })} className={`${fieldClass} mt-1`}>
+                    <option value="portrait">Portrait (9:16)</option>
+                    <option value="landscape">Landscape (16:9)</option>
+                  </select>
+                  <span className="mt-1 block text-[10px] font-normal leading-relaxed text-gray-400">Landscape tampil di rak Widescreen dengan bingkai 16:9.</span>
                 </label>
                 <label className="text-xs font-medium text-gray-700">Urutan tampil
                   <input min="0" type="number" value={form.display_order} onChange={(e) => setForm({ ...form, display_order: Number(e.target.value) })} className={`${fieldClass} mt-1`} />

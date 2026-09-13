@@ -2,7 +2,8 @@ import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
 
 const STATUSES = new Set(["draft", "published"]);
-const LIST_COLUMNS = "id, title, account_username, description, publish_time, permalink, post_type, category, sponsored, thumbnail_url, status, display_order, featured, views, reach, likes, shares, follows, comments, saves, created_at, updated_at";
+const ORIENTATIONS = new Set(["portrait", "landscape"]);
+const LIST_COLUMNS = "id, title, orientation, account_username, description, publish_time, permalink, post_type, category, sponsored, thumbnail_url, status, display_order, featured, views, reach, likes, shares, follows, comments, saves, created_at, updated_at";
 
 type Authorized = Awaited<ReturnType<typeof authorizeUser>>;
 
@@ -81,6 +82,8 @@ async function normalizeBody(auth: NonNullable<Authorized>, body: Record<string,
   const postType = String(body.post_type ?? "Reel").trim() || "Reel";
   const category = String(body.category ?? "Wisata").trim();
   const status = String(body.status ?? "draft");
+  const orientation = String(body.orientation ?? "portrait");
+  if (!ORIENTATIONS.has(orientation)) throw new Error("Orientasi tidak valid.");
   let thumbnailUrl = String(body.thumbnail_url ?? "").trim();
 
   if (!accountUsername || accountUsername.length > 100) throw new Error("Account username wajib diisi.");
@@ -103,6 +106,7 @@ async function normalizeBody(auth: NonNullable<Authorized>, body: Record<string,
     post_type: postType,
     category,
     sponsored: Boolean(body.sponsored),
+    orientation,
     thumbnail_url: thumbnailUrl,
     status,
     display_order: nonNegativeInteger(body.display_order, "Urutan tampil"),
@@ -132,6 +136,11 @@ function inlineValues(body: Record<string, unknown>) {
     values.category = category;
   }
   if ("featured" in body) values.featured = Boolean(body.featured);
+  if ("orientation" in body) {
+    const orientation = String(body.orientation);
+    if (!ORIENTATIONS.has(orientation)) throw new Error("Orientasi tidak valid.");
+    values.orientation = orientation;
+  }
   if ("sponsored" in body) values.sponsored = Boolean(body.sponsored);
   if ("display_order" in body) values.display_order = nonNegativeInteger(body.display_order, "Urutan tampil");
   if (Object.keys(values).length === 0) throw new Error("Tidak ada perubahan yang dapat disimpan.");
