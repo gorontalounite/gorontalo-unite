@@ -43,8 +43,8 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
   return (
     <>
       {/* A — Hero, with the search panel riding its lower edge */}
-      <section className="relative">
-        <div className="relative h-[calc(100svh-3.5rem)] w-full overflow-hidden bg-[#1b1a17] sm:h-[70vh] sm:max-h-[620px]">
+      <section className="relative mx-auto max-w-[1280px] sm:px-6 sm:pt-8 lg:px-8">
+        <div className="relative h-[calc(100svh-3.5rem)] w-full overflow-hidden bg-[#1b1a17] sm:aspect-[32/15] sm:h-auto">
           <Image
             src="/city-guide/hero.webp"
             alt=""
