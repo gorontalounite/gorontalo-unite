@@ -34,13 +34,19 @@ function priceLabel(event: EventItem) {
 /** The wide card used by the "Event Seru Untukmu" rail. */
 function RailCard({ event }: { event: EventItem }) {
   return (
-    <Link href={`/event/${event.slug}`} className="group block min-w-0">
-      <Poster event={event} className="aspect-[4/3] rounded-xl" />
-      <p className="mt-3 truncate text-[11px] text-neutral-500 dark:text-neutral-400">{event.city ?? "Gorontalo"}</p>
-      <h3 className="font-heading mt-1 line-clamp-2 text-[15px] font-semibold leading-snug group-hover:underline">{event.title}</h3>
-      {event.organizer && <p className="mt-1 truncate text-xs text-neutral-500 dark:text-neutral-400">Oleh {event.organizer}</p>}
-      <p className="mt-3 text-[11px] text-neutral-400">Mulai dari</p>
-      <p className="text-[15px] font-bold">{priceLabel(event)}</p>
+    <Link href={`/event/${event.slug}`} className="group block h-full min-w-0">
+      <div className="flex h-full flex-col overflow-hidden rounded-lg border border-[#e7e2d8] bg-white transition hover:shadow-[0_18px_36px_-24px_rgba(0,0,0,.45)] dark:border-zinc-800 dark:bg-zinc-900">
+        <Poster event={event} className="aspect-[4/3]" />
+        <div className="flex flex-1 flex-col p-3">
+          <p className="truncate text-[11px] text-neutral-500 dark:text-neutral-400">{event.city ?? "Gorontalo"}</p>
+          <h3 className="font-heading mt-1 line-clamp-2 text-[15px] font-semibold leading-snug group-hover:underline">{event.title}</h3>
+          {event.organizer && <p className="mt-1 truncate text-xs text-neutral-500 dark:text-neutral-400">Oleh {event.organizer}</p>}
+          <div className="mt-auto border-t border-[#f0ece4] pt-3 dark:border-zinc-800">
+            <p className="text-[11px] text-neutral-400">Mulai dari</p>
+            <p className="text-[15px] font-bold">{priceLabel(event)}</p>
+          </div>
+        </div>
+      </div>
     </Link>
   );
 }
@@ -50,15 +56,15 @@ function GridCard({ event }: { event: EventItem }) {
   return (
     <Link
       href={`/event/${event.slug}`}
-      className="group flex flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white transition hover:border-neutral-300 hover:shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+      className="group flex flex-col overflow-hidden rounded-lg border border-[#e7e2d8] bg-white transition hover:shadow-[0_18px_36px_-24px_rgba(0,0,0,.45)] dark:border-zinc-800 dark:bg-zinc-900"
     >
-      <Poster event={event} className="aspect-[16/9]" />
+      <Poster event={event} className="aspect-[4/3]" />
       <div className="flex flex-1 flex-col p-3">
         <p className="truncate text-[11px] text-neutral-500 dark:text-neutral-400">{event.category}</p>
-        <h3 className="font-heading mt-1 line-clamp-2 text-sm font-semibold leading-snug group-hover:underline">{event.title}</h3>
+        <h3 className="font-heading mt-1 line-clamp-2 text-[15px] font-semibold leading-snug group-hover:underline">{event.title}</h3>
         <p className="mt-1 text-[11px] text-neutral-500 dark:text-neutral-400">{eventDay(event.startsAt)}</p>
         <p className="truncate text-[11px] text-neutral-500 dark:text-neutral-400">{event.venue ?? event.city ?? "Gorontalo"}</p>
-        <div className="mt-auto pt-3">
+        <div className="mt-auto border-t border-[#f0ece4] pt-3 dark:border-zinc-800">
           {event.soldOut ? (
             <p className="text-sm font-semibold text-neutral-400">Terjual habis</p>
           ) : (
@@ -76,17 +82,23 @@ function GridCard({ event }: { event: EventItem }) {
 export default function EventBrowser({ events, showingSamples }: { events: EventItem[]; showingSamples: boolean }) {
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState<string | null>(null);
+  const [city, setCity] = useState("");
   const [shown, setShown] = useState(GRID_STEP);
 
   const needle = query.trim().toLowerCase();
+  const cities = useMemo(
+    () => [...new Set(events.map((event) => event.city).filter((name): name is string => Boolean(name)))].sort(),
+    [events],
+  );
   const filtered = useMemo(() => events.filter((event) => {
     if (category && event.category !== category) return false;
+    if (city && event.city !== city) return false;
     if (!needle) return true;
     return [event.title, event.organizer, event.venue, event.city, event.category]
       .filter(Boolean).join(" ").toLowerCase().includes(needle);
-  }), [events, category, needle]);
+  }), [events, category, city, needle]);
 
-  const filtering = Boolean(needle) || Boolean(category);
+  const filtering = Boolean(needle) || Boolean(category) || Boolean(city);
   const featured = filtered.filter((event) => event.featured).slice(0, 4);
   const rest = filtered.filter((event) => !featured.includes(event));
 
@@ -98,33 +110,103 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
         </p>
       )}
 
-      {/* Hero + search */}
-      <section className="mx-auto max-w-7xl px-4 pt-4 sm:px-6">
-        <div className="relative flex min-h-[220px] items-end overflow-hidden rounded-2xl bg-gradient-to-br from-[#7b4bd8] via-[#c2417a] to-[#f0a020] sm:min-h-[320px]">
+      {/* A — Hero, built to the same measurements as the City Guide hero: same
+          heights, same overlay, same search panel riding the lower half. The
+          gradient stands in until there is an event photograph to put here. */}
+      <section className="relative">
+        <div className="relative h-[calc(100svh-3.5rem)] w-full overflow-hidden bg-[#1b1a17] sm:h-[70vh] sm:max-h-[620px]">
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-br from-[#7b4bd8] via-[#c2417a] to-[#f0a020]" />
           <div aria-hidden="true" className="absolute inset-0 bg-[radial-gradient(circle_at_20%_20%,rgba(255,255,255,.28),transparent_45%)]" />
-          <div className="relative w-full p-4 sm:p-8">
-            <label className="sr-only" htmlFor="event-search">Cari event</label>
-            <div className="flex items-center gap-3 rounded-full bg-white px-5 py-3.5 shadow-lg dark:bg-zinc-900">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 shrink-0 text-neutral-400" aria-hidden="true">
-                <circle cx="11" cy="11" r="7" /><path d="m20 20-3.5-3.5" strokeLinecap="round" />
-              </svg>
-              <input
-                id="event-search"
-                value={query}
-                onChange={(event) => { setQuery(event.target.value); setShown(GRID_STEP); }}
-                placeholder="Cari event, artis, venue…"
-                className="w-full bg-transparent text-[15px] outline-none placeholder:text-neutral-400"
-              />
-              {query && (
-                <button type="button" onClick={() => setQuery("")} className="shrink-0 text-sm text-neutral-400 hover:text-neutral-600">✕</button>
-              )}
-            </div>
+          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-black/40 via-black/35 to-black/65" />
+
+          <div className="relative mx-auto flex h-full max-w-[1280px] flex-col items-center justify-center px-4 text-center text-white sm:px-6 lg:px-8">
+            <h1 className="font-heading max-w-3xl text-[34px] leading-[1.08] sm:text-[52px] lg:text-[60px]">
+              Semua acara Gorontalo,
+              <br />
+              satu halaman
+            </h1>
+            <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
+              {showingSamples
+                ? "Cari berdasarkan area, kategori, atau nama acara."
+                : `${events.length} acara untuk didatangi. Pilih area, atau cari yang Anda tuju.`}
+            </p>
+            <a
+              href="#browse"
+              className="mt-7 inline-flex min-h-11 items-center rounded-md bg-white px-7 text-sm font-bold text-[#302f2c] transition hover:bg-amber-300"
+            >
+              Lihat semua event
+            </a>
+
+            {/* Same panel as the City Guide: three axes and a solid button. The
+                colour is set explicitly, or the fields inherit the hero's white
+                type and vanish against their own white background. */}
+            <form
+              onSubmit={(submit) => {
+                submit.preventDefault();
+                document.getElementById("browse")?.scrollIntoView({ behavior: "smooth" });
+              }}
+              className="mt-8 grid w-full max-w-3xl gap-px overflow-hidden rounded-lg border border-[#d7d1c6] bg-[#d7d1c6] text-left text-[#302f2c] shadow-[0_18px_40px_-24px_rgba(0,0,0,.6)] sm:max-w-4xl sm:grid-cols-[1.1fr_1fr_1.2fr_auto] dark:border-zinc-700 dark:bg-zinc-700 dark:text-zinc-100"
+            >
+              <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
+                <span className="sr-only">Area</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                  <path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11z" />
+                  <circle cx="12" cy="10" r="2.5" />
+                </svg>
+                <select
+                  value={city}
+                  onChange={(change) => { setCity(change.target.value); setShown(GRID_STEP); }}
+                  className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+                >
+                  <option value="">Semua area</option>
+                  {cities.map((name) => <option key={name} value={name}>{name}</option>)}
+                </select>
+              </label>
+
+              <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
+                <span className="sr-only">Kategori</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                  <rect x="3" y="4" width="18" height="16" rx="2" />
+                  <path d="M3 10h18" />
+                </svg>
+                <select
+                  value={category ?? ""}
+                  onChange={(change) => { setCategory(change.target.value || null); setShown(GRID_STEP); }}
+                  className="min-w-0 flex-1 bg-transparent text-sm outline-none"
+                >
+                  <option value="">Semua kategori</option>
+                  {EVENT_CATEGORIES.map((item) => <option key={item.label} value={item.label}>{item.label}</option>)}
+                </select>
+              </label>
+
+              <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
+                <span className="sr-only">Kata kunci</span>
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                  <circle cx="11" cy="11" r="7" />
+                  <path d="M20 20l-3.5-3.5" />
+                </svg>
+                <input
+                  value={query}
+                  onChange={(change) => { setQuery(change.target.value); setShown(GRID_STEP); }}
+                  type="search"
+                  placeholder="Nama event, artis, atau venue"
+                  className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#a8a29e]"
+                />
+              </label>
+
+              <button
+                type="submit"
+                className="min-h-12 bg-[#302f2c] px-8 text-sm font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#9b7513] dark:bg-amber-300 dark:text-zinc-950 dark:hover:bg-amber-200"
+              >
+                Cari
+              </button>
+            </form>
           </div>
         </div>
       </section>
 
       {/* Category strip */}
-      <section className="mx-auto max-w-7xl px-4 pt-5 sm:px-6">
+      <section id="browse" className="mx-auto max-w-7xl scroll-mt-16 px-4 pt-8 sm:px-6">
         <div className="no-scrollbar -mx-1 flex gap-1 overflow-x-auto pb-1">
           {EVENT_CATEGORIES.map((item) => {
             const active = category === item.label;
@@ -158,7 +240,7 @@ export default function EventBrowser({ events, showingSamples }: { events: Event
             </h2>
             <button
               type="button"
-              onClick={() => { setQuery(""); setCategory(null); }}
+              onClick={() => { setQuery(""); setCategory(null); setCity(""); }}
               className="text-xs text-neutral-500 underline-offset-2 hover:underline"
             >
               Bersihkan filter
