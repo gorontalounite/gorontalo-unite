@@ -24,7 +24,7 @@ function Poster({ event, className = "" }: { event: EventItem; className?: strin
       )}
       {event.isSample && (
         <span className="absolute left-2 top-2 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white">
-          Contoh
+          Sample
         </span>
       )}
     </div>
@@ -32,8 +32,8 @@ function Poster({ event, className = "" }: { event: EventItem; className?: strin
 }
 
 function priceLabel(event: EventItem) {
-  if (event.priceFrom === null) return "Cek harga";
-  return event.priceFrom === 0 ? "Gratis" : rupiah(event.priceFrom);
+  if (event.priceFrom === null) return "Check price";
+  return event.priceFrom === 0 ? "Free" : rupiah(event.priceFrom);
 }
 
 const ViewAll = ({ total, expanded, onToggle }: { total: number; expanded: boolean; onToggle: () => void }) => (
@@ -42,11 +42,11 @@ const ViewAll = ({ total, expanded, onToggle }: { total: number; expanded: boole
     onClick={onToggle}
     className="shrink-0 text-sm font-semibold text-[#1b4dd8] hover:underline dark:text-sky-400"
   >
-    {expanded ? "Tampilkan lebih sedikit" : `View all (${total}) \u203a`}
+    {expanded ? "Show less" : `View all (${total}) \u203a`}
   </button>
 );
 
-/** The wide card used by the "Event Seru Untukmu" rail. */
+/** The wide card used by the "Picks for you" rail. */
 function RailCard({ event }: { event: EventItem }) {
   return (
     <Link href={`/event/${event.slug}`} className="group block h-full min-w-0">
@@ -58,7 +58,7 @@ function RailCard({ event }: { event: EventItem }) {
           </h3>
           {/* Two fixed lines, so the rule below lands on one baseline across a row. */}
           <p className="mt-1.5 line-clamp-2 min-h-10 text-xs leading-relaxed text-[#78716c] dark:text-zinc-400">
-            {event.organizer ? `Oleh ${event.organizer}` : eventDay(event.startsAt)}
+            {event.organizer ? `By ${event.organizer}` : eventDay(event.startsAt)}
           </p>
           <div className="mt-3 flex items-center gap-3 border-t border-[#f0ece4] pt-3 text-[11px] text-[#78716c] dark:border-zinc-800 dark:text-zinc-400">
             <span className="shrink-0">{event.city ?? "Gorontalo"}</span>
@@ -66,7 +66,7 @@ function RailCard({ event }: { event: EventItem }) {
             <span className="hidden min-w-0 truncate sm:block">{eventDay(event.startsAt)}</span>
           </div>
           <div className="mt-3">
-            <p className="text-[11px] text-[#78716c] dark:text-zinc-400">Mulai dari</p>
+            <p className="text-[11px] text-[#78716c] dark:text-zinc-400">From</p>
             <p className="text-[15px] font-bold">{priceLabel(event)}</p>
           </div>
         </div>
@@ -75,7 +75,7 @@ function RailCard({ event }: { event: EventItem }) {
   );
 }
 
-/** The bordered card used by the "Event Lainnya" grid. */
+/** The bordered card used by the "Past events" grid. */
 function GridCard({ event }: { event: EventItem }) {
   return (
     <Link
@@ -97,10 +97,10 @@ function GridCard({ event }: { event: EventItem }) {
         </div>
         <div className="mt-3">
           {event.soldOut ? (
-            <p className="text-[15px] font-bold text-[#78716c] dark:text-zinc-400">Terjual habis</p>
+            <p className="text-[15px] font-bold text-[#78716c] dark:text-zinc-400">Sold out</p>
           ) : (
             <>
-              <p className="text-[11px] text-[#78716c] dark:text-zinc-400">Mulai dari</p>
+              <p className="text-[11px] text-[#78716c] dark:text-zinc-400">From</p>
               <p className="text-[15px] font-bold">{priceLabel(event)}</p>
             </>
           )}
@@ -163,7 +163,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
     <div className="bg-[#fafafa] pb-10 text-neutral-900 dark:bg-zinc-950 dark:text-white md:pb-12">
       {showingSamples && (
         <p className="bg-amber-100 px-4 py-2.5 text-center text-[13px] text-amber-900 dark:bg-amber-500/15 dark:text-amber-200">
-          Tampilan contoh. Belum ada event yang dipublikasikan, jadi acara, tanggal, dan harga di bawah ini bukan acara sungguhan.
+          Sample view. Nothing has been published yet, so the events, dates and prices below are not real.
         </p>
       )}
 
@@ -178,20 +178,19 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
 
           <div className="relative mx-auto flex h-full max-w-[1280px] flex-col items-center justify-center px-4 text-center text-white sm:px-6 lg:px-8">
             <h1 className="font-heading max-w-3xl text-[34px] leading-[1.08] sm:text-[52px] lg:text-[60px]">
-              Semua acara Gorontalo,
+              Be there
               <br />
-              satu halaman
+              when it happens
             </h1>
             <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
-              {showingSamples
-                ? "Cari berdasarkan area, kategori, atau nama acara."
-                : `${events.length} acara untuk didatangi. Pilih area, atau cari yang Anda tuju.`}
+              Concerts, festivals, races and everything else worth turning up
+              for. Search by area, category or name.
             </p>
             <a
               href="#browse"
               className="mt-7 inline-flex min-h-11 items-center rounded-md bg-white px-7 text-sm font-bold text-[#302f2c] transition hover:bg-amber-300"
             >
-              Lihat semua event
+              Start planning
             </a>
 
             {/* Same panel as the City Guide: three axes and a solid button. The
@@ -215,13 +214,13 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
                   onChange={(change) => { setCity(change.target.value); setShown(GRID_STEP); }}
                   className="min-w-0 flex-1 bg-transparent text-sm outline-none"
                 >
-                  <option value="">Semua area</option>
+                  <option value="">All areas</option>
                   {cities.map((name) => <option key={name} value={name}>{name}</option>)}
                 </select>
               </label>
 
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
-                <span className="sr-only">Kategori</span>
+                <span className="sr-only">Category</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
                   <rect x="3" y="4" width="18" height="16" rx="2" />
                   <path d="M3 10h18" />
@@ -231,13 +230,13 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
                   onChange={(change) => { setCategory(change.target.value || null); setShown(GRID_STEP); }}
                   className="min-w-0 flex-1 bg-transparent text-sm outline-none"
                 >
-                  <option value="">Semua kategori</option>
+                  <option value="">All categories</option>
                   {EVENT_CATEGORIES.map((item) => <option key={item.label} value={item.label}>{item.label}</option>)}
                 </select>
               </label>
 
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
-                <span className="sr-only">Kata kunci</span>
+                <span className="sr-only">Keyword</span>
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
                   <circle cx="11" cy="11" r="7" />
                   <path d="M20 20l-3.5-3.5" />
@@ -246,7 +245,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
                   value={query}
                   onChange={(change) => { setQuery(change.target.value); setShown(GRID_STEP); }}
                   type="search"
-                  placeholder="Nama event, artis, atau venue"
+                  placeholder="Event, artist or venue"
                   className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[#a8a29e]"
                 />
               </label>
@@ -255,7 +254,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
                 type="submit"
                 className="min-h-12 bg-[#302f2c] px-8 text-sm font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#9b7513] dark:bg-amber-300 dark:text-zinc-950 dark:hover:bg-amber-200"
               >
-                Cari
+                Search
               </button>
             </form>
           </div>
@@ -300,7 +299,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <h2 className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
               <span className="text-[#f5c400]" aria-hidden="true">/</span>
-              <span>{filtered.length} event{category ? ` · ${category}` : ""}{needle ? ` · “${query.trim()}”` : ""}</span>
+              <span>{filtered.length} event{filtered.length === 1 ? "" : "s"}{category ? ` · ${category}` : ""}{needle ? ` · “${query.trim()}”` : ""}</span>
               <span className="text-[#f5c400]" aria-hidden="true">/</span>
             </h2>
             <button
@@ -308,12 +307,12 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
               onClick={() => { setQuery(""); setCategory(null); setCity(""); }}
               className="text-xs text-neutral-500 underline-offset-2 hover:underline"
             >
-              Bersihkan filter
+              Clear filters
             </button>
           </div>
           {filtered.length === 0 ? (
             <p className="rounded-xl border border-dashed border-neutral-300 px-6 py-16 text-center text-sm text-neutral-500 dark:border-zinc-700">
-              Tidak ada event yang cocok.
+              Nothing matches that.
             </p>
           ) : (
             <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
@@ -330,7 +329,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
                   ? <ViewAll total={featured.length} expanded={showAllFeatured} onToggle={() => setShowAllFeatured((value) => !value)} />
                   : null}
               >
-                Event Seru Untukmu
+                Picks for you
               </SectionHeading>
               <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
                 {(showAllFeatured ? featured : featured.slice(0, SECTION_SIZE))
@@ -346,7 +345,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
                   ? <ViewAll total={rest.length} expanded={showAllUpcoming} onToggle={() => setShowAllUpcoming((value) => !value)} />
                   : null}
               >
-                Event akan datang
+                Coming up
               </SectionHeading>
               <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
                 {(showAllUpcoming ? rest : rest.slice(0, SECTION_SIZE))
@@ -361,8 +360,8 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
               className="flex min-h-[120px] items-center justify-between gap-4 overflow-hidden rounded-2xl bg-gradient-to-r from-[#1b4dd8] to-[#2a7bf0] px-6 py-6 text-white sm:min-h-[170px] sm:px-10"
             >
               <span>
-                <span className="font-heading block text-lg font-bold sm:text-2xl">Rencanakan sekalian perjalanannya</span>
-                <span className="mt-1 block text-sm text-white/80">Tempat makan, penginapan, dan hal-hal yang bisa dilihat di enam wilayah Gorontalo.</span>
+                <span className="font-heading block text-lg font-bold sm:text-2xl">Plan the rest of the trip</span>
+                <span className="mt-1 block text-sm text-white/80">Places to eat, stay and see across the six areas of Gorontalo.</span>
               </span>
               <span aria-hidden="true" className="shrink-0 text-2xl">→</span>
             </Link>
@@ -373,12 +372,12 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
               <SectionHeading
                 className="mb-2"
                 action={finished.length > shown
-                  ? <button type="button" onClick={() => setShown((value) => value + GRID_STEP)} className="shrink-0 text-sm font-semibold text-[#1b4dd8] hover:underline dark:text-sky-400">Lebih Banyak Event ›</button>
+                  ? <button type="button" onClick={() => setShown((value) => value + GRID_STEP)} className="shrink-0 text-sm font-semibold text-[#1b4dd8] hover:underline dark:text-sky-400">More events ›</button>
                   : null}
               >
-                Event Lainnya
+                Past events
               </SectionHeading>
-              <p className="mb-4 text-xs text-neutral-500 dark:text-neutral-400">Acara yang sudah selesai.</p>
+              <p className="mb-4 text-xs text-neutral-500 dark:text-neutral-400">Events that have already taken place.</p>
               <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
                 {finished.slice(0, shown).map((event) => <GridCard key={event.id} event={event} />)}
               </div>
@@ -388,7 +387,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
           {filtered.length === 0 && (
             <section className="mx-auto max-w-[1280px] px-4 pt-10 sm:px-6 lg:px-8">
               <p className="rounded-xl border border-dashed border-neutral-300 px-6 py-20 text-center text-sm text-neutral-500 dark:border-zinc-700">
-                Belum ada event mendatang. Agenda Gorontalo akan muncul di sini.
+                No upcoming events yet. The Gorontalo calendar will appear here.
               </p>
             </section>
           )}

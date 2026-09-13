@@ -6,8 +6,8 @@ import { fromEventRow, SAMPLE_EVENTS, type EventItem } from "./data";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Event Gorontalo",
-  description: "Agenda festival, konser, turnamen, dan acara komunitas di Gorontalo.",
+  title: "Events in Gorontalo",
+  description: "Festivals, concerts, tournaments and community events across Gorontalo.",
   alternates: { canonical: "/event" },
 };
 

@@ -51,7 +51,7 @@ function BuyPanel({ event }: { event: EventItem }) {
   return (
     <div className="rounded-xl border border-neutral-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
       <p className="text-[13px] text-neutral-600 dark:text-neutral-300">
-        {available ? "Tiket tersedia, beli sebelum kehabisan!" : "Tiket untuk acara ini sudah habis."}
+        {available ? "Tickets are on sale." : "This event is sold out."}
       </p>
       {available && (
         event.registrationUrl ? (
@@ -61,11 +61,11 @@ function BuyPanel({ event }: { event: EventItem }) {
             rel="noreferrer"
             className="mt-3 block rounded-lg bg-[#1b4dd8] px-4 py-2.5 text-center text-sm font-semibold text-white hover:bg-[#1741b8]"
           >
-            Beli tiket sekarang
+            Get tickets
           </a>
         ) : (
           <p className="mt-3 rounded-lg bg-neutral-100 px-4 py-2.5 text-center text-sm font-semibold text-neutral-400 dark:bg-zinc-800">
-            Tautan pembelian belum tersedia
+            No booking link yet
           </p>
         )
       )}
@@ -85,7 +85,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
     <div className="bg-[#fafafa] pb-10 text-neutral-900 dark:bg-zinc-950 dark:text-white md:pb-12">
       {event.isSample && (
         <p className="bg-amber-100 px-4 py-2.5 text-center text-[13px] text-amber-900 dark:bg-amber-500/15 dark:text-amber-200">
-          Tampilan contoh. Acara, tanggal, dan harga di halaman ini bukan acara sungguhan.
+          Sample view. The event, dates and prices on this page are not real.
         </p>
       )}
 
@@ -108,17 +108,17 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
               {event.priceFrom !== null && (
                 <p className="flex gap-2">
                   <Icon path={TICKET} />
-                  {event.priceFrom === 0 ? "Gratis" : `Harga tiket mulai dari ${rupiah(event.priceFrom)}`}
+                  {event.priceFrom === 0 ? "Free" : `Tickets from ${rupiah(event.priceFrom)}`}
                 </p>
               )}
             </div>
             <div className="mt-5 max-w-sm rounded-lg bg-white/10 p-3">
               <p className="text-[13px] text-white/85">
-                {event.soldOut ? "Tiket untuk acara ini sudah habis." : "Tiket tersedia, beli sebelum kehabisan!"}
+                {event.soldOut ? "This event is sold out." : "Tickets are on sale."}
               </p>
               {!event.soldOut && event.registrationUrl && (
                 <a href={event.registrationUrl} target="_blank" rel="noreferrer" className="mt-2.5 inline-block rounded-lg bg-[#1b4dd8] px-4 py-2 text-sm font-semibold hover:bg-[#1741b8]">
-                  Beli tiket sekarang
+                  Get tickets
                 </a>
               )}
             </div>
@@ -129,11 +129,11 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
       {/* Detail + tickets */}
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0">
-          <SectionHeading>Detail Event</SectionHeading>
+          <SectionHeading>Event detail</SectionHeading>
 
           {event.importantInfo.length > 0 && (
             <div className="mt-4 rounded-xl bg-[#f2f4f8] p-4 dark:bg-zinc-900">
-              <h3 className={SUBHEAD_CLASS}>Info Penting</h3>
+              <h3 className={SUBHEAD_CLASS}>Need to know</h3>
               <ul className="mt-2 list-disc space-y-2 pl-5 text-[13px] leading-relaxed text-neutral-700 dark:text-neutral-300">
                 {event.importantInfo.map((line) => <li key={line}>{line}</li>)}
               </ul>
@@ -148,9 +148,9 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
 
           {event.terms.length > 0 && (
             <section className="mt-10">
-              <SectionHeading>Info Lainnya</SectionHeading>
+              <SectionHeading>More information</SectionHeading>
               <details className="mt-3 rounded-xl border border-neutral-200 p-4 dark:border-zinc-800" open>
-                <summary className="cursor-pointer text-[15px] font-semibold">Syarat &amp; Ketentuan</summary>
+                <summary className="cursor-pointer text-[15px] font-semibold">Terms &amp; conditions</summary>
                 <ul className="mt-3 list-disc space-y-2 pl-5 text-[13px] leading-relaxed text-neutral-700 dark:text-neutral-300">
                   {event.terms.map((line) => <li key={line}>{line}</li>)}
                 </ul>
@@ -159,20 +159,20 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
           )}
 
           <section className="mt-8">
-            <h3 className="text-[13px] font-semibold">Lokasi</h3>
+            <h3 className="text-[13px] font-semibold">Location</h3>
             <div className="mt-2 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-neutral-200 bg-white px-4 py-4 text-[13px] dark:border-zinc-800 dark:bg-zinc-900">
               <p className="flex min-w-0 gap-2 text-neutral-700 dark:text-neutral-300">
                 <Icon path={PIN} /><span className="truncate">{place || "Gorontalo"}</span>
               </p>
               {event.mapsUrl && (
                 <a href={event.mapsUrl} target="_blank" rel="noreferrer" className="shrink-0 font-semibold text-[#1b4dd8] hover:underline dark:text-sky-400">
-                  Lihat peta ↗
+                  View map ↗
                 </a>
               )}
             </div>
           </section>
 
-          <Link href="/event" className="mt-8 inline-block text-sm text-neutral-500 hover:underline">← Semua event</Link>
+          <Link href="/event" className="mt-8 inline-block text-sm text-neutral-500 hover:underline">← All events</Link>
         </div>
 
         <aside className="space-y-4 md:sticky md:top-20 md:self-start">
@@ -181,17 +181,17 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
           {event.tickets.length > 0 && (
             <div className="overflow-hidden rounded-xl border border-neutral-200 bg-white dark:border-zinc-800 dark:bg-zinc-900">
               <div className="flex items-center justify-between border-b border-neutral-100 px-4 py-3 text-[13px] font-semibold dark:border-zinc-800">
-                <span>Kategori</span><span>Harga</span>
+                <span>Type</span><span>Price</span>
               </div>
               <ul>
                 {event.tickets.map((ticket) => (
                   <li key={ticket.name} className="flex items-start justify-between gap-4 border-b border-neutral-50 px-4 py-3 last:border-0 dark:border-zinc-800/60">
                     <span className="min-w-0">
                       <span className="block text-[13px] font-semibold uppercase leading-snug">{ticket.name}</span>
-                      {ticket.soldOut && <span className="mt-0.5 block text-[11px] text-neutral-400">Terjual habis</span>}
+                      {ticket.soldOut && <span className="mt-0.5 block text-[11px] text-neutral-400">Sold out</span>}
                     </span>
                     <span className="shrink-0 text-[13px] tabular-nums text-neutral-700 dark:text-neutral-300">
-                      {ticket.price === null ? "—" : ticket.price === 0 ? "Gratis" : rupiah(ticket.price)}
+                      {ticket.price === null ? "—" : ticket.price === 0 ? "Free" : rupiah(ticket.price)}
                     </span>
                   </li>
                 ))}
