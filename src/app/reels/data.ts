@@ -1,9 +1,20 @@
 /**
+ * Two shelves that are not categories: everything an editor ticked, and every
+ * wide reel gathered out of the category shelves into one place. Shared with
+ * the server page so a "View all" link survives a reload.
+ */
+export const FEATURED_SHELF = "Featured";
+export const LANDSCAPE_SHELF = "Choices for You";
+
+/** URL form of a shelf or category name: "Untold Story" -> "untold-story". */
+export const reelSlug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
+
+/**
  * The Reels taxonomy, in the order editors see it. Shared by the public feed
  * and the admin grid so both offer the same vocabulary.
  *
  * Tourism, Culinary and Sponsored were renamed from Wisata, Food and Brand by
- * migration 20260912140000; the rest of the list is new and starts empty.
+ * migration 20260912140000.
  */
 export const DEFAULT_REEL_CATEGORIES = [
   "Tourism",
@@ -14,21 +25,11 @@ export const DEFAULT_REEL_CATEGORIES = [
   "News",
   "Culinary",
   "Sponsored",
-  // Still offered in the admin, but it has no reels and so no shelf; it sits
-  // last rather than in the middle of an order chosen for the live shelves.
-  "Destination",
+  // The wide shelf is a category an editor can file to as well, so a reel can
+  // be put there deliberately rather than only by being shot landscape. It
+  // replaced "Destination", which never had a reel in it.
+  LANDSCAPE_SHELF,
 ] as const;
-
-/**
- * Two shelves that are not categories: everything an editor ticked, and every
- * wide reel gathered out of the category shelves into one place. Shared with
- * the server page so a "View all" link survives a reload.
- */
-export const FEATURED_SHELF = "Featured";
-export const LANDSCAPE_SHELF = "Choices for You";
-
-/** URL form of a shelf or category name: "Untold Story" -> "untold-story". */
-export const reelSlug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
 
 export type ReelCategory = string;
 
