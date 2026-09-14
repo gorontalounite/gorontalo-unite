@@ -47,7 +47,7 @@ export default async function AdminReelsPage({ searchParams }: PageProps) {
 
   const { rows, missing, error } = await selectWithOptional<AdminReel>(
     runReels,
-    ["id", "account_username", "description", "publish_time", "permalink", "post_type", "category", "sponsored", "orientation", "thumbnail_url", "status", "display_order", "featured", "views", "reach", "likes", "shares", "follows", "comments", "saves", "created_at", "updated_at", "deleted_at"],
+    ["id", "account_username", "description", "publish_time", "permalink", "post_type", "category", "sponsored", "orientation", "thumbnail_url", "status", "display_order", "featured", "editor_choice", "views", "reach", "likes", "shares", "follows", "comments", "saves", "created_at", "updated_at", "deleted_at"],
     ["title"],
   );
   const titleColumnReady = !missing.includes("title");

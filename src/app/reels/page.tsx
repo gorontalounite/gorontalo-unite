@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import ReelsFeed from "./ReelsFeed";
 import {
-  DEFAULT_REEL_CATEGORIES, FEATURED_SHELF, LANDSCAPE_SHELF, RECENT_SHELF, reelSlug,
+  CHOICES_SHELF, DEFAULT_REEL_CATEGORIES, FEATURED_SHELF, RECENT_SHELF, reelSlug,
   reels as fallbackReels, type ReelItem,
 } from "./data";
 
@@ -17,7 +17,7 @@ function getCategory(value: string | string[] | undefined, reels: ReelItem[]): "
   // Match the whole taxonomy, not only categories that currently have reels —
   // otherwise a link to an empty category silently lands on All instead.
   const known = [
-    FEATURED_SHELF, LANDSCAPE_SHELF, RECENT_SHELF,
+    FEATURED_SHELF, CHOICES_SHELF, RECENT_SHELF,
     ...DEFAULT_REEL_CATEGORIES, ...reels.map((item) => item.category),
   ];
   const wanted = normalized?.toLowerCase();
@@ -43,7 +43,7 @@ export default async function ReelsPage({ searchParams }: PageProps<"/reels">) {
   const supabase = await createClient();
   const { data } = await supabase
     .from("reels")
-    .select("id, account_username, description, publish_time, permalink, category, sponsored, thumbnail_url, orientation, featured, views, reach, likes")
+    .select("id, account_username, description, publish_time, permalink, category, sponsored, thumbnail_url, orientation, featured, editor_choice, views, reach, likes")
     .eq("status", "published")
     // Newest first, with anything ticked Featured pinned above it. Display
     // order used to sit in between, but every row shares the same value, so it
@@ -63,6 +63,7 @@ export default async function ReelsPage({ searchParams }: PageProps<"/reels">) {
       thumbnail: (item.thumbnail_url as string | null) ?? null,
       orientation: (item.orientation as "portrait" | "landscape" | null) ?? "portrait",
       featured: Boolean(item.featured),
+      editorChoice: Boolean(item.editor_choice),
       views: Number(item.views),
       reach: Number(item.reach),
       likes: Number(item.likes),
