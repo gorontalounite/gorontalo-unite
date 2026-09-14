@@ -1,10 +1,10 @@
 /**
- * Two shelves that are not categories: everything an editor ticked, and every
- * wide reel gathered out of the category shelves into one place. Shared with
- * the server page so a "View all" link survives a reload.
+ * Three shelves that are not categories. Two are placements an editor ticks —
+ * Featured and Choices for You — and the third is just everything by date.
+ * Shared with the server page so a "View all" link survives a reload.
  */
 export const FEATURED_SHELF = "Featured";
-export const LANDSCAPE_SHELF = "Choices for You";
+export const CHOICES_SHELF = "Choices for You";
 export const RECENT_SHELF = "Recently Added";
 
 /**
@@ -39,10 +39,6 @@ export const DEFAULT_REEL_CATEGORIES = [
   "News",
   "Culinary",
   "Sponsored",
-  // The wide shelf is a category an editor can file to as well, so a reel can
-  // be put there deliberately rather than only by being shot landscape. It
-  // replaced "Destination", which never had a reel in it.
-  LANDSCAPE_SHELF,
 ] as const;
 
 export type ReelCategory = string;
@@ -61,6 +57,8 @@ export interface ReelItem {
   orientation: "portrait" | "landscape";
   /** Pinned to the top shelf. */
   featured: boolean;
+  /** Placed on the "Choices for You" shelf. Independent of featured. */
+  editorChoice: boolean;
   views: number;
   reach?: number;
   likes: number;
@@ -78,6 +76,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/DZpL7hZBRBu.jpg",
     orientation: "portrait",
     featured: true,
+    editorChoice: false,
     views: 436777,
     likes: 7068,
   },
@@ -92,6 +91,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/DZu2aNEhvkr.jpg",
     orientation: "portrait",
     featured: true,
+    editorChoice: false,
     views: 200007,
     likes: 12631,
   },
@@ -106,6 +106,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/DZoyaZMhRLO.jpg",
     orientation: "portrait",
     featured: true,
+    editorChoice: false,
     views: 142577,
     likes: 8702,
   },
@@ -120,6 +121,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/DWDp6ggE872.jpg",
     orientation: "portrait",
     featured: true,
+    editorChoice: false,
     views: 30047,
     likes: 1007,
   },
@@ -134,6 +136,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/DVqa7dGD1pB.jpg",
     orientation: "portrait",
     featured: false,
+    editorChoice: false,
     views: 16238,
     likes: 241,
   },
@@ -148,6 +151,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/DU_c97ck4bX.jpg",
     orientation: "portrait",
     featured: false,
+    editorChoice: false,
     views: 12577,
     likes: 95,
   },
@@ -162,6 +166,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/DV-v77ega42.jpg",
     orientation: "portrait",
     featured: false,
+    editorChoice: false,
     views: 14239,
     likes: 314,
   },
@@ -176,6 +181,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/Dauv99eBUFx.jpg",
     orientation: "portrait",
     featured: false,
+    editorChoice: false,
     views: 13284,
     likes: 94,
   },
@@ -190,6 +196,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/DYJXI99uALJ.jpg",
     orientation: "portrait",
     featured: false,
+    editorChoice: false,
     views: 11686,
     likes: 358,
   },
@@ -204,6 +211,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/DVyCk6dE4Mr.jpg",
     orientation: "portrait",
     featured: false,
+    editorChoice: false,
     views: 14081,
     likes: 300,
   },
@@ -218,6 +226,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/Dbav5taTC8j.jpg",
     orientation: "portrait",
     featured: false,
+    editorChoice: false,
     views: 12416,
     likes: 112,
   },
@@ -232,6 +241,7 @@ export const reels: ReelItem[] = [
     thumbnail: "/reels/DVk9FGGT2pg.jpg",
     orientation: "portrait",
     featured: false,
+    editorChoice: false,
     views: 12410,
     likes: 58,
   },

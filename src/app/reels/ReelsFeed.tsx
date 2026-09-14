@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SectionHeading from "@/components/ui/SectionHeading";
 import {
-  DEFAULT_REEL_CATEGORIES, FEATURED_SHELF, LANDSCAPE_SHELF, RECENT_SHELF, reelSlug, shelfLabel,
+  CHOICES_SHELF, DEFAULT_REEL_CATEGORIES, FEATURED_SHELF, RECENT_SHELF, reelSlug, shelfLabel,
   type ReelItem,
 } from "./data";
 
@@ -21,16 +21,15 @@ type PeriodFilter = "all" | string;
 const SHELF_SIZE = 6;
 
 /**
- * Two shelves that are not categories.
+ * Three shelves that are not categories.
  *
- * FEATURED is every reel an editor has ticked, however many that is — it used
- * to be capped at four, which quietly dropped the fifth and sixth picks with
- * nothing to say they existed. LANDSCAPE gathers the wide reels from every
- * category into one place, so a 16:9 post is not scattered through shelves
- * built for phone-shaped ones.
+ * FEATURED and CHOICES are both placements an editor ticks, and a reel can sit
+ * on both or neither. CHOICES used to be drawn from whatever happened to be
+ * filmed landscape, which is a property of the camera, not an editorial
+ * decision — the shape of a reel no longer decides where it goes.
  */
 const FEATURED = FEATURED_SHELF;
-const LANDSCAPE = LANDSCAPE_SHELF;
+const CHOICES = CHOICES_SHELF;
 /** Everything, newest first, in a frame that suits both shapes. */
 const RECENT = RECENT_SHELF;
 /** The publication's own account, pinned to the top of the Account filter. */
@@ -69,19 +68,16 @@ function matchesPeriod(reel: ReelItem, period: PeriodFilter) {
 }
 
 /**
- * The categories that get a shelf of their own.
- *
- * Featured and Choices for You are drawn separately — the first from what is
- * ticked, the second from what is landscape — and "Choices for You" is also a
- * category an editor can file to. It is dropped here so the page cannot end up
- * with two shelves under the same heading.
+ * The categories that get a shelf of their own. The three placement shelves are
+ * dropped, in case a stray row was ever filed under one of their names.
  */
 function orderedCategories(reels: ReelItem[]) {
   const canonical: readonly string[] = DEFAULT_REEL_CATEGORIES;
   const leftovers = [...new Set(reels.map((item) => item.category))]
     .filter((item) => !canonical.includes(item))
     .sort();
-  return [...canonical, ...leftovers].filter((name) => name !== FEATURED_SHELF && name !== LANDSCAPE_SHELF);
+  const placements: string[] = [FEATURED, CHOICES, RECENT];
+  return [...canonical, ...leftovers].filter((name) => !placements.includes(name));
 }
 
 function PlayBadge({ small }: { small?: boolean }) {
@@ -107,6 +103,13 @@ const SHAPE_CLASS: Record<Shape, string> = {
   wide: "aspect-video",
   mixed: "aspect-[4/5]",
 };
+/** One frame for a whole row or grid, chosen by what is actually in it. */
+function shapeOf(reels: ReelItem[]): Shape {
+  if (reels.length === 0) return "tall";
+  if (reels.every((reel) => reel.orientation === "landscape")) return "wide";
+  return reels.some((reel) => reel.orientation === "landscape") ? "mixed" : "tall";
+}
+
 const GRID_COLS: Record<Shape, string> = {
   tall: "grid-cols-2 sm:grid-cols-4 lg:grid-cols-6",
   wide: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
@@ -147,7 +150,7 @@ function Poster({ reel, shape = "tall" }: { reel: ReelItem; shape?: Shape }) {
   );
 }
 
-function ReelCard({ reel, shape = "tall", rank }: { reel: ReelItem; shape?: Shape; rank?: number }) {
+function ReelCard({ reel, shape = "tall" }: { reel: ReelItem; shape?: Shape }) {
   return (
     <a
       href={reel.permalink}
@@ -155,27 +158,12 @@ function ReelCard({ reel, shape = "tall", rank }: { reel: ReelItem; shape?: Shap
       rel="noopener noreferrer"
       aria-label={`Open the ${reel.category} Reel by @${reel.username} on Instagram`}
       className={`group block shrink-0 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] ${
-        rank ? "w-[62vw] sm:w-[300px]"
-        : shape === "wide" ? "w-[78vw] sm:w-[420px]"
+        shape === "wide" ? "w-[78vw] sm:w-[420px]"
         : shape === "mixed" ? "w-[52vw] sm:w-[260px]"
         : "w-[42vw] sm:w-[200px]"
       }`}
     >
-      {rank ? (
-        // The rank is the point of the top shelf, so it sits beside the poster
-        // at a size you read before the picture.
-        <span className="flex items-end gap-1">
-          <span
-            aria-hidden="true"
-            className="font-heading -mb-3 shrink-0 select-none text-[76px] font-bold leading-[0.72] text-neutral-300 dark:text-zinc-700 sm:text-[96px]"
-          >
-            {rank}
-          </span>
-          <span className="min-w-0 flex-1"><Poster reel={reel} /></span>
-        </span>
-      ) : (
-        <Poster reel={reel} shape={shape} />
-      )}
+      <Poster reel={reel} shape={shape} />
       <span className="mt-2 block truncate text-xs text-neutral-600 dark:text-neutral-300">{reel.description}</span>
       <span className="mt-0.5 block text-[11px] text-neutral-400">{reelDate(reel)}</span>
     </a>
@@ -184,11 +172,10 @@ function ReelCard({ reel, shape = "tall", rank }: { reel: ReelItem; shape?: Shap
 
 /* ------------------------------- the shelf ------------------------------ */
 
-function Shelf({ title, reels, shape, ranked, onViewAll }: {
+function Shelf({ title, reels, shape, onViewAll }: {
   title: string;
   reels: ReelItem[];
   shape?: Shape;
-  ranked?: boolean;
   onViewAll?: () => void;
 }) {
   const rail = useRef<HTMLDivElement>(null);
@@ -235,8 +222,8 @@ function Shelf({ title, reels, shape, ranked, onViewAll }: {
         onScroll={readEdges}
         className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-pl-4 gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:gap-4 sm:scroll-pl-0 sm:px-0"
       >
-        {reels.map((reel, index) => (
-          <ReelCard key={reel.id} reel={reel} shape={shape} rank={ranked ? index + 1 : undefined} />
+        {reels.map((reel) => (
+          <ReelCard key={reel.id} reel={reel} shape={shape ?? shapeOf(reels)} />
         ))}
       </div>
     </section>
@@ -329,10 +316,8 @@ export default function ReelsFeed({
   const filtered = useMemo(() => {
     if (category === "All" || category === RECENT) return inScope;
     if (category === FEATURED) return inScope.filter((reel) => reel.featured);
-    if (category === LANDSCAPE) return inScope.filter((reel) => reel.orientation === "landscape");
-    // A wide reel lives on its own shelf, so it is not repeated under its
-    // category here either.
-    return inScope.filter((reel) => reel.category === category && reel.orientation !== "landscape");
+    if (category === CHOICES) return inScope.filter((reel) => reel.editorChoice);
+    return inScope.filter((reel) => reel.category === category);
   }, [inScope, category]);
 
   // Everything, newest first — the shelf that does not care how a reel is
@@ -351,7 +336,8 @@ export default function ReelsFeed({
     picked.length > 0 ? picked : [...inScope].sort((a, b) => b.views - a.views).slice(0, 4)
   ), [picked, inScope]);
   const topShelfTitle = picked.length > 0 ? FEATURED : "Most watched";
-  const landscape = useMemo(() => inScope.filter((reel) => reel.orientation === "landscape"), [inScope]);
+  const choices = useMemo(() => inScope.filter((reel) => reel.editorChoice), [inScope]);
+  // Only the hero still cares about shape: its tiles are five narrow columns.
   const portrait = useMemo(() => inScope.filter((reel) => reel.orientation !== "landscape"), [inScope]);
 
   // The hero is built from the archive's own covers rather than a stock photo.
@@ -392,10 +378,7 @@ export default function ReelsFeed({
   // The grid takes one frame for every card in it, chosen by what it holds: a
   // wide-only view can afford 16:9 and three columns, a mixed one settles on
   // 4:5, and a phone-shaped one keeps 9:16 and six.
-  const gridShape: Shape =
-    filtered.length > 0 && filtered.every((reel) => reel.orientation === "landscape") ? "wide"
-    : filtered.some((reel) => reel.orientation === "landscape") ? "mixed"
-    : "tall";
+  const gridShape = shapeOf(filtered);
 
   return (
     <div className="bg-[#fafafa] pb-10 text-neutral-900 dark:bg-zinc-950 dark:text-white md:pb-12">
@@ -455,7 +438,7 @@ export default function ReelsFeed({
           >
             <option value="All">All categories</option>
             <option value={FEATURED}>{FEATURED}</option>
-            <option value={LANDSCAPE}>{LANDSCAPE}</option>
+            <option value={CHOICES}>{CHOICES}</option>
             <option value={RECENT}>{RECENT}</option>
             {categories.map((item) => <option key={item} value={item}>{shelfLabel(item)}</option>)}
           </FilterSelect>
@@ -492,17 +475,16 @@ export default function ReelsFeed({
           <Shelf
             title={topShelfTitle}
             reels={topShelf}
-            ranked
             onViewAll={picked.length > 0 ? () => selectCategory(FEATURED) : undefined}
           />
           <Shelf
-            title={LANDSCAPE}
-            reels={landscape.slice(0, SHELF_SIZE)}
+            title={CHOICES}
+            reels={choices.slice(0, SHELF_SIZE)}
             shape="wide"
-            onViewAll={landscape.length > SHELF_SIZE ? () => selectCategory(LANDSCAPE) : undefined}
+            onViewAll={choices.length > SHELF_SIZE ? () => selectCategory(CHOICES) : undefined}
           />
           {categories.map((name) => {
-            const shelf = portrait.filter((reel) => reel.category === name);
+            const shelf = inScope.filter((reel) => reel.category === name);
             return (
               <Shelf
                 key={name}

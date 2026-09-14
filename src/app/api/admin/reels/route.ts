@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const STATUSES = new Set(["draft", "published"]);
 const ORIENTATIONS = new Set(["portrait", "landscape"]);
-const LIST_COLUMNS = "id, title, orientation, account_username, description, publish_time, permalink, post_type, category, sponsored, thumbnail_url, status, display_order, featured, views, reach, likes, shares, follows, comments, saves, created_at, updated_at, deleted_at";
+const LIST_COLUMNS = "id, title, orientation, account_username, description, publish_time, permalink, post_type, category, sponsored, thumbnail_url, status, display_order, featured, editor_choice, views, reach, likes, shares, follows, comments, saves, created_at, updated_at, deleted_at";
 
 type Authorized = Awaited<ReturnType<typeof authorizeUser>>;
 
@@ -111,6 +111,7 @@ async function normalizeBody(auth: NonNullable<Authorized>, body: Record<string,
     status,
     display_order: nonNegativeInteger(body.display_order, "Urutan tampil"),
     featured: Boolean(body.featured),
+    editor_choice: Boolean(body.editor_choice),
     views: nonNegativeInteger(body.views, "Views"),
     reach: nonNegativeInteger(body.reach, "Reach"),
     likes: nonNegativeInteger(body.likes, "Likes"),
@@ -136,6 +137,7 @@ function inlineValues(body: Record<string, unknown>) {
     values.category = category;
   }
   if ("featured" in body) values.featured = Boolean(body.featured);
+  if ("editor_choice" in body) values.editor_choice = Boolean(body.editor_choice);
   if ("orientation" in body) {
     const orientation = String(body.orientation);
     if (!ORIENTATIONS.has(orientation)) throw new Error("Orientasi tidak valid.");

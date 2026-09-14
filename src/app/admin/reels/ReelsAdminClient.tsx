@@ -4,7 +4,7 @@ import Image from "next/image";
 import { useCallback, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import AdminGrid, { type GridColumn } from "@/components/admin/grid/AdminGrid";
-import { DateCell, PillSelectCell, StatusCell, TextCell, ThumbCell } from "@/components/admin/grid/cells";
+import { DateCell, PillSelectCell, StatusCell, SwitchCell, TextCell, ThumbCell } from "@/components/admin/grid/cells";
 import {
   BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, StatusTabs, TrashRowActions,
 } from "@/components/admin/grid/GridChrome";
@@ -26,6 +26,7 @@ export interface AdminReel {
   status: "draft" | "published";
   display_order: number;
   featured: boolean;
+  editor_choice: boolean;
   views: number;
   reach: number;
   likes: number;
@@ -85,6 +86,7 @@ function emptyForm(): ReelForm {
     status: "draft",
     display_order: 0,
     featured: false,
+    editor_choice: false,
     views: 0,
     reach: 0,
     likes: 0,
@@ -195,6 +197,7 @@ export default function ReelsAdminClient({
       status: item.status,
       display_order: item.display_order,
       featured: item.featured,
+      editor_choice: item.editor_choice,
       views: item.views,
       reach: item.reach,
       likes: item.likes,
@@ -356,6 +359,28 @@ export default function ReelsAdminClient({
       ),
     },
     {
+      // Featured and Choices for You are placements, not categories: a reel is
+      // on either shelf because somebody put it there, and it can be on both.
+      key: "featured", header: "Featured", width: 96,
+      render: (row) => (
+        <SwitchCell
+          checked={row.featured}
+          label={`Tampilkan ${row.title ?? row.account_username} di shelf Featured`}
+          onChange={(next) => update(row, { featured: next })}
+        />
+      ),
+    },
+    {
+      key: "editor_choice", header: "Choices Editor", width: 128,
+      render: (row) => (
+        <SwitchCell
+          checked={row.editor_choice}
+          label={`Tampilkan ${row.title ?? row.account_username} di shelf Choices for You`}
+          onChange={(next) => update(row, { editor_choice: next })}
+        />
+      ),
+    },
+    {
       key: "category", header: "Category", width: 150, sort: "category",
       render: (row) => (
         <PillSelectCell
@@ -488,8 +513,15 @@ export default function ReelsAdminClient({
                 <label className="inline-flex items-start gap-2 text-sm font-medium text-gray-700">
                   <input type="checkbox" checked={form.featured} onChange={(e) => setForm({ ...form, featured: e.target.checked })} className="mt-0.5 h-4 w-4 accent-amber-500" />
                   <span>
-                    Featured Reel
-                    <span className="mt-0.5 block text-[10px] font-normal leading-relaxed text-gray-400">Prioritaskan Reel ini agar tampil sebelum Reel non-featured.</span>
+                    Featured
+                    <span className="mt-0.5 block text-[10px] font-normal leading-relaxed text-gray-400">Tempatkan Reel ini di shelf Featured, paling atas halaman.</span>
+                  </span>
+                </label>
+                <label className="inline-flex items-start gap-2 text-sm font-medium text-gray-700">
+                  <input type="checkbox" checked={form.editor_choice} onChange={(e) => setForm({ ...form, editor_choice: e.target.checked })} className="mt-0.5 h-4 w-4 accent-amber-500" />
+                  <span>
+                    Choices Editor
+                    <span className="mt-0.5 block text-[10px] font-normal leading-relaxed text-gray-400">Tempatkan Reel ini di shelf Choices for You. Bisa dicentang bersamaan dengan Featured.</span>
                   </span>
                 </label>
               </div>
