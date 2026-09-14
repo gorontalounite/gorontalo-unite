@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { DEFAULT_REEL_CATEGORIES, type ReelItem } from "./data";
+import { DEFAULT_REEL_CATEGORIES, FEATURED_SHELF, LANDSCAPE_SHELF, reelSlug, type ReelItem } from "./data";
 
 /* ---------------------------------------------------------------------------
  * The Reels page reads as a video service: a hero, then shelves you push
@@ -14,9 +14,20 @@ import { DEFAULT_REEL_CATEGORIES, type ReelItem } from "./data";
 type CategoryFilter = "All" | string;
 type PeriodFilter = "all" | string;
 
-/** How many a shelf shows before "View all" is worth offering. */
+/** How many a category shelf shows before "View all" is worth offering. */
 const SHELF_SIZE = 6;
-const FEATURED_SIZE = 4;
+
+/**
+ * Two shelves that are not categories.
+ *
+ * FEATURED is every reel an editor has ticked, however many that is — it used
+ * to be capped at four, which quietly dropped the fifth and sixth picks with
+ * nothing to say they existed. LANDSCAPE gathers the wide reels from every
+ * category into one place, so a 16:9 post is not scattered through shelves
+ * built for phone-shaped ones.
+ */
+const FEATURED = FEATURED_SHELF;
+const LANDSCAPE = LANDSCAPE_SHELF;
 
 const CATEGORY_ACCENT: Record<string, string> = {
   Tourism: "bg-sky-500",
@@ -254,36 +265,42 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
   );
 
   const inPeriod = useMemo(() => reels.filter((reel) => matchesPeriod(reel, period)), [reels, period]);
-  const filtered = useMemo(
-    () => inPeriod.filter((reel) => category === "All" || reel.category === category),
-    [inPeriod, category],
-  );
 
-  // The top shelf is whatever has been ticked Featured. With nothing ticked it
-  // falls back to the most-watched, and says so — an OTT front page without a
-  // top shelf reads as broken, but the label should not claim an editor chose
-  // these when the view count did.
+  // Featured and Choices for You are shelves, not categories, so "View all" on
+  // either has to be answered here rather than by matching reel.category.
+  const filtered = useMemo(() => {
+    if (category === "All") return inPeriod;
+    if (category === FEATURED) return inPeriod.filter((reel) => reel.featured);
+    if (category === LANDSCAPE) return inPeriod.filter((reel) => reel.orientation === "landscape");
+    // A wide reel lives on its own shelf, so it is not repeated under its
+    // category here either.
+    return inPeriod.filter((reel) => reel.category === category && reel.orientation !== "landscape");
+  }, [inPeriod, category]);
+
+  // The top shelf is every reel ticked Featured — all of them, however many.
+  // With nothing ticked it falls back to the most-watched and says so: an OTT
+  // front page without a top shelf reads as broken, but the label should not
+  // claim an editor chose these when the view count did.
   const picked = useMemo(() => inPeriod.filter((reel) => reel.featured), [inPeriod]);
   const topShelf = useMemo(() => (
-    picked.length > 0
-      ? picked.slice(0, FEATURED_SIZE)
-      : [...inPeriod].sort((a, b) => b.views - a.views).slice(0, FEATURED_SIZE)
+    picked.length > 0 ? picked : [...inPeriod].sort((a, b) => b.views - a.views).slice(0, 4)
   ), [picked, inPeriod]);
-  const topShelfTitle = picked.length > 0 ? "Featured" : "Most watched";
+  const topShelfTitle = picked.length > 0 ? FEATURED : "Most watched";
   const landscape = useMemo(() => inPeriod.filter((reel) => reel.orientation === "landscape"), [inPeriod]);
+  const portrait = useMemo(() => inPeriod.filter((reel) => reel.orientation !== "landscape"), [inPeriod]);
 
   // The hero is built from the archive's own covers rather than a stock photo.
   // A phone-shaped cover stretched across a 32:15 frame would be a blurred
   // sliver, so the wide layout tiles five of them instead — each shown at
   // close to its own ratio, and downscaled rather than blown up.
   const heroReels = useMemo(
-    () => [...inPeriod].filter((reel) => reel.thumbnail).sort((a, b) => b.views - a.views).slice(0, 5),
-    [inPeriod],
+    () => [...portrait].filter((reel) => reel.thumbnail).sort((a, b) => b.views - a.views).slice(0, 5),
+    [portrait],
   );
 
   function updateUrl(nextCategory: CategoryFilter, nextPeriod: PeriodFilter) {
     const params = new URLSearchParams();
-    if (nextCategory !== "All") params.set("kategori", nextCategory.toLowerCase());
+    if (nextCategory !== "All") params.set("kategori", reelSlug(nextCategory));
     if (nextPeriod !== "all") params.set("periode", nextPeriod);
     window.history.replaceState(null, "", params.size ? `/reels?${params}` : "/reels");
   }
@@ -362,6 +379,8 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
             onChange={(value) => selectCategory(value as CategoryFilter)}
           >
             <option value="All">All categories</option>
+            <option value={FEATURED}>{FEATURED}</option>
+            <option value={LANDSCAPE}>{LANDSCAPE}</option>
             {categories.map((item) => <option key={item} value={item}>{item}</option>)}
           </FilterSelect>
           <FilterSelect
@@ -384,10 +403,20 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
 
       {browsing ? (
         <>
-          <Shelf title={topShelfTitle} reels={topShelf} ranked />
-          <Shelf title="Widescreen" reels={landscape.slice(0, SHELF_SIZE)} wide />
+          <Shelf
+            title={topShelfTitle}
+            reels={topShelf}
+            ranked
+            onViewAll={picked.length > 0 ? () => selectCategory(FEATURED) : undefined}
+          />
+          <Shelf
+            title={LANDSCAPE}
+            reels={landscape.slice(0, SHELF_SIZE)}
+            wide
+            onViewAll={landscape.length > SHELF_SIZE ? () => selectCategory(LANDSCAPE) : undefined}
+          />
           {categories.map((name) => {
-            const shelf = inPeriod.filter((reel) => reel.category === name);
+            const shelf = portrait.filter((reel) => reel.category === name);
             return (
               <Shelf
                 key={name}
@@ -407,7 +436,13 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
               No Reels here yet.
             </p>
           ) : (
-            <div className="grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-4 lg:grid-cols-6">
+            <div className={`grid gap-x-5 gap-y-8 ${
+              // Six columns of 16:9 would be postage stamps; a wide grid needs
+              // fewer, wider cells than a grid of phone-shaped posters.
+              filtered.every((reel) => reel.orientation === "landscape")
+                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                : "grid-cols-2 sm:grid-cols-4 lg:grid-cols-6"
+            }`}>
               {filtered.map((reel) => (
                 <a
                   key={reel.id}
