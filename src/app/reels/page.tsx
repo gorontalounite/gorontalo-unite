@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import ReelsFeed from "./ReelsFeed";
 import {
-  DEFAULT_REEL_CATEGORIES, FEATURED_SHELF, LANDSCAPE_SHELF, reelSlug,
+  DEFAULT_REEL_CATEGORIES, FEATURED_SHELF, LANDSCAPE_SHELF, RECENT_SHELF, reelSlug,
   reels as fallbackReels, type ReelItem,
 } from "./data";
 
@@ -17,12 +17,19 @@ function getCategory(value: string | string[] | undefined, reels: ReelItem[]): "
   // Match the whole taxonomy, not only categories that currently have reels —
   // otherwise a link to an empty category silently lands on All instead.
   const known = [
-    FEATURED_SHELF, LANDSCAPE_SHELF,
+    FEATURED_SHELF, LANDSCAPE_SHELF, RECENT_SHELF,
     ...DEFAULT_REEL_CATEGORIES, ...reels.map((item) => item.category),
   ];
   const wanted = normalized?.toLowerCase();
   // Links written before names were slugified used a space, so both forms match.
   return known.find((item) => reelSlug(item) === wanted || item.toLowerCase() === wanted) ?? "All";
+}
+
+/** Only an account that actually has reels; anything else falls back to all. */
+function getAccount(value: string | string[] | undefined, reels: ReelItem[]): string {
+  const normalized = Array.isArray(value) ? value[0] : value;
+  if (!normalized) return "all";
+  return reels.some((item) => item.username === normalized) ? normalized : "all";
 }
 
 function getPeriod(value: string | string[] | undefined): string {
@@ -67,6 +74,7 @@ export default async function ReelsPage({ searchParams }: PageProps<"/reels">) {
       reels={reels}
       initialCategory={getCategory(query.kategori, reels)}
       initialPeriod={getPeriod(query.periode)}
+      initialAccount={getAccount(query.akun, reels)}
     />
   );
 }

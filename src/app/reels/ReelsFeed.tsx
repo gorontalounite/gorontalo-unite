@@ -3,7 +3,10 @@
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import SectionHeading from "@/components/ui/SectionHeading";
-import { DEFAULT_REEL_CATEGORIES, FEATURED_SHELF, LANDSCAPE_SHELF, reelSlug, type ReelItem } from "./data";
+import {
+  DEFAULT_REEL_CATEGORIES, FEATURED_SHELF, LANDSCAPE_SHELF, RECENT_SHELF, reelSlug, shelfLabel,
+  type ReelItem,
+} from "./data";
 
 /* ---------------------------------------------------------------------------
  * The Reels page reads as a video service: a hero, then shelves you push
@@ -28,6 +31,10 @@ const SHELF_SIZE = 6;
  */
 const FEATURED = FEATURED_SHELF;
 const LANDSCAPE = LANDSCAPE_SHELF;
+/** Everything, newest first, in a frame that suits both shapes. */
+const RECENT = RECENT_SHELF;
+/** The publication's own account, pinned to the top of the Account filter. */
+const HOUSE_ACCOUNT = "gorontalo.unite";
 
 const CATEGORY_ACCENT: Record<string, string> = {
   Tourism: "bg-sky-500",
@@ -89,15 +96,37 @@ function PlayBadge({ small }: { small?: boolean }) {
 
 /* ------------------------------- the card ------------------------------- */
 
-function Poster({ reel, wide }: { reel: ReelItem; wide?: boolean }) {
+/**
+ * `mixed` is 4:5 — the frame a shelf uses when it holds both shapes. Neither
+ * 9:16 nor 16:9 can show the other without gutting it, and 4:5 is the shape
+ * that costs each of them the least.
+ */
+type Shape = "tall" | "wide" | "mixed";
+const SHAPE_CLASS: Record<Shape, string> = {
+  tall: "aspect-[9/16]",
+  wide: "aspect-video",
+  mixed: "aspect-[4/5]",
+};
+const GRID_COLS: Record<Shape, string> = {
+  tall: "grid-cols-2 sm:grid-cols-4 lg:grid-cols-6",
+  wide: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+  mixed: "grid-cols-2 sm:grid-cols-3 lg:grid-cols-5",
+};
+const SHAPE_SIZES: Record<Shape, string> = {
+  tall: "(max-width: 639px) 42vw, 220px",
+  wide: "(max-width: 639px) 78vw, 420px",
+  mixed: "(max-width: 639px) 52vw, 260px",
+};
+
+function Poster({ reel, shape = "tall" }: { reel: ReelItem; shape?: Shape }) {
   return (
-    <span className={`relative block w-full overflow-hidden rounded-lg bg-neutral-900 ring-1 ring-black/10 dark:ring-white/10 ${wide ? "aspect-video" : "aspect-[9/16]"}`}>
+    <span className={`relative block w-full overflow-hidden rounded-lg bg-neutral-900 ring-1 ring-black/10 dark:ring-white/10 ${SHAPE_CLASS[shape]}`}>
       {reel.thumbnail ? (
         <Image
           src={reel.thumbnail}
           alt=""
           fill
-          sizes={wide ? "(max-width: 639px) 78vw, 420px" : "(max-width: 639px) 42vw, 220px"}
+          sizes={SHAPE_SIZES[shape]}
           className="object-cover transition duration-500 group-hover:scale-[1.04]"
         />
       ) : (
@@ -105,7 +134,7 @@ function Poster({ reel, wide }: { reel: ReelItem; wide?: boolean }) {
       )}
       <span className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-transparent" />
       <span className="absolute inset-0 grid place-items-center opacity-0 transition group-hover:opacity-100">
-        <PlayBadge small={!wide} />
+        <PlayBadge small={shape !== "wide"} />
       </span>
       <span className="absolute inset-x-0 bottom-0 p-2.5">
         <span className="flex items-center gap-1.5">
@@ -118,7 +147,7 @@ function Poster({ reel, wide }: { reel: ReelItem; wide?: boolean }) {
   );
 }
 
-function ReelCard({ reel, wide, rank }: { reel: ReelItem; wide?: boolean; rank?: number }) {
+function ReelCard({ reel, shape = "tall", rank }: { reel: ReelItem; shape?: Shape; rank?: number }) {
   return (
     <a
       href={reel.permalink}
@@ -126,7 +155,10 @@ function ReelCard({ reel, wide, rank }: { reel: ReelItem; wide?: boolean; rank?:
       rel="noopener noreferrer"
       aria-label={`Open the ${reel.category} Reel by @${reel.username} on Instagram`}
       className={`group block shrink-0 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] ${
-        rank ? "w-[62vw] sm:w-[300px]" : wide ? "w-[78vw] sm:w-[420px]" : "w-[42vw] sm:w-[200px]"
+        rank ? "w-[62vw] sm:w-[300px]"
+        : shape === "wide" ? "w-[78vw] sm:w-[420px]"
+        : shape === "mixed" ? "w-[52vw] sm:w-[260px]"
+        : "w-[42vw] sm:w-[200px]"
       }`}
     >
       {rank ? (
@@ -142,7 +174,7 @@ function ReelCard({ reel, wide, rank }: { reel: ReelItem; wide?: boolean; rank?:
           <span className="min-w-0 flex-1"><Poster reel={reel} /></span>
         </span>
       ) : (
-        <Poster reel={reel} wide={wide} />
+        <Poster reel={reel} shape={shape} />
       )}
       <span className="mt-2 block truncate text-xs text-neutral-600 dark:text-neutral-300">{reel.description}</span>
       <span className="mt-0.5 block text-[11px] text-neutral-400">{reelDate(reel)}</span>
@@ -152,10 +184,10 @@ function ReelCard({ reel, wide, rank }: { reel: ReelItem; wide?: boolean; rank?:
 
 /* ------------------------------- the shelf ------------------------------ */
 
-function Shelf({ title, reels, wide, ranked, onViewAll }: {
+function Shelf({ title, reels, shape, ranked, onViewAll }: {
   title: string;
   reels: ReelItem[];
-  wide?: boolean;
+  shape?: Shape;
   ranked?: boolean;
   onViewAll?: () => void;
 }) {
@@ -204,7 +236,7 @@ function Shelf({ title, reels, wide, ranked, onViewAll }: {
         className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-pl-4 gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:gap-4 sm:scroll-pl-0 sm:px-0"
       >
         {reels.map((reel, index) => (
-          <ReelCard key={reel.id} reel={reel} wide={wide} rank={ranked ? index + 1 : undefined} />
+          <ReelCard key={reel.id} reel={reel} shape={shape} rank={ranked ? index + 1 : undefined} />
         ))}
       </div>
     </section>
@@ -258,44 +290,69 @@ function FilterSelect({ name, label, value, onChange, children, active = false }
 
 /* --------------------------------- page --------------------------------- */
 
-export default function ReelsFeed({ reels, initialCategory = "All", initialPeriod = "all" }: {
+export default function ReelsFeed({
+  reels, initialCategory = "All", initialPeriod = "all", initialAccount = "all",
+}: {
   reels: ReelItem[];
   initialCategory?: CategoryFilter;
   initialPeriod?: PeriodFilter;
+  initialAccount?: string;
 }) {
   const [category, setCategory] = useState<CategoryFilter>(initialCategory);
   const [period, setPeriod] = useState<PeriodFilter>(initialPeriod);
+  const [account, setAccount] = useState(initialAccount);
 
   const categories = useMemo(() => orderedCategories(reels), [reels]);
   const years = useMemo(
     () => [...new Set(reels.map(reelYear))].sort((a, b) => b.localeCompare(a)),
     [reels],
   );
+  // The house account leads; everyone else is alphabetical. There is no ranking
+  // to apply to contributors, and alphabetical is the order a reader can
+  // predict.
+  const accounts = useMemo(() => {
+    const rest = [...new Set(reels.map((reel) => reel.username))].filter((name) => name !== HOUSE_ACCOUNT);
+    rest.sort((a, b) => a.localeCompare(b));
+    return reels.some((reel) => reel.username === HOUSE_ACCOUNT) ? [HOUSE_ACCOUNT, ...rest] : rest;
+  }, [reels]);
 
-  const inPeriod = useMemo(() => reels.filter((reel) => matchesPeriod(reel, period)), [reels, period]);
+  // Everything the year and account chips leave standing. Every shelf below is
+  // drawn from this, so the two chips narrow the whole page at once.
+  const inScope = useMemo(
+    () => reels.filter((reel) => matchesPeriod(reel, period) && (account === "all" || reel.username === account)),
+    [reels, period, account],
+  );
 
-  // Featured and Choices for You are shelves, not categories, so "View all" on
-  // either has to be answered here rather than by matching reel.category.
+  // Featured, Choices for You and Recently Added are shelves, not categories,
+  // so "View all" on any of them has to be answered here rather than by
+  // matching reel.category.
   const filtered = useMemo(() => {
-    if (category === "All") return inPeriod;
-    if (category === FEATURED) return inPeriod.filter((reel) => reel.featured);
-    if (category === LANDSCAPE) return inPeriod.filter((reel) => reel.orientation === "landscape");
+    if (category === "All" || category === RECENT) return inScope;
+    if (category === FEATURED) return inScope.filter((reel) => reel.featured);
+    if (category === LANDSCAPE) return inScope.filter((reel) => reel.orientation === "landscape");
     // A wide reel lives on its own shelf, so it is not repeated under its
     // category here either.
-    return inPeriod.filter((reel) => reel.category === category && reel.orientation !== "landscape");
-  }, [inPeriod, category]);
+    return inScope.filter((reel) => reel.category === category && reel.orientation !== "landscape");
+  }, [inScope, category]);
+
+  // Everything, newest first — the shelf that does not care how a reel is
+  // classified, only when it arrived.
+  const recent = useMemo(
+    () => [...inScope].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)),
+    [inScope],
+  );
 
   // The top shelf is every reel ticked Featured — all of them, however many.
   // With nothing ticked it falls back to the most-watched and says so: an OTT
   // front page without a top shelf reads as broken, but the label should not
   // claim an editor chose these when the view count did.
-  const picked = useMemo(() => inPeriod.filter((reel) => reel.featured), [inPeriod]);
+  const picked = useMemo(() => inScope.filter((reel) => reel.featured), [inScope]);
   const topShelf = useMemo(() => (
-    picked.length > 0 ? picked : [...inPeriod].sort((a, b) => b.views - a.views).slice(0, 4)
-  ), [picked, inPeriod]);
+    picked.length > 0 ? picked : [...inScope].sort((a, b) => b.views - a.views).slice(0, 4)
+  ), [picked, inScope]);
   const topShelfTitle = picked.length > 0 ? FEATURED : "Most watched";
-  const landscape = useMemo(() => inPeriod.filter((reel) => reel.orientation === "landscape"), [inPeriod]);
-  const portrait = useMemo(() => inPeriod.filter((reel) => reel.orientation !== "landscape"), [inPeriod]);
+  const landscape = useMemo(() => inScope.filter((reel) => reel.orientation === "landscape"), [inScope]);
+  const portrait = useMemo(() => inScope.filter((reel) => reel.orientation !== "landscape"), [inScope]);
 
   // The hero is built from the archive's own covers rather than a stock photo.
   // A phone-shaped cover stretched across a 32:15 frame would be a blurred
@@ -306,14 +363,16 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
     [portrait],
   );
 
-  function updateUrl(nextCategory: CategoryFilter, nextPeriod: PeriodFilter) {
+  function updateUrl(nextCategory: CategoryFilter, nextPeriod: PeriodFilter, nextAccount: string) {
     const params = new URLSearchParams();
     if (nextCategory !== "All") params.set("kategori", reelSlug(nextCategory));
     if (nextPeriod !== "all") params.set("periode", nextPeriod);
+    if (nextAccount !== "all") params.set("akun", nextAccount);
     window.history.replaceState(null, "", params.size ? `/reels?${params}` : "/reels");
   }
-  const selectCategory = (next: CategoryFilter) => { setCategory(next); updateUrl(next, period); };
-  const selectPeriod = (next: PeriodFilter) => { setPeriod(next); updateUrl(category, next); };
+  const selectCategory = (next: CategoryFilter) => { setCategory(next); updateUrl(next, period, account); };
+  const selectPeriod = (next: PeriodFilter) => { setPeriod(next); updateUrl(category, next, account); };
+  const selectAccount = (next: string) => { setAccount(next); updateUrl(category, period, next); };
 
   // Picking a category swaps every shelf for one grid, and the "View all" that
   // did it is usually far down the page — leaving you dropped into the middle
@@ -326,9 +385,17 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
   useEffect(() => {
     if (!settled.current) { settled.current = true; return; }
     shelvesTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [category, period]);
+  }, [category, period, account]);
 
   const browsing = category === "All";
+
+  // The grid takes one frame for every card in it, chosen by what it holds: a
+  // wide-only view can afford 16:9 and three columns, a mixed one settles on
+  // 4:5, and a phone-shaped one keeps 9:16 and six.
+  const gridShape: Shape =
+    filtered.length > 0 && filtered.every((reel) => reel.orientation === "landscape") ? "wide"
+    : filtered.some((reel) => reel.orientation === "landscape") ? "mixed"
+    : "tall";
 
   return (
     <div className="bg-[#fafafa] pb-10 text-neutral-900 dark:bg-zinc-950 dark:text-white md:pb-12">
@@ -381,7 +448,7 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
         <div className="flex flex-wrap items-center gap-2">
           <FilterSelect
             name="category"
-            label={category === "All" ? "Category" : category}
+            label={category === "All" ? "Category" : shelfLabel(category)}
             value={category}
             active={category !== "All"}
             onChange={(value) => selectCategory(value as CategoryFilter)}
@@ -389,7 +456,8 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
             <option value="All">All categories</option>
             <option value={FEATURED}>{FEATURED}</option>
             <option value={LANDSCAPE}>{LANDSCAPE}</option>
-            {categories.map((item) => <option key={item} value={item}>{item}</option>)}
+            <option value={RECENT}>{RECENT}</option>
+            {categories.map((item) => <option key={item} value={item}>{shelfLabel(item)}</option>)}
           </FilterSelect>
           <FilterSelect
             name="year"
@@ -400,6 +468,16 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
           >
             <option value="all">All years</option>
             {years.map((year) => <option key={year} value={year}>{year}</option>)}
+          </FilterSelect>
+          <FilterSelect
+            name="account"
+            label={account === "all" ? "Account" : `@${account}`}
+            value={account}
+            active={account !== "all"}
+            onChange={selectAccount}
+          >
+            <option value="all">All accounts</option>
+            {accounts.map((name) => <option key={name} value={name}>@{name}</option>)}
           </FilterSelect>
           {!browsing && (
             <button type="button" onClick={() => selectCategory("All")} className="text-xs text-neutral-500 underline-offset-2 hover:underline">
@@ -420,7 +498,7 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
           <Shelf
             title={LANDSCAPE}
             reels={landscape.slice(0, SHELF_SIZE)}
-            wide
+            shape="wide"
             onViewAll={landscape.length > SHELF_SIZE ? () => selectCategory(LANDSCAPE) : undefined}
           />
           {categories.map((name) => {
@@ -428,29 +506,29 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
             return (
               <Shelf
                 key={name}
-                title={name}
+                title={shelfLabel(name)}
                 reels={shelf.slice(0, SHELF_SIZE)}
                 onViewAll={shelf.length > SHELF_SIZE ? () => selectCategory(name) : undefined}
               />
             );
           })}
+          <Shelf
+            title={RECENT}
+            reels={recent.slice(0, SHELF_SIZE)}
+            shape="mixed"
+            onViewAll={recent.length > SHELF_SIZE ? () => selectCategory(RECENT) : undefined}
+          />
         </>
       ) : (
         // One category, everything in it, as a grid rather than a shelf.
         <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
-          <SectionHeading>{`${category} · ${filtered.length}`}</SectionHeading>
+          <SectionHeading>{`${shelfLabel(category)} · ${filtered.length}`}</SectionHeading>
           {filtered.length === 0 ? (
             <p className="rounded-xl border border-dashed border-neutral-300 px-6 py-16 text-center text-sm text-neutral-500 dark:border-zinc-700">
               No Reels here yet.
             </p>
           ) : (
-            <div className={`grid gap-x-5 gap-y-8 ${
-              // Six columns of 16:9 would be postage stamps; a wide grid needs
-              // fewer, wider cells than a grid of phone-shaped posters.
-              filtered.every((reel) => reel.orientation === "landscape")
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                : "grid-cols-2 sm:grid-cols-4 lg:grid-cols-6"
-            }`}>
+            <div className={`grid gap-x-5 gap-y-8 ${GRID_COLS[gridShape]}`}>
               {filtered.map((reel) => (
                 <a
                   key={reel.id}
@@ -460,7 +538,7 @@ export default function ReelsFeed({ reels, initialCategory = "All", initialPerio
                   aria-label={`Open the ${reel.category} Reel by @${reel.username} on Instagram`}
                   className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]"
                 >
-                  <Poster reel={reel} wide={reel.orientation === "landscape"} />
+                  <Poster reel={reel} shape={gridShape} />
                   <span className="mt-2 block truncate text-xs text-neutral-600 dark:text-neutral-300">{reel.description}</span>
                   <span className="mt-0.5 block text-[11px] text-neutral-400">{reelDate(reel)}</span>
                 </a>

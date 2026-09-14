@@ -5,6 +5,20 @@
  */
 export const FEATURED_SHELF = "Featured";
 export const LANDSCAPE_SHELF = "Choices for You";
+export const RECENT_SHELF = "Recently Added";
+
+/**
+ * What a category is called on the page, where it differs from what it is
+ * called in the database and the admin.
+ *
+ * Only Sponsored differs. "Sponsored" is a filing label, and as a shelf
+ * heading it reads as a section of adverts; the rail is renamed the way any
+ * recommendation rail is. The disclosure does not move with it — every card
+ * still carries its category, so a paid post is still marked as one where a
+ * reader is actually looking at it.
+ */
+const DISPLAY_NAME: Record<string, string> = { Sponsored: "Worth a Look" };
+export const shelfLabel = (name: string) => DISPLAY_NAME[name] ?? name;
 
 /** URL form of a shelf or category name: "Untold Story" -> "untold-story". */
 export const reelSlug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
