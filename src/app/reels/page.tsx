@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import { createClient } from "@/lib/supabase/server";
 import ReelsFeed from "./ReelsFeed";
-import { DEFAULT_REEL_CATEGORIES, reels as fallbackReels, type ReelItem } from "./data";
+import {
+  DEFAULT_REEL_CATEGORIES, FEATURED_SHELF, LANDSCAPE_SHELF, reelSlug,
+  reels as fallbackReels, type ReelItem,
+} from "./data";
 
 export const metadata: Metadata = {
   title: "Reels",
@@ -13,8 +16,13 @@ function getCategory(value: string | string[] | undefined, reels: ReelItem[]): "
   const normalized = Array.isArray(value) ? value[0] : value;
   // Match the whole taxonomy, not only categories that currently have reels —
   // otherwise a link to an empty category silently lands on All instead.
-  const known = [...DEFAULT_REEL_CATEGORIES, ...reels.map((item) => item.category)];
-  return known.find((item) => item.toLowerCase() === normalized?.toLowerCase()) ?? "All";
+  const known = [
+    FEATURED_SHELF, LANDSCAPE_SHELF,
+    ...DEFAULT_REEL_CATEGORIES, ...reels.map((item) => item.category),
+  ];
+  const wanted = normalized?.toLowerCase();
+  // Links written before names were slugified used a space, so both forms match.
+  return known.find((item) => reelSlug(item) === wanted || item.toLowerCase() === wanted) ?? "All";
 }
 
 function getPeriod(value: string | string[] | undefined): string {

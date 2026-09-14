@@ -6,16 +6,29 @@
  * migration 20260912140000; the rest of the list is new and starts empty.
  */
 export const DEFAULT_REEL_CATEGORIES = [
-  "Culinary",
-  "Sponsored",
   "Tourism",
   "Culture",
-  "Destination",
-  "Lifestyle",
-  "News",
   "Untold Story",
   "Event",
+  "Lifestyle",
+  "News",
+  "Culinary",
+  "Sponsored",
+  // Still offered in the admin, but it has no reels and so no shelf; it sits
+  // last rather than in the middle of an order chosen for the live shelves.
+  "Destination",
 ] as const;
+
+/**
+ * Two shelves that are not categories: everything an editor ticked, and every
+ * wide reel gathered out of the category shelves into one place. Shared with
+ * the server page so a "View all" link survives a reload.
+ */
+export const FEATURED_SHELF = "Featured";
+export const LANDSCAPE_SHELF = "Choices for You";
+
+/** URL form of a shelf or category name: "Untold Story" -> "untold-story". */
+export const reelSlug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
 
 export type ReelCategory = string;
 
