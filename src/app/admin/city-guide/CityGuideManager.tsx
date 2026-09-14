@@ -9,7 +9,7 @@ import {
   DateCell, EditableTextCell, GalleryCell, PillSelectCell, StatusCell, SwitchCell, TextCell, ThumbCell,
 } from "@/components/admin/grid/cells";
 import {
-  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, TrashRowActions,
+  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, StatusTabs, TrashRowActions,
 } from "@/components/admin/grid/GridChrome";
 import { useRowEditor } from "@/components/admin/grid/useRowEditor";
 
@@ -69,6 +69,7 @@ interface Props {
   allCount: number;
   publishedCount: number;
   draftCount: number;
+  archivedCount: number;
   trashCount: number;
   page: number;
   pageSize: number;
@@ -87,7 +88,7 @@ const localDateTime = () => new Date(Date.now() + 8 * 60 * 60 * 1000).toISOStrin
 const statusOf = (published: boolean, archived: boolean): Status => (archived ? "archived" : published ? "published" : "draft");
 
 export default function CityGuideManager({
-  rows, totalCount, allCount, publishedCount, draftCount, trashCount,
+  rows, totalCount, allCount, publishedCount, draftCount, archivedCount, trashCount,
   page, pageSize, q, section, status, sortField, sortDir, sections,
 }: Props) {
   const inTrash = status === "trash";
@@ -366,6 +367,18 @@ export default function CityGuideManager({
       </p>
     )}
 
+    <StatusTabs
+      value={status}
+      tabs={[
+        { value: "all", label: "Semua", count: allCount },
+        { value: "published", label: "Publik", count: publishedCount },
+        { value: "draft", label: "Draft", count: draftCount },
+        { value: "archived", label: "Arsip", count: archivedCount },
+        { value: "trash", label: "Sampah", count: trashCount },
+      ]}
+      onChange={(value) => { setSelected(new Set()); nav({ status: value, page: "1" }); }}
+    />
+
     <GridToolbar
       search={q}
       onSearch={(value) => nav({ q: value, page: "1" })}
@@ -373,15 +386,6 @@ export default function CityGuideManager({
       category={section}
       categories={sections}
       onCategory={(value) => nav({ section: value, page: "1" })}
-      status={status}
-      statuses={[
-        { value: "all", label: "Semua status" },
-        { value: "published", label: "Publik" },
-        { value: "draft", label: "Draft" },
-        { value: "archived", label: "Arsip" },
-        { value: "trash", label: `Sampah${trashCount > 0 ? ` (${trashCount})` : ""}` },
-      ]}
-      onStatus={(value) => nav({ status: value, page: "1" })}
       pageSize={pageSize}
       onPageSize={(value) => nav({ pageSize: value, page: "1" })}
     />

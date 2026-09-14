@@ -47,10 +47,57 @@ export function CountSummary({
   );
 }
 
+/**
+ * Status is a row of tabs above the table, not a dropdown inside it.
+ *
+ * The bin is the reason: an editor who deletes something looks for where it
+ * went, and a destination hidden as the fourth option of a select is a
+ * destination they will not find. Counts sit in the tab so the bin announces
+ * that it is holding something.
+ */
+export function StatusTabs({
+  value, tabs, onChange,
+}: {
+  value: string;
+  tabs: Array<{ value: string; label: string; count?: number }>;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <div className="mb-4 flex flex-wrap items-center gap-x-1 gap-y-2 border-b border-gray-200">
+      {tabs.map((tab) => {
+        const active = tab.value === value;
+        const bin = tab.value === "trash";
+        return (
+          <button
+            key={tab.value}
+            type="button"
+            onClick={() => onChange(tab.value)}
+            aria-current={active ? "page" : undefined}
+            className={`-mb-px border-b-2 px-3 py-2 text-sm transition-colors ${
+              active
+                ? `border-gray-900 font-semibold ${bin ? "text-red-600" : "text-gray-900"}`
+                : `border-transparent ${bin ? "text-red-500 hover:text-red-700" : "text-gray-500 hover:text-gray-800"}`
+            }`}
+          >
+            {bin && <span aria-hidden="true" className="mr-1">🗑</span>}
+            {tab.label}
+            {typeof tab.count === "number" && (
+              <span className={`ml-1.5 rounded-full px-1.5 py-0.5 text-[11px] tabular-nums ${
+                active ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-500"
+              }`}>
+                {tab.count.toLocaleString("id-ID")}
+              </span>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 export function GridToolbar({
   search, onSearch, placeholder,
   category, categories, onCategory, categoryLabel = "Semua kategori",
-  status, statuses, onStatus,
   pageSize, onPageSize,
 }: {
   search: string;
@@ -60,9 +107,6 @@ export function GridToolbar({
   categories: string[];
   onCategory: (value: string) => void;
   categoryLabel?: string;
-  status: string;
-  statuses: Array<{ value: string; label: string }>;
-  onStatus: (value: string) => void;
   pageSize: number;
   onPageSize: (value: string) => void;
 }) {
@@ -100,10 +144,6 @@ export function GridToolbar({
       <select value={category} onChange={(event) => onCategory(event.target.value)} className={CONTROL}>
         <option value="">{categoryLabel}</option>
         {categories.map((name) => <option key={name} value={name}>{name}</option>)}
-      </select>
-
-      <select value={status} onChange={(event) => onStatus(event.target.value)} className={CONTROL}>
-        {statuses.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
       </select>
 
       <select value={pageSize} onChange={(event) => onPageSize(event.target.value)} className={CONTROL}>
