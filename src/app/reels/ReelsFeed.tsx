@@ -35,7 +35,7 @@ const CATEGORY_ACCENT: Record<string, string> = {
   Event: "bg-rose-500",
   Sponsored: "bg-violet-500",
   Culture: "bg-fuchsia-500",
-  Destination: "bg-teal-500",
+  "Choices for You": "bg-teal-500",
   Lifestyle: "bg-lime-600",
   News: "bg-slate-500",
   "Untold Story": "bg-indigo-500",
@@ -61,12 +61,20 @@ function matchesPeriod(reel: ReelItem, period: PeriodFilter) {
   return period.length === 4 ? reelYear(reel) === period : reelPeriod(reel) === period;
 }
 
+/**
+ * The categories that get a shelf of their own.
+ *
+ * Featured and Choices for You are drawn separately — the first from what is
+ * ticked, the second from what is landscape — and "Choices for You" is also a
+ * category an editor can file to. It is dropped here so the page cannot end up
+ * with two shelves under the same heading.
+ */
 function orderedCategories(reels: ReelItem[]) {
   const canonical: readonly string[] = DEFAULT_REEL_CATEGORIES;
   const leftovers = [...new Set(reels.map((item) => item.category))]
     .filter((item) => !canonical.includes(item))
     .sort();
-  return [...canonical, ...leftovers];
+  return [...canonical, ...leftovers].filter((name) => name !== FEATURED_SHELF && name !== LANDSCAPE_SHELF);
 }
 
 function PlayBadge({ small }: { small?: boolean }) {
