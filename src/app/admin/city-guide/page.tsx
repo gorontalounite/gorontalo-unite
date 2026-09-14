@@ -47,10 +47,25 @@ export default async function CityGuideAdminPage({ searchParams }: PageProps) {
   const sortDir: SortDir = sp.dir === "asc" ? "asc" : "desc";
 
   const supabase = await createClient();
+  // Staff read binned rows under RLS, so the bin is a separate fetch rather
+  // than a filter applied after the fact — every other view must not see them.
+  const inTrash = status === "trash";
   const [{ data: places }, { data: events }] = await Promise.all([
-    supabase.from("tourism_places").select("*").order("updated_at", { ascending: false }),
-    supabase.from("events").select("*").order("starts_at", { ascending: false }),
+    (inTrash
+      ? supabase.from("tourism_places").select("*").not("deleted_at", "is", null)
+      : supabase.from("tourism_places").select("*").is("deleted_at", null)
+    ).order("updated_at", { ascending: false }),
+    (inTrash
+      ? supabase.from("events").select("*").not("deleted_at", "is", null)
+      : supabase.from("events").select("*").is("deleted_at", null)
+    ).order("starts_at", { ascending: false }),
   ]);
+
+  const [{ count: placeTrash }, { count: eventTrash }] = await Promise.all([
+    supabase.from("tourism_places").select("id", { count: "exact", head: true }).not("deleted_at", "is", null),
+    supabase.from("events").select("id", { count: "exact", head: true }).not("deleted_at", "is", null),
+  ]);
+  const trashCount = (placeTrash ?? 0) + (eventTrash ?? 0);
 
   const rows: AdminRow[] = [
     ...(places ?? []).map((item) => ({
@@ -123,6 +138,7 @@ export default async function CityGuideAdminPage({ searchParams }: PageProps) {
       allCount={rows.length}
       publishedCount={rows.filter((r) => r.published).length}
       draftCount={rows.filter((r) => !r.published && !r.archived).length}
+      trashCount={trashCount}
       page={page}
       pageSize={pageSize}
       q={q}

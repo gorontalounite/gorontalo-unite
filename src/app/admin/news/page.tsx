@@ -32,6 +32,7 @@ interface ArticleRow {
   published:    boolean;
   published_at: string | null;
   created_at:   string;
+  deleted_at:   string | null;
 }
 
 interface PageProps {
@@ -64,6 +65,9 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     if (q)                      qb = qb.or(`title.ilike.%${q}%,slug.ilike.%${q}%`);
     if (status === "published") qb = qb.eq("published", true);
     if (status === "draft")     qb = qb.eq("published", false);
+    // Staff read binned rows under RLS, so every view except the bin has to
+    // exclude them explicitly.
+    qb = status === "trash" ? qb.not("deleted_at", "is", null) : qb.is("deleted_at", null);
     // The column list is built at runtime, so supabase-js cannot infer the row.
     return qb as unknown as PromiseLike<{ data: ArticleRow[] | null; error: { code?: string; message?: string } | null }>;
   };
@@ -71,7 +75,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
   const [articles, { data: categoryRows }, { data: profileRows }] = await Promise.all([
     selectWithOptional<ArticleRow>(
       runArticles,
-      ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "is_trending", "author_id", "published", "published_at", "created_at"],
+      ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "is_trending", "author_id", "published", "published_at", "created_at", "deleted_at"],
       ["video_url"],
     ),
     admin.from("categories").select("id, name, parent_id, desk_key"),
@@ -124,7 +128,16 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     published: row.published,
     published_at: row.published_at,
     created_at: row.created_at,
+    deleted_at: row.deleted_at ?? null,
   }));
+
+  // The bin is counted with its own query: the list above holds one side or
+  // the other, never both, so it cannot report the count for the other side.
+  const { count: trashCount } = await admin
+    .from("articles")
+    .select("id", { count: "exact", head: true })
+    .neq("category", "Portfolio")
+    .not("deleted_at", "is", null);
 
   return (
     <NewsAdminList
@@ -133,6 +146,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
       allCount={withCanonicalCategory.length}
       publishedCount={withCanonicalCategory.filter((row) => row.published).length}
       draftCount={withCanonicalCategory.filter((row) => !row.published).length}
+      trashCount={trashCount ?? 0}
       page={page}
       pageSize={pageSize}
       q={q}

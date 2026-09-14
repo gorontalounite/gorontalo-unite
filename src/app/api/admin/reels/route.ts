@@ -3,7 +3,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const STATUSES = new Set(["draft", "published"]);
 const ORIENTATIONS = new Set(["portrait", "landscape"]);
-const LIST_COLUMNS = "id, title, orientation, account_username, description, publish_time, permalink, post_type, category, sponsored, thumbnail_url, status, display_order, featured, views, reach, likes, shares, follows, comments, saves, created_at, updated_at";
+const LIST_COLUMNS = "id, title, orientation, account_username, description, publish_time, permalink, post_type, category, sponsored, thumbnail_url, status, display_order, featured, views, reach, likes, shares, follows, comments, saves, created_at, updated_at, deleted_at";
 
 type Authorized = Awaited<ReturnType<typeof authorizeUser>>;
 
@@ -154,6 +154,10 @@ export async function GET(req: NextRequest) {
   const id = req.nextUrl.searchParams.get("id");
   let query = auth.supabase.from("reels").select(id ? "*" : LIST_COLUMNS);
   if (id) query = query.eq("id", id);
+  // Staff can read binned reels under RLS, so the bin is opt-in here.
+  else query = req.nextUrl.searchParams.get("status") === "trash"
+    ? query.not("deleted_at", "is", null)
+    : query.is("deleted_at", null);
   const result = id ? await query.single() : await query.order("display_order").order("publish_time", { ascending: false });
   if (result.error) return NextResponse.json({ error: result.error.message }, { status: 400 });
   return NextResponse.json({ data: result.data });
@@ -187,7 +191,11 @@ export async function PATCH(req: NextRequest) {
     if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
     // Grid cells patch a single field, so they skip the whole-record validation
     // (which would reject a body that carries no permalink or caption).
-    const values = body.inline ? inlineValues(body) : await normalizeBody(auth, body);
+    // Restoring returns the reel as a draft — it was set to draft on the way
+    // into the bin and stays there until someone publishes it again.
+    const values = body.restore
+      ? { deleted_at: null }
+      : body.inline ? inlineValues(body) : await normalizeBody(auth, body);
     const { data, error } = await auth.supabase
       .from("reels")
       .update(values)
@@ -201,12 +209,19 @@ export async function PATCH(req: NextRequest) {
   }
 }
 
+// Into the bin by default; `permanent` destroys the row for good.
 export async function DELETE(req: NextRequest) {
   const auth = await authorizeUser();
   if (!auth) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  const { id } = await req.json();
+  const { id, permanent } = await req.json();
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
-  const { error } = await auth.supabase.from("reels").delete().eq("id", id);
+  // Reels record the same state as text, so binning writes status, not a
+  // boolean. `reels_binned_is_draft` enforces the pair.
+  const { error } = permanent
+    ? await auth.supabase.from("reels").delete().eq("id", id)
+    : await auth.supabase.from("reels")
+        .update({ deleted_at: new Date().toISOString(), status: "draft" })
+        .eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json({ success: true });
 }
