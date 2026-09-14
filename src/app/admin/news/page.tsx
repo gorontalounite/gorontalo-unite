@@ -131,22 +131,29 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     deleted_at: row.deleted_at ?? null,
   }));
 
-  // The bin is counted with its own query: the list above holds one side or
-  // the other, never both, so it cannot report the count for the other side.
-  const { count: trashCount } = await admin
+  // Tab counts come from their own queries. The list above holds one status
+  // at a time, so counting it would only ever describe the tab already open.
+  const countOf = () => admin
     .from("articles")
     .select("id", { count: "exact", head: true })
-    .neq("category", "Portfolio")
-    .not("deleted_at", "is", null);
+    .neq("category", "Portfolio");
+  const [{ count: liveTotal }, { count: livePublished }, { count: trashTotal }] = await Promise.all([
+    countOf().is("deleted_at", null),
+    countOf().is("deleted_at", null).eq("published", true),
+    countOf().not("deleted_at", "is", null),
+  ]);
+  const allCount = liveTotal ?? 0;
+  const publishedCount = livePublished ?? 0;
+  const trashCount = trashTotal ?? 0;
 
   return (
     <NewsAdminList
       initialItems={items}
       totalCount={totalCount}
-      allCount={withCanonicalCategory.length}
-      publishedCount={withCanonicalCategory.filter((row) => row.published).length}
-      draftCount={withCanonicalCategory.filter((row) => !row.published).length}
-      trashCount={trashCount ?? 0}
+      allCount={allCount}
+      publishedCount={publishedCount}
+      draftCount={allCount - publishedCount}
+      trashCount={trashCount}
       page={page}
       pageSize={pageSize}
       q={q}

@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import AdminGrid, { type GridColumn } from "@/components/admin/grid/AdminGrid";
 import { DateCell, PillSelectCell, StatusCell, TextCell, ThumbCell } from "@/components/admin/grid/cells";
 import {
-  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, TrashRowActions,
+  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, StatusTabs, TrashRowActions,
 } from "@/components/admin/grid/GridChrome";
 import { useRowEditor } from "@/components/admin/grid/useRowEditor";
 import { DEFAULT_REEL_CATEGORIES } from "@/app/reels/data";
@@ -520,6 +520,17 @@ export default function ReelsAdminClient({
         </form>
       )}
 
+      <StatusTabs
+        value={status}
+        tabs={[
+          { value: "all", label: "Semua", count: allCount },
+          { value: "published", label: "Published", count: publishedCount },
+          { value: "draft", label: "Draft", count: draftCount },
+          { value: "trash", label: "Sampah", count: trashCount },
+        ]}
+        onChange={(value) => { setSelected(new Set()); nav({ status: value, page: "1" }); }}
+      />
+
       <GridToolbar
         search={q}
         onSearch={(value) => nav({ q: value, page: "1" })}
@@ -528,14 +539,7 @@ export default function ReelsAdminClient({
         categories={[...categoryOptions]}
         categoryLabel="All"
         onCategory={(value) => nav({ category: value, page: "1" })}
-        status={status}
-        statuses={[
-          { value: "all", label: "Semua status" },
-          { value: "published", label: "Published" },
-          { value: "draft", label: "Draft" },
-          { value: "trash", label: `Sampah${trashCount > 0 ? ` (${trashCount})` : ""}` },
-        ]}
-        onStatus={(value) => nav({ status: value, page: "1" })}
+
         pageSize={pageSize}
         onPageSize={(value) => nav({ pageSize: value, page: "1" })}
       />

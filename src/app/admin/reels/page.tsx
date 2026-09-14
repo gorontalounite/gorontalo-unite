@@ -52,10 +52,17 @@ export default async function AdminReelsPage({ searchParams }: PageProps) {
   );
   const titleColumnReady = !missing.includes("title");
 
-  const { count: trashCount } = await supabase
-    .from("reels")
-    .select("id", { count: "exact", head: true })
-    .not("deleted_at", "is", null);
+  // Tab counts come from their own queries: the list above holds one status at
+  // a time and cannot describe the others.
+  const head = () => supabase.from("reels").select("id", { count: "exact", head: true });
+  const [{ count: liveTotal }, { count: livePublished }, { count: trashTotal }] = await Promise.all([
+    head().is("deleted_at", null),
+    head().is("deleted_at", null).eq("status", "published"),
+    head().not("deleted_at", "is", null),
+  ]);
+  const allCount = liveTotal ?? 0;
+  const publishedCount = livePublished ?? 0;
+  const trashCount = trashTotal ?? 0;
 
   // Reels are captured from Instagram, where the caption is the only text.
   // Until a title is written, the caption's first line stands in for one.
@@ -89,10 +96,10 @@ export default async function AdminReelsPage({ searchParams }: PageProps) {
       initialError={error}
       titleColumnReady={titleColumnReady}
       totalCount={sorted.length}
-      allCount={all.length}
-      publishedCount={all.filter((reel) => reel.status === "published").length}
-      draftCount={all.filter((reel) => reel.status === "draft").length}
-      trashCount={trashCount ?? 0}
+      allCount={allCount}
+      publishedCount={publishedCount}
+      draftCount={allCount - publishedCount}
+      trashCount={trashCount}
       categories={[...new Set(all.map((reel) => reel.category))].sort()}
       page={page}
       pageSize={pageSize}

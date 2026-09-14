@@ -8,7 +8,7 @@ import {
   DateCell, EditableTextCell, PillSelectCell, StatusCell, SwitchCell, TextCell, ThumbCell, TitleCell,
 } from "@/components/admin/grid/cells";
 import {
-  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, TrashRowActions,
+  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, StatusTabs, TrashRowActions,
 } from "@/components/admin/grid/GridChrome";
 import { useRowEditor } from "@/components/admin/grid/useRowEditor";
 
@@ -239,6 +239,17 @@ export default function NewsAdminList({
         </p>
       )}
 
+      <StatusTabs
+        value={status}
+        tabs={[
+          { value: "all", label: "Semua", count: allCount },
+          { value: "published", label: "Publik", count: publishedCount },
+          { value: "draft", label: "Draft", count: draftCount },
+          { value: "trash", label: "Sampah", count: trashCount },
+        ]}
+        onChange={(value) => { setSelected(new Set()); nav({ status: value, page: "1" }); }}
+      />
+
       <GridToolbar
         search={q}
         onSearch={(value) => nav({ q: value, page: "1" })}
@@ -246,14 +257,6 @@ export default function NewsAdminList({
         category={category}
         categories={allCategories}
         onCategory={(value) => nav({ category: value, page: "1" })}
-        status={status}
-        statuses={[
-          { value: "all", label: "Semua status" },
-          { value: "published", label: "Publik" },
-          { value: "draft", label: "Draft" },
-          { value: "trash", label: `Sampah${trashCount > 0 ? ` (${trashCount})` : ""}` },
-        ]}
-        onStatus={(value) => nav({ status: value, page: "1" })}
         pageSize={pageSize}
         onPageSize={(value) => nav({ pageSize: value, page: "1" })}
       />

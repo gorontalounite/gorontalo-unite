@@ -61,11 +61,20 @@ export default async function CityGuideAdminPage({ searchParams }: PageProps) {
     ).order("starts_at", { ascending: false }),
   ]);
 
-  const [{ count: placeTrash }, { count: eventTrash }] = await Promise.all([
-    supabase.from("tourism_places").select("id", { count: "exact", head: true }).not("deleted_at", "is", null),
-    supabase.from("events").select("id", { count: "exact", head: true }).not("deleted_at", "is", null),
+  // Tab counts come from their own queries, across both tables. The list
+  // above holds one status at a time and cannot describe the others.
+  const head = (table: "tourism_places" | "events") =>
+    supabase.from(table).select("id", { count: "exact", head: true });
+  const pair = async (apply: (q: ReturnType<typeof head>) => ReturnType<typeof head>) => {
+    const [a, b] = await Promise.all([apply(head("tourism_places")), apply(head("events"))]);
+    return (a.count ?? 0) + (b.count ?? 0);
+  };
+  const [allCount, publishedCount, archivedCount, trashCount] = await Promise.all([
+    pair((q) => q.is("deleted_at", null)),
+    pair((q) => q.is("deleted_at", null).eq("published", true)),
+    pair((q) => q.is("deleted_at", null).eq("archived", true)),
+    pair((q) => q.not("deleted_at", "is", null)),
   ]);
-  const trashCount = (placeTrash ?? 0) + (eventTrash ?? 0);
 
   const rows: AdminRow[] = [
     ...(places ?? []).map((item) => ({
@@ -135,9 +144,10 @@ export default async function CityGuideAdminPage({ searchParams }: PageProps) {
     <CityGuideManager
       rows={sorted.slice(start, start + pageSize)}
       totalCount={sorted.length}
-      allCount={rows.length}
-      publishedCount={rows.filter((r) => r.published).length}
-      draftCount={rows.filter((r) => !r.published && !r.archived).length}
+      allCount={allCount}
+      publishedCount={publishedCount}
+      draftCount={allCount - publishedCount - archivedCount}
+      archivedCount={archivedCount}
       trashCount={trashCount}
       page={page}
       pageSize={pageSize}
