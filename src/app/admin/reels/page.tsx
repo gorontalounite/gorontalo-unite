@@ -33,9 +33,12 @@ export default async function AdminReelsPage({ searchParams }: PageProps) {
   const sortDir: SortDir = sp.dir === "asc" ? "asc" : sp.dir === "desc" ? "desc" : sortField === "order" ? "asc" : "desc";
 
   const supabase = await createClient();
-  const runReels = (columns: string) => supabase
-    .from("reels")
-    .select(columns)
+  // Staff read binned reels under RLS, so every view except the bin has to
+  // exclude them explicitly.
+  const inTrash = status === "trash";
+  const runReels = (columns: string) => (inTrash
+    ? supabase.from("reels").select(columns).not("deleted_at", "is", null)
+    : supabase.from("reels").select(columns).is("deleted_at", null))
     .order("display_order")
     .order("publish_time", { ascending: false }) as unknown as PromiseLike<{
       data: AdminReel[] | null;
@@ -44,10 +47,15 @@ export default async function AdminReelsPage({ searchParams }: PageProps) {
 
   const { rows, missing, error } = await selectWithOptional<AdminReel>(
     runReels,
-    ["id", "account_username", "description", "publish_time", "permalink", "post_type", "category", "sponsored", "orientation", "thumbnail_url", "status", "display_order", "featured", "views", "reach", "likes", "shares", "follows", "comments", "saves", "created_at", "updated_at"],
+    ["id", "account_username", "description", "publish_time", "permalink", "post_type", "category", "sponsored", "orientation", "thumbnail_url", "status", "display_order", "featured", "views", "reach", "likes", "shares", "follows", "comments", "saves", "created_at", "updated_at", "deleted_at"],
     ["title"],
   );
   const titleColumnReady = !missing.includes("title");
+
+  const { count: trashCount } = await supabase
+    .from("reels")
+    .select("id", { count: "exact", head: true })
+    .not("deleted_at", "is", null);
 
   // Reels are captured from Instagram, where the caption is the only text.
   // Until a title is written, the caption's first line stands in for one.
@@ -59,7 +67,8 @@ export default async function AdminReelsPage({ searchParams }: PageProps) {
   const filtered = all.filter((reel) => {
     if (needle && !`${reel.title ?? ""} ${reel.account_username} ${reel.description}`.toLowerCase().includes(needle)) return false;
     if (category && reel.category !== category) return false;
-    if (status !== "all" && reel.status !== status) return false;
+    // "trash" is answered by the query above, not by the reel's own status.
+    if (status !== "all" && !inTrash && reel.status !== status) return false;
     return true;
   });
 
@@ -83,6 +92,7 @@ export default async function AdminReelsPage({ searchParams }: PageProps) {
       allCount={all.length}
       publishedCount={all.filter((reel) => reel.status === "published").length}
       draftCount={all.filter((reel) => reel.status === "draft").length}
+      trashCount={trashCount ?? 0}
       categories={[...new Set(all.map((reel) => reel.category))].sort()}
       page={page}
       pageSize={pageSize}

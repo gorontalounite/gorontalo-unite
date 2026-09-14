@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import AdminGrid, { type GridColumn } from "@/components/admin/grid/AdminGrid";
 import { DateCell, PillSelectCell, StatusCell, TextCell, ThumbCell } from "@/components/admin/grid/cells";
 import {
-  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar,
+  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, TrashRowActions,
 } from "@/components/admin/grid/GridChrome";
 import { useRowEditor } from "@/components/admin/grid/useRowEditor";
 import { DEFAULT_REEL_CATEGORIES } from "@/app/reels/data";
@@ -49,6 +49,15 @@ const METRICS: Array<{ key: keyof Pick<ReelForm, "views" | "reach" | "likes" | "
   { key: "comments", label: "Comments" },
   { key: "saves", label: "Saves" },
 ];
+
+type BulkAction = "draft" | "trash" | "restore" | "purge";
+
+const BULK_COPY: Record<BulkAction, { title: (n: number) => string; body: string; confirm: string }> = {
+  draft:   { title: (n) => `Jadikan ${n} Reel draft?`,       body: "Reel yang dipilih akan disembunyikan dari publik.", confirm: "Jadikan Draft" },
+  trash:   { title: (n) => `Pindahkan ${n} Reel ke sampah?`, body: "Reel turun dari situs dan bisa dipulihkan dari tab Sampah.", confirm: "Pindahkan" },
+  restore: { title: (n) => `Pulihkan ${n} Reel?`,            body: "Reel kembali sebagai draft, belum terbit lagi.",    confirm: "Pulihkan" },
+  purge:   { title: (n) => `Hapus permanen ${n} Reel?`,      body: "Reel dan seluruh data insight-nya hilang untuk selamanya. Tindakan ini tidak dapat dibatalkan.", confirm: "Hapus permanen" },
+};
 
 const STATUS_OPTIONS = [
   { value: "published", label: "Live",  tone: "bg-[#e3f6ec] text-[#0f8a52]" },
@@ -97,6 +106,7 @@ interface Props {
   allCount: number;
   publishedCount: number;
   draftCount: number;
+  trashCount: number;
   categories: string[];
   page: number;
   pageSize: number;
@@ -108,9 +118,10 @@ interface Props {
 }
 
 export default function ReelsAdminClient({
-  initialItems, initialError, titleColumnReady, totalCount, allCount, publishedCount, draftCount,
+  initialItems, initialError, titleColumnReady, totalCount, allCount, publishedCount, draftCount, trashCount,
   categories, page, pageSize, q, category, status, sortField, sortDir,
 }: Props) {
+  const inTrash = status === "trash";
   const router = useRouter();
   const [, startTransition] = useTransition();
   const fileRef = useRef<HTMLInputElement>(null);
@@ -121,7 +132,7 @@ export default function ReelsAdminClient({
   const [uploading, setUploading] = useState(false);
   const [formError, setFormError] = useState<string | null>(initialError);
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [bulkAction, setBulkAction] = useState<"draft" | "delete" | null>(null);
+  const [bulkAction, setBulkAction] = useState<BulkAction | null>(null);
   const [bulkRunning, setBulkRunning] = useState(false);
 
   const { rows, setRows, update, savingIds, error: rowError, setError: setRowError } = useRowEditor<AdminReel>(initialItems, {
@@ -237,17 +248,28 @@ export default function ReelsAdminClient({
     router.refresh();
   }
 
-  async function runBulk(action: "draft" | "delete") {
+  const runOne = (id: string, action: BulkAction) => fetch("/api/admin/reels", {
+    method: action === "trash" || action === "purge" ? "DELETE" : "PATCH",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify(
+      action === "trash"     ? { id }
+      : action === "purge"   ? { id, permanent: true }
+      : action === "restore" ? { id, restore: true }
+      : { id, status: "draft", inline: true },
+    ),
+  });
+
+  async function runBulk(action: BulkAction) {
     setBulkRunning(true);
-    const ids = [...selected];
-    await Promise.all(ids.map((id) => fetch("/api/admin/reels", {
-      method: action === "delete" ? "DELETE" : "PATCH",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify(action === "delete" ? { id } : { id, status: "draft", inline: true }),
-    })));
+    await Promise.all([...selected].map((id) => runOne(id, action)));
     setBulkRunning(false);
     setBulkAction(null);
     setSelected(new Set());
+    router.refresh();
+  }
+
+  async function runRow(id: string, action: BulkAction) {
+    await runOne(id, action);
     router.refresh();
   }
 
@@ -302,8 +324,13 @@ export default function ReelsAdminClient({
       ),
     },
     {
-      key: "status", header: "Status", width: 108,
-      render: (row) => (
+      key: "status", header: inTrash ? "Sampah" : "Status", width: inTrash ? 150 : 108,
+      render: (row) => inTrash ? (
+        <TrashRowActions
+          onRestore={() => runRow(row.id, "restore")}
+          onPurge={() => { setSelected(new Set([row.id])); setBulkAction("purge"); }}
+        />
+      ) : (
         <StatusCell
           value={row.status}
           options={STATUS_OPTIONS}
@@ -361,7 +388,7 @@ export default function ReelsAdminClient({
     <div className="p-6">
       <GridHeader
         title="Reels"
-        summary={<CountSummary total={allCount} filtered={totalCount} published={publishedCount} draft={draftCount} noun="reel" filtering={filtering} />}
+        summary={<CountSummary total={allCount} filtered={totalCount} published={publishedCount} draft={draftCount} trash={trashCount} noun="reel" filtering={filtering} />}
         actions={
           <button type="button" onClick={openCreate} className="rounded-xl px-4 py-2 text-sm font-semibold" style={{ backgroundColor: "#F5C400", color: "#000" }}>
             + Tambah Reel
@@ -502,7 +529,12 @@ export default function ReelsAdminClient({
         categoryLabel="All"
         onCategory={(value) => nav({ category: value, page: "1" })}
         status={status}
-        statuses={[{ value: "all", label: "Semua status" }, { value: "published", label: "Published" }, { value: "draft", label: "Draft" }]}
+        statuses={[
+          { value: "all", label: "Semua status" },
+          { value: "published", label: "Published" },
+          { value: "draft", label: "Draft" },
+          { value: "trash", label: `Sampah${trashCount > 0 ? ` (${trashCount})` : ""}` },
+        ]}
         onStatus={(value) => nav({ status: value, page: "1" })}
         pageSize={pageSize}
         onPageSize={(value) => nav({ pageSize: value, page: "1" })}
@@ -510,8 +542,10 @@ export default function ReelsAdminClient({
 
       <BulkBar
         count={selected.size}
+        inTrash={inTrash}
         onDraft={() => setBulkAction("draft")}
-        onDelete={() => setBulkAction("delete")}
+        onRestore={() => setBulkAction("restore")}
+        onDelete={() => setBulkAction(inTrash ? "purge" : "trash")}
         onClear={() => setSelected(new Set())}
       />
 
@@ -533,17 +567,17 @@ export default function ReelsAdminClient({
         onSort={toggleSort}
         onReorder={reorderable ? reorder : undefined}
         savingIds={savingIds}
-        empty={filtering ? "Tidak ada Reel untuk filter ini." : "Belum ada Reel."}
+        empty={inTrash ? "Sampah kosong." : filtering ? "Tidak ada Reel untuk filter ini." : "Belum ada Reel."}
       />
 
       <GridPagination page={page} pageSize={pageSize} totalCount={totalCount} noun="reel" onPage={(next) => nav({ page: String(next) })} />
 
       {bulkAction && (
         <ConfirmDialog
-          title={bulkAction === "delete" ? `Hapus ${selected.size} Reel?` : `Jadikan ${selected.size} Reel draft?`}
-          body={bulkAction === "delete" ? "Data insight akan ikut dihapus." : "Reel yang dipilih akan disembunyikan dari publik."}
-          confirmLabel={bulkAction === "delete" ? "Hapus" : "Jadikan Draft"}
-          danger={bulkAction === "delete"}
+          title={BULK_COPY[bulkAction].title(selected.size)}
+          body={BULK_COPY[bulkAction].body}
+          confirmLabel={BULK_COPY[bulkAction].confirm}
+          danger={bulkAction === "purge"}
           busy={bulkRunning}
           onCancel={() => setBulkAction(null)}
           onConfirm={() => runBulk(bulkAction)}

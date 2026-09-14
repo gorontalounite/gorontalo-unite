@@ -9,7 +9,7 @@ import {
   DateCell, EditableTextCell, GalleryCell, PillSelectCell, StatusCell, SwitchCell, TextCell, ThumbCell,
 } from "@/components/admin/grid/cells";
 import {
-  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar,
+  BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, TrashRowActions,
 } from "@/components/admin/grid/GridChrome";
 import { useRowEditor } from "@/components/admin/grid/useRowEditor";
 
@@ -48,6 +48,15 @@ const CATEGORY_OF_SECTION: Record<string, string> = {
   Services: "Layanan Publik & Transportasi",
 };
 
+type BulkAction = "draft" | "trash" | "restore" | "purge";
+
+const BULK_COPY: Record<BulkAction, { title: (n: number) => string; body: string; confirm: string }> = {
+  draft:   { title: (n) => `Jadikan ${n} entri draft?`,       body: "Entri yang dipilih akan disembunyikan dari publik.", confirm: "Jadikan Draft" },
+  trash:   { title: (n) => `Pindahkan ${n} entri ke sampah?`, body: "Entri turun dari situs dan bisa dipulihkan dari tab Sampah.", confirm: "Pindahkan" },
+  restore: { title: (n) => `Pulihkan ${n} entri?`,            body: "Entri kembali sebagai draft, belum terbit lagi.",    confirm: "Pulihkan" },
+  purge:   { title: (n) => `Hapus permanen ${n} entri?`,      body: "Entri hilang untuk selamanya. Tindakan ini tidak dapat dibatalkan.", confirm: "Hapus permanen" },
+};
+
 const STATUS_OPTIONS = [
   { value: "published", label: "Live",  tone: "bg-[#e3f6ec] text-[#0f8a52]" },
   { value: "draft",     label: "Draft", tone: "bg-[#f1f0ee] text-gray-600" },
@@ -60,6 +69,7 @@ interface Props {
   allCount: number;
   publishedCount: number;
   draftCount: number;
+  trashCount: number;
   page: number;
   pageSize: number;
   q: string;
@@ -77,13 +87,14 @@ const localDateTime = () => new Date(Date.now() + 8 * 60 * 60 * 1000).toISOStrin
 const statusOf = (published: boolean, archived: boolean): Status => (archived ? "archived" : published ? "published" : "draft");
 
 export default function CityGuideManager({
-  rows, totalCount, allCount, publishedCount, draftCount,
+  rows, totalCount, allCount, publishedCount, draftCount, trashCount,
   page, pageSize, q, section, status, sortField, sortDir, sections,
 }: Props) {
+  const inTrash = status === "trash";
   const router = useRouter();
   const [, startT] = useTransition();
   const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [bulkAction, setBulkAction] = useState<"draft" | "delete" | null>(null);
+  const [bulkAction, setBulkAction] = useState<BulkAction | null>(null);
   const [bulkRunning, setBulkRunning] = useState(false);
 
   const endpointOf = (row: AdminRow) => row.kind === "event" ? "/api/admin/events" : "/api/admin/tourism";
@@ -208,17 +219,28 @@ export default function CityGuideManager({
   const toggleAll = () => setSelected((current) =>
     gridRows.every((row) => current.has(row.id)) ? new Set() : new Set(gridRows.map((row) => row.id)));
 
-  async function runBulk(action: "draft" | "delete") {
+  const runOne = (row: AdminRow, action: BulkAction) => fetch(endpointOf(row), {
+    method: action === "trash" || action === "purge" ? "DELETE" : "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(
+      action === "trash"     ? { id: row.id }
+      : action === "purge"   ? { id: row.id, permanent: true }
+      : action === "restore" ? { id: row.id, restore: true }
+      : { id: row.id, published: false },
+    ),
+  });
+
+  async function runBulk(action: BulkAction) {
     setBulkRunning(true);
-    const targets = gridRows.filter((row) => selected.has(row.id));
-    await Promise.all(targets.map((row) => fetch(endpointOf(row), {
-      method: action === "delete" ? "DELETE" : "PATCH",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(action === "delete" ? { id: row.id } : { id: row.id, published: false }),
-    })));
+    await Promise.all(gridRows.filter((row) => selected.has(row.id)).map((row) => runOne(row, action)));
     setBulkRunning(false);
     setBulkAction(null);
     setSelected(new Set());
+    router.refresh();
+  }
+
+  async function runRow(row: AdminRow, action: BulkAction) {
+    await runOne(row, action);
     router.refresh();
   }
 
@@ -245,8 +267,13 @@ export default function CityGuideManager({
       ),
     },
     {
-      key: "status", header: "Status", width: 108,
-      render: (row) => (
+      key: "status", header: inTrash ? "Sampah" : "Status", width: inTrash ? 150 : 108,
+      render: (row) => inTrash ? (
+        <TrashRowActions
+          onRestore={() => runRow(row, "restore")}
+          onPurge={() => { setSelected(new Set([row.id])); setBulkAction("purge"); }}
+        />
+      ) : (
         <StatusCell
           value={statusValue(row)}
           options={STATUS_OPTIONS}
@@ -325,7 +352,7 @@ export default function CityGuideManager({
   return <div className="p-6">
     <GridHeader
       title="City Guide"
-      summary={<CountSummary total={allCount} filtered={totalCount} published={publishedCount} draft={draftCount} noun="entri" filtering={filtering} />}
+      summary={<CountSummary total={allCount} filtered={totalCount} published={publishedCount} draft={draftCount} trash={trashCount} noun="entri" filtering={filtering} />}
       actions={<>
         <button type="button" onClick={() => start(undefined, "place")} className="rounded-xl px-4 py-2 text-sm font-semibold" style={{ backgroundColor: "#F5C400", color: "#000" }}>+ Tempat</button>
         <button type="button" onClick={() => start(undefined, "event")} className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-50">+ Event</button>
@@ -352,6 +379,7 @@ export default function CityGuideManager({
         { value: "published", label: "Publik" },
         { value: "draft", label: "Draft" },
         { value: "archived", label: "Arsip" },
+        { value: "trash", label: `Sampah${trashCount > 0 ? ` (${trashCount})` : ""}` },
       ]}
       onStatus={(value) => nav({ status: value, page: "1" })}
       pageSize={pageSize}
@@ -360,8 +388,10 @@ export default function CityGuideManager({
 
     <BulkBar
       count={selected.size}
+      inTrash={inTrash}
       onDraft={() => setBulkAction("draft")}
-      onDelete={() => setBulkAction("delete")}
+      onRestore={() => setBulkAction("restore")}
+      onDelete={() => setBulkAction(inTrash ? "purge" : "trash")}
       onClear={() => setSelected(new Set())}
     />
 
@@ -376,17 +406,17 @@ export default function CityGuideManager({
       sortDir={sortDir}
       onSort={toggleSort}
       savingIds={savingIds}
-      empty={filtering ? "Tidak ada hasil untuk filter ini." : "Belum ada entri. Tambahkan yang pertama dari tombol di atas."}
+      empty={inTrash ? "Sampah kosong." : filtering ? "Tidak ada hasil untuk filter ini." : "Belum ada entri. Tambahkan yang pertama dari tombol di atas."}
     />
 
     <GridPagination page={page} pageSize={pageSize} totalCount={totalCount} noun="entri" onPage={(next) => nav({ page: String(next) })} />
 
     {bulkAction && (
       <ConfirmDialog
-        title={bulkAction === "delete" ? `Hapus ${selected.size} entri?` : `Jadikan ${selected.size} entri draft?`}
-        body={bulkAction === "delete" ? "Tindakan ini tidak dapat dibatalkan." : "Entri yang dipilih akan disembunyikan dari publik."}
-        confirmLabel={bulkAction === "delete" ? "Hapus" : "Jadikan Draft"}
-        danger={bulkAction === "delete"}
+        title={BULK_COPY[bulkAction].title(selected.size)}
+        body={BULK_COPY[bulkAction].body}
+        confirmLabel={BULK_COPY[bulkAction].confirm}
+        danger={bulkAction === "purge"}
         busy={bulkRunning}
         onCancel={() => setBulkAction(null)}
         onConfirm={() => runBulk(bulkAction)}
