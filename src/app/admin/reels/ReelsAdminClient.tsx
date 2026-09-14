@@ -372,7 +372,17 @@ export default function ReelsAdminClient({
     },
     {
       key: "editor_choice", header: "Choices Editor", width: 128,
-      render: (row) => (
+      // A landscape reel is on that shelf whatever this says — no category
+      // rail can hold a 16:9 card — so the switch would be a lie. It reads
+      // as automatic instead.
+      render: (row) => row.orientation === "landscape" ? (
+        <span
+          title="Reel landscape selalu tampil di Choices for You."
+          className="rounded-full bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-gray-500"
+        >
+          Otomatis
+        </span>
+      ) : (
         <SwitchCell
           checked={row.editor_choice}
           label={`Tampilkan ${row.title ?? row.account_username} di shelf Choices for You`}
@@ -521,7 +531,7 @@ export default function ReelsAdminClient({
                   <input type="checkbox" checked={form.editor_choice} onChange={(e) => setForm({ ...form, editor_choice: e.target.checked })} className="mt-0.5 h-4 w-4 accent-amber-500" />
                   <span>
                     Choices Editor
-                    <span className="mt-0.5 block text-[10px] font-normal leading-relaxed text-gray-400">Tempatkan Reel ini di shelf Choices for You. Bisa dicentang bersamaan dengan Featured.</span>
+                    <span className="mt-0.5 block text-[10px] font-normal leading-relaxed text-gray-400">Tempatkan Reel ini di shelf Choices for You. Reel landscape selalu ada di sana tanpa dicentang.</span>
                   </span>
                 </label>
               </div>

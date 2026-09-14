@@ -23,10 +23,12 @@ const SHELF_SIZE = 6;
 /**
  * Three shelves that are not categories.
  *
- * FEATURED and CHOICES are both placements an editor ticks, and a reel can sit
- * on both or neither. CHOICES used to be drawn from whatever happened to be
- * filmed landscape, which is a property of the camera, not an editorial
- * decision — the shape of a reel no longer decides where it goes.
+ * FEATURED is a straight tick. CHOICES is a tick too, plus every wide reel:
+ * shape decides which shelves a reel is *eligible* for, and a 16:9 post is not
+ * eligible for a category rail, because one wide card forces the whole row off
+ * 9:16 and every phone-shaped cover in it gets cropped to suit the exception.
+ * So the wide ones live here, and an editor can add portrait reels alongside
+ * them.
  */
 const FEATURED = FEATURED_SHELF;
 const CHOICES = CHOICES_SHELF;
@@ -103,6 +105,16 @@ const SHAPE_CLASS: Record<Shape, string> = {
   wide: "aspect-video",
   mixed: "aspect-[4/5]",
 };
+/**
+ * On the Choices for You shelf, and so kept off the category rails.
+ *
+ * Every wide reel qualifies whether or not anyone ticked it. Unticking one
+ * would not put it back on a category rail — nothing there can hold a 16:9
+ * card — it would only strand it in Recently Added, so the tick is what adds
+ * portrait reels to this shelf, not what keeps the wide ones on it.
+ */
+const onChoicesShelf = (reel: ReelItem) => reel.editorChoice || reel.orientation === "landscape";
+
 /** One frame for a whole row or grid, chosen by what is actually in it. */
 function shapeOf(reels: ReelItem[]): Shape {
   if (reels.length === 0) return "tall";
@@ -316,8 +328,10 @@ export default function ReelsFeed({
   const filtered = useMemo(() => {
     if (category === "All" || category === RECENT) return inScope;
     if (category === FEATURED) return inScope.filter((reel) => reel.featured);
-    if (category === CHOICES) return inScope.filter((reel) => reel.editorChoice);
-    return inScope.filter((reel) => reel.category === category);
+    if (category === CHOICES) return inScope.filter(onChoicesShelf);
+    // A category holds phone-shaped reels only. The wide ones are on the
+    // Choices shelf and in Recently Added; they do not appear twice.
+    return inScope.filter((reel) => reel.category === category && !onChoicesShelf(reel));
   }, [inScope, category]);
 
   // Everything, newest first — the shelf that does not care how a reel is
@@ -336,8 +350,11 @@ export default function ReelsFeed({
     picked.length > 0 ? picked : [...inScope].sort((a, b) => b.views - a.views).slice(0, 4)
   ), [picked, inScope]);
   const topShelfTitle = picked.length > 0 ? FEATURED : "Most watched";
-  const choices = useMemo(() => inScope.filter((reel) => reel.editorChoice), [inScope]);
-  // Only the hero still cares about shape: its tiles are five narrow columns.
+  const choices = useMemo(() => inScope.filter(onChoicesShelf), [inScope]);
+  // What the category rails draw from: everything not on the Choices shelf, so
+  // each of them stays 9:16.
+  const inCategories = useMemo(() => inScope.filter((reel) => !onChoicesShelf(reel)), [inScope]);
+  // The hero tiles are five narrow columns, so they want phone-shaped covers.
   const portrait = useMemo(() => inScope.filter((reel) => reel.orientation !== "landscape"), [inScope]);
 
   // The hero is built from the archive's own covers rather than a stock photo.
@@ -484,7 +501,7 @@ export default function ReelsFeed({
             onViewAll={choices.length > SHELF_SIZE ? () => selectCategory(CHOICES) : undefined}
           />
           {categories.map((name) => {
-            const shelf = inScope.filter((reel) => reel.category === name);
+            const shelf = inCategories.filter((reel) => reel.category === name);
             return (
               <Shelf
                 key={name}
