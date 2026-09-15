@@ -87,7 +87,15 @@ export default function HeroCarousel({ pool, deskMap }: { pool: HeroArticleData[
   return (
     <div className="grid gap-4 lg:grid-cols-[1.7fr_.8fr]">
       <article
-        className="group relative aspect-[4/5] overflow-hidden rounded-[4px] bg-black sm:aspect-auto sm:min-h-[570px]"
+        /* On a phone the lead story takes the whole first screen, the way the
+           City Guide, Event and Reels heroes do, and the two stories beside it
+           fall below the fold to arrive on scroll.
+           189px is everything between it and the edges at the top of the page:
+           the sticky header (57), the category strip (43), the section's own
+           top padding (24) and the bottom nav (65). The safe-area inset comes
+           off as well — the nav pads itself by that much on a notched phone,
+           and without it the card would slide back under the nav. */
+        className="group relative h-[calc(100svh-189px-env(safe-area-inset-bottom))] overflow-hidden rounded-[4px] bg-black sm:h-auto sm:min-h-[570px]"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
       >
