@@ -24,6 +24,19 @@ export const shelfLabel = (name: string) => DISPLAY_NAME[name] ?? name;
 export const reelSlug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
 
 /**
+ * The Account filter names an account once it has this many reels, and folds
+ * everything below it into one entry.
+ *
+ * 188 accounts is not a menu, it is a scroll. At seven, twenty accounts are
+ * named — everyone a reader might actually be looking for — and the remaining
+ * 168, between them holding 312 reels, stay reachable as a single choice
+ * rather than 168 near-empty ones.
+ */
+export const ACCOUNT_NAMED_FROM = 7;
+export const OTHER_ACCOUNTS = "lainnya";
+export const OTHER_ACCOUNTS_LABEL = "Account Lainnya";
+
+/**
  * The Reels taxonomy, in the order editors see it. Shared by the public feed
  * and the admin grid so both offer the same vocabulary.
  *
