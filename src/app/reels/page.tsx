@@ -38,28 +38,54 @@ function getPeriod(value: string | string[] | undefined): string {
   return normalized;
 }
 
+const REEL_COLUMNS =
+  "id, account_username, description, publish_time, permalink, category, sponsored, thumbnail_url, orientation, featured, editor_choice, views, reach, likes";
+
+/**
+ * PostgREST caps a single response at 1000 rows and says nothing about it. The
+ * archive passed that mark, and because the order is newest-first the cap was
+ * silently amputating the oldest end: 2022 vanished from the year filter
+ * altogether and 2023 came back 76 short.
+ *
+ * `id` is the last sort key so the order is total — paging over a sort with
+ * ties can otherwise repeat a row on one page and drop another.
+ */
+async function loadPublishedReels(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const PAGE = 1000;
+  const rows: Record<string, unknown>[] = [];
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await supabase
+      .from("reels")
+      .select(REEL_COLUMNS)
+      .eq("status", "published")
+      // Newest first, with anything ticked Featured pinned above it. Display
+      // order used to sit in between, but every row shares the same value, so
+      // it only ever pushed a reel down — the publish date is the honest handle.
+      .order("featured", { ascending: false })
+      .order("publish_time", { ascending: false })
+      .order("id")
+      .range(from, from + PAGE - 1);
+    if (error || !data?.length) break;
+    rows.push(...data);
+    if (data.length < PAGE) break;
+  }
+  return rows;
+}
+
 export default async function ReelsPage({ searchParams }: PageProps<"/reels">) {
   const query = await searchParams;
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("reels")
-    .select("id, account_username, description, publish_time, permalink, category, sponsored, thumbnail_url, orientation, featured, editor_choice, views, reach, likes")
-    .eq("status", "published")
-    // Newest first, with anything ticked Featured pinned above it. Display
-    // order used to sit in between, but every row shares the same value, so it
-    // only ever pushed a reel down — the publish date is the honest handle.
-    .order("featured", { ascending: false })
-    .order("publish_time", { ascending: false });
+  const data = await loadPublishedReels(supabase);
 
   const databaseReels: ReelItem[] = (data ?? [])
     .map((item) => ({
-      id: item.id,
-      username: item.account_username,
-      category: item.category,
-      sponsored: item.sponsored,
-      description: item.description,
-      publishedAt: item.publish_time,
-      permalink: item.permalink,
+      id: String(item.id),
+      username: String(item.account_username),
+      category: String(item.category),
+      sponsored: Boolean(item.sponsored),
+      description: String(item.description ?? ""),
+      publishedAt: String(item.publish_time),
+      permalink: String(item.permalink),
       thumbnail: (item.thumbnail_url as string | null) ?? null,
       orientation: (item.orientation as "portrait" | "landscape" | null) ?? "portrait",
       featured: Boolean(item.featured),
