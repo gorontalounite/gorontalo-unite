@@ -14,6 +14,7 @@ export default function SectionHeading({
   as: Tag = "h2",
   id,
   action,
+  leading,
   slashes = true,
   className = "",
 }: {
@@ -22,16 +23,28 @@ export default function SectionHeading({
   id?: string;
   /** Trailing control, e.g. "View all →". */
   action?: ReactNode;
+  /**
+   * A control that belongs to the title itself, e.g. a way back out of the
+   * view it names. It shares the heading's row rather than sitting in one of
+   * its own, so the two line up on the same centre.
+   */
+  leading?: ReactNode;
   slashes?: boolean;
   className?: string;
 }) {
+  const title = (
+    <Tag id={id} className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
+      {slashes && <span className="text-[#f5c400]" aria-hidden="true">/</span>}
+      <span>{children}</span>
+      {slashes && <span className="text-[#f5c400]" aria-hidden="true">/</span>}
+    </Tag>
+  );
+
   return (
     <div className={`mb-6 flex items-center justify-between gap-4 ${className}`}>
-      <Tag id={id} className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
-        {slashes && <span className="text-[#f5c400]" aria-hidden="true">/</span>}
-        <span>{children}</span>
-        {slashes && <span className="text-[#f5c400]" aria-hidden="true">/</span>}
-      </Tag>
+      {/* Only wrapped when there is something to pair with the title, so every
+          other heading on the site keeps the markup it already had. */}
+      {leading ? <div className="flex min-w-0 items-center gap-2.5">{leading}{title}</div> : title}
       {action}
     </div>
   );
