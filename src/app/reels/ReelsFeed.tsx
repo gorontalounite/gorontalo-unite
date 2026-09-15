@@ -1,41 +1,42 @@
 "use client";
 
 import Image from "next/image";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useRef, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import SectionHeading from "@/components/ui/SectionHeading";
 import {
-  CHOICES_SHELF, DEFAULT_REEL_CATEGORIES, FEATURED_SHELF, RECENT_SHELF, reelSlug, shelfLabel,
-  type ReelItem,
+  ACCOUNT_NAMED_FROM, CHOICES_SHELF, FEATURED_SHELF, OTHER_ACCOUNTS, OTHER_ACCOUNTS_LABEL,
+  RECENT_SHELF, reelSlug, shelfLabel, type ReelItem,
 } from "./data";
 
 /* ---------------------------------------------------------------------------
  * The Reels page reads as a video service: a hero, then shelves you push
- * sideways. It used to be one full-screen snap feed, which only ever showed a
- * single reel and gave no sense of how much there was.
+ * sideways.
+ *
+ * It no longer holds the archive. The server sends the rows for the view being
+ * looked at, and every chip is a link — which is why the filtering that used
+ * to live here is gone. What is left is how a reel looks and how a rail moves.
  * ------------------------------------------------------------------------ */
 
-type CategoryFilter = "All" | string;
-type PeriodFilter = "all" | string;
-
-/** How many a category shelf shows before "View all" is worth offering. */
-const SHELF_SIZE = 6;
-
-/**
- * Three shelves that are not categories.
- *
- * FEATURED is a straight tick. CHOICES is a tick too, plus every wide reel:
- * shape decides which shelves a reel is *eligible* for, and a 16:9 post is not
- * eligible for a category rail, because one wide card forces the whole row off
- * 9:16 and every phone-shaped cover in it gets cropped to suit the exception.
- * So the wide ones live here, and an editor can add portrait reels alongside
- * them.
- */
 const FEATURED = FEATURED_SHELF;
 const CHOICES = CHOICES_SHELF;
-/** Everything, newest first, in a frame that suits both shapes. */
 const RECENT = RECENT_SHELF;
 /** The publication's own account, pinned to the top of the Account filter. */
 const HOUSE_ACCOUNT = "gorontalo.unite";
+
+export interface ShelfData {
+  key: string;
+  reels: ReelItem[];
+  /** There is more behind this shelf than the six on it. */
+  more: boolean;
+  shape?: Shape;
+}
+
+export interface Facets {
+  total: number;
+  years: string[];
+  accounts: Array<{ username: string; count: number }>;
+}
 
 const CATEGORY_ACCENT: Record<string, string> = {
   Tourism: "bg-sky-500",
@@ -51,7 +52,6 @@ const CATEGORY_ACCENT: Record<string, string> = {
 const categoryAccent = (category: string) => CATEGORY_ACCENT[category] ?? "bg-emerald-500";
 
 const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-const reelYear = (reel: ReelItem) => reel.publishedAt.slice(0, 4);
 /**
  * The stored timestamp already carries +08:00, so the date written in the
  * string is the Gorontalo date. Slicing it beats building a Date, which the
@@ -61,25 +61,6 @@ const reelYear = (reel: ReelItem) => reel.publishedAt.slice(0, 4);
 function reelDate(reel: ReelItem) {
   const [year, month, day] = reel.publishedAt.slice(0, 10).split("-");
   return `${Number(day)} ${MONTHS[Number(month) - 1]} ${year}`;
-}
-const reelPeriod = (reel: ReelItem) => reel.publishedAt.slice(0, 7);
-
-function matchesPeriod(reel: ReelItem, period: PeriodFilter) {
-  if (period === "all") return true;
-  return period.length === 4 ? reelYear(reel) === period : reelPeriod(reel) === period;
-}
-
-/**
- * The categories that get a shelf of their own. The three placement shelves are
- * dropped, in case a stray row was ever filed under one of their names.
- */
-function orderedCategories(reels: ReelItem[]) {
-  const canonical: readonly string[] = DEFAULT_REEL_CATEGORIES;
-  const leftovers = [...new Set(reels.map((item) => item.category))]
-    .filter((item) => !canonical.includes(item))
-    .sort();
-  const placements: string[] = [FEATURED, CHOICES, RECENT];
-  return [...canonical, ...leftovers].filter((name) => !placements.includes(name));
 }
 
 function PlayBadge({ small }: { small?: boolean }) {
@@ -105,23 +86,6 @@ const SHAPE_CLASS: Record<Shape, string> = {
   wide: "aspect-video",
   mixed: "aspect-[4/5]",
 };
-/**
- * On the Choices for You shelf, and so kept off the category rails.
- *
- * Every wide reel qualifies whether or not anyone ticked it. Unticking one
- * would not put it back on a category rail — nothing there can hold a 16:9
- * card — it would only strand it in Recently Added, so the tick is what adds
- * portrait reels to this shelf, not what keeps the wide ones on it.
- */
-const onChoicesShelf = (reel: ReelItem) => reel.editorChoice || reel.orientation === "landscape";
-
-/** One frame for a whole row or grid, chosen by what is actually in it. */
-function shapeOf(reels: ReelItem[]): Shape {
-  if (reels.length === 0) return "tall";
-  if (reels.every((reel) => reel.orientation === "landscape")) return "wide";
-  return reels.some((reel) => reel.orientation === "landscape") ? "mixed" : "tall";
-}
-
 const GRID_COLS: Record<Shape, string> = {
   tall: "grid-cols-2 sm:grid-cols-4 lg:grid-cols-6",
   wide: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
@@ -132,6 +96,13 @@ const SHAPE_SIZES: Record<Shape, string> = {
   wide: "(max-width: 639px) 78vw, 420px",
   mixed: "(max-width: 639px) 52vw, 260px",
 };
+
+/** One frame for a whole row or grid, chosen by what is actually in it. */
+function shapeOf(reels: ReelItem[]): Shape {
+  if (reels.length === 0) return "tall";
+  if (reels.every((reel) => reel.orientation === "landscape")) return "wide";
+  return reels.some((reel) => reel.orientation === "landscape") ? "mixed" : "tall";
+}
 
 function Poster({ reel, shape = "tall" }: { reel: ReelItem; shape?: Shape }) {
   return (
@@ -290,240 +261,159 @@ function FilterSelect({ name, label, value, onChange, children, active = false }
 /* --------------------------------- page --------------------------------- */
 
 export default function ReelsFeed({
-  reels, initialCategory = "All", initialPeriod = "all", initialAccount = "all",
+  shelves, hero, facets, view, viewReels, viewCount, page, pageSize, period, account,
 }: {
-  reels: ReelItem[];
-  initialCategory?: CategoryFilter;
-  initialPeriod?: PeriodFilter;
-  initialAccount?: string;
+  shelves: ShelfData[];
+  hero: ReelItem[];
+  facets: Facets;
+  /** The shelf being looked at on its own, or null while browsing them all. */
+  view: string | null;
+  viewReels: ReelItem[];
+  viewCount: number;
+  page: number;
+  pageSize: number;
+  period: string;
+  account: string;
 }) {
-  const [category, setCategory] = useState<CategoryFilter>(initialCategory);
-  const [period, setPeriod] = useState<PeriodFilter>(initialPeriod);
-  const [account, setAccount] = useState(initialAccount);
+  const router = useRouter();
+  const [pending, startTransition] = useTransition();
 
-  const categories = useMemo(() => orderedCategories(reels), [reels]);
-  const years = useMemo(
-    () => [...new Set(reels.map(reelYear))].sort((a, b) => b.localeCompare(a)),
-    [reels],
-  );
-  // The house account leads; everyone else is alphabetical. There is no ranking
-  // to apply to contributors, and alphabetical is the order a reader can
-  // predict.
-  const accounts = useMemo(() => {
-    const rest = [...new Set(reels.map((reel) => reel.username))].filter((name) => name !== HOUSE_ACCOUNT);
-    rest.sort((a, b) => a.localeCompare(b));
-    return reels.some((reel) => reel.username === HOUSE_ACCOUNT) ? [HOUSE_ACCOUNT, ...rest] : rest;
-  }, [reels]);
-
-  // Everything the year and account chips leave standing. Every shelf below is
-  // drawn from this, so the two chips narrow the whole page at once.
-  const inScope = useMemo(
-    () => reels.filter((reel) => matchesPeriod(reel, period) && (account === "all" || reel.username === account)),
-    [reels, period, account],
-  );
-
-  // Featured, Choices for You and Recently Added are shelves, not categories,
-  // so "View all" on any of them has to be answered here rather than by
-  // matching reel.category.
-  const filtered = useMemo(() => {
-    if (category === "All" || category === RECENT) return inScope;
-    if (category === FEATURED) return inScope.filter((reel) => reel.featured);
-    if (category === CHOICES) return inScope.filter(onChoicesShelf);
-    // A category holds phone-shaped reels only. The wide ones are on the
-    // Choices shelf and in Recently Added; they do not appear twice.
-    return inScope.filter((reel) => reel.category === category && !onChoicesShelf(reel));
-  }, [inScope, category]);
-
-  // Everything, newest first — the shelf that does not care how a reel is
-  // classified, only when it arrived.
-  const recent = useMemo(
-    () => [...inScope].sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)),
-    [inScope],
-  );
-
-  // The top shelf is every reel ticked Featured — all of them, however many.
-  // With nothing ticked it falls back to the most-watched and says so: an OTT
-  // front page without a top shelf reads as broken, but the label should not
-  // claim an editor chose these when the view count did.
-  const picked = useMemo(() => inScope.filter((reel) => reel.featured), [inScope]);
-  const topShelf = useMemo(() => (
-    picked.length > 0 ? picked : [...inScope].sort((a, b) => b.views - a.views).slice(0, 4)
-  ), [picked, inScope]);
-  const topShelfTitle = picked.length > 0 ? FEATURED : "Most watched";
-  const choices = useMemo(() => inScope.filter(onChoicesShelf), [inScope]);
-  // What the category rails draw from: everything not on the Choices shelf, so
-  // each of them stays 9:16.
-  const inCategories = useMemo(() => inScope.filter((reel) => !onChoicesShelf(reel)), [inScope]);
-  // The hero tiles are five narrow columns, so they want phone-shaped covers.
-  const portrait = useMemo(() => inScope.filter((reel) => reel.orientation !== "landscape"), [inScope]);
-
-  // The hero is built from the archive's own covers rather than a stock photo.
-  // A phone-shaped cover stretched across a 32:15 frame would be a blurred
-  // sliver, so the wide layout tiles five of them instead — each shown at
-  // close to its own ratio, and downscaled rather than blown up.
-  const heroReels = useMemo(
-    () => [...portrait].filter((reel) => reel.thumbnail).sort((a, b) => b.views - a.views).slice(0, 5),
-    [portrait],
-  );
-
-  function updateUrl(nextCategory: CategoryFilter, nextPeriod: PeriodFilter, nextAccount: string) {
+  /**
+   * Every chip is a link. The filters used to be React state over the whole
+   * archive; now the server decides what a view contains, so changing one has
+   * to ask it. The hash lands on the filter bar rather than the top of the
+   * hero — you came back to pick something else, not to read the headline.
+   */
+  const go = (next: { view?: string | null; period?: string; account?: string; page?: number }) => {
     const params = new URLSearchParams();
-    if (nextCategory !== "All") params.set("kategori", reelSlug(nextCategory));
-    if (nextPeriod !== "all") params.set("periode", nextPeriod);
-    if (nextAccount !== "all") params.set("akun", nextAccount);
-    window.history.replaceState(null, "", params.size ? `/reels?${params}` : "/reels");
-  }
-  const selectCategory = (next: CategoryFilter) => { setCategory(next); updateUrl(next, period, account); };
-  const selectPeriod = (next: PeriodFilter) => { setPeriod(next); updateUrl(category, next, account); };
-  const selectAccount = (next: string) => { setAccount(next); updateUrl(category, period, next); };
+    const wantView = next.view === undefined ? view : next.view;
+    const wantPeriod = next.period ?? period;
+    const wantAccount = next.account ?? account;
+    const wantPage = next.page ?? 1;
+    if (wantView) params.set("kategori", reelSlug(wantView));
+    if (wantPeriod !== "all") params.set("periode", wantPeriod);
+    if (wantAccount !== "all") params.set("akun", wantAccount);
+    if (wantPage > 1) params.set("hal", String(wantPage));
+    const url = params.size ? `/reels?${params}#shelves` : "/reels";
+    startTransition(() => router.push(url));
+  };
 
-  // Picking a category swaps every shelf for one grid, and the "View all" that
-  // did it is usually far down the page — leaving you dropped into the middle
-  // of the new view. Scroll back to the filter bar so it opens at the first
-  // item. This waits for the paint: the shorter page makes the browser clamp
-  // the old scroll position, and that clamp cancels an animation started any
-  // earlier (a handler call, or even two rAFs, both get eaten).
-  const shelvesTop = useRef<HTMLElement>(null);
-  const settled = useRef(false);
-  useEffect(() => {
-    if (!settled.current) { settled.current = true; return; }
-    shelvesTop.current?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, [category, period, account]);
+  // Named accounts lead with the house account, then alphabetical: there is no
+  // ranking to apply to contributors, and alphabetical is an order a reader can
+  // predict. Everyone below the threshold is reachable as one entry.
+  const named = facets.accounts.filter((row) => row.count >= ACCOUNT_NAMED_FROM);
+  const namedAccounts = [
+    ...named.filter((row) => row.username === HOUSE_ACCOUNT),
+    ...named.filter((row) => row.username !== HOUSE_ACCOUNT).sort((a, b) => a.username.localeCompare(b.username)),
+  ];
+  const otherCount = facets.accounts.filter((row) => row.count < ACCOUNT_NAMED_FROM).length;
 
-  const browsing = category === "All";
+  const accountLabel =
+    account === "all" ? "Account"
+    : account === OTHER_ACCOUNTS ? OTHER_ACCOUNTS_LABEL
+    : `@${account}`;
 
-  // The grid takes one frame for every card in it, chosen by what it holds: a
-  // wide-only view can afford 16:9 and three columns, a mixed one settles on
-  // 4:5, and a phone-shaped one keeps 9:16 and six.
-  const gridShape = shapeOf(filtered);
+  const gridShape = shapeOf(viewReels);
+  const lastPage = Math.max(1, Math.ceil(viewCount / pageSize));
+  const from = (page - 1) * pageSize + 1;
+  const to = Math.min(page * pageSize, viewCount);
 
   return (
-    <div className="bg-[#fafafa] pb-10 text-neutral-900 dark:bg-zinc-950 dark:text-white md:pb-12">
+    <div className={`bg-[#fafafa] pb-10 text-neutral-900 transition-opacity dark:bg-zinc-950 dark:text-white md:pb-12 ${pending ? "opacity-60" : ""}`}>
       {/* A — Hero, to the same measurements as the City Guide and Event heroes.
           No search panel here: a reel is found by browsing, not by typing. */}
-      <section className="relative mx-auto max-w-[1280px] sm:px-6 sm:pt-8 lg:px-8">
-        <div className="relative h-[calc(100svh-3.5rem)] w-full overflow-hidden bg-[#1b1a17] sm:aspect-[32/15] sm:h-auto">
-          {heroReels[0]?.thumbnail && (
-            <Image
-              src={heroReels[0].thumbnail}
-              alt=""
-              fill
-              priority
-              sizes="100vw"
-              className="object-cover sm:hidden"
-            />
-          )}
-          <div aria-hidden="true" className="absolute inset-0 hidden sm:grid sm:grid-cols-5">
-            {heroReels.map((reel) => (
-              <span key={reel.id} className="relative block h-full overflow-hidden">
-                {reel.thumbnail && (
-                  <Image src={reel.thumbnail} alt="" fill priority sizes="(min-width: 1280px) 250px, 20vw" className="object-cover" />
-                )}
-              </span>
-            ))}
-          </div>
-          <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/40 to-black/70" />
+      {!view && (
+        <section className="relative mx-auto max-w-[1280px] sm:px-6 sm:pt-8 lg:px-8">
+          <div className="relative h-[calc(100svh-3.5rem)] w-full overflow-hidden bg-[#1b1a17] sm:aspect-[32/15] sm:h-auto">
+            {hero[0]?.thumbnail && (
+              <Image src={hero[0].thumbnail} alt="" fill priority sizes="100vw" className="object-cover sm:hidden" />
+            )}
+            <div aria-hidden="true" className="absolute inset-0 hidden sm:grid sm:grid-cols-5">
+              {hero.map((reel) => (
+                <span key={reel.id} className="relative block h-full overflow-hidden">
+                  {reel.thumbnail && (
+                    <Image src={reel.thumbnail} alt="" fill priority sizes="(min-width: 1280px) 250px, 20vw" className="object-cover" />
+                  )}
+                </span>
+              ))}
+            </div>
+            <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/40 to-black/70" />
 
-          <div className="relative mx-auto flex h-full max-w-[1280px] flex-col items-center justify-center px-4 text-center text-white sm:px-6 lg:px-8">
-            <h1 className="font-heading max-w-3xl text-[34px] leading-[1.08] sm:text-[52px] lg:text-[60px]">
-              Press play
-              <br />
-              on Gorontalo
-            </h1>
-            <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
-              Reels from across the province. Pick a shelf and keep scrolling.
-            </p>
-            <a
-              href="#shelves"
-              className="mt-7 inline-flex min-h-11 items-center rounded-md bg-white px-7 text-sm font-bold text-[#302f2c] transition hover:bg-amber-300"
-            >
-              Start watching
-            </a>
+            <div className="relative mx-auto flex h-full max-w-[1280px] flex-col items-center justify-center px-4 text-center text-white sm:px-6 lg:px-8">
+              <h1 className="font-heading max-w-3xl text-[34px] leading-[1.08] sm:text-[52px] lg:text-[60px]">
+                Press play
+                <br />
+                on Gorontalo
+              </h1>
+              <p className="mt-4 max-w-xl text-sm leading-relaxed text-white/85 sm:text-base">
+                Reels from across the province. Pick a shelf and keep scrolling.
+              </p>
+              <a
+                href="#shelves"
+                className="mt-7 inline-flex min-h-11 items-center rounded-md bg-white px-7 text-sm font-bold text-[#302f2c] transition hover:bg-amber-300"
+              >
+                Start watching
+              </a>
+            </div>
           </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       {/* B — Filters */}
-      <section ref={shelvesTop} id="shelves" className="mx-auto max-w-[1280px] scroll-mt-16 px-4 pt-8 sm:px-6 lg:px-8">
+      <section id="shelves" className="mx-auto max-w-[1280px] scroll-mt-16 px-4 pt-8 sm:px-6 lg:px-8">
         <div className="flex flex-wrap items-center gap-2">
           <FilterSelect
             name="category"
-            label={category === "All" ? "Category" : shelfLabel(category)}
-            value={category}
-            active={category !== "All"}
-            onChange={(value) => selectCategory(value as CategoryFilter)}
+            label={view ? shelfLabel(view) : "Category"}
+            value={view ?? "All"}
+            active={Boolean(view)}
+            onChange={(value) => go({ view: value === "All" ? null : value })}
           >
             <option value="All">All categories</option>
             <option value={FEATURED}>{FEATURED}</option>
             <option value={CHOICES}>{CHOICES}</option>
             <option value={RECENT}>{RECENT}</option>
-            {categories.map((item) => <option key={item} value={item}>{shelfLabel(item)}</option>)}
+            {shelves
+              .map((entry) => entry.key)
+              .filter((key) => key !== FEATURED && key !== CHOICES && key !== RECENT)
+              .map((key) => <option key={key} value={key}>{shelfLabel(key)}</option>)}
           </FilterSelect>
           <FilterSelect
             name="year"
             label={period === "all" ? "Year" : period}
             value={period}
             active={period !== "all"}
-            onChange={selectPeriod}
+            onChange={(value) => go({ period: value })}
           >
             <option value="all">All years</option>
-            {years.map((year) => <option key={year} value={year}>{year}</option>)}
+            {facets.years.map((year) => <option key={year} value={year}>{year}</option>)}
           </FilterSelect>
           <FilterSelect
             name="account"
-            label={account === "all" ? "Account" : `@${account}`}
+            label={accountLabel}
             value={account}
             active={account !== "all"}
-            onChange={selectAccount}
+            onChange={(value) => go({ account: value })}
           >
             <option value="all">All accounts</option>
-            {accounts.map((name) => <option key={name} value={name}>@{name}</option>)}
+            {namedAccounts.map((row) => (
+              <option key={row.username} value={row.username}>@{row.username} ({row.count})</option>
+            ))}
+            {otherCount > 0 && (
+              <option value={OTHER_ACCOUNTS}>{OTHER_ACCOUNTS_LABEL} ({otherCount})</option>
+            )}
           </FilterSelect>
         </div>
       </section>
 
-      {browsing ? (
-        <>
-          <Shelf
-            title={topShelfTitle}
-            reels={topShelf}
-            onViewAll={picked.length > 0 ? () => selectCategory(FEATURED) : undefined}
-          />
-          <Shelf
-            title={CHOICES}
-            reels={choices.slice(0, SHELF_SIZE)}
-            shape="wide"
-            onViewAll={choices.length > SHELF_SIZE ? () => selectCategory(CHOICES) : undefined}
-          />
-          {categories.map((name) => {
-            const shelf = inCategories.filter((reel) => reel.category === name);
-            return (
-              <Shelf
-                key={name}
-                title={shelfLabel(name)}
-                reels={shelf.slice(0, SHELF_SIZE)}
-                onViewAll={shelf.length > SHELF_SIZE ? () => selectCategory(name) : undefined}
-              />
-            );
-          })}
-          <Shelf
-            title={RECENT}
-            reels={recent.slice(0, SHELF_SIZE)}
-            shape="mixed"
-            onViewAll={recent.length > SHELF_SIZE ? () => selectCategory(RECENT) : undefined}
-          />
-        </>
-      ) : (
-        // One category, everything in it, as a grid rather than a shelf.
+      {view ? (
+        // One shelf, one page of it, as a grid rather than a rail.
         <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
-          {/* The way out sits against the title rather than under the
-              filters: a line of text three rows above the heading it undoes
-              was read as a label, not as a control. */}
           <SectionHeading
             leading={
               <button
                 type="button"
-                onClick={() => selectCategory("All")}
+                onClick={() => go({ view: null })}
                 aria-label="Back to all shelves"
                 className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#d7d1c6] text-[#302f2c] transition hover:border-[#302f2c] dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-amber-300"
               >
@@ -533,31 +423,55 @@ export default function ReelsFeed({
               </button>
             }
           >
-            {`${shelfLabel(category)} · ${filtered.length}`}
+            {`${shelfLabel(view)} · ${viewCount}`}
           </SectionHeading>
-          {filtered.length === 0 ? (
+
+          {viewReels.length === 0 ? (
             <p className="rounded-xl border border-dashed border-neutral-300 px-6 py-16 text-center text-sm text-neutral-500 dark:border-zinc-700">
               No Reels here yet.
             </p>
           ) : (
-            <div className={`grid gap-x-5 gap-y-8 ${GRID_COLS[gridShape]}`}>
-              {filtered.map((reel) => (
-                <a
-                  key={reel.id}
-                  href={reel.permalink}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={`Open the ${reel.category} Reel by @${reel.username} on Instagram`}
-                  className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]"
-                >
-                  <Poster reel={reel} shape={gridShape} />
-                  <span className="mt-2 block truncate text-xs text-neutral-600 dark:text-neutral-300">{reel.description}</span>
-                  <span className="mt-0.5 block text-[11px] text-neutral-400">{reelDate(reel)}</span>
-                </a>
-              ))}
-            </div>
+            <>
+              <div className={`grid gap-x-5 gap-y-8 ${GRID_COLS[gridShape]}`}>
+                {viewReels.map((reel) => (
+                  <a
+                    key={reel.id}
+                    href={reel.permalink}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`Open the ${reel.category} Reel by @${reel.username} on Instagram`}
+                    className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]"
+                  >
+                    <Poster reel={reel} shape={gridShape} />
+                    <span className="mt-2 block truncate text-xs text-neutral-600 dark:text-neutral-300">{reel.description}</span>
+                    <span className="mt-0.5 block text-[11px] text-neutral-400">{reelDate(reel)}</span>
+                  </a>
+                ))}
+              </div>
+
+              {lastPage > 1 && (
+                <div className="mt-10 flex items-center justify-between gap-4">
+                  <p className="text-xs text-neutral-500">{from}–{to} of {viewCount}</p>
+                  <div className="flex items-center gap-2">
+                    <RailArrow direction="prev" disabled={page <= 1} onClick={() => go({ page: page - 1 })} />
+                    <span className="text-xs tabular-nums text-neutral-500">{page} / {lastPage}</span>
+                    <RailArrow direction="next" disabled={page >= lastPage} onClick={() => go({ page: page + 1 })} />
+                  </div>
+                </div>
+              )}
+            </>
           )}
         </section>
+      ) : (
+        shelves.map((entry) => (
+          <Shelf
+            key={entry.key}
+            title={shelfLabel(entry.key)}
+            reels={entry.reels}
+            shape={entry.shape}
+            onViewAll={entry.more ? () => go({ view: entry.key }) : undefined}
+          />
+        ))
       )}
     </div>
   );
