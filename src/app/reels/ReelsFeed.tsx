@@ -270,7 +270,7 @@ function FilterSelect({ name, label, value, onChange, children, active = false }
   active?: boolean;
 }) {
   return (
-    <label className={`relative inline-flex h-9 max-w-[46vw] items-center rounded-full border px-3.5 text-[10px] font-bold uppercase tracking-[.08em] shadow-sm sm:max-w-none ${active ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black" : "border-black/10 bg-white/80 text-neutral-700 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200"}`}>
+    <label className={`relative inline-flex h-9 max-w-[46vw] items-center rounded-lg border px-3.5 text-[10px] font-bold uppercase tracking-[.08em] shadow-sm sm:max-w-none ${active ? "border-black bg-black text-white dark:border-white dark:bg-white dark:text-black" : "border-black/10 bg-white/80 text-neutral-700 dark:border-white/15 dark:bg-neutral-900 dark:text-neutral-200"}`}>
       <span className="truncate">{label}</span>
       <svg className="ml-1.5 h-3 w-3 shrink-0" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
         <path fillRule="evenodd" d="M5.22 7.22a.75.75 0 0 1 1.06 0L10 10.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 8.28a.75.75 0 0 1 0-1.06Z" clipRule="evenodd" />
@@ -479,11 +479,6 @@ export default function ReelsFeed({
             <option value="all">All accounts</option>
             {accounts.map((name) => <option key={name} value={name}>@{name}</option>)}
           </FilterSelect>
-          {!browsing && (
-            <button type="button" onClick={() => selectCategory("All")} className="text-xs text-neutral-500 underline-offset-2 hover:underline">
-              Back to all shelves
-            </button>
-          )}
         </div>
       </section>
 
@@ -521,7 +516,22 @@ export default function ReelsFeed({
       ) : (
         // One category, everything in it, as a grid rather than a shelf.
         <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
-          <SectionHeading>{`${shelfLabel(category)} · ${filtered.length}`}</SectionHeading>
+          {/* The way out sits against the title rather than under the
+              filters: a line of text three rows above the heading it undoes
+              was read as a label, not as a control. */}
+          <div className="mb-6 flex items-center gap-2.5">
+            <button
+              type="button"
+              onClick={() => selectCategory("All")}
+              aria-label="Back to all shelves"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#d7d1c6] text-[#302f2c] transition hover:border-[#302f2c] dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-amber-300"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                <path d="M15 18l-6-6 6-6" />
+              </svg>
+            </button>
+            <SectionHeading className="mb-0 flex-1">{`${shelfLabel(category)} · ${filtered.length}`}</SectionHeading>
+          </div>
           {filtered.length === 0 ? (
             <p className="rounded-xl border border-dashed border-neutral-300 px-6 py-16 text-center text-sm text-neutral-500 dark:border-zinc-700">
               No Reels here yet.
