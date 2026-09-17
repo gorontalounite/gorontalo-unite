@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import SearchCard from "./SearchCard";
+import RadarCard from "./RadarCard";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Dashboard | Admin Gorontalo Unite" };
@@ -178,6 +179,12 @@ export default async function AdminDashboardPage() {
         </section>
 
         <div className="space-y-4">
+          {/* Eleven feeds, so it gets its own boundary: a slow outlet must not
+              hold back the rest of the page. */}
+          <Suspense fallback={<div className="min-h-[190px] rounded-2xl border border-gray-200 bg-white" />}>
+            <RadarCard />
+          </Suspense>
+
           <section className="rounded-2xl border border-gray-200 bg-white p-3">
             <h2 className="px-2 pb-2 pt-1 text-sm font-semibold text-gray-900">Aksi Cepat</h2>
             <div className="space-y-1">
