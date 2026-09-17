@@ -13,13 +13,22 @@ export function TextCell({ value, muted }: { value: string | null; muted?: boole
   return <span className={`block truncate ${muted ? "text-gray-500" : "text-gray-800"}`}>{value}</span>;
 }
 
-export function TitleCell({ href, title, slug }: { href: string; title: string; slug?: string }) {
-  return (
-    <Link href={href} className="block min-w-0" title={title}>
+/** Pass `onOpen` to edit in a side panel, or `href` to open an editor page. */
+export function TitleCell({ href, onOpen, title, slug }: { href?: string; onOpen?: () => void; title: string; slug?: string }) {
+  const label = (
+    <>
       <span className="block truncate font-medium text-gray-900 hover:underline">{title || "Tanpa judul"}</span>
       {slug && <span className="block truncate text-[11px] text-gray-400">/{slug}</span>}
-    </Link>
+    </>
   );
+  if (onOpen) {
+    return (
+      <button type="button" onClick={onOpen} title={title} className="block w-full min-w-0 text-left">
+        {label}
+      </button>
+    );
+  }
+  return <Link href={href ?? "#"} className="block min-w-0" title={title}>{label}</Link>;
 }
 
 export function DateCell({ value }: { value: string | null }) {
