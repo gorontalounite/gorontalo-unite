@@ -366,7 +366,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
                 id="editor-choice"
                 className="text-white"
                 action={
-                  <Link href="/editor-choice" className="inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold text-white">
+                  <Link href="/category/editor-choice" className="inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold text-white">
                     View all <span aria-hidden>→</span>
                   </Link>
                 }

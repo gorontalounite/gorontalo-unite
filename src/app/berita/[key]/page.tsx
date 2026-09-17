@@ -13,6 +13,17 @@ const LIMIT = 9;
 
 const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]));
 
+/**
+ * Editor Choice is a placement, not a desk — it is ticked per article rather
+ * than derived from a category. It gets its archive at the same
+ * /category/<key> URL every other section uses, but stays out of CATEGORIES so
+ * it does not turn up in the nav beside the real desks.
+ */
+const EDITOR_CHOICE = { key: "editor-choice", label: "Editor Choice" };
+
+/** The section a key names, or undefined when the key is an article slug. */
+const sectionFor = (key: string) => (key === EDITOR_CHOICE.key ? EDITOR_CHOICE : CAT_MAP[key]);
+
 interface Article {
   id: string; title: string; slug: string; category: string; categories: string[];
   tags: string[] | null;
@@ -28,10 +39,11 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { key } = await params;
-  if (!CAT_MAP[key]) return generateArticleMetadata({ params: Promise.resolve({ id: key }) });
-  const cat = CAT_MAP[key];
-  if (!cat) return { title: "Gorontalo Unite" };
-  const description = WEB_CATEGORY_DESCRIPTIONS[key] ?? `Berita terkini seputar ${cat.label} di Gorontalo.`;
+  const cat = sectionFor(key);
+  if (!cat) return generateArticleMetadata({ params: Promise.resolve({ id: key }) });
+  const description = key === EDITOR_CHOICE.key
+    ? "Artikel pilihan redaksi Gorontalo Unite."
+    : WEB_CATEGORY_DESCRIPTIONS[key] ?? `Berita terkini seputar ${cat.label} di Gorontalo.`;
   return {
     title: cat.label,
     description,
@@ -58,7 +70,7 @@ function formatDate(d: string | null) {
 export default async function BeritaCategoryPage({ params, searchParams }: Props) {
   const { key }  = await params;
   const { page: pageParam } = await searchParams;
-  const cat = CAT_MAP[key];
+  const cat = sectionFor(key);
   if (!cat) return <NewsDetailPage params={Promise.resolve({ id: key })} />;
 
   const page   = Math.max(1, parseInt(pageParam ?? "1"));
@@ -69,7 +81,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   const [{ data: raw }, { data: categoryRows }] = await Promise.all([
     admin
       .from("articles")
-      .select("id, title, slug, category, categories, tags, excerpt, image_url, published_at, created_at, is_trending, view_count")
+      .select("id, title, slug, category, categories, tags, excerpt, image_url, published_at, created_at, is_trending, editor_choice, view_count")
       .eq("published", true)
       .order("published_at", { ascending: false, nullsFirst: false })
       .limit(500),
@@ -78,6 +90,9 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   const deskMap = buildCategoryDeskMap((categoryRows ?? []) as CategoryRow[]);
 
   const matching = (raw ?? []).filter((article) => {
+    // A tick, not a category match — nothing about the article's own filing
+    // decides whether it belongs here.
+    if (key === EDITOR_CHOICE.key) return article.editor_choice === true;
     if (WEB_CATEGORY_DESCRIPTIONS[key]) return articleBelongsToWebCategory({
       category: article.category as string,
       categories: article.categories as string[] | null,
