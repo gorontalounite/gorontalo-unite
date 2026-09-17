@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
 import { useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import AdminGrid, { type GridColumn } from "@/components/admin/grid/AdminGrid";
+import ArticlePanel from "./ArticlePanel";
 import {
   DateCell, EditableTextCell, ImageCell, PillSelectCell, StatusCell, SwitchCell, TextCell, TitleCell,
 } from "@/components/admin/grid/cells";
@@ -79,6 +79,9 @@ export default function NewsAdminList({
   const [selected, setSelected] = useState<Set<string>>(new Set());
   const [bulkAction, setBulkAction] = useState<BulkAction | null>(null);
   const [bulkRunning, setBulkRunning] = useState(false);
+  // `{ id: null }` is a new article; `null` is the panel closed. A plain string
+  // could not tell "create" apart from "nothing open".
+  const [editing, setEditing] = useState<{ id: string | null } | null>(null);
 
   const { rows, update, savingIds, error, setError } = useRowEditor<NewsRow>(initialItems, {
     endpointFor: () => "/api/admin/articles",
@@ -139,7 +142,7 @@ export default function NewsAdminList({
   const columns: GridColumn<NewsRow>[] = [
     {
       key: "title", header: "Title", width: 260, frozen: true, sort: "title",
-      render: (row) => <TitleCell href={`/admin/news/edit/${row.id}`} title={row.title} slug={row.slug} />,
+      render: (row) => <TitleCell onOpen={() => setEditing({ id: row.id })} title={row.title} slug={row.slug} />,
     },
     {
       key: "status", header: inTrash ? "Sampah" : "Status", width: inTrash ? 150 : 108,
@@ -280,9 +283,9 @@ export default function NewsAdminList({
         title="Manajemen Konten"
         summary={<CountSummary total={allCount} filtered={totalCount} published={publishedCount} draft={draftCount} trash={trashCount} noun="artikel" filtering={filtering} />}
         actions={
-          <Link href="/admin/news/new" className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold" style={{ backgroundColor: "#F5C400", color: "#000" }}>
+          <button type="button" onClick={() => setEditing({ id: null })} className="flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold" style={{ backgroundColor: "#F5C400", color: "#000" }}>
             <span className="text-base leading-none">+</span> Konten Baru
-          </Link>
+          </button>
         }
       />
 
@@ -339,6 +342,13 @@ export default function NewsAdminList({
       />
 
       <GridPagination page={page} pageSize={pageSize} totalCount={totalCount} noun="artikel" onPage={(next) => nav({ page: String(next) })} />
+
+      <ArticlePanel
+        open={editing !== null}
+        id={editing?.id ?? null}
+        onClose={() => setEditing(null)}
+        onSaved={() => router.refresh()}
+      />
 
       {bulkAction && (
         <ConfirmDialog

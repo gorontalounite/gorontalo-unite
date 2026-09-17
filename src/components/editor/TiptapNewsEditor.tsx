@@ -15,6 +15,14 @@ import { blocksToText, type Block } from "./types";
 
 type Props = {
   editId?: string;
+  /**
+   * How to leave the editor. Without it the header navigates back to the list,
+   * as a page would; with it, it closes whatever is hosting the editor — the
+   * admin grid mounts this in a side panel and has no page to leave.
+   */
+  onExit?: () => void;
+  /** Called after a successful save so a host list can refresh its rows. */
+  onSaved?: () => void;
   initialMeta?: Partial<PostMeta>;
   initialBlocks?: Block[];
 };
@@ -225,7 +233,7 @@ function SeoDistribution({ meta, onChange }: { meta: PostMeta; onChange: (next: 
   </section>;
 }
 
-export default function TiptapNewsEditor({ editId, initialMeta, initialBlocks }: Props) {
+export default function TiptapNewsEditor({ editId, onExit, onSaved, initialMeta, initialBlocks }: Props) {
   const router = useRouter();
   const [meta, setMeta] = useState<PostMeta>({
     ...EMPTY_META,
@@ -355,15 +363,18 @@ export default function TiptapNewsEditor({ editId, initialMeta, initialBlocks }:
     try { localStorage.removeItem(draftKey); } catch { /* ignore */ }
     setMeta((current) => ({ ...current, slug: payload.slug, published: publish, seo_title: payload.seo_title ?? "", seo_description: payload.seo_description ?? "", focus_keyword: payload.focus_keyword ?? "", excerpt: payload.excerpt ?? "" }));
     setSaved(true);
-    if (!editId && data.data?.id) router.replace(`/admin/news/edit/${data.data.id}`);
-  }, [draftKey, editId, editor, meta, router]);
+    onSaved?.();
+    // Only a page needs to adopt the new record's URL. In a panel there is no
+    // URL to adopt, and replacing it would throw the grid behind it away.
+    if (!editId && data.data?.id && !onExit) router.replace(`/admin/news/edit/${data.data.id}`);
+  }, [draftKey, editId, editor, meta, router, onExit, onSaved]);
 
   if (!editor) return <div className="flex h-full items-center justify-center text-sm text-gray-400">Memuat editor…</div>;
 
   return (
     <div className="flex h-full min-h-0 flex-col bg-white text-gray-900">
       <header className="flex min-h-14 flex-wrap items-center gap-2 border-b border-gray-200 bg-white px-3 py-2 sm:px-5">
-        <button type="button" onClick={() => router.push("/admin/news")} className="text-sm text-gray-500 hover:text-gray-950">← Konten</button>
+        <button type="button" onClick={() => (onExit ? onExit() : router.push("/admin/news"))} className="text-sm text-gray-500 hover:text-gray-950">{onExit ? "← Tutup" : "← Konten"}</button>
         <span className="hidden text-gray-200 sm:inline">/</span>
         <span className="hidden min-w-0 flex-1 truncate text-sm text-gray-500 sm:block">{meta.title || "Artikel tanpa judul"}</span>
         <span className={`rounded-full px-2 py-1 text-[11px] ${saved ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>{saving ? "Menyimpan…" : saved ? "Tersimpan" : "Belum disimpan"}</span>

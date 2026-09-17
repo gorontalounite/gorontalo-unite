@@ -11,6 +11,14 @@ import TiptapNewsEditor from "./TiptapNewsEditor";
 export interface PostEditorProps {
   postType:         "news" | "portfolio";
   editId?:          string;
+  /**
+   * How to leave the editor. Omitted, it navigates back to the list as a page
+   * would; supplied, it closes whatever is hosting the editor — the admin grid
+   * mounts this in a side panel and has no page to navigate away from.
+   */
+  onExit?:          () => void;
+  /** Called after a successful save, so a host list can refresh its rows. */
+  onSaved?:         () => void;
   initialMeta?:     Partial<PostMeta>;
   initialBlocks?:   Block[];
   initialSections?: {
@@ -676,7 +684,7 @@ function LegacyPostEditor({ postType, editId, initialMeta, initialBlocks, initia
 
 export default function PostEditor(props: PostEditorProps) {
   if (props.postType === "news") {
-    return <TiptapNewsEditor editId={props.editId} initialMeta={props.initialMeta} initialBlocks={props.initialBlocks} />;
+    return <TiptapNewsEditor editId={props.editId} onExit={props.onExit} onSaved={props.onSaved} initialMeta={props.initialMeta} initialBlocks={props.initialBlocks} />;
   }
   return <LegacyPostEditor {...props} />;
 }

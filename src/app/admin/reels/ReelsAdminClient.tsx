@@ -9,6 +9,7 @@ import {
   BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, StatusTabs, TrashRowActions,
 } from "@/components/admin/grid/GridChrome";
 import { useRowEditor } from "@/components/admin/grid/useRowEditor";
+import SidePanel from "@/components/admin/SidePanel";
 import { DEFAULT_REEL_CATEGORIES } from "@/app/reels/data";
 
 export interface AdminReel {
@@ -439,15 +440,14 @@ export default function ReelsAdminClient({
       )}
 
       {showForm && (
-        <form onSubmit={submit} className="mb-6 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm sm:p-6">
-          <div className="mb-5 flex items-center justify-between">
-            <div>
-              <h2 className="font-semibold text-gray-900">{editingId ? "Edit Reel" : "Reel Baru"}</h2>
-              <p className="mt-0.5 text-xs text-gray-400">Kolom bertanda * wajib diisi.</p>
-            </div>
-            <button type="button" onClick={() => setShowForm(false)} className="rounded-lg px-2 py-1 text-sm text-gray-400 hover:bg-gray-100">✕</button>
-          </div>
-
+        <SidePanel
+          open={showForm}
+          onClose={() => setShowForm(false)}
+          title={editingId ? "Edit Reel" : "Reel Baru"}
+          subtitle="Kolom bertanda * wajib diisi."
+          width="min(880px, 94vw)"
+        >
+        <form onSubmit={submit} className="p-5">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
             <div className="space-y-4">
               {titleColumnReady && <label className="block text-xs font-medium text-gray-700">Judul
@@ -560,6 +560,7 @@ export default function ReelsAdminClient({
             </button>
           </div>
         </form>
+        </SidePanel>
       )}
 
       <StatusTabs
