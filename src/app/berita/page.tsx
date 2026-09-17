@@ -33,12 +33,13 @@ type Article = {
   published_at: string | null;
   created_at: string;
   is_trending: boolean | null;
+  editor_choice: boolean | null;
   view_count: number | null;
 };
 
 type DeskKey = "news" | "whats-on" | "travel" | "culinary" | "culture" | "people" | "life";
 
-const ARTICLE_FIELDS = "id, title, slug, excerpt, image_url, category, categories, tags, published_at, created_at, is_trending, view_count";
+const ARTICLE_FIELDS = "id, title, slug, excerpt, image_url, category, categories, tags, published_at, created_at, is_trending, editor_choice, view_count";
 
 const DESKS: ReadonlyArray<{ key: DeskKey; label: string; description: string; terms: string[] }> = [
   {
@@ -160,6 +161,30 @@ function StoryCard({ article, large = false, deskMap = {} }: { article: Article;
           <Eyebrow article={article} deskMap={deskMap} />
           <h3 className={`font-heading mt-2 font-bold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#9b7513] ${large ? "text-[22px] sm:text-[30px]" : "text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
           {article.excerpt ? <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{article.excerpt}</p> : null}
+        </div>
+      </Link>
+    </article>
+  );
+}
+
+/**
+ * A 9:16 card for the Editor Choice rail. Portrait rather than the 4:3 the
+ * rest of the page uses, because the rail is read sideways: tall cards let
+ * several sit on screen at once without shrinking to thumbnails.
+ */
+function PickCard({ article, deskMap = {} }: { article: Article; deskMap?: DeskMap }) {
+  return (
+    <article className="group w-[42vw] shrink-0 snap-start sm:w-[200px]">
+      <Link href={`/${article.slug}`} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]">
+        <ArticleImage article={article} className="aspect-[9/16]" sizes="(max-width: 640px) 42vw, 200px" />
+        <div className="pt-2.5">
+          <span className="text-[10px] font-bold uppercase tracking-[.15em] text-[#f5c400]">{deskLabel(article, deskMap)}</span>
+          <h3 className="font-heading mt-1.5 line-clamp-3 text-[14px] font-bold leading-[1.18] tracking-[-.015em] text-white transition group-hover:text-[#f5c400] sm:text-[15px]">
+            {article.title}
+          </h3>
+          <time dateTime={articleDate(article)} className="mt-1.5 block text-[11px] text-white/45">
+            {displayDate(articleDate(article))}
+          </time>
         </div>
       </Link>
     </article>
@@ -312,6 +337,11 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
   const heroIds = new Set(heroPool.map((article) => article.id));
   const remaining = articles.filter((article) => !heroIds.has(article.id));
 
+  // Drawn from every published article, not from `remaining`: the tick is an
+  // editor's decision, and an article they marked should appear here whether
+  // or not it also leads the page.
+  const editorPicks = articles.filter((article) => article.editor_choice).slice(0, 12);
+
   const news = articlesFor(remaining, "news", 5, deskMap);
   const travel = articlesFor(remaining, "travel", 5, deskMap);
   const culinary = articlesFor(remaining, "culinary", 3, deskMap);
@@ -326,6 +356,32 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
         <section className="mx-auto max-w-[1280px] px-4 pb-12 pt-6 sm:px-6 sm:pb-16 sm:pt-8 lg:px-8">
           <HeroCarousel pool={heroPool} deskMap={deskMap} />
         </section>
+
+        {/* Nothing ticked yet means no band at all — an empty black stripe
+            between the hero and Culture would read as a broken section. */}
+        {editorPicks.length > 0 && (
+          <section id="editor-choice" className="scroll-mt-24 bg-black py-12 sm:py-16">
+            <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
+              <SectionHeading
+                id="editor-choice"
+                className="text-white"
+                action={
+                  <Link href="/editor-choice" className="inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold text-white">
+                    View all <span aria-hidden>→</span>
+                  </Link>
+                }
+              >
+                Editor Choice
+              </SectionHeading>
+              {/* scroll-pl-4 moves the snapport, not the padding: without it
+                  snap-mandatory pins the first card flush to the screen edge
+                  and eats the gutter. */}
+              <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-pl-4 gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:gap-4 sm:scroll-pl-0 sm:px-0">
+                {editorPicks.map((article) => <PickCard key={article.id} article={article} deskMap={deskMap} />)}
+              </div>
+            </div>
+          </section>
+        )}
 
         <section id="culture" className="scroll-mt-24 border-t border-[#d7d1c6] dark:border-zinc-800 bg-white dark:bg-zinc-950 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">

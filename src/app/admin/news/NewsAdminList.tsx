@@ -251,6 +251,25 @@ export default function NewsAdminList({
         />
       ),
     },
+    {
+      key: "view", header: "View", width: 64, align: "center",
+      // Only for rows that actually have a page. A draft or a binned article
+      // has no live URL, and an arrow that lands on a 404 is worse than none.
+      render: (row) => row.published && !inTrash ? (
+        <a
+          href={`/${row.slug}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          title="Buka di situs"
+          aria-label={`Buka ${row.title} di situs`}
+          className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-900"
+        >
+          <span aria-hidden="true" className="text-[13px] leading-none">↗</span>
+        </a>
+      ) : (
+        <span className="text-gray-300">—</span>
+      ),
+    },
   ];
 
   const filtering = Boolean(q) || Boolean(category) || status !== "all";
