@@ -21,7 +21,9 @@ interface Props {
 export default function AdminSidebar({ fullName, role }: Props) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  // Collapsed by default: the grids are wide enough that the extra 160px of
+  // table matters more than the labels, which the icons already carry.
+  const [collapsed, setCollapsed] = useState(true);
 
   return (
     <>

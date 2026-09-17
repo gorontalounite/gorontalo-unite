@@ -5,7 +5,7 @@ import { useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import AdminGrid, { type GridColumn } from "@/components/admin/grid/AdminGrid";
 import {
-  DateCell, EditableTextCell, PillSelectCell, StatusCell, SwitchCell, TextCell, ThumbCell, TitleCell,
+  DateCell, PillSelectCell, StatusCell, SwitchCell, TextCell, ThumbCell, TitleCell,
 } from "@/components/admin/grid/cells";
 import {
   BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, StatusTabs, TrashRowActions,
@@ -20,7 +20,6 @@ export interface NewsRow {
   canonicalCategory: string;
   excerpt:           string | null;
   image_url:         string | null;
-  video_url:         string | null;
   is_trending:       boolean;
   author_id:         string | null;
   published:         boolean;
@@ -30,7 +29,7 @@ export interface NewsRow {
   deleted_at:        string | null;
 }
 
-type SortField = "title" | "category" | "published_at" | "created_at";
+type SortField = "title" | "category" | "published_at" | "created_at" | "published" | "is_trending";
 type SortDir   = "asc" | "desc";
 
 type BulkAction = "draft" | "trash" | "restore" | "purge";
@@ -63,13 +62,11 @@ interface Props {
   sortDir:       SortDir;
   allCategories: string[];
   authors:       Array<{ id: string; name: string }>;
-  /** False until the admin-grid migration adds articles.video_url. */
-  videoColumnReady: boolean;
 }
 
 export default function NewsAdminList({
   initialItems, totalCount, allCount, publishedCount, draftCount, trashCount,
-  page, pageSize, q, category, status, sortField, sortDir, allCategories, authors, videoColumnReady,
+  page, pageSize, q, category, status, sortField, sortDir, allCategories, authors,
 }: Props) {
   const inTrash = status === "trash";
   const router = useRouter();
@@ -141,6 +138,9 @@ export default function NewsAdminList({
     },
     {
       key: "status", header: inTrash ? "Sampah" : "Status", width: inTrash ? 150 : 108,
+      // In the bin this column holds restore/purge buttons, not a status, so
+      // there is nothing to sort by there.
+      sort: inTrash ? undefined : "published",
       render: (row) => inTrash ? (
         <TrashRowActions
           onRestore={() => runRow(row.id, "restore")}
@@ -162,7 +162,7 @@ export default function NewsAdminList({
       render: (row) => <ThumbCell src={row.image_url} alt={row.title} />,
     },
     {
-      key: "featured", header: "Featured?", width: 96,
+      key: "featured", header: "Featured?", width: 96, sort: "is_trending",
       render: (row) => (
         <SwitchCell
           checked={row.is_trending}
@@ -178,20 +178,6 @@ export default function NewsAdminList({
     {
       key: "date", header: "Date", width: 116, sort: "published_at",
       render: (row) => <DateCell value={row.published_at ?? row.created_at} />,
-    },
-    {
-      key: "video", header: "Video URL", width: 200,
-      render: (row) => videoColumnReady ? (
-        <EditableTextCell
-          value={row.video_url}
-          placeholder="Tambah URL"
-          onSave={(next) => update(row, { video_url: next || null })}
-        />
-      ) : (
-        <span title="Kolom video_url belum ada di database — jalankan migrasi 20260912090000." className="text-gray-300">
-          belum aktif
-        </span>
-      ),
     },
     {
       key: "author", header: "Author", width: 170,
