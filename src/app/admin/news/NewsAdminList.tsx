@@ -67,11 +67,13 @@ interface Props {
   sortDir:       SortDir;
   allCategories: string[];
   authors:       Array<{ id: string; name: string }>;
+  /** Opens the editing panel on arrival, e.g. following a link from the dashboard. */
+  initialOpen?:  { id: string | null } | null;
 }
 
 export default function NewsAdminList({
   initialItems, totalCount, allCount, publishedCount, draftCount, trashCount,
-  page, pageSize, q, category, status, sortField, sortDir, allCategories, authors,
+  page, pageSize, q, category, status, sortField, sortDir, allCategories, authors, initialOpen,
 }: Props) {
   const inTrash = status === "trash";
   const router = useRouter();
@@ -81,7 +83,7 @@ export default function NewsAdminList({
   const [bulkRunning, setBulkRunning] = useState(false);
   // `{ id: null }` is a new article; `null` is the panel closed. A plain string
   // could not tell "create" apart from "nothing open".
-  const [editing, setEditing] = useState<{ id: string | null } | null>(null);
+  const [editing, setEditing] = useState<{ id: string | null } | null>(initialOpen ?? null);
 
   const { rows, update, savingIds, error, setError } = useRowEditor<NewsRow>(initialItems, {
     endpointFor: () => "/api/admin/articles",
