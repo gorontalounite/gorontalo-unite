@@ -1,15 +1,16 @@
 /**
- * A newsroom radar for Gorontalo: what the rest of the province published
- * today, gathered in one place so a lead is not missed.
+ * A newsroom radar for Gorontalo: what the rest of the province published,
+ * gathered in one place so a lead is not missed.
  *
- * It surfaces headlines and links out. Nothing here copies or rewrites
+ * It surfaces headlines, thumbnails and links. Nothing here copies or rewrites
  * anybody's reporting — the panel exists so an editor can decide what to go
  * and cover themselves.
  *
  * Google News does the aggregation that direct RSS cannot: of the seven
- * kabupaten/kota government sites, only gorontalokota.go.id publishes a feed
- * at all. The direct feeds that do exist are read as well, so the radar
- * weakens rather than dies if the Google endpoint ever changes.
+ * kabupaten/kota government sites plus their OPD subdomains, only
+ * gorontalokota.go.id publishes a feed at all. Nine local outlets do, and they
+ * are read directly so the radar weakens rather than dies if Google's endpoint
+ * ever changes.
  */
 
 const GOOGLE = "https://news.google.com/rss/search";
@@ -25,20 +26,44 @@ interface Source {
   google: boolean;
 }
 
+/** One query per kabupaten/kota: a Pohuwato story often never says "Gorontalo". */
+const AREAS = [
+  "Gorontalo", "\"Kota Gorontalo\"", "\"Kabupaten Gorontalo\"",
+  "Boalemo", "Pohuwato", "\"Bone Bolango\"", "\"Gorontalo Utara\"",
+];
+
+/**
+ * Read straight from the outlet. Every Pemda site except Kota Gorontalo was
+ * checked — province, five kabupaten, and the Diskominfo/Dispar subdomains —
+ * and none publishes a feed, so the local press carries this half.
+ */
+const DIRECT: Array<[string, string]> = [
+  ["Pemkot Gorontalo",   "https://gorontalokota.go.id/rss.xml"],
+  ["Gorontalo Post",     "https://gopos.id/feed"],
+  ["Mimoza TV",          "https://mimoza.tv/feed"],
+  ["Kronologi",          "https://kronologi.id/feed"],
+  ["Banthayo",           "https://banthayo.id/rss"],
+  ["Hargo",              "https://hargo.co.id/feed/"],
+  ["Kabar Gorontalo",    "https://kabargorontalo.com/rss"],
+  ["Suara Gorontalo",    "https://suaragorontalo.com/feed"],
+  ["Gorontalo Terkini",  "https://gorontaloterkini.com/feed"],
+];
+
 const SOURCES: Source[] = [
-  // One query per kabupaten/kota: a story about Pohuwato often never says
-  // "Gorontalo" in its headline, so the province-wide query alone misses it.
-  ...["Gorontalo", "\"Kota Gorontalo\"", "\"Kabupaten Gorontalo\"", "Boalemo",
-      "Pohuwato", "\"Bone Bolango\"", "\"Gorontalo Utara\""].map((term) => ({
+  ...AREAS.map((term) => ({
     label: term.replace(/"/g, ""),
     url: `${GOOGLE}?q=${encodeURIComponent(term)}&${LOCALE}`,
     google: true,
   })),
-  { label: "Pemkot Gorontalo", url: "https://gorontalokota.go.id/rss.xml", google: false },
-  { label: "Gorontalo Post",   url: "https://gopos.id/feed",               google: false },
-  { label: "Mimoza TV",        url: "https://mimoza.tv/feed",              google: false },
-  { label: "Kronologi",        url: "https://kronologi.id/feed",           google: false },
+  ...DIRECT.map(([label, url]) => ({ label, url, google: false })),
 ];
+
+export const RADAR_CATEGORIES = [
+  "Wisata", "Kuliner", "Budaya", "Olahraga", "Pendidikan",
+  "Kesehatan", "Ekonomi", "Pemerintahan", "Hukum", "Peristiwa", "Lainnya",
+] as const;
+
+export type RadarCategory = (typeof RADAR_CATEGORIES)[number];
 
 export interface Lead {
   fingerprint: string;
@@ -46,6 +71,8 @@ export interface Lead {
   url: string;
   source: string;
   publishedAt: string | null;
+  image: string | null;
+  category: RadarCategory;
   /** How many outlets carried it. A story three newsrooms ran is worth a look. */
   outlets: string[];
 }
@@ -68,11 +95,24 @@ const tag = (block: string, name: string) => {
 };
 
 /**
- * RSS is simple and these feeds are machine-generated, so this reads them
- * directly rather than pulling in an XML parser for four tags.
+ * Where a feed happens to put its picture. Three of the nine direct feeds
+ * carry one; the rest ship an excerpt with no image, and fetching each article
+ * for its og:image costs one to three seconds and still comes back empty about
+ * a third of the time. Those items go without.
  */
+function imageOf(block: string): string | null {
+  const found =
+    block.match(/<media:content[^>]+url=["']([^"']+\.(?:jpe?g|png|webp)[^"']*)/i) ??
+    block.match(/<media:thumbnail[^>]+url=["']([^"']+)/i) ??
+    block.match(/<enclosure[^>]+url=["']([^"']+\.(?:jpe?g|png|webp)[^"']*)/i) ??
+    block.match(/<img[^>]+src=["']([^"']+)/i);
+  if (!found) return null;
+  const url = decode(found[1]).trim();
+  return url.startsWith("http") ? url : null;
+}
+
 function parseItems(xml: string, limit: number) {
-  const items: Array<{ title: string; link: string; date: string; source: string }> = [];
+  const items: Array<{ title: string; link: string; date: string; source: string; image: string | null }> = [];
   const blocks = xml.match(/<item[\s>][\s\S]*?<\/item>/gi) ?? [];
   for (const block of blocks.slice(0, limit)) {
     const title = tag(block, "title");
@@ -83,9 +123,35 @@ function parseItems(xml: string, limit: number) {
       link,
       date: tag(block, "pubDate") || tag(block, "dc:date"),
       source: tag(block, "source"),
+      image: imageOf(block),
     });
   }
   return items;
+}
+
+/* ----------------------------- categorising ----------------------------- */
+
+/**
+ * Keyword rules, ordered most specific first. Crude by design: this sorts a
+ * reading list, it does not file anything for publication, and a wrong guess
+ * costs an editor one glance.
+ */
+const RULES: Array<[RadarCategory, RegExp]> = [
+  ["Wisata",      /wisata|pariwisata|destinasi|pantai|danau|air terjun|festival|homestay|pesona|snorkel/i],
+  ["Kuliner",     /kuliner|makanan|masakan|restoran|kafe|warung|resep|minuman|kopi/i],
+  ["Budaya",      /budaya|adat|tradisi|karawo|kesenian|tari|sanggar|situs sejarah|pusaka/i],
+  ["Olahraga",    /olahraga|sepak ?bola|atlet|turnamen|kejuaraan|liga|porprov|\bpon\b|voli|futsal/i],
+  ["Pendidikan",  /sekolah|siswa|guru|kampus|universitas|mahasiswa|\bung\b|beasiswa|kuliah|pendidikan/i],
+  ["Kesehatan",   /kesehatan|rumah sakit|puskesmas|stunting|dokter|vaksin|gizi|posyandu|\brsud\b|pasien/i],
+  ["Peristiwa",   /kebakaran|banjir|kecelakaan|gempa|longsor|bencana|tenggelam|hanyut|karhutla|kekeringan/i],
+  ["Hukum",       /polisi|polres|polda|kejaksaan|tersangka|lapas|narkoba|razia|curanmor|korupsi|ditangkap|sidang|bnn/i],
+  ["Ekonomi",     /ekonomi|umkm|pasar|harga|inflasi|investasi|petani|nelayan|panen|jagung|perdagangan|bank/i],
+  ["Pemerintahan",/pemkab|pemkot|pemprov|bupati|wali ?kota|gubernur|dprd|apbd|dinas|pelantikan|musrenbang|sekda|asn/i],
+];
+
+export function categorise(title: string): RadarCategory {
+  for (const [name, pattern] of RULES) if (pattern.test(title)) return name;
+  return "Lainnya";
 }
 
 /* ----------------------------- fingerprints ----------------------------- */
@@ -122,8 +188,9 @@ async function read(source: Source): Promise<Lead[]> {
   try {
     const response = await fetch(source.url, {
       headers: { "User-Agent": "Mozilla/5.0 (compatible; GorontaloUniteRadar/1.0)" },
-      // The radar is re-read on a schedule, not on every dashboard load.
+      // Re-read on a schedule, not on every page load.
       next: { revalidate: 900 },
+      signal: AbortSignal.timeout(12_000),
     });
     if (!response.ok) return [];
     const xml = await response.text();
@@ -138,32 +205,49 @@ async function read(source: Source): Promise<Lead[]> {
         url: item.link,
         source: outlet,
         publishedAt: when && !Number.isNaN(when.getTime()) ? when.toISOString() : null,
+        image: item.image,
+        category: categorise(title),
         outlets: [outlet],
       };
     });
   } catch {
-    // One dead feed must not empty the radar.
+    // One dead or slow feed must not empty the radar.
     return [];
   }
 }
 
+export interface GatherOptions {
+  /** Ignored when `on` is given. */
+  maxAgeHours?: number;
+  /** A single day, `YYYY-MM-DD`, in Gorontalo time. */
+  on?: string | null;
+  /** A single month, `YYYY-MM`. */
+  month?: string | null;
+  category?: RadarCategory | null;
+  limit?: number;
+}
+
+/** Gorontalo is UTC+8, so a "day" here is not the server's day. */
+const localDay = (iso: string) =>
+  new Date(new Date(iso).getTime() + 8 * 3_600_000).toISOString().slice(0, 10);
+
 /**
  * Every source, merged. Stories carried by more than one outlet collapse into
  * one row that names them all.
- *
- * Bounded by age rather than by count alone: the eleven feeds together carry
- * roughly 340 stories, and a third of those are over a week old. A radar
- * showing last week is not a radar.
  */
-export async function gatherRegional({ maxAgeHours = 72, limit = 60 } = {}): Promise<Lead[]> {
+export async function gatherRegional(options: GatherOptions = {}): Promise<Lead[]> {
+  const { maxAgeHours = 72, on = null, month = null, category = null, limit = 120 } = options;
+
   const batches = await Promise.all(SOURCES.map(read));
-  const oldest = Date.now() - maxAgeHours * 3_600_000;
 
   const merged = new Map<string, Lead>();
   for (const lead of batches.flat()) {
     const seen = merged.get(lead.fingerprint);
     if (!seen) { merged.set(lead.fingerprint, lead); continue; }
     if (!seen.outlets.includes(lead.source)) seen.outlets.push(lead.source);
+    // Whichever copy has a picture wins — the feed that carried the image is
+    // rarely the one that happened to be read first.
+    if (!seen.image && lead.image) seen.image = lead.image;
     // Keep the earliest sighting: that is when the story broke, not when the
     // last outlet got round to it.
     if (lead.publishedAt && (!seen.publishedAt || lead.publishedAt < seen.publishedAt)) {
@@ -171,10 +255,17 @@ export async function gatherRegional({ maxAgeHours = 72, limit = 60 } = {}): Pro
     }
   }
 
+  const oldest = Date.now() - maxAgeHours * 3_600_000;
+
   return [...merged.values()]
-    // An item with no usable date is kept: better an undated lead than a
-    // silently dropped one.
-    .filter((lead) => !lead.publishedAt || new Date(lead.publishedAt).getTime() >= oldest)
+    .filter((lead) => {
+      if (category && lead.category !== category) return false;
+      if (!lead.publishedAt) return !on && !month;   // undated only in the open view
+      const day = localDay(lead.publishedAt);
+      if (on) return day === on;
+      if (month) return day.startsWith(month);
+      return new Date(lead.publishedAt).getTime() >= oldest;
+    })
     .sort((a, b) => (b.publishedAt ?? "").localeCompare(a.publishedAt ?? ""))
     .slice(0, limit);
 }
