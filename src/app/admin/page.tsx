@@ -84,7 +84,7 @@ export default async function AdminDashboardPage() {
     admin.from("user_profiles").select("*", { count: "exact", head: true }),
     admin.from("reels").select("*", { count: "exact", head: true }).is("deleted_at", null),
     admin.from("reels").select("*", { count: "exact", head: true }).is("deleted_at", null).eq("status", "published"),
-    admin.from("articles").select("id, title, category, published, created_at").neq("category", "Portfolio").is("deleted_at", null).order("created_at", { ascending: false }).limit(6),
+    admin.from("articles").select("id, title, category, published, created_at").neq("category", "Portfolio").is("deleted_at", null).order("created_at", { ascending: false }).limit(5),
     admin.from("user_profiles").select("role").neq("role", "user"),
   ]);
 
@@ -105,30 +105,39 @@ export default async function AdminDashboardPage() {
 
   return (
     <div className="mx-auto max-w-[1400px] p-4 sm:p-6">
-      <header className="mb-6">
+      <header className="mb-4">
         <h1 className="text-2xl font-bold tracking-[-.02em] text-gray-900">Dashboard</h1>
-        <p className="mt-1 text-sm text-gray-500">Selamat datang di panel admin Gorontalo Unite.</p>
+        <p className="mt-0.5 text-sm text-gray-500">Selamat datang di panel admin Gorontalo Unite.</p>
       </header>
 
-      <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {stats.map((card) => (
-          <Link
-            key={card.label}
-            href={card.href}
-            className="group relative overflow-hidden rounded-2xl border border-gray-200 bg-white p-4 transition-colors hover:border-gray-300"
-          >
-            <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-1 ${card.accent}`} />
-            <div className="flex items-center justify-between text-gray-400">
-              <span className="transition-colors group-hover:text-gray-600">{card.icon}</span>
-              <span aria-hidden="true" className="text-xs opacity-0 transition-opacity group-hover:opacity-100">→</span>
-            </div>
-            <p className="mt-3 text-[26px] font-bold leading-none tracking-[-.02em] text-gray-900">
-              {card.value.toLocaleString("id-ID")}
-            </p>
-            <p className="mt-1.5 text-[13px] font-medium text-gray-700">{card.label}</p>
-            <p className="mt-0.5 text-xs text-gray-400">{card.sub}</p>
-          </Link>
-        ))}
+      {/* Search leads, the counts sit beside it. Both rows use the same
+          column split so the four cards line up down the page instead of
+          each row finding its own edge. */}
+      <div className="mb-4 grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
+        <Suspense fallback={<div className="min-h-[248px] rounded-2xl border border-gray-200 bg-white" />}>
+          <SearchCard />
+        </Suspense>
+
+        <div className="grid gap-3 sm:grid-cols-3 lg:grid-cols-1">
+          {stats.map((card) => (
+            <Link
+              key={card.label}
+              href={card.href}
+              className="group relative flex items-center gap-3 overflow-hidden rounded-2xl border border-gray-200 bg-white px-4 py-3 transition-colors hover:border-gray-300"
+            >
+              <span aria-hidden="true" className={`absolute inset-y-0 left-0 w-1 ${card.accent}`} />
+              <span className="shrink-0 text-gray-400 transition-colors group-hover:text-gray-600">{card.icon}</span>
+              <div className="min-w-0 flex-1">
+                <p className="text-[20px] font-bold leading-none tracking-[-.02em] text-gray-900">
+                  {card.value.toLocaleString("id-ID")}
+                </p>
+                <p className="mt-1 truncate text-[12px] font-medium text-gray-700">{card.label}</p>
+                <p className="truncate text-[11px] text-gray-400">{card.sub}</p>
+              </div>
+              <span aria-hidden="true" className="shrink-0 text-xs text-gray-400 opacity-0 transition-opacity group-hover:opacity-100">→</span>
+            </Link>
+          ))}
+        </div>
       </div>
 
       <div className="grid gap-4 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)]">
@@ -169,12 +178,6 @@ export default async function AdminDashboardPage() {
         </section>
 
         <div className="space-y-4">
-          {/* Suspended on its own: a slow round-trip to Google must not hold
-              back counts that are already in hand. */}
-          <Suspense fallback={null}>
-            <SearchCard />
-          </Suspense>
-
           <section className="rounded-2xl border border-gray-200 bg-white p-3">
             <h2 className="px-2 pb-2 pt-1 text-sm font-semibold text-gray-900">Aksi Cepat</h2>
             <div className="space-y-1">
