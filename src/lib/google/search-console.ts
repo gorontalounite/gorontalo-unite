@@ -31,8 +31,6 @@ function credentials() {
   return { email, key, site };
 }
 
-export const searchConsoleConfigured = () => credentials() !== null;
-
 const b64url = (value: string | Buffer) =>
   Buffer.from(value).toString("base64").replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 
