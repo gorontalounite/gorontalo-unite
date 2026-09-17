@@ -48,6 +48,10 @@ interface PageProps {
     pageSize?: string;
     sort?:     string;
     dir?:      string;
+    /** Opens that article's editing panel straight away, e.g. from the dashboard. */
+    buka?:     string;
+    /** `1` opens the panel on a blank article. */
+    baru?:     string;
   }>;
 }
 
@@ -183,6 +187,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
       sortDir={sortDir}
       allCategories={CATEGORY_OPTIONS}
       authors={authors}
+      initialOpen={sp.baru === "1" ? { id: null } : sp.buka ? { id: sp.buka } : null}
     />
   );
 }
