@@ -5,7 +5,7 @@ import { useCallback, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import AdminGrid, { type GridColumn } from "@/components/admin/grid/AdminGrid";
 import {
-  DateCell, PillSelectCell, StatusCell, SwitchCell, TextCell, ThumbCell, TitleCell,
+  DateCell, EditableTextCell, ImageCell, PillSelectCell, StatusCell, SwitchCell, TextCell, TitleCell,
 } from "@/components/admin/grid/cells";
 import {
   BulkBar, ConfirmDialog, CountSummary, GridHeader, GridPagination, GridToolbar, StatusTabs, TrashRowActions,
@@ -21,6 +21,11 @@ export interface NewsRow {
   excerpt:           string | null;
   image_url:         string | null;
   is_trending:       boolean;
+  editor_choice:     boolean;
+  /** The hero shows the collaboration line only when this and a name are set. */
+  is_sponsored:      boolean;
+  sponsor_name:      string | null;
+  sponsor_logo_url:  string | null;
   author_id:         string | null;
   published:         boolean;
   published_at:      string | null;
@@ -29,7 +34,7 @@ export interface NewsRow {
   deleted_at:        string | null;
 }
 
-type SortField = "title" | "category" | "published_at" | "created_at" | "published" | "is_trending";
+type SortField = "title" | "category" | "published_at" | "created_at" | "published" | "is_trending" | "editor_choice";
 type SortDir   = "asc" | "desc";
 
 type BulkAction = "draft" | "trash" | "restore" | "purge";
@@ -159,7 +164,14 @@ export default function NewsAdminList({
     },
     {
       key: "thumbnail", header: "Thumbnail", width: 96,
-      render: (row) => <ThumbCell src={row.image_url} alt={row.title} />,
+      render: (row) => (
+        <ImageCell
+          src={row.image_url}
+          alt={row.title}
+          onChange={(next) => update(row, { image_url: next })}
+          onError={setError}
+        />
+      ),
     },
     {
       key: "featured", header: "Featured?", width: 96, sort: "is_trending",
@@ -169,6 +181,43 @@ export default function NewsAdminList({
           label={`Jadikan ${row.title} berita pilihan`}
           onChange={(next) => update(row, { is_trending: next })}
         />
+      ),
+    },
+    {
+      key: "editorChoice", header: "Editor Choice", width: 112, sort: "editor_choice",
+      render: (row) => (
+        <SwitchCell
+          checked={row.editor_choice}
+          label={`Jadikan ${row.title} pilihan editor`}
+          onChange={(next) => update(row, { editor_choice: next })}
+        />
+      ),
+    },
+    {
+      key: "collab", header: "In Collaboration With", width: 210,
+      render: (row) => (
+        <div className="flex min-w-0 items-center gap-2">
+          <ImageCell
+            src={row.sponsor_logo_url}
+            alt={`logo ${row.sponsor_name ?? "kolaborator"}`}
+            onChange={(next) => update(row, { sponsor_logo_url: next })}
+            onError={setError}
+          />
+          <div className="min-w-0 flex-1">
+            <EditableTextCell
+              value={row.sponsor_name}
+              placeholder="Tambah nama"
+              // The hero renders this line only when the flag and a name are
+              // both set, so the name is the switch: typing one turns the
+              // disclosure on, clearing it turns it off. A row cannot end up
+              // holding a collaborator that never appears.
+              onSave={(next) => update(row, {
+                sponsor_name: next || null,
+                is_sponsored: Boolean(next),
+              })}
+            />
+          </div>
+        </div>
       ),
     },
     {

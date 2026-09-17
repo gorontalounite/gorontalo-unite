@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 /* -------------------------------------------------------------------------
  * Cell primitives shared by the News, City Guide and Reels grids.
@@ -38,6 +38,93 @@ export function ThumbCell({ src, alt = "", portrait }: { src: string | null; alt
     <div className={`overflow-hidden rounded bg-gray-100 ${portrait ? "h-8 w-[22px]" : "h-6 w-11"}`}>
       {/* eslint-disable-next-line @next/next/no-img-element -- Supabase Storage + Instagram CDN, both remote and unoptimised here. */}
       {src ? <img src={src} alt={alt} className="h-full w-full object-cover" loading="lazy" /> : null}
+    </div>
+  );
+}
+
+/**
+ * A thumbnail you can set, swap and clear without leaving the row.
+ *
+ * Clearing only drops the reference — the file stays in the `media` bucket.
+ * Deleting it here would break any other row still pointing at the same URL,
+ * and nothing tracks that, so the orphan is the safer of the two mistakes.
+ */
+export function ImageCell({
+  src, alt = "", folder = "articles", portrait, onChange, onError,
+}: {
+  src: string | null;
+  alt?: string;
+  folder?: "articles" | "reels";
+  portrait?: boolean;
+  onChange: (next: string | null) => void;
+  onError?: (message: string) => void;
+}) {
+  const [busy, setBusy] = useState(false);
+  const picker = useRef<HTMLInputElement>(null);
+
+  async function upload(file: File) {
+    setBusy(true);
+    try {
+      const body = new FormData();
+      body.append("file", file);
+      body.append("folder", folder);
+      const response = await fetch("/api/admin/upload", { method: "POST", body });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.error ?? `Unggahan ditolak (${response.status}).`);
+      onChange(payload.url as string);
+    } catch (cause) {
+      onError?.(cause instanceof Error ? cause.message : "Unggahan gagal.");
+    } finally {
+      setBusy(false);
+      // Reset the input, or picking the same file twice in a row fires nothing.
+      if (picker.current) picker.current.value = "";
+    }
+  }
+
+  return (
+    <div className="group/img relative inline-flex">
+      <button
+        type="button"
+        onClick={() => picker.current?.click()}
+        disabled={busy}
+        title={src ? "Ganti gambar" : "Tambah gambar"}
+        aria-label={src ? `Ganti gambar ${alt}` : `Tambah gambar ${alt}`}
+        className={`flex items-center justify-center overflow-hidden rounded border bg-gray-100 ${
+          portrait ? "h-8 w-[22px]" : "h-6 w-11"
+        } ${src ? "border-transparent" : "border-dashed border-gray-300"} ${
+          busy ? "opacity-40" : "hover:border-[#F5C400]"
+        }`}
+      >
+        {src ? (
+          /* eslint-disable-next-line @next/next/no-img-element -- Supabase Storage, remote and unoptimised here. */
+          <img src={src} alt={alt} className="h-full w-full object-cover" loading="lazy" />
+        ) : (
+          <span aria-hidden="true" className="text-[11px] leading-none text-gray-400">+</span>
+        )}
+      </button>
+
+      {src && !busy && (
+        <button
+          type="button"
+          onClick={() => onChange(null)}
+          title="Hapus gambar"
+          aria-label={`Hapus gambar ${alt}`}
+          className="absolute -right-1.5 -top-1.5 hidden h-3.5 w-3.5 items-center justify-center rounded-full bg-gray-700 text-[8px] leading-none text-white group-hover/img:flex"
+        >
+          ✕
+        </button>
+      )}
+
+      <input
+        ref={picker}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/avif"
+        className="hidden"
+        onChange={(event) => {
+          const file = event.target.files?.[0];
+          if (file) void upload(file);
+        }}
+      />
     </div>
   );
 }

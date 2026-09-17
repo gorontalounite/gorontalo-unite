@@ -6,10 +6,10 @@ import { resolveWebCategoryLabel, buildCategoryDeskMap, WEB_CATEGORIES, type Cat
 export const dynamic  = "force-dynamic";
 export const metadata = { title: "Berita | Admin Gorontalo Unite" };
 
-type SortField = "title" | "category" | "published_at" | "created_at" | "published" | "is_trending";
+type SortField = "title" | "category" | "published_at" | "created_at" | "published" | "is_trending" | "editor_choice";
 type SortDir   = "asc" | "desc";
 
-const SORT_FIELDS: SortField[] = ["title", "category", "published_at", "created_at", "published", "is_trending"];
+const SORT_FIELDS: SortField[] = ["title", "category", "published_at", "created_at", "published", "is_trending", "editor_choice"];
 
 // Same order shown on the public homepage/nav, so the admin filter speaks
 // the same vocabulary as what visitors actually see.
@@ -28,6 +28,10 @@ interface ArticleRow {
   excerpt:      string | null;
   image_url:    string | null;
   is_trending:  boolean | null;
+  editor_choice: boolean | null;
+  is_sponsored:  boolean | null;
+  sponsor_name:  string | null;
+  sponsor_logo_url: string | null;
   author_id:    string | null;
   published:    boolean;
   published_at: string | null;
@@ -75,7 +79,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
   const [articles, { data: categoryRows }, { data: profileRows }] = await Promise.all([
     selectWithOptional<ArticleRow>(
       runArticles,
-      ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "is_trending", "author_id", "published", "published_at", "created_at", "deleted_at"],
+      ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "is_trending", "editor_choice", "is_sponsored", "sponsor_name", "sponsor_logo_url", "author_id", "published", "published_at", "created_at", "deleted_at"],
       [],
     ),
     admin.from("categories").select("id, name, parent_id, desk_key"),
@@ -112,6 +116,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     else if (sortField === "published_at") cmp = new Date(a.published_at ?? a.created_at).getTime() - new Date(b.published_at ?? b.created_at).getTime();
     else if (sortField === "published")    cmp = flag(a.published) - flag(b.published);
     else if (sortField === "is_trending")  cmp = flag(a.is_trending) - flag(b.is_trending);
+    else if (sortField === "editor_choice") cmp = flag(a.editor_choice) - flag(b.editor_choice);
     else                                   cmp = newest(a) - newest(b);
     const ordered = sortDir === "asc" ? cmp : -cmp;
     // A boolean splits the list into two blocks and says nothing about the
@@ -135,6 +140,10 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     excerpt: row.excerpt,
     image_url: row.image_url,
     is_trending: Boolean(row.is_trending),
+    editor_choice: Boolean(row.editor_choice),
+    is_sponsored: Boolean(row.is_sponsored),
+    sponsor_name: row.sponsor_name,
+    sponsor_logo_url: row.sponsor_logo_url,
     author_id: row.author_id,
     published: row.published,
     published_at: row.published_at,
