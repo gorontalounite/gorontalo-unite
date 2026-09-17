@@ -6,8 +6,10 @@ import { resolveWebCategoryLabel, buildCategoryDeskMap, WEB_CATEGORIES, type Cat
 export const dynamic  = "force-dynamic";
 export const metadata = { title: "Berita | Admin Gorontalo Unite" };
 
-type SortField = "title" | "category" | "published_at" | "created_at";
+type SortField = "title" | "category" | "published_at" | "created_at" | "published" | "is_trending";
 type SortDir   = "asc" | "desc";
+
+const SORT_FIELDS: SortField[] = ["title", "category", "published_at", "created_at", "published", "is_trending"];
 
 // Same order shown on the public homepage/nav, so the admin filter speaks
 // the same vocabulary as what visitors actually see.
@@ -25,8 +27,6 @@ interface ArticleRow {
   tags:         string[] | null;
   excerpt:      string | null;
   image_url:    string | null;
-  /** Optional until the admin-grid migration has run. */
-  video_url?:   string | null;
   is_trending:  boolean | null;
   author_id:    string | null;
   published:    boolean;
@@ -54,8 +54,8 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
   const q        = sp.q        ?? "";
   const category = sp.category ?? "";
   const status   = sp.status   ?? "all";
-  const sortField: SortField = (["title","category","published_at","created_at"].includes(sp.sort ?? "")
-    ? sp.sort : "created_at") as SortField;
+  const sortField: SortField = (SORT_FIELDS as string[]).includes(sp.sort ?? "")
+    ? (sp.sort as SortField) : "created_at";
   const sortDir: SortDir = sp.dir === "asc" ? "asc" : "desc";
 
   const admin = await createClient();
@@ -76,7 +76,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     selectWithOptional<ArticleRow>(
       runArticles,
       ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "is_trending", "author_id", "published", "published_at", "created_at", "deleted_at"],
-      ["video_url"],
+      [],
     ),
     admin.from("categories").select("id, name, parent_id, desk_key"),
     // Staff can read every profile under RLS; the Author cell picks from them.
@@ -99,13 +99,25 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     ? withCanonicalCategory.filter((row) => row.canonicalCategory === category)
     : withCanonicalCategory;
 
+  const newest = (row: typeof filtered[number]) => new Date(row.created_at).getTime();
+  // Ascending puts the "on" rows first — Live before Draft, Featured before the
+  // rest. Sorting a boolean the usual way would make the first click surface
+  // everything the editor was not looking for, since most rows are "off".
+  const flag = (value: boolean | null) => (value ? 0 : 1);
+
   const sorted = [...filtered].sort((a, b) => {
     let cmp = 0;
     if (sortField === "title")             cmp = a.title.localeCompare(b.title, "id");
     else if (sortField === "category")     cmp = a.canonicalCategory.localeCompare(b.canonicalCategory, "id");
     else if (sortField === "published_at") cmp = new Date(a.published_at ?? a.created_at).getTime() - new Date(b.published_at ?? b.created_at).getTime();
-    else                                   cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-    return sortDir === "asc" ? cmp : -cmp;
+    else if (sortField === "published")    cmp = flag(a.published) - flag(b.published);
+    else if (sortField === "is_trending")  cmp = flag(a.is_trending) - flag(b.is_trending);
+    else                                   cmp = newest(a) - newest(b);
+    const ordered = sortDir === "asc" ? cmp : -cmp;
+    // A boolean splits the list into two blocks and says nothing about the
+    // order inside them, and the query has no ORDER BY to fall back on. Break
+    // the tie by newest first so the page does not reshuffle between loads.
+    return ordered !== 0 ? ordered : newest(b) - newest(a);
   });
 
   const authors = (profileRows ?? [])
@@ -122,7 +134,6 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     canonicalCategory: row.canonicalCategory,
     excerpt: row.excerpt,
     image_url: row.image_url,
-    video_url: row.video_url ?? null,
     is_trending: Boolean(row.is_trending),
     author_id: row.author_id,
     published: row.published,
@@ -163,7 +174,6 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
       sortDir={sortDir}
       allCategories={CATEGORY_OPTIONS}
       authors={authors}
-      videoColumnReady={!articles.missing.includes("video_url")}
     />
   );
 }
