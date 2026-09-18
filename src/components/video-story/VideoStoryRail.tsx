@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import VideoStoryModal from "./VideoStoryModal";
 import { VIDEO_STORY_HREF, type VideoStoryItem, runtime } from "./data";
 import Verified from "./Verified";
 
@@ -14,6 +15,7 @@ import Verified from "./Verified";
  */
 export default function VideoStoryRail({ items }: { items: VideoStoryItem[] }) {
   const rail = useRef<HTMLDivElement>(null);
+  const [open, setOpen] = useState<number | null>(null);
   const [edge, setEdge] = useState<{ start: boolean; end: boolean }>({ start: true, end: false });
 
   useEffect(() => {
@@ -42,10 +44,10 @@ export default function VideoStoryRail({ items }: { items: VideoStoryItem[] }) {
         ref={rail}
         className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-pl-4 gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:gap-4 sm:scroll-pl-0 sm:px-0"
       >
-        {items.map((item) => (
+        {items.map((item, index) => (
           <article key={item.id} className="group w-[42vw] shrink-0 snap-start sm:w-[190px]">
-            <a href={item.permalink} target="_blank" rel="noopener noreferrer"
-               className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]">
+            <button type="button" onClick={() => setOpen(index)} aria-label={`Putar: ${item.title}`}
+                    className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]">
               <div className="relative aspect-[9/16] overflow-hidden rounded-[4px] bg-zinc-800">
                 {item.thumbnail && (
                   /* eslint-disable-next-line @next/next/no-img-element -- Supabase Storage and Instagram CDN, unoptimised here */
@@ -69,7 +71,7 @@ export default function VideoStoryRail({ items }: { items: VideoStoryItem[] }) {
                 <span className="truncate">@{item.username}</span>
                 <Verified className="h-2.5 w-2.5" />
               </p>
-            </a>
+            </button>
           </article>
         ))}
 
@@ -81,6 +83,8 @@ export default function VideoStoryRail({ items }: { items: VideoStoryItem[] }) {
 
       {!edge.start && <Arrow side="left" onClick={() => nudge(-1)} />}
       {!edge.end && <Arrow side="right" onClick={() => nudge(1)} />}
+
+      <VideoStoryModal items={items} index={open} onClose={() => setOpen(null)} onMove={setOpen} />
     </div>
   );
 }

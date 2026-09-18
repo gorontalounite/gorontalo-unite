@@ -1,8 +1,8 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PAGE_TITLE_CLASS } from "@/components/ui/SectionHeading";
-import { VIDEO_STORY_HREF, VIDEO_STORY_TITLE, headline, runtime, type VideoStoryItem } from "./data";
-import Verified from "./Verified";
+import { VIDEO_STORY_HREF, VIDEO_STORY_TITLE, headline, type VideoStoryItem } from "./data";
+import VideoStoryGrid from "./VideoStoryGrid";
 
 /**
  * Video Story's own archive, laid out as a video library rather than as the
@@ -30,43 +30,6 @@ const toItem = (row: Row): VideoStoryItem => ({
   views: row.views ?? 0,
   brand: row.brand,
 });
-
-function Card({ item }: { item: VideoStoryItem }) {
-  return (
-    <article className="group">
-      <a href={item.permalink} target="_blank" rel="noopener noreferrer"
-         className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]">
-        <div className="relative aspect-[9/16] overflow-hidden rounded-xl bg-zinc-800">
-          {item.thumbnail && (
-            /* eslint-disable-next-line @next/next/no-img-element -- Supabase Storage and Instagram CDN, unoptimised here */
-            <img src={item.thumbnail} alt="" loading="lazy"
-                 className="h-full w-full object-cover transition duration-700 ease-out group-hover:scale-[1.03]" />
-          )}
-          <span aria-hidden="true"
-                className="absolute bottom-2 left-2 flex h-6 w-6 items-center justify-center rounded-md bg-black/60 text-[10px] text-white backdrop-blur-sm">
-            ▶
-          </span>
-          {item.durationSec && (
-            <span className="absolute bottom-2 right-2 rounded-md bg-black/70 px-1.5 py-0.5 text-[11px] font-medium tabular-nums text-white">
-              {runtime(item.durationSec)}
-            </span>
-          )}
-        </div>
-      </a>
-      <h2 className="mt-2.5 line-clamp-2 text-[14px] font-semibold leading-snug text-white">
-        <a href={item.permalink} target="_blank" rel="noopener noreferrer" className="hover:text-[#f5c400]">
-          {item.title}
-        </a>
-      </h2>
-      <p className="mt-1 flex items-center gap-1 text-[12px] text-white/50">
-        {/* The sponsor is what identifies the piece; the posting account is
-            the same on almost all of them. */}
-        <span className="truncate">{item.brand ?? item.username}</span>
-        <Verified />
-      </p>
-    </article>
-  );
-}
 
 export default async function VideoStoryPage({ brand, page }: { brand: string | null; page: number }) {
   const supabase = await createClient();
@@ -143,9 +106,7 @@ export default async function VideoStoryPage({ brand, page }: { brand: string | 
           </p>
         ) : (
           <>
-            <div className="mt-7 grid grid-cols-2 gap-x-4 gap-y-8 sm:grid-cols-3 lg:grid-cols-4 xl:gap-x-6">
-              {items.map((item) => <Card key={item.id} item={item} />)}
-            </div>
+            <VideoStoryGrid items={items} />
 
             {pages > 1 && (
               <nav className="mt-12 flex items-center justify-center gap-3 text-sm">
