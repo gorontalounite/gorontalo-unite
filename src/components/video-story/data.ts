@@ -44,3 +44,20 @@ export function headline(caption: string) {
   return (clean.length > 90 ? `${clean.slice(0, 90).trimEnd()}…` : clean) || "Tanpa judul";
 }
 
+
+/** The shortcode inside an Instagram permalink, which is what the embed needs. */
+export function shortcodeOf(permalink: string): string | null {
+  return permalink.match(/instagram\.com\/(?:reel|reels|p|tv)\/([A-Za-z0-9_-]+)/)?.[1] ?? null;
+}
+
+/**
+ * Instagram's own embed. Verified playing for a signed-out visitor — no login
+ * wall, no sign-up prompt — which is why this ships before any self-hosting.
+ */
+export const embedSrc = (permalink: string) => {
+  const code = shortcodeOf(permalink);
+  return code ? `https://www.instagram.com/reel/${code}/embed/` : null;
+};
+
+export const prettyDate = (iso: string) =>
+  new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Makassar" });
