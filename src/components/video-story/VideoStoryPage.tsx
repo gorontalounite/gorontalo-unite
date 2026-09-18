@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PAGE_TITLE_CLASS } from "@/components/ui/SectionHeading";
 import { VIDEO_STORY_HREF, VIDEO_STORY_TITLE, headline, runtime, type VideoStoryItem } from "./data";
+import Verified from "./Verified";
 
 /**
  * Video Story's own archive, laid out as a video library rather than as the
@@ -29,15 +30,6 @@ const toItem = (row: Row): VideoStoryItem => ({
   views: row.views ?? 0,
   brand: row.brand,
 });
-
-function Verified() {
-  return (
-    <svg viewBox="0 0 24 24" aria-label="terverifikasi" className="h-3 w-3 shrink-0 fill-sky-400">
-      <path d="M12 1.6 14.3 4l3.3-.4 1 3.2 3 1.4-1.2 3.1 1.2 3.1-3 1.4-1 3.2-3.3-.4L12 22.4 9.7 20l-3.3.4-1-3.2-3-1.4 1.2-3.1L2.4 9.6l3-1.4 1-3.2 3.3.4L12 1.6Z" />
-      <path d="m10.8 14.6-2.3-2.3 1-1 1.3 1.3 3.6-3.6 1 1-4.6 4.6Z" className="fill-black" />
-    </svg>
-  );
-}
 
 function Card({ item }: { item: VideoStoryItem }) {
   return (
@@ -126,7 +118,7 @@ export default async function VideoStoryPage({ brand, page }: { brand: string | 
     <div className="min-h-screen bg-black text-white">
       <main className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
         <Link href="/" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#f5c400]">
-          ← Beranda
+          ← Back to Home
         </Link>
         <h1 className={`${PAGE_TITLE_CLASS} mt-3`}>{VIDEO_STORY_TITLE}</h1>
 

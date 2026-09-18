@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { VIDEO_STORY_HREF, type VideoStoryItem, runtime } from "./data";
+import Verified from "./Verified";
 
 /**
  * The Video Story rail on the homepage: ten covers on black, moved by arrows
@@ -64,14 +65,17 @@ export default function VideoStoryRail({ items }: { items: VideoStoryItem[] }) {
               <h3 className="mt-2 line-clamp-2 text-[13px] font-semibold leading-snug text-white transition group-hover:text-[#f5c400]">
                 {item.title}
               </h3>
-              <p className="mt-0.5 truncate text-[11px] text-white/45">@{item.username}</p>
+              <p className="mt-0.5 flex items-center gap-1 text-[11px] text-white/45">
+                <span className="truncate">@{item.username}</span>
+                <Verified className="h-2.5 w-2.5" />
+              </p>
             </a>
           </article>
         ))}
 
         <Link href={VIDEO_STORY_HREF}
               className="flex w-[42vw] shrink-0 snap-start items-center justify-center rounded-[4px] border border-white/15 text-xs font-semibold text-white/70 transition-colors hover:border-white/40 hover:text-white sm:w-[190px]">
-          Lihat semua →
+          View all →
         </Link>
       </div>
 
