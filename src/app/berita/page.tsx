@@ -2,6 +2,9 @@ import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
 import SectionHeading from "@/components/ui/SectionHeading";
+import VideoStoryRail from "@/components/video-story/VideoStoryRail";
+import { HOME_SLIDES, VIDEO_STORY_HREF, VIDEO_STORY_TITLE } from "@/components/video-story/data";
+import { getVideoStories } from "@/components/video-story/queries";
 import { createClient } from "@/lib/supabase/server";
 import LatestNewsGrid from "./LatestNewsGrid";
 import HeroCarousel from "./HeroCarousel";
@@ -167,30 +170,6 @@ function StoryCard({ article, large = false, deskMap = {} }: { article: Article;
   );
 }
 
-/**
- * A 9:16 card for the Editor Choice rail. Portrait rather than the 4:3 the
- * rest of the page uses, because the rail is read sideways: tall cards let
- * several sit on screen at once without shrinking to thumbnails.
- */
-function PickCard({ article, deskMap = {} }: { article: Article; deskMap?: DeskMap }) {
-  return (
-    <article className="group w-[42vw] shrink-0 snap-start sm:w-[200px]">
-      <Link href={`/${article.slug}`} className="block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]">
-        <ArticleImage article={article} className="aspect-[9/16]" sizes="(max-width: 640px) 42vw, 200px" />
-        <div className="pt-2.5">
-          <span className="text-[10px] font-bold uppercase tracking-[.15em] text-[#f5c400]">{deskLabel(article, deskMap)}</span>
-          <h3 className="font-heading mt-1.5 line-clamp-3 text-[14px] font-bold leading-[1.18] tracking-[-.015em] text-white transition group-hover:text-[#f5c400] sm:text-[15px]">
-            {article.title}
-          </h3>
-          <time dateTime={articleDate(article)} className="mt-1.5 block text-[11px] text-white/45">
-            {displayDate(articleDate(article))}
-          </time>
-        </div>
-      </Link>
-    </article>
-  );
-}
-
 function CompactStory({ article, deskMap = {} }: { article: Article; deskMap?: DeskMap }) {
   return (
     <article className="group border-b border-[#d7d1c6] dark:border-zinc-800 pb-4 last:border-0 last:pb-0">
@@ -337,10 +316,9 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
   const heroIds = new Set(heroPool.map((article) => article.id));
   const remaining = articles.filter((article) => !heroIds.has(article.id));
 
-  // Drawn from every published article, not from `remaining`: the tick is an
-  // editor's decision, and an article they marked should appear here whether
-  // or not it also leads the page.
-  const editorPicks = articles.filter((article) => article.editor_choice).slice(0, 12);
+  // Video Story is reels, not articles: the material is the endorsement work
+  // that also fills /reels?kategori=sponsored.
+  const videoStories = await getVideoStories(HOME_SLIDES);
 
   const news = articlesFor(remaining, "news", 5, deskMap);
   const travel = articlesFor(remaining, "travel", 5, deskMap);
@@ -357,28 +335,23 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           <HeroCarousel pool={heroPool} deskMap={deskMap} />
         </section>
 
-        {/* Nothing ticked yet means no band at all — an empty black stripe
-            between the hero and Culture would read as a broken section. */}
-        {editorPicks.length > 0 && (
-          <section id="editor-choice" className="scroll-mt-24 bg-black py-12 sm:py-16">
+        {/* No reels means no band at all — an empty black stripe between the
+            hero and Culture would read as a broken section. */}
+        {videoStories.length > 0 && (
+          <section id="video-story" className="scroll-mt-24 bg-black py-12 sm:py-16">
             <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
               <SectionHeading
-                id="editor-choice"
+                id="video-story"
                 className="text-white"
                 action={
-                  <Link href="/category/editor-choice" className="inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold text-white">
+                  <Link href={VIDEO_STORY_HREF} className="inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold text-white">
                     View all <span aria-hidden>→</span>
                   </Link>
                 }
               >
-                Editor Choice
+                {VIDEO_STORY_TITLE}
               </SectionHeading>
-              {/* scroll-pl-4 moves the snapport, not the padding: without it
-                  snap-mandatory pins the first card flush to the screen edge
-                  and eats the gutter. */}
-              <div className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-pl-4 gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:gap-4 sm:scroll-pl-0 sm:px-0">
-                {editorPicks.map((article) => <PickCard key={article.id} article={article} deskMap={deskMap} />)}
-              </div>
+              <VideoStoryRail items={videoStories} />
             </div>
           </section>
         )}
