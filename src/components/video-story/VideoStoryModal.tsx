@@ -92,14 +92,16 @@ export default function VideoStoryModal({
               scrolling="no"
               allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
               allowFullScreen
-              className="h-[58vh] w-full border-0 md:h-[78vh]"
+              className="h-[70vh] w-full border-0 md:h-[78vh]"
             />
           ) : (
             <p className="p-10 text-center text-sm text-white/60">Video tidak dapat dimuat.</p>
           )}
         </div>
 
-        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-5">
+        {/* Compact on a phone, where the panel and the player share one
+            column and every pixel it takes is one the video loses. */}
+        <div className="flex min-h-0 flex-1 flex-col overflow-y-auto p-3.5 md:p-5">
           <div className="flex items-center gap-1.5 text-sm font-semibold text-gray-900">
             <span className="truncate">{item.username}</span>
             <Verified />
@@ -109,23 +111,24 @@ export default function VideoStoryModal({
             {item.durationSec ? ` · ${runtime(item.durationSec)}` : ""}
           </p>
 
-          <h2 className="mt-4 text-[17px] font-bold leading-snug tracking-[-.01em] text-gray-900">
+          <h2 className="mt-2.5 line-clamp-3 text-[15px] font-bold leading-snug tracking-[-.01em] text-gray-900 md:mt-4 md:line-clamp-none md:text-[17px]">
             {item.title}
           </h2>
 
           {item.brand && (
-            <p className="mt-3 inline-flex w-fit items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-xs text-gray-600">
+            <p className="mt-2 inline-flex w-fit items-center gap-1.5 rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-600 md:mt-3 md:text-xs">
               in collaboration with <strong className="font-semibold text-gray-800">{item.brand}</strong>
             </p>
           )}
 
-          <div className="mt-auto pt-6">
+          <div className="mt-auto pt-3 md:pt-6">
             <a href={item.permalink} target="_blank" rel="noopener noreferrer"
                className="inline-flex items-center gap-1.5 text-xs font-semibold text-gray-500 transition-colors hover:text-gray-900">
               Buka di Instagram <span aria-hidden>↗</span>
             </a>
-            <p className="mt-2 text-[11px] text-gray-400">
-              {index! + 1} dari {items.length} · gunakan ← → untuk berpindah
+            <p className="mt-1.5 text-[11px] text-gray-400">
+              {index! + 1} dari {items.length}
+              <span className="hidden sm:inline"> · gunakan ← → untuk berpindah</span>
             </p>
           </div>
         </div>
