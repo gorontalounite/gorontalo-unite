@@ -7,7 +7,7 @@ import { headline, HOME_SLIDES, type VideoStoryItem } from "./data";
  * bundle and broke the build.
  */
 
-const COLUMNS = "id, description, account_username, permalink, thumbnail_url, duration_sec, publish_time, views";
+const COLUMNS = "id, description, account_username, permalink, thumbnail_url, duration_sec, publish_time, views, brand";
 
 interface Row {
   id: string;
@@ -18,6 +18,7 @@ interface Row {
   duration_sec: number | null;
   publish_time: string;
   views: number | null;
+  brand: string | null;
 }
 
 const toItem = (row: Row): VideoStoryItem => ({
@@ -29,6 +30,7 @@ const toItem = (row: Row): VideoStoryItem => ({
   durationSec: row.duration_sec,
   publishedAt: row.publish_time,
   views: row.views ?? 0,
+  brand: row.brand,
 });
 
 /**
@@ -43,6 +45,10 @@ export async function getVideoStories(limit = HOME_SLIDES): Promise<VideoStoryIt
       .select(COLUMNS)
       .eq("status", "published")
       .eq("category", "Sponsored")
+      // Portrait only. A landscape reel dropped into a 9:16 frame is either
+      // letterboxed or cropped through its subject, and this shelf is nothing
+      // but covers.
+      .neq("orientation", "landscape")
       .not("thumbnail_url", "is", null)
       .order("publish_time", { ascending: false })
       .limit(limit);

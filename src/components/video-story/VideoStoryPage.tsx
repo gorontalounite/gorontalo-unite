@@ -10,11 +10,12 @@ import { VIDEO_STORY_HREF, VIDEO_STORY_TITLE, headline, runtime, type VideoStory
  */
 
 const PER_PAGE = 40;
-const COLUMNS = "id, description, account_username, permalink, thumbnail_url, duration_sec, publish_time, views";
+const COLUMNS = "id, description, account_username, permalink, thumbnail_url, duration_sec, publish_time, views, brand";
 
 interface Row {
   id: string; description: string | null; account_username: string; permalink: string;
   thumbnail_url: string | null; duration_sec: number | null; publish_time: string; views: number | null;
+  brand: string | null;
 }
 
 const toItem = (row: Row): VideoStoryItem => ({
@@ -26,6 +27,7 @@ const toItem = (row: Row): VideoStoryItem => ({
   durationSec: row.duration_sec,
   publishedAt: row.publish_time,
   views: row.views ?? 0,
+  brand: row.brand,
 });
 
 function Verified() {
@@ -65,14 +67,16 @@ function Card({ item }: { item: VideoStoryItem }) {
         </a>
       </h2>
       <p className="mt-1 flex items-center gap-1 text-[12px] text-white/50">
-        <span className="truncate">{item.username}</span>
+        {/* The sponsor is what identifies the piece; the posting account is
+            the same on almost all of them. */}
+        <span className="truncate">{item.brand ?? item.username}</span>
         <Verified />
       </p>
     </article>
   );
 }
 
-export default async function VideoStoryPage({ akun, page }: { akun: string | null; page: number }) {
+export default async function VideoStoryPage({ brand, page }: { brand: string | null; page: number }) {
   const supabase = await createClient();
 
   const scoped = () => {
@@ -80,26 +84,31 @@ export default async function VideoStoryPage({ akun, page }: { akun: string | nu
       .select(COLUMNS, { count: "exact" })
       .eq("status", "published")
       .eq("category", "Sponsored")
+      // Portrait only: a landscape reel in a 9:16 frame is letterboxed or
+      // cropped through its subject, and this page is nothing but covers.
+      .neq("orientation", "landscape")
       .not("thumbnail_url", "is", null);
-    if (akun) query = query.eq("account_username", akun);
+    if (brand) query = query.eq("brand", brand);
     return query;
   };
 
   const [{ data, count }, { data: allRows }] = await Promise.all([
     scoped().order("publish_time", { ascending: false })
             .range((page - 1) * PER_PAGE, page * PER_PAGE - 1),
-    // The chips name real accounts, so they come from the same set the grid
-    // draws from rather than from a list written by hand.
-    supabase.from("reels").select("account_username")
+    // The chips name sponsors, not the account that posted — a reader looking
+    // for the Honda work does not know it went out from gorontalo.unite. They
+    // come from the same set the grid draws from, never a hand-written list.
+    supabase.from("reels").select("brand")
       .eq("status", "published").eq("category", "Sponsored")
-      .not("thumbnail_url", "is", null).limit(1000),
+      .neq("orientation", "landscape")
+      .not("thumbnail_url", "is", null).not("brand", "is", null).limit(1000),
   ]);
 
   const tally = new Map<string, number>();
-  for (const row of (allRows ?? []) as Array<{ account_username: string }>) {
-    tally.set(row.account_username, (tally.get(row.account_username) ?? 0) + 1);
+  for (const row of (allRows ?? []) as Array<{ brand: string | null }>) {
+    if (row.brand) tally.set(row.brand, (tally.get(row.brand) ?? 0) + 1);
   }
-  const accounts = [...tally.entries()]
+  const brands = [...tally.entries()]
     .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
     .slice(0, 14);
 
@@ -109,7 +118,7 @@ export default async function VideoStoryPage({ akun, page }: { akun: string | nu
 
   const chipHref = (name: string | null) => {
     const params = new URLSearchParams();
-    if (name) params.set("akun", name);
+    if (name) params.set("brand", name);
     return params.size ? `${VIDEO_STORY_HREF}?${params}` : VIDEO_STORY_HREF;
   };
 
@@ -124,13 +133,13 @@ export default async function VideoStoryPage({ akun, page }: { akun: string | nu
         <div className="no-scrollbar -mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
           <Link href={chipHref(null)}
                 className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
-                  akun ? "bg-white/10 text-white/70 hover:bg-white/20" : "bg-white text-black"}`}>
+                  brand ? "bg-white/10 text-white/70 hover:bg-white/20" : "bg-white text-black"}`}>
             All
           </Link>
-          {accounts.map(([name, n]) => (
+          {brands.map(([name, n]) => (
             <Link key={name} href={chipHref(name)}
                   className={`shrink-0 rounded-full px-3.5 py-1.5 text-[13px] font-medium transition-colors ${
-                    akun === name ? "bg-white text-black" : "bg-white/10 text-white/70 hover:bg-white/20"}`}>
+                    brand === name ? "bg-white text-black" : "bg-white/10 text-white/70 hover:bg-white/20"}`}>
               {name} <span className="opacity-50">{n}</span>
             </Link>
           ))}
@@ -149,14 +158,14 @@ export default async function VideoStoryPage({ akun, page }: { akun: string | nu
             {pages > 1 && (
               <nav className="mt-12 flex items-center justify-center gap-3 text-sm">
                 {page > 1 && (
-                  <Link href={`${chipHref(akun)}${chipHref(akun).includes("?") ? "&" : "?"}hal=${page - 1}`}
+                  <Link href={`${chipHref(brand)}${chipHref(brand).includes("?") ? "&" : "?"}hal=${page - 1}`}
                         className="rounded-lg border border-white/20 px-3 py-1.5 hover:bg-white/10">
                     ← Sebelumnya
                   </Link>
                 )}
                 <span className="text-white/45">Halaman {page} dari {pages}</span>
                 {page < pages && (
-                  <Link href={`${chipHref(akun)}${chipHref(akun).includes("?") ? "&" : "?"}hal=${page + 1}`}
+                  <Link href={`${chipHref(brand)}${chipHref(brand).includes("?") ? "&" : "?"}hal=${page + 1}`}
                         className="rounded-lg border border-white/20 px-3 py-1.5 hover:bg-white/10">
                     Berikutnya →
                   </Link>
