@@ -78,8 +78,8 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   // Video Story is a video library, not an article archive, so it takes over
   // the whole page rather than borrowing this one's banner and card list.
   if (key === VIDEO_STORY.key) {
-    const { akun, hal } = await searchParams as { akun?: string; hal?: string };
-    return <VideoStoryPage akun={akun?.trim() || null} page={Math.max(1, parseInt(hal ?? "1"))} />;
+    const { brand: merek, hal } = await searchParams as { brand?: string; hal?: string };
+    return <VideoStoryPage brand={merek?.trim() || null} page={Math.max(1, parseInt(hal ?? "1"))} />;
   }
 
   const page   = Math.max(1, parseInt(pageParam ?? "1"));

@@ -23,6 +23,8 @@ export interface VideoStoryItem {
   durationSec: number | null;
   publishedAt: string;
   views: number;
+  /** Sponsor the reel is for, when it has one. */
+  brand: string | null;
 }
 
 /** mm:ss, the way a player writes it. */
