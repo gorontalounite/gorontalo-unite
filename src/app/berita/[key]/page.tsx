@@ -6,6 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, CATEGORY_HERO, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, type CategoryRow } from "../categories";
 import BeritaPagination from "../BeritaPagination";
 import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/app/news/[id]/page";
+import VideoStoryPage from "@/components/video-story/VideoStoryPage";
+import { VIDEO_STORY_KEY, VIDEO_STORY_TITLE } from "@/components/video-story/data";
 
 export const dynamic = "force-dynamic";
 
@@ -14,15 +16,15 @@ const LIMIT = 9;
 const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]));
 
 /**
- * Editor Choice is a placement, not a desk — it is ticked per article rather
- * than derived from a category. It gets its archive at the same
- * /category/<key> URL every other section uses, but stays out of CATEGORIES so
- * it does not turn up in the nav beside the real desks.
+ * Video Story is not a desk — it is the sponsored reels, and it draws its own
+ * archive rather than the article list every other section uses. It keeps the
+ * /category/<key> URL those sections use, but stays out of CATEGORIES so it
+ * does not appear in the nav beside the real desks.
  */
-const EDITOR_CHOICE = { key: "editor-choice", label: "Editor Choice" };
+const VIDEO_STORY = { key: VIDEO_STORY_KEY, label: VIDEO_STORY_TITLE };
 
 /** The section a key names, or undefined when the key is an article slug. */
-const sectionFor = (key: string) => (key === EDITOR_CHOICE.key ? EDITOR_CHOICE : CAT_MAP[key]);
+const sectionFor = (key: string) => (key === VIDEO_STORY.key ? VIDEO_STORY : CAT_MAP[key]);
 
 interface Article {
   id: string; title: string; slug: string; category: string; categories: string[];
@@ -41,8 +43,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { key } = await params;
   const cat = sectionFor(key);
   if (!cat) return generateArticleMetadata({ params: Promise.resolve({ id: key }) });
-  const description = key === EDITOR_CHOICE.key
-    ? "Artikel pilihan redaksi Gorontalo Unite."
+  const description = key === VIDEO_STORY.key
+    ? "Video kolaborasi dan konten berdurasi dari Gorontalo Unite."
     : WEB_CATEGORY_DESCRIPTIONS[key] ?? `Berita terkini seputar ${cat.label} di Gorontalo.`;
   return {
     title: cat.label,
@@ -73,6 +75,13 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   const cat = sectionFor(key);
   if (!cat) return <NewsDetailPage params={Promise.resolve({ id: key })} />;
 
+  // Video Story is a video library, not an article archive, so it takes over
+  // the whole page rather than borrowing this one's banner and card list.
+  if (key === VIDEO_STORY.key) {
+    const { akun, hal } = await searchParams as { akun?: string; hal?: string };
+    return <VideoStoryPage akun={akun?.trim() || null} page={Math.max(1, parseInt(hal ?? "1"))} />;
+  }
+
   const page   = Math.max(1, parseInt(pageParam ?? "1"));
   const offset = (page - 1) * LIMIT;
   const colors = CAT_COLOR[cat.label] ?? DEFAULT_COLOR;
@@ -90,9 +99,6 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   const deskMap = buildCategoryDeskMap((categoryRows ?? []) as CategoryRow[]);
 
   const matching = (raw ?? []).filter((article) => {
-    // A tick, not a category match — nothing about the article's own filing
-    // decides whether it belongs here.
-    if (key === EDITOR_CHOICE.key) return article.editor_choice === true;
     if (WEB_CATEGORY_DESCRIPTIONS[key]) return articleBelongsToWebCategory({
       category: article.category as string,
       categories: article.categories as string[] | null,
