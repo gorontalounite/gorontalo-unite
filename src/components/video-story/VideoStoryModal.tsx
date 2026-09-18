@@ -60,12 +60,12 @@ export default function VideoStoryModal({
   const last = index === items.length - 1;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 sm:p-6">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 pt-14 sm:p-6">
       <button type="button" aria-label="Tutup" onClick={onClose}
               className="absolute inset-0 h-full w-full cursor-default bg-black/80 backdrop-blur-sm" />
 
       <button type="button" onClick={onClose} aria-label="Tutup"
-              className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-lg text-white transition hover:bg-white/25 sm:right-6 sm:top-6">
+              className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-lg text-white backdrop-blur-sm transition hover:bg-white/30 sm:left-auto sm:right-6 sm:top-6 sm:h-9 sm:w-9">
         ✕
       </button>
 
@@ -92,7 +92,7 @@ export default function VideoStoryModal({
               scrolling="no"
               allow="autoplay; clipboard-write; encrypted-media; picture-in-picture"
               allowFullScreen
-              className="h-[70vh] w-full border-0 md:h-[78vh]"
+              className="h-[64vh] w-full border-0 sm:h-[70vh] md:h-[78vh]"
             />
           ) : (
             <p className="p-10 text-center text-sm text-white/60">Video tidak dapat dimuat.</p>
