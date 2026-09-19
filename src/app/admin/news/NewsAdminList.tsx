@@ -26,8 +26,6 @@ export interface NewsRow {
   is_sponsored:      boolean;
   sponsor_name:      string | null;
   sponsor_logo_url:  string | null;
-  /** Instagram post this article was written from, when there is one. */
-  source_permalink:  string | null;
   author_id:         string | null;
   published:         boolean;
   published_at:      string | null;
@@ -234,18 +232,6 @@ export default function NewsAdminList({
     {
       key: "date", header: "Date", width: 116, sort: "published_at",
       render: (row) => <DateCell value={row.published_at ?? row.created_at} />,
-    },
-    {
-      key: "source", header: "Sumber IG", width: 190,
-      render: (row) => (
-        <EditableTextCell
-          value={row.source_permalink}
-          placeholder="Tempel permalink"
-          // Unique in the database, so pasting one that is already on another
-          // article is refused there rather than quietly creating a duplicate.
-          onSave={(next) => update(row, { source_permalink: next || null })}
-        />
-      ),
     },
     {
       key: "author", header: "Author", width: 170,
