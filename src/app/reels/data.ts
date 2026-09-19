@@ -49,12 +49,8 @@ export const DEFAULT_REEL_CATEGORIES = [
   "Untold Story",
   "Event",
   "Lifestyle",
-  // Was "News". The archive calls this desk Regional and so does the public
-  // nav; only the reel shelves still said News, and 20260919140000 ended that.
-  "Regional",
+  "News",
   "Culinary",
-  "People",
-  "Paket Narasi Daerah",
   "Sponsored",
 ] as const;
 
