@@ -32,6 +32,7 @@ interface ArticleRow {
   is_sponsored:  boolean | null;
   sponsor_name:  string | null;
   sponsor_logo_url: string | null;
+  source_permalink: string | null;
   author_id:    string | null;
   published:    boolean;
   published_at: string | null;
@@ -83,7 +84,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
   const [articles, { data: categoryRows }, { data: profileRows }] = await Promise.all([
     selectWithOptional<ArticleRow>(
       runArticles,
-      ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "is_trending", "editor_choice", "is_sponsored", "sponsor_name", "sponsor_logo_url", "author_id", "published", "published_at", "created_at", "deleted_at"],
+      ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "is_trending", "editor_choice", "is_sponsored", "sponsor_name", "sponsor_logo_url", "source_permalink", "author_id", "published", "published_at", "created_at", "deleted_at"],
       [],
     ),
     admin.from("categories").select("id, name, parent_id, desk_key"),
@@ -148,6 +149,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     is_sponsored: Boolean(row.is_sponsored),
     sponsor_name: row.sponsor_name,
     sponsor_logo_url: row.sponsor_logo_url,
+    source_permalink: row.source_permalink,
     author_id: row.author_id,
     published: row.published,
     published_at: row.published_at,

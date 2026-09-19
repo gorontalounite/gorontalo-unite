@@ -10,6 +10,7 @@ import ShareButtons       from "@/components/ui/ShareButtons";
 import RelatedPosts, { type RelatedItem } from "@/components/ui/RelatedPosts";
 import ViewTracker        from "@/components/ui/ViewTracker";
 import CommentSection     from "@/components/ui/CommentSection";
+import SourcePost         from "@/components/ui/SourcePost";
 import ArticleHero        from "@/components/ui/ArticleHero";
 import ReaderRevenueManager from "@/components/google/ReaderRevenueManager";
 import { blocksToText, type Block } from "@/components/editor/types";
@@ -238,6 +239,11 @@ export async function NewsDetailPage({ params }: Props) {
               ))}
             </div>
           </div>
+        )}
+
+        {/* The Instagram post this was written from, when there is one. */}
+        {typeof article.source_permalink === "string" && article.source_permalink && (
+          <SourcePost permalink={article.source_permalink} />
         )}
 
         {/* Source attribution */}
