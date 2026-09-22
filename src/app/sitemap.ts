@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { WEB_CATEGORIES } from "@/app/berita/categories";
+import { REGIONS } from "@/lib/city-guide/regions";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
 
@@ -13,6 +14,12 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       lastModified: new Date(),
       changeFrequency: "daily" as const,
       priority: 0.8,
+    })),
+    ...REGIONS.map((region) => ({
+      url: `${BASE}/city-guide/area/${region.slug}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
     })),
     { url: `${BASE}/reels`,          lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
     { url: `${BASE}/event`,          lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
@@ -29,12 +36,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const admin = createAdminClient();
 
-  // Fetch all published articles
-  const { data: articles } = await admin
-    .from("articles")
-    .select("slug, category, updated_at, published_at")
-    .eq("published", true)
-    .order("published_at", { ascending: false });
+  const [{ data: articles }, { data: places }, { data: events }] = await Promise.all([
+    admin
+      .from("articles")
+      .select("slug, category, updated_at, published_at")
+      .eq("published", true)
+      .order("published_at", { ascending: false }),
+    admin
+      .from("tourism_places")
+      .select("slug, updated_at")
+      .eq("published", true),
+    admin
+      .from("events")
+      .select("slug, updated_at")
+      .eq("published", true),
+  ]);
 
   const newsSlugs = (articles ?? [])
     .filter((a) => a.category !== "Portfolio")
@@ -45,5 +61,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority:     0.8,
     }));
 
-  return [...staticPages, ...newsSlugs];
+  const placeSlugs = (places ?? []).map((p) => ({
+    url:          `${BASE}/city-guide/${p.slug}`,
+    lastModified: new Date(p.updated_at ?? Date.now()),
+    changeFrequency: "weekly" as const,
+    priority:     0.7,
+  }));
+
+  const eventSlugs = (events ?? []).map((e) => ({
+    url:          `${BASE}/event/${e.slug}`,
+    lastModified: new Date(e.updated_at ?? Date.now()),
+    changeFrequency: "weekly" as const,
+    priority:     0.7,
+  }));
+
+  return [...staticPages, ...newsSlugs, ...placeSlugs, ...eventSlugs];
 }

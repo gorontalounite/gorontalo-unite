@@ -68,6 +68,18 @@ export async function POST(
     return NextResponse.json({ error: "Komentar dinonaktifkan untuk artikel ini" }, { status: 403 });
   }
 
+  // Basic flood guard: one comment per user per 20 seconds, across all articles.
+  const { data: recent } = await admin
+    .from("comments")
+    .select("created_at")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(1)
+    .maybeSingle();
+  if (recent && Date.now() - new Date(recent.created_at as string).getTime() < 20_000) {
+    return NextResponse.json({ error: "Tunggu sebentar sebelum mengirim komentar lagi" }, { status: 429 });
+  }
+
   // Get user profile for display name
   const { data: profile } = await admin
     .from("user_profiles")

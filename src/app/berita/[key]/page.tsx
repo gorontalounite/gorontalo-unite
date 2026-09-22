@@ -5,6 +5,7 @@ import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, CATEGORY_HERO, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, type CategoryRow } from "../categories";
 import BeritaPagination from "../BeritaPagination";
+import Breadcrumbs, { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
 import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/app/news/[id]/page";
 import VideoStoryPage from "@/components/video-story/VideoStoryPage";
 import { VIDEO_STORY_KEY, VIDEO_STORY_TITLE } from "@/components/video-story/data";
@@ -127,9 +128,14 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   }));
 
   const hero = CATEGORY_HERO[key];
+  const breadcrumbItems = [{ label: "Home", href: "/" }, { label: cat.label }];
 
   return (
     <div className="min-h-screen bg-[#f7f7f7] pb-24 text-[#101018] dark:bg-zinc-950 dark:text-white md:pb-10">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbItems)) }}
+      />
       {/* The banner carries the section; the name is the only text it needs. */}
       <section className="bg-white pt-4 dark:bg-zinc-950 sm:pt-6">
         <div className="mx-auto max-w-7xl px-4 sm:px-8">
@@ -163,8 +169,9 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
       </section>
 
       <main className="mx-auto max-w-7xl px-4 sm:px-8">
-        <div className="py-7 text-xs sm:text-sm">
+        <div className="flex items-center justify-between gap-4 py-7 text-xs sm:text-sm">
           <Link href="/" className="font-semibold text-brand hover:underline">← All news</Link>
+          <Breadcrumbs items={breadcrumbItems} className="hidden text-stone-400 dark:text-zinc-500 sm:block" />
         </div>
 
         {articles.length === 0 ? (

@@ -5,7 +5,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import ProfileClient     from "./ProfileClient";
 
 export const metadata: Metadata = {
-  title: "Profil Saya | Gorontalo Unite",
+  title: "Profil Saya",
   // One reader's own account page, and it was drawing more impressions than
   // any article.
   robots: { index: false, follow: false },

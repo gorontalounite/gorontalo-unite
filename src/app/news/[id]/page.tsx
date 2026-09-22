@@ -11,6 +11,7 @@ import RelatedPosts, { type RelatedItem } from "@/components/ui/RelatedPosts";
 import ViewTracker        from "@/components/ui/ViewTracker";
 import CommentSection     from "@/components/ui/CommentSection";
 import ArticleHero        from "@/components/ui/ArticleHero";
+import Breadcrumbs, { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
 import ReaderRevenueManager from "@/components/google/ReaderRevenueManager";
 import { blocksToText, type Block } from "@/components/editor/types";
 
@@ -40,14 +41,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     .eq("published", true)
     .neq("category", "Portfolio")
     .single();
-  if (!data) return { title: "Article | Gorontalo Unite" };
+  if (!data) return { title: "Article" };
 
   const title = data.seo_title || data.title;
   const desc  = data.seo_description || data.excerpt;
   const url   = `${BASE}/${slug}`;
 
   return {
-    title:       `${title} | Gorontalo Unite`,
+    title,
     description: desc || undefined,
     alternates:  { canonical: url },
     openGraph: {
@@ -188,6 +189,12 @@ export async function NewsDetailPage({ params }: Props) {
     inLanguage:    "id-ID",
   };
 
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: heroCategories[0].label, href: heroCategories[0].href },
+    { label: article.title },
+  ];
+
   return (
     <>
     <ReaderRevenueManager />
@@ -196,6 +203,10 @@ export async function NewsDetailPage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbItems)) }}
       />
 
       {/* Silent view tracker */}
@@ -217,6 +228,10 @@ export async function NewsDetailPage({ params }: Props) {
         />
 
       <div className="article-snap mx-auto max-w-5xl scroll-mt-14 px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8">
+        <Breadcrumbs
+          items={breadcrumbItems}
+          className="mb-4 text-xs text-stone-400 dark:text-zinc-500"
+        />
         {/* Standfirst, set as a quote at the head of the story rather than over the photo. */}
 
         {/* Content */}

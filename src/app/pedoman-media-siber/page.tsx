@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PAGE_TITLE_CLASS, SUBHEAD_CLASS } from "@/components/ui/SectionHeading";
 
 export const metadata: Metadata = {
-  title: "Pedoman Pemberitaan Media Siber — Gorontalo Unite",
+  title: "Pedoman Pemberitaan Media Siber",
   description:
     "Gorontalo Unite beroperasi sesuai Pedoman Pemberitaan Media Siber yang ditetapkan oleh Dewan Pers pada 3 September 2012.",
 };

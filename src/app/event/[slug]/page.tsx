@@ -4,6 +4,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import SectionHeading, { PAGE_TITLE_CLASS, SUBHEAD_CLASS } from "@/components/ui/SectionHeading";
+import Breadcrumbs, { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
 import {
   EVENT_CATEGORIES, eventDayLong, fromEventRow, rupiah, SAMPLE_EVENTS, type EventItem,
 } from "../data";
@@ -80,9 +81,18 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
 
   const icon = EVENT_CATEGORIES.find((item) => item.label === event.category)?.icon ?? "🎫";
   const place = [event.venue, event.address].filter(Boolean).join(", ");
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "Event", href: "/event" },
+    { label: event.title },
+  ];
 
   return (
     <div className="bg-[#fafafa] pb-10 text-neutral-900 dark:bg-zinc-950 dark:text-white md:pb-12">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbItems)) }}
+      />
       {event.isSample && (
         <p className="bg-amber-100 px-4 py-2.5 text-center text-[13px] text-amber-900 dark:bg-amber-500/15 dark:text-amber-200">
           Sample view. The event, dates and prices on this page are not real.
@@ -129,6 +139,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
       {/* Detail + tickets */}
       <div className="mx-auto grid max-w-6xl gap-8 px-4 py-8 sm:px-6 md:grid-cols-[minmax(0,1fr)_340px]">
         <div className="min-w-0">
+          <Breadcrumbs items={breadcrumbItems} className="mb-4 text-xs text-neutral-400 dark:text-neutral-500" />
           <SectionHeading>Event detail</SectionHeading>
 
           {event.importantInfo.length > 0 && (

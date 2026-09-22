@@ -3,7 +3,7 @@ import Link from "next/link";
 import { PAGE_TITLE_CLASS, SUBHEAD_CLASS } from "@/components/ui/SectionHeading";
 
 export const metadata: Metadata = {
-  title: "Kebijakan Privasi | Gorontalo Unite",
+  title: "Kebijakan Privasi",
 };
 
 export default function PrivacyPolicyPage() {

@@ -110,6 +110,21 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+const organizationJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "Gorontalo Unite",
+  url: BASE,
+  logo: `${BASE}/icons/icon-512.png`,
+  sameAs: [
+    "https://www.facebook.com/gorontalounitemediahub/",
+    "https://www.instagram.com/gorontalo.unite",
+    "https://www.threads.com/@gorontalo.unite",
+    "https://www.tiktok.com/@gorontalounite",
+    "https://www.youtube.com/gorontalounite",
+  ],
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -120,6 +135,14 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
       </head>
       <body className="min-h-screen flex flex-col bg-background text-foreground font-sans">
+        {/* Site-wide Organization schema. Kept in <body>, not <head> — a
+            second inline application/ld+json script placed in <head>
+            collided with page-level JSON-LD during hydration (React merged
+            the two scripts' @type arrays into one node). */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
+        />
         <ThemeProvider>
           <Navbar />
           <MainContent>{children}</MainContent>

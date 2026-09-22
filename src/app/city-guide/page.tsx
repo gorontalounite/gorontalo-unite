@@ -8,7 +8,7 @@ import CityGuideDirectory, {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "City Guide | Gorontalo Unite",
+  title: "City Guide",
   description: "Directory of destinations and upcoming events in Gorontalo.",
   alternates: { canonical: "/city-guide" },
 };

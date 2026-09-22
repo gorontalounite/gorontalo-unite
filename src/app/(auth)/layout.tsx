@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Account | Gorontalo Unite",
+  title: "Account",
   // Sign-in and sign-up are doors, not pages. Covers /auth/login too, which
   // redirects here — the redirect itself can carry no tag of its own.
   robots: { index: false, follow: false },

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ServicePage from "@/components/ServicePage";
 
 export const metadata: Metadata = {
-  title: "Branding Identity — Gorontalo Unite",
+  title: "Branding Identity",
   description: "Membangun identitas merek yang kuat, konsisten, dan berkesan melalui desain visual strategis.",
 };
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ServicePage from "@/components/ServicePage";
 
 export const metadata: Metadata = {
-  title: "Digital Marketing — Gorontalo Unite",
+  title: "Digital Marketing",
   description: "Strategi pemasaran digital yang terukur: SEO, iklan berbayar, dan konten yang mengkonversi.",
 };
 

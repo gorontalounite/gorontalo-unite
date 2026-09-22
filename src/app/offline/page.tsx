@@ -3,7 +3,7 @@ import Link from "next/link";
 import ReloadButton from "./ReloadButton";
 
 export const metadata: Metadata = {
-  title: "Offline | Gorontalo Unite",
+  title: "Offline",
   robots: { index: false, follow: false },
 };
 

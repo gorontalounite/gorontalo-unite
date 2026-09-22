@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
@@ -7,12 +8,44 @@ import ExpandableText from "@/components/city-guide/ExpandableText";
 import GalleryCarousel from "@/components/city-guide/GalleryCarousel";
 import InstagramEmbedGrid from "@/components/city-guide/InstagramEmbedGrid";
 import BlockRenderer from "@/components/ui/BlockRenderer";
+import { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
 import type { Block } from "@/components/editor/types";
 import styles from "./detail.module.css";
 
 export const dynamic = "force-dynamic";
 
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
+
 type DetailItem = { label: string; value: string };
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const supabase = await createClient();
+  const { data: place } = await supabase
+    .from("tourism_places")
+    .select("name, description, image_url, category, address, location")
+    .eq("slug", slug)
+    .eq("published", true)
+    .single();
+  if (!place) return {};
+
+  const description = (place.description ? String(place.description).slice(0, 160) : null)
+    ?? `${place.name} — ${place.category ?? "City Guide"} di ${place.address || place.location || "Gorontalo"}.`;
+  const url = `${BASE}/city-guide/${slug}`;
+
+  return {
+    title: place.name,
+    description,
+    alternates: { canonical: url },
+    openGraph: {
+      title: place.name,
+      description,
+      url,
+      type: "website",
+      images: place.image_url ? [{ url: place.image_url, width: 1200, height: 630, alt: place.name }] : undefined,
+    },
+  };
+}
 
 /** Eat and Stay — the categories whose hero is a slider rather than a mosaic. */
 const SLIDER_CATEGORIES = new Set(["Kuliner", "Akomodasi"]);
@@ -75,6 +108,13 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
   // Falls back to the same coordinates the embedded map already uses — no invented location data.
   const mapLink = place.maps_url || (hasCoords ? `https://www.google.com/maps/search/?api=1&query=${place.latitude}%2C${place.longitude}` : null);
 
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "City Guide", href: "/city-guide" },
+    ...(place.category ? [{ label: place.category as string }] : []),
+    { label: place.name },
+  ];
+
   const faqs: DetailItem[] = [
     place.price_range ? { label: `How much is admission to ${place.name}?`, value: place.price_range } : null,
     place.opening_hours ? { label: `What are ${place.name} opening hours?`, value: place.opening_hours } : null,
@@ -83,6 +123,10 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
   ].filter((item): item is DetailItem => item !== null);
 
   return <main className={styles.page}>
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbItems)) }}
+    />
     <div className={styles.wrap}>
 
       {/* A — Hero gallery. Eat and Stay run a full-width 16:9 slider; Explore

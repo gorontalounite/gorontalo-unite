@@ -3,6 +3,12 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   async redirects() {
     return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "www.gorontalounite.com" }],
+        destination: "https://gorontalounite.com/:path*",
+        permanent: true,
+      },
       { source: "/berita/news", destination: "/", permanent: true },
       { source: "/category/news", destination: "/", permanent: true },
       { source: "/berita/food-drink", destination: "/category/culinary", permanent: true },

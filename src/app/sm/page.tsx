@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ServicePage from "@/components/ServicePage";
 
 export const metadata: Metadata = {
-  title: "Social Media Management — Gorontalo Unite",
+  title: "Social Media Management",
   description: "Pengelolaan media sosial secara profesional: konten kreatif, jadwal posting, dan engagement.",
 };
 

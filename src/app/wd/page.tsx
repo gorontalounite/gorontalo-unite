@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import ServicePage from "@/components/ServicePage";
 
 export const metadata: Metadata = {
-  title: "Web Developer — Gorontalo Unite",
+  title: "Web Developer",
   description: "Membangun website dan aplikasi web modern, cepat, dan responsif untuk bisnis Anda.",
 };
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Tentang Kami — Gorontalo Unite",
+  title: "Tentang Kami",
   description:
     "Gorontalo Unite adalah media informasi dan edukasi visual yang didedikasikan untuk mengangkat sisi terbaik dari Gorontalo.",
 };

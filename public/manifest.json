@@ -44,13 +44,6 @@
       "description": "Baca berita terbaru dari Gorontalo",
       "url": "/good-news",
       "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
-    },
-    {
-      "name": "Tanya AI",
-      "short_name": "AI Chat",
-      "description": "Tanya asisten AI Gorontalo",
-      "url": "/chat",
-      "icons": [{ "src": "/icons/icon-192.png", "sizes": "192x192" }]
     }
   ],
   "screenshots": [

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Shop — Produk Lokal Gorontalo | Gorontalo Unite",
+  title: "Shop — Produk Lokal Gorontalo",
   description:
     "Belanja produk-produk lokal unggulan dari Gorontalo. Kain Karawo, produk pertanian, kerajinan tangan, dan oleh-oleh khas Gorontalo.",
 };

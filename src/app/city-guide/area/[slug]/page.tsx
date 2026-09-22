@@ -5,6 +5,7 @@ import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AREA_PROFILES } from "@/lib/city-guide/area-facts";
 import { REGIONS, regionOf, type RegionSlug } from "@/lib/city-guide/regions";
+import { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,7 @@ export async function generateMetadata({
   if (!isArea(slug)) return {};
   const area = AREA_PROFILES[slug];
   return {
-    title: `${area.name} | City Guide | Gorontalo Unite`,
+    title: `${area.name} | City Guide`,
     description: area.tagline,
     alternates: { canonical: `/city-guide/area/${slug}` },
   };
@@ -32,6 +33,11 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
 
   const area = AREA_PROFILES[slug];
   const region = REGIONS.find((r) => r.slug === slug)!;
+  const breadcrumbItems = [
+    { label: "Home", href: "/" },
+    { label: "City Guide", href: "/city-guide" },
+    { label: region.short },
+  ];
 
   const supabase = await createClient();
   const { data } = await supabase
@@ -53,6 +59,10 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
 
   return (
     <main className="bg-white text-[#302f2c] dark:bg-zinc-950 dark:text-zinc-50">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbItems)) }}
+      />
       {/* Masthead */}
       <section className="relative h-[46vh] min-h-[300px] overflow-hidden bg-[#1b1a17] sm:h-[52vh] sm:max-h-[460px]">
         <Image
