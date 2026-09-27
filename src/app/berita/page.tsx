@@ -8,6 +8,8 @@ import { getVideoStories } from "@/components/video-story/queries";
 import { createClient } from "@/lib/supabase/server";
 import LatestNewsGrid from "./LatestNewsGrid";
 import HeroCarousel from "./HeroCarousel";
+import SliderRow from "./SliderRow";
+import DeskPaginatedList from "./DeskPaginatedList";
 import { articleBelongsToWebCategory, resolveWebCategoryLabel, buildCategoryDeskMap, type CategoryRow } from "./categories";
 
 type DeskMap = Readonly<Record<string, string>>;
@@ -171,38 +173,6 @@ function StoryCard({ article, large = false, deskMap = {} }: { article: Article;
   );
 }
 
-function CompactStory({ article, deskMap = {} }: { article: Article; deskMap?: DeskMap }) {
-  return (
-    <article className="group border-b border-[#d7d1c6] dark:border-zinc-800 pb-4 last:border-0 last:pb-0">
-      <Link href={`/${article.slug}`} className="grid grid-cols-[1fr_108px] gap-4">
-        <div>
-          <Eyebrow article={article} deskMap={deskMap} />
-          <h3 className="font-heading mt-2 line-clamp-3 text-[15px] font-bold leading-[1.16] tracking-[-.015em] transition group-hover:text-[#9b7513] sm:text-[17px]">{article.title}</h3>
-        </div>
-        <div className="relative">
-          <ArticleImage article={article} className="aspect-square" sizes="108px" />
-        </div>
-      </Link>
-    </article>
-  );
-}
-
-function DarkFeature({ article, deskMap = {} }: { article: Article; deskMap?: DeskMap }) {
-  return (
-    <article className="group relative min-h-[430px] overflow-hidden rounded-[4px] sm:min-h-[560px]">
-      <ArticleImage article={article} className="absolute inset-0 h-full w-full" priority sizes="(max-width: 768px) 100vw, 70vw" />
-      <div className="absolute inset-0 bg-gradient-to-t from-black via-black/35 to-transparent" />
-      <Link href={`/${article.slug}`} className="absolute inset-0 flex items-end p-6 sm:p-9">
-        <div className="max-w-3xl text-white">
-          <Eyebrow article={article} light deskMap={deskMap} />
-          <h3 className="font-heading mt-3 text-[26px] font-bold leading-[1.04] tracking-[-.035em] sm:text-[38px]">{article.title}</h3>
-          {article.excerpt ? <p className="mt-4 hidden max-w-2xl text-sm leading-relaxed text-white/75 sm:line-clamp-2">{article.excerpt}</p> : null}
-        </div>
-      </Link>
-    </article>
-  );
-}
-
 const NAV_ORDER: DeskKey[] = ["culture", "travel", "culinary", "life", "people", "news"];
 
 const QUICK_LINKS = [
@@ -321,12 +291,12 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
   // that also fills /reels?kategori=sponsored.
   const videoStories = await getVideoStories(HOME_SLIDES);
 
-  const news = articlesFor(remaining, "news", 5, deskMap);
-  const travel = articlesFor(remaining, "travel", 5, deskMap);
-  const culinary = articlesFor(remaining, "culinary", 3, deskMap);
-  const culture = articlesFor(remaining, "culture", 3, deskMap);
-  const people = articlesFor(remaining, "people", 4, deskMap);
-  const life = articlesFor(remaining, "life", 5, deskMap);
+  const news = articlesFor(remaining, "news", 15, deskMap);
+  const travel = articlesFor(remaining, "travel", 15, deskMap);
+  const culinary = articlesFor(remaining, "culinary", 9, deskMap);
+  const culture = articlesFor(remaining, "culture", 9, deskMap);
+  const people = articlesFor(remaining, "people", 9, deskMap);
+  const life = articlesFor(remaining, "life", 15, deskMap);
 
   return (
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-[#302f2c] dark:text-zinc-50">
@@ -360,53 +330,42 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
         <section id="culture" className="scroll-mt-24 border-t border-[#d7d1c6] dark:border-zinc-800 bg-white dark:bg-zinc-950 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="culture" title="Culture" />
-            {culture.length ? <div className="grid gap-8 sm:grid-cols-3">{culture.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</div> : <EmptyDesk />}
+            {culture.length ? <SliderRow>{culture.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</SliderRow> : <EmptyDesk />}
           </div>
         </section>
 
         <section id="travel" className="scroll-mt-24 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="travel" title="Tourism" />
-            {travel.length ? <div className="grid gap-6 lg:grid-cols-[1.45fr_.55fr]">
-              <DarkFeature article={travel[0]} deskMap={deskMap} />
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">{travel.slice(1).map((article) => <CompactStory key={article.id} article={article} deskMap={deskMap} />)}</div>
-            </div> : <EmptyDesk />}
+            {travel.length ? <DeskPaginatedList articles={travel} deskMap={deskMap} variant="dark" /> : <EmptyDesk />}
           </div>
         </section>
 
         <section id="culinary" className="scroll-mt-24 border-y border-[#dedede] dark:border-zinc-800 bg-[#f6f6f6] dark:bg-zinc-900 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="culinary" title="Culinary" />
-            {culinary.length ? <div className="grid gap-8 sm:grid-cols-3">{culinary.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</div> : <EmptyDesk />}
+            {culinary.length ? <SliderRow>{culinary.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</SliderRow> : <EmptyDesk />}
           </div>
         </section>
 
         <section id="life" className="scroll-mt-24 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="life" title="Lifestyle" />
-            {life.length ? <div className="grid gap-6 lg:grid-cols-[1.45fr_.55fr]">
-              <DarkFeature article={life[0]} deskMap={deskMap} />
-              <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-1">{life.slice(1).map((article) => <CompactStory key={article.id} article={article} deskMap={deskMap} />)}</div>
-            </div> : <EmptyDesk />}
+            {life.length ? <DeskPaginatedList articles={life} deskMap={deskMap} variant="dark" /> : <EmptyDesk />}
           </div>
         </section>
 
         <section id="people" className="scroll-mt-24 border-y border-[#dedede] dark:border-zinc-800 bg-[#f7f7f7] dark:bg-zinc-900 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="people" title="People" />
-            {people.length ? <div className="flex snap-x gap-5 overflow-x-auto pb-3 [scrollbar-width:none] sm:grid sm:grid-cols-2 sm:overflow-visible lg:grid-cols-4 [&::-webkit-scrollbar]:hidden">
-              {people.map((article) => <div key={article.id} className="min-w-[78vw] snap-start sm:min-w-0"><StoryCard article={article} deskMap={deskMap} /></div>)}
-            </div> : <EmptyDesk />}
+            {people.length ? <SliderRow itemClassName="w-[78vw] sm:w-[calc((100%-3.75rem)/4)]">{people.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</SliderRow> : <EmptyDesk />}
           </div>
         </section>
 
         <section id="news" className="scroll-mt-24 py-12 sm:py-16">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
-            <SectionTitle id="news" title="Regional" showViewAll={false} />
-            {news.length ? <div className="grid gap-8 lg:grid-cols-[1.2fr_.8fr]">
-              <StoryCard article={news[0]} large deskMap={deskMap} />
-              <div className="grid content-start gap-4 sm:grid-cols-2 lg:grid-cols-1">{news.slice(1).map((article) => <CompactStory key={article.id} article={article} deskMap={deskMap} />)}</div>
-            </div> : <EmptyDesk />}
+            <SectionTitle id="news" title="Regional" />
+            {news.length ? <DeskPaginatedList articles={news} deskMap={deskMap} variant="light" /> : <EmptyDesk />}
           </div>
         </section>
 

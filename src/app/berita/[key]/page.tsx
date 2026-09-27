@@ -1,18 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Suspense } from "react";
 import { createClient } from "@/lib/supabase/server";
 import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, CATEGORY_HERO, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, type CategoryRow } from "../categories";
-import BeritaPagination from "../BeritaPagination";
+import CategoryArticleList from "./CategoryArticleList";
 import Breadcrumbs, { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
 import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/app/news/[id]/page";
 import VideoStoryPage from "@/components/video-story/VideoStoryPage";
 import { VIDEO_STORY_KEY, VIDEO_STORY_TITLE } from "@/components/video-story/data";
 
 export const dynamic = "force-dynamic";
-
-const LIMIT = 9;
 
 const CAT_MAP = Object.fromEntries(CATEGORIES.map((c) => [c.key, c]));
 
@@ -60,19 +57,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-function formatDate(d: string | null) {
-  if (!d) return "";
-  return new Date(d).toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-    timeZone: "Asia/Makassar",
-  });
-}
-
 export default async function BeritaCategoryPage({ params, searchParams }: Props) {
   const { key }  = await params;
-  const { page: pageParam } = await searchParams;
   const cat = sectionFor(key);
   if (!cat) return <NewsDetailPage params={Promise.resolve({ id: key })} />;
 
@@ -83,8 +69,6 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
     return <VideoStoryPage brand={merek?.trim() || null} page={Math.max(1, parseInt(hal ?? "1"))} />;
   }
 
-  const page   = Math.max(1, parseInt(pageParam ?? "1"));
-  const offset = (page - 1) * LIMIT;
   const colors = CAT_COLOR[cat.label] ?? DEFAULT_COLOR;
   const admin  = await createClient();
 
@@ -109,10 +93,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
     }, key, deskMap);
     return (article.categories as string[] | null)?.includes(cat.label) || article.category === cat.label;
   });
-  const totalCount = matching.length;
-  const totalPages = Math.ceil(totalCount / LIMIT);
-
-  const articles: Article[] = matching.slice(offset, offset + LIMIT).map((a) => ({
+  const articles: Article[] = matching.map((a) => ({
     id:           a.id as string,
     title:        a.title as string,
     slug:         a.slug as string,
@@ -183,59 +164,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
             </p>
           </div>
         ) : (
-          <>
-            <div className="grid grid-cols-1 gap-4 lg:grid-cols-2 lg:gap-5">
-              {articles.map((article) => {
-                const articleCategory = article.categories[0] || article.category;
-                const articleColors = CAT_COLOR[articleCategory] ?? DEFAULT_COLOR;
-                const publishedAt = article.published_at ?? article.created_at;
-
-                return (
-                  <Link
-                    key={article.id}
-                    href={`/${article.slug}`}
-                    className="group flex min-h-36 overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-[0_10px_35px_rgba(15,23,42,.06)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_40px_rgba(15,23,42,.1)] dark:border-zinc-800 dark:bg-zinc-900 sm:min-h-48"
-                  >
-                    <div className="category-article-image relative min-h-full shrink-0 overflow-hidden bg-stone-100 dark:bg-zinc-800">
-                      {article.image_thumb_url ?? article.image_url ? (
-                        <Image
-                          src={(article.image_thumb_url ?? article.image_url) as string}
-                          alt=""
-                          fill
-                          unoptimized
-                          className="object-cover transition duration-500 group-hover:scale-[1.03]"
-                          sizes="(max-width: 639px) 124px, (max-width: 1023px) 208px, 190px"
-                        />
-                      ) : (
-                        <div className={`absolute inset-0 ${articleColors.bg}`} />
-                      )}
-                      {article.is_trending && (
-                        <span className="absolute left-2 top-2 rounded-full bg-orange-500 px-2 py-0.5 text-[9px] font-semibold text-white">
-                          Trending
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="flex min-w-0 flex-1 flex-col justify-center px-4 py-4 sm:px-6 sm:py-5">
-                      <span className={`w-fit rounded-full px-2 py-1 text-[9px] font-bold uppercase tracking-[.1em] sm:text-[10px] ${articleColors.badge}`}>
-                        {articleCategory}
-                      </span>
-                      <h2 className="font-heading mt-3 line-clamp-3 text-sm font-semibold leading-snug tracking-[-.015em] text-[#101018] transition group-hover:text-brand dark:text-white sm:text-lg">
-                        {article.title}
-                      </h2>
-                      <time dateTime={publishedAt} className="mt-4 text-[10px] text-stone-400 dark:text-zinc-500 sm:text-xs">
-                        {formatDate(publishedAt)}
-                      </time>
-                    </div>
-                  </Link>
-                );
-              })}
-            </div>
-
-            <Suspense>
-              <BeritaPagination page={page} totalPages={totalPages} basePath={`/category/${key}`} />
-            </Suspense>
-          </>
+          <CategoryArticleList articles={articles} />
         )}
       </main>
     </div>
