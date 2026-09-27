@@ -12,7 +12,9 @@ export async function GET(request: NextRequest) {
     ? requestedNext
     : "/";
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
+  // The host that was actually visited, so preview and local deployments
+  // redirect back to themselves instead of bouncing to production.
+  const siteUrl = request.nextUrl.origin;
   if (providerError || !code) {
     return NextResponse.redirect(new URL("/sign-in?error=oauth", siteUrl));
   }
@@ -35,7 +37,6 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Always redirect to the live site root (or next param), never localhost
   const redirectUrl = new URL(next, siteUrl);
   return NextResponse.redirect(redirectUrl);
 }
