@@ -53,3 +53,4 @@ next-env.d.ts
 
 # Claude Code local session state (may contain local tokens/config).
 /.claude/
+.scratch

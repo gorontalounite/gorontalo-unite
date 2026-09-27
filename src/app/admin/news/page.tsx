@@ -27,6 +27,7 @@ interface ArticleRow {
   tags:         string[] | null;
   excerpt:      string | null;
   image_url:    string | null;
+  image_thumb_url: string | null;
   is_trending:  boolean | null;
   editor_choice: boolean | null;
   is_sponsored:  boolean | null;
@@ -83,7 +84,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
   const [articles, { data: categoryRows }, { data: profileRows }] = await Promise.all([
     selectWithOptional<ArticleRow>(
       runArticles,
-      ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "is_trending", "editor_choice", "is_sponsored", "sponsor_name", "sponsor_logo_url", "author_id", "published", "published_at", "created_at", "deleted_at"],
+      ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "image_thumb_url", "is_trending", "editor_choice", "is_sponsored", "sponsor_name", "sponsor_logo_url", "author_id", "published", "published_at", "created_at", "deleted_at"],
       [],
     ),
     admin.from("categories").select("id, name, parent_id, desk_key"),
@@ -143,6 +144,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     canonicalCategory: row.canonicalCategory,
     excerpt: row.excerpt,
     image_url: row.image_url,
+    image_thumb_url: row.image_thumb_url,
     is_trending: Boolean(row.is_trending),
     editor_choice: Boolean(row.editor_choice),
     is_sponsored: Boolean(row.is_sponsored),

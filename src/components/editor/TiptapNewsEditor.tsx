@@ -343,6 +343,7 @@ export default function TiptapNewsEditor({ editId, onExit, onSaved, initialMeta,
     const payload = {
       title: meta.title, slug: meta.slug || slugify(meta.title), excerpt: summary || null,
       content: blocksToText(blocks), blocks, image_url: meta.image_url || null,
+      image_thumb_url: meta.image_thumb_url || null,
       category: categories[0], categories, tags: meta.tags.length ? meta.tags : null,
       published: publish,
       published_at: publish ? toMakassarIso(meta.published_at) : null,

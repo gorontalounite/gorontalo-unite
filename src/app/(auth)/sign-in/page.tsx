@@ -26,8 +26,7 @@ function SignInForm() {
   const handleGoogle = async () => {
     setLoading(true);
     setError(null);
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
-    const callbackUrl = new URL("/auth/callback", siteUrl);
+    const callbackUrl = new URL("/auth/callback", window.location.origin);
     callbackUrl.searchParams.set("next", next);
     const { error: oauthError } = await createClient().auth.signInWithOAuth({
       provider: "google",

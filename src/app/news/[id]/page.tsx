@@ -108,7 +108,7 @@ export async function NewsDetailPage({ params }: Props) {
   // Related posts
   const { data: relatedRaw } = await admin
     .from("articles")
-    .select("id, title, slug, category, image_url, published_at, excerpt")
+    .select("id, title, slug, category, image_url, image_thumb_url, published_at, excerpt")
     .eq("published", true).eq("category", article.category)
     .neq("slug", slug).neq("category", "Portfolio")
     .order("published_at", { ascending: false }).limit(3);
@@ -216,7 +216,7 @@ export async function NewsDetailPage({ params }: Props) {
         <ArticleHero
           title={article.title}
           excerpt={displayExcerpt}
-          imageUrl={(article.image_url as string | null) ?? null}
+          imageUrl={(article.image_overlay_url as string | null) ?? (article.image_url as string | null) ?? null}
           categories={heroCategories}
           isTrending={isTrending}
           isSponsored={isSponsored}

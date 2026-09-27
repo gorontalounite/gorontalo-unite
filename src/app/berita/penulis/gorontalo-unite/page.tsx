@@ -16,6 +16,7 @@ interface AuthorArticle {
   title: string;
   slug: string;
   image_url: string | null;
+  image_thumb_url: string | null;
   category: string;
   categories: string[] | null;
   published_at: string | null;
@@ -48,7 +49,7 @@ export default async function GorontaloUniteAuthorPage() {
   const supabase = await createClient();
   const { data } = await supabase
     .from("articles")
-    .select("id, title, slug, image_url, category, categories, published_at, created_at")
+    .select("id, title, slug, image_url, image_thumb_url, category, categories, published_at, created_at")
     .eq("published", true)
     .neq("category", "Portfolio")
     .order("published_at", { ascending: false, nullsFirst: false })
@@ -109,9 +110,9 @@ export default async function GorontaloUniteAuthorPage() {
                   className="group flex min-h-36 overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-[0_10px_35px_rgba(15,23,42,.06)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_40px_rgba(15,23,42,.1)] dark:border-zinc-800 dark:bg-zinc-900 sm:min-h-48"
                 >
                   <div className="author-article-image relative min-h-full shrink-0 overflow-hidden bg-stone-100 dark:bg-zinc-800">
-                    {article.image_url ? (
+                    {article.image_thumb_url ?? article.image_url ? (
                       <Image
-                        src={article.image_url}
+                        src={(article.image_thumb_url ?? article.image_url) as string}
                         alt=""
                         fill
                         className="object-cover transition duration-500 group-hover:scale-[1.03]"

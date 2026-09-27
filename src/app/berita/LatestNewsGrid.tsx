@@ -10,6 +10,7 @@ type LatestArticle = {
   slug: string;
   excerpt: string | null;
   image_url: string | null;
+  image_thumb_url: string | null;
   published_at: string | null;
   created_at: string;
 };
@@ -32,9 +33,9 @@ function displayDate(value: string) {
 function Thumbnail({ article }: { article: LatestArticle }) {
   return (
     <div className="relative aspect-[4/3] overflow-hidden rounded-[4px] bg-[#e8e4dc] dark:bg-zinc-800">
-      {article.image_url ? (
+      {article.image_thumb_url ?? article.image_url ? (
         <Image
-          src={article.image_url}
+          src={(article.image_thumb_url ?? article.image_url) as string}
           alt=""
           fill
           unoptimized
