@@ -154,11 +154,13 @@ export function GridToolbar({
 }
 
 export function BulkBar({
-  count, inTrash, onDraft, onRestore, onDelete, onClear,
+  count, inTrash, onPublish, onDraft, onRestore, onDelete, onClear,
 }: {
   count: number;
   /** Viewing the bin: the two actions become put-back and destroy. */
   inTrash?: boolean;
+  /** Only News currently offers a one-click bulk publish. */
+  onPublish?: () => void;
   onDraft: () => void;
   onRestore: () => void;
   onDelete: () => void;
@@ -178,6 +180,7 @@ export function BulkBar({
           </>
         ) : (
           <>
+            {onPublish && <button type="button" onClick={onPublish} className={secondary}>Jadikan Live</button>}
             <button type="button" onClick={onDraft} className={secondary}>Jadikan Draft</button>
             <button type="button" onClick={onDelete} className={destructive}>Pindahkan ke Sampah</button>
           </>

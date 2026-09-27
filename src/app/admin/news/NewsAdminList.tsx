@@ -38,9 +38,10 @@ export interface NewsRow {
 type SortField = "title" | "category" | "published_at" | "created_at" | "published" | "is_trending" | "editor_choice";
 type SortDir   = "asc" | "desc";
 
-type BulkAction = "draft" | "trash" | "restore" | "purge";
+type BulkAction = "publish" | "draft" | "trash" | "restore" | "purge";
 
 const BULK_COPY: Record<BulkAction, { title: (n: number) => string; body: string; confirm: string }> = {
+  publish: { title: (n) => `Jadikan ${n} artikel live?`,         body: "Artikel yang dipilih akan langsung tampil ke publik di situs.", confirm: "Jadikan Live" },
   draft:   { title: (n) => `Jadikan ${n} artikel draft?`,        body: "Artikel yang dipilih akan disembunyikan dari publik.", confirm: "Jadikan Draft" },
   trash:   { title: (n) => `Pindahkan ${n} artikel ke sampah?`,  body: "Artikel turun dari situs dan bisa dipulihkan dari tab Sampah.", confirm: "Pindahkan" },
   restore: { title: (n) => `Pulihkan ${n} artikel?`,             body: "Artikel kembali sebagai draft, belum terbit lagi.",    confirm: "Pulihkan" },
@@ -122,6 +123,10 @@ export default function NewsAdminList({
       action === "trash"   ? { id }
       : action === "purge" ? { id, permanent: true }
       : action === "restore" ? { id, restore: true }
+      : action === "publish" ? {
+          id, published: true,
+          published_at: rows.find((row) => row.id === id)?.published_at ?? new Date().toISOString(),
+        }
       : { id, published: false, published_at: null },
     ),
   });
@@ -335,6 +340,7 @@ export default function NewsAdminList({
       <BulkBar
         count={selected.size}
         inTrash={inTrash}
+        onPublish={() => setBulkAction("publish")}
         onDraft={() => setBulkAction("draft")}
         onRestore={() => setBulkAction("restore")}
         onDelete={() => setBulkAction(inTrash ? "purge" : "trash")}
