@@ -53,7 +53,7 @@ export default function NavSearch() {
               type="search"
               placeholder="Search news…"
               aria-label="Search keyword"
-              className="min-h-11 min-w-0 flex-1 rounded-xl border border-gray-200 bg-white px-4 text-sm outline-none focus-visible:border-brand dark:border-zinc-700 dark:bg-zinc-900"
+              className="min-h-11 min-w-0 flex-1 rounded-xl border border-gray-200 bg-white px-4 text-[16px] outline-none focus-visible:border-brand dark:border-zinc-700 dark:bg-zinc-900 sm:text-sm"
             />
             <button
               type="submit"

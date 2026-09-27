@@ -230,7 +230,7 @@ export async function NewsDetailPage({ params }: Props) {
       <div className="article-snap mx-auto max-w-5xl scroll-mt-14 px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8">
         <Breadcrumbs
           items={breadcrumbItems}
-          className="mb-4 text-xs text-stone-400 dark:text-zinc-500"
+          className="mx-auto mb-6 max-w-3xl border-b border-stone-100 pb-4 text-[11px] text-stone-400 dark:border-zinc-800 dark:text-zinc-500"
         />
         {/* Standfirst, set as a quote at the head of the story rather than over the photo. */}
 
@@ -274,9 +274,13 @@ export async function NewsDetailPage({ params }: Props) {
         {Array.isArray(article.tags) && article.tags.length > 0 && (
           <div className="mt-5 flex flex-wrap gap-1.5">
             {(article.tags as string[]).map((tag) => (
-              <span key={tag} className="rounded-full bg-gray-100 px-2 py-1 text-[9px] text-gray-600 dark:bg-zinc-800 dark:text-gray-300 sm:text-xs">
+              <Link
+                key={tag}
+                href={`/tag/${encodeURIComponent(tag.toLowerCase())}`}
+                className="rounded-full bg-gray-100 px-2 py-1 text-[9px] text-gray-600 transition-colors hover:bg-brand hover:text-black dark:bg-zinc-800 dark:text-gray-300 dark:hover:bg-yellow-400 sm:text-xs"
+              >
                 {tag}
-              </span>
+              </Link>
             ))}
           </div>
         )}
