@@ -30,6 +30,7 @@ export interface NewsRow {
   author_id:         string | null;
   published:         boolean;
   published_at:      string | null;
+  source_published_at: string | null;
   created_at:        string;
   /** Null unless the article is in the bin. */
   deleted_at:        string | null;
@@ -123,10 +124,13 @@ export default function NewsAdminList({
       action === "trash"   ? { id }
       : action === "purge" ? { id, permanent: true }
       : action === "restore" ? { id, restore: true }
-      : action === "publish" ? {
-          id, published: true,
-          published_at: rows.find((row) => row.id === id)?.published_at ?? new Date().toISOString(),
-        }
+      : action === "publish" ? (() => {
+          const row = rows.find((r) => r.id === id);
+          return {
+            id, published: true,
+            published_at: row?.published_at ?? row?.source_published_at ?? new Date().toISOString(),
+          };
+        })()
       : { id, published: false, published_at: null },
     ),
   });
@@ -168,7 +172,7 @@ export default function NewsAdminList({
           options={STATUS_OPTIONS}
           onChange={(next) => update(row, {
             published: next === "published",
-            published_at: next === "published" ? (row.published_at ?? new Date().toISOString()) : null,
+            published_at: next === "published" ? (row.published_at ?? row.source_published_at ?? new Date().toISOString()) : null,
           })}
         />
       ),

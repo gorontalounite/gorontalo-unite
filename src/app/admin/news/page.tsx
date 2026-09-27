@@ -36,6 +36,7 @@ interface ArticleRow {
   author_id:    string | null;
   published:    boolean;
   published_at: string | null;
+  source_published_at: string | null;
   created_at:   string;
   deleted_at:   string | null;
 }
@@ -84,7 +85,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
   const [articles, { data: categoryRows }, { data: profileRows }] = await Promise.all([
     selectWithOptional<ArticleRow>(
       runArticles,
-      ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "image_thumb_url", "is_trending", "editor_choice", "is_sponsored", "sponsor_name", "sponsor_logo_url", "author_id", "published", "published_at", "created_at", "deleted_at"],
+      ["id", "title", "slug", "category", "categories", "tags", "excerpt", "image_url", "image_thumb_url", "is_trending", "editor_choice", "is_sponsored", "sponsor_name", "sponsor_logo_url", "author_id", "published", "published_at", "source_published_at", "created_at", "deleted_at"],
       [],
     ),
     admin.from("categories").select("id, name, parent_id, desk_key"),
@@ -153,6 +154,7 @@ export default async function AdminNewsPage({ searchParams }: PageProps) {
     author_id: row.author_id,
     published: row.published,
     published_at: row.published_at,
+    source_published_at: row.source_published_at,
     created_at: row.created_at,
     deleted_at: row.deleted_at ?? null,
   }));

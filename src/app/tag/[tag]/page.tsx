@@ -63,13 +63,11 @@ export default async function TagArchivePage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbItems)) }}
       />
-      <section className="bg-white pt-4 dark:bg-zinc-950 sm:pt-6">
+      <section className="bg-white pt-8 dark:bg-zinc-950 sm:pt-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-8">
-          <div className={`relative flex min-h-[150px] items-end overflow-hidden rounded-2xl aspect-[851/315] ${DEFAULT_COLOR.bg}`}>
-            <h1 className={`font-heading relative px-5 pb-4 text-3xl font-semibold tracking-[-.025em] sm:px-8 sm:pb-6 sm:text-4xl ${DEFAULT_COLOR.text}`}>
-              #{label}
-            </h1>
-          </div>
+          <h1 className={`font-heading text-3xl font-semibold tracking-[-.025em] sm:text-4xl ${DEFAULT_COLOR.text}`}>
+            #{label}
+          </h1>
         </div>
       </section>
 

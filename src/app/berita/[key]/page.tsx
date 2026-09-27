@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { createClient } from "@/lib/supabase/server";
-import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, CATEGORY_HERO, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, type CategoryRow } from "../categories";
+import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, type CategoryRow } from "../categories";
 import CategoryArticleList from "./CategoryArticleList";
 import Breadcrumbs, { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
 import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/app/news/[id]/page";
@@ -109,7 +108,6 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
     view_count:   (a.view_count as number) ?? 0,
   }));
 
-  const hero = CATEGORY_HERO[key];
   const breadcrumbItems = [{ label: "Home", href: "/" }, { label: cat.label }];
 
   return (
@@ -118,35 +116,11 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbItems)) }}
       />
-      {/* The banner carries the section; the name is the only text it needs. */}
-      <section className="bg-white pt-4 dark:bg-zinc-950 sm:pt-6">
+      <section className="bg-white pt-8 dark:bg-zinc-950 sm:pt-10">
         <div className="mx-auto max-w-7xl px-4 sm:px-8">
-          <div className="relative flex min-h-[150px] items-end overflow-hidden rounded-2xl aspect-[851/315]">
-            {hero ? (
-              <>
-                <Image
-                  src={hero}
-                  alt=""
-                  fill
-                  priority
-                  sizes="(min-width: 1280px) 1216px, 100vw"
-                  className="object-cover"
-                />
-                <div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/25 to-transparent" />
-              </>
-            ) : (
-              // No artwork for this section yet — a tinted band rather than
-              // somebody else's photograph.
-              <div aria-hidden="true" className={`absolute inset-0 ${colors.bg}`} />
-            )}
-            <h1
-              className={`font-heading relative px-5 pb-4 text-3xl font-semibold tracking-[-.025em] sm:px-8 sm:pb-6 sm:text-4xl ${
-                hero ? "text-white [text-shadow:0_1px_12px_rgba(0,0,0,.45)]" : colors.text
-              }`}
-            >
-              {cat.label}
-            </h1>
-          </div>
+          <h1 className={`font-heading text-3xl font-semibold tracking-[-.025em] sm:text-4xl ${colors.text}`}>
+            {cat.label}
+          </h1>
         </div>
       </section>
 
