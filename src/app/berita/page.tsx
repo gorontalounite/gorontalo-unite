@@ -30,6 +30,7 @@ type Article = {
   slug: string;
   excerpt: string | null;
   image_url: string | null;
+  image_thumb_url: string | null;
   category: string;
   categories: string[] | null;
   tags: string[] | null;
@@ -42,7 +43,7 @@ type Article = {
 
 type DeskKey = "news" | "whats-on" | "travel" | "culinary" | "culture" | "people" | "life";
 
-const ARTICLE_FIELDS = "id, title, slug, excerpt, image_url, category, categories, tags, published_at, created_at, is_trending, editor_choice, view_count";
+const ARTICLE_FIELDS = "id, title, slug, excerpt, image_url, image_thumb_url, category, categories, tags, published_at, created_at, is_trending, editor_choice, view_count";
 
 const DESKS: ReadonlyArray<{ key: DeskKey; label: string; description: string; terms: string[] }> = [
   {
@@ -117,9 +118,9 @@ function deskLabel(article: Article, deskMap: DeskMap = {}) {
 function ArticleImage({ article, className, priority = false, sizes = "(max-width: 768px) 100vw, 50vw" }: { article: Article; className: string; priority?: boolean; sizes?: string }) {
   return (
     <div className={`relative overflow-hidden rounded-[4px] bg-[#e8e4dc] dark:bg-zinc-800 ${className}`}>
-      {article.image_url ? (
+      {article.image_thumb_url ?? article.image_url ? (
         <Image
-          src={article.image_url}
+          src={(article.image_thumb_url ?? article.image_url) as string}
           alt=""
           fill
           priority={priority}

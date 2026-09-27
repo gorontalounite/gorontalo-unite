@@ -6,6 +6,7 @@ export interface RelatedItem {
   slug:         string;
   category:     string;
   image_url:    string | null;
+  image_thumb_url: string | null;
   published_at: string | null;
   excerpt:      string | null;
 }
@@ -33,9 +34,9 @@ export default function RelatedPosts({ items, basePath }: Props) {
           >
             {/* Thumbnail */}
             <div className="aspect-video relative rounded-xl overflow-hidden mb-3 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-zinc-800 dark:to-zinc-700 shrink-0">
-              {item.image_url && (
+              {(item.image_thumb_url ?? item.image_url) && (
                 <img
-                  src={item.image_url}
+                  src={(item.image_thumb_url ?? item.image_url) as string}
                   alt={item.title}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   loading="lazy"

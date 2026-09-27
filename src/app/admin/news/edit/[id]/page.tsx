@@ -35,6 +35,7 @@ export default async function EditNewsPage({ params }: Props) {
     categories:      (article.categories as string[]) ?? (article.category ? [article.category] : []),
     tags:            (article.tags as string[]) ?? [],
     image_url:       article.image_url ?? "",
+    image_thumb_url: article.image_thumb_url ?? "",
     source_url:      article.source_url ?? "",
     published:       article.published ?? false,
     published_at:    article.published_at ? article.published_at.slice(0, 16) : "",

@@ -26,6 +26,7 @@ interface ArticleRecord {
   categories?: string[] | null;
   tags?: string[] | null;
   image_url?: string | null;
+  image_thumb_url?: string | null;
   source_url?: string | null;
   published?: boolean | null;
   published_at?: string | null;
@@ -51,6 +52,7 @@ function metaOf(article: ArticleRecord): Partial<PostMeta> {
     categories:       article.categories ?? (article.category ? [article.category] : []),
     tags:             article.tags ?? [],
     image_url:        article.image_url ?? "",
+    image_thumb_url:  article.image_thumb_url ?? "",
     source_url:       article.source_url ?? "",
     published:        article.published ?? false,
     published_at:     article.published_at ? article.published_at.slice(0, 16) : "",

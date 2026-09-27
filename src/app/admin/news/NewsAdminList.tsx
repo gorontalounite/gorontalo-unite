@@ -20,6 +20,7 @@ export interface NewsRow {
   canonicalCategory: string;
   excerpt:           string | null;
   image_url:         string | null;
+  image_thumb_url:   string | null;
   is_trending:       boolean;
   editor_choice:     boolean;
   /** The hero shows the collaboration line only when this and a name are set. */
@@ -169,6 +170,17 @@ export default function NewsAdminList({
     },
     {
       key: "thumbnail", header: "Thumbnail", width: 96,
+      render: (row) => (
+        <ImageCell
+          src={row.image_thumb_url}
+          alt={row.title}
+          onChange={(next) => update(row, { image_thumb_url: next })}
+          onError={setError}
+        />
+      ),
+    },
+    {
+      key: "overlayImage", header: "Overlay", width: 96,
       render: (row) => (
         <ImageCell
           src={row.image_url}

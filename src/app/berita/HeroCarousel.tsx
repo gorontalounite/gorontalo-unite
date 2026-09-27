@@ -11,6 +11,7 @@ export interface HeroArticleData {
   title: string;
   excerpt: string | null;
   image_url: string | null;
+  image_thumb_url: string | null;
   category: string;
   categories: string[] | null;
   tags: string[] | null;
@@ -39,8 +40,8 @@ function HeroEyebrow({ article, deskMap }: { article: HeroArticleData; deskMap: 
 function HeroImage({ article, className, priority = false, sizes }: { article: HeroArticleData; className: string; priority?: boolean; sizes: string }) {
   return (
     <div className={`bg-[#e8e4dc] dark:bg-zinc-800 ${className}`}>
-      {article.image_url ? (
-        <Image src={article.image_url} alt="" fill priority={priority} loading={priority ? "eager" : "lazy"} unoptimized sizes={sizes} className="object-cover" />
+      {article.image_thumb_url ?? article.image_url ? (
+        <Image src={(article.image_thumb_url ?? article.image_url) as string} alt="" fill priority={priority} loading={priority ? "eager" : "lazy"} unoptimized sizes={sizes} className="object-cover" />
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(245,196,0,.55),transparent_28%),linear-gradient(135deg,#eee9df,#cfc9bb)]" />
       )}

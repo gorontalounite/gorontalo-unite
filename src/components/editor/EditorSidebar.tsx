@@ -12,6 +12,7 @@ export interface PostMeta {
   categories:      string[];
   tags:            string[];
   image_url:       string;
+  image_thumb_url?: string;
   published:       boolean;
   published_at:    string;
   seo_title:       string;
@@ -36,7 +37,7 @@ export interface PostMeta {
 
 export const EMPTY_META: PostMeta = {
   title: "", slug: "", excerpt: "", category: "", categories: [], tags: [],
-  image_url: "", published: false, published_at: "",
+  image_url: "", image_thumb_url: "", published: false, published_at: "",
   seo_title: "", seo_description: "",
   is_trending: false,
   is_sponsored: false,
@@ -613,6 +614,16 @@ export default function EditorSidebar({
                 value={meta.image_url}
                 onChange={(url) => setField("image_url", url)}
               />
+              <p className="text-[10px] text-gray-400">Tampil di halaman detail artikel.</p>
+            </Panel>
+
+            {/* Thumbnail image (list/grid cards) */}
+            <Panel title="Gambar Thumbnail">
+              <ImageUploadField
+                value={meta.image_thumb_url ?? ""}
+                onChange={(url) => setField("image_thumb_url", url)}
+              />
+              <p className="text-[10px] text-gray-400">Tampil di kartu daftar/grid. Kosongkan untuk memakai Gambar Unggulan.</p>
             </Panel>
 
 

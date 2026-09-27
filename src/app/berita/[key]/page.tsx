@@ -30,7 +30,7 @@ const sectionFor = (key: string) => (key === VIDEO_STORY.key ? VIDEO_STORY : CAT
 interface Article {
   id: string; title: string; slug: string; category: string; categories: string[];
   tags: string[] | null;
-  excerpt: string | null; image_url: string | null;
+  excerpt: string | null; image_url: string | null; image_thumb_url: string | null;
   published_at: string | null; created_at: string;
   is_trending: boolean; view_count: number;
 }
@@ -91,7 +91,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   const [{ data: raw }, { data: categoryRows }] = await Promise.all([
     admin
       .from("articles")
-      .select("id, title, slug, category, categories, tags, excerpt, image_url, published_at, created_at, is_trending, editor_choice, view_count")
+      .select("id, title, slug, category, categories, tags, excerpt, image_url, image_thumb_url, published_at, created_at, is_trending, editor_choice, view_count")
       .eq("published", true)
       .order("published_at", { ascending: false, nullsFirst: false })
       .limit(500),
@@ -121,6 +121,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
     tags:          a.tags as string[] | null,
     excerpt:      a.excerpt as string | null,
     image_url:    a.image_url as string | null,
+    image_thumb_url: a.image_thumb_url as string | null,
     published_at: a.published_at as string | null,
     created_at:   a.created_at as string,
     is_trending:  (a.is_trending as boolean) ?? false,
@@ -196,9 +197,9 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
                     className="group flex min-h-36 overflow-hidden rounded-2xl border border-stone-100 bg-white shadow-[0_10px_35px_rgba(15,23,42,.06)] transition hover:-translate-y-0.5 hover:shadow-[0_14px_40px_rgba(15,23,42,.1)] dark:border-zinc-800 dark:bg-zinc-900 sm:min-h-48"
                   >
                     <div className="category-article-image relative min-h-full shrink-0 overflow-hidden bg-stone-100 dark:bg-zinc-800">
-                      {article.image_url ? (
+                      {article.image_thumb_url ?? article.image_url ? (
                         <Image
-                          src={article.image_url}
+                          src={(article.image_thumb_url ?? article.image_url) as string}
                           alt=""
                           fill
                           unoptimized
