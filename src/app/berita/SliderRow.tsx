@@ -1,6 +1,6 @@
 "use client";
 
-import { Children, useRef } from "react";
+import { Children, useEffect, useRef, useState } from "react";
 
 function ArrowIcon({ direction }: { direction: "left" | "right" }) {
   return (
@@ -11,15 +11,36 @@ function ArrowIcon({ direction }: { direction: "left" | "right" }) {
 }
 
 /**
- * Wraps already-rendered cards (from a Server Component) in an
- * arrow-controlled horizontal scroller — sliding through the desk in place
- * instead of navigating away, the way the hero carousel already does.
+ * Wraps already-rendered cards (from a Server Component) in a horizontal
+ * scroller with prev/next controls underneath — visible at every breakpoint,
+ * not just hover-revealed side arrows a touch device would never see.
  */
 export default function SliderRow({ children, itemClassName = "w-[78vw] sm:w-[calc((100%-2.5rem)/3)]" }: {
   children: React.ReactNode;
   itemClassName?: string;
 }) {
   const trackRef = useRef<HTMLDivElement>(null);
+  const [atStart, setAtStart] = useState(true);
+  const [atEnd, setAtEnd] = useState(false);
+
+  const updateEdges = () => {
+    const node = trackRef.current;
+    if (!node) return;
+    setAtStart(node.scrollLeft <= 4);
+    setAtEnd(node.scrollLeft + node.clientWidth >= node.scrollWidth - 4);
+  };
+
+  useEffect(() => {
+    updateEdges();
+    const node = trackRef.current;
+    if (!node) return;
+    node.addEventListener("scroll", updateEdges, { passive: true });
+    window.addEventListener("resize", updateEdges);
+    return () => {
+      node.removeEventListener("scroll", updateEdges);
+      window.removeEventListener("resize", updateEdges);
+    };
+  }, []);
 
   const scroll = (direction: 1 | -1) => {
     const node = trackRef.current;
@@ -28,7 +49,7 @@ export default function SliderRow({ children, itemClassName = "w-[78vw] sm:w-[ca
   };
 
   return (
-    <div className="group/slider relative">
+    <div>
       <div
         ref={trackRef}
         className="flex snap-x snap-mandatory gap-5 overflow-x-auto scroll-smooth pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
@@ -38,22 +59,26 @@ export default function SliderRow({ children, itemClassName = "w-[78vw] sm:w-[ca
         ))}
       </div>
 
-      <button
-        type="button"
-        onClick={() => scroll(-1)}
-        aria-label="Sebelumnya"
-        className="absolute left-0 top-1/2 hidden -translate-x-4 -translate-y-1/2 rounded-full border border-stone-200 bg-white/95 p-2 text-[#302f2c] shadow-lg transition hover:bg-white sm:flex dark:border-zinc-700 dark:bg-zinc-800/95 dark:text-white dark:hover:bg-zinc-800"
-      >
-        <ArrowIcon direction="left" />
-      </button>
-      <button
-        type="button"
-        onClick={() => scroll(1)}
-        aria-label="Berikutnya"
-        className="absolute right-0 top-1/2 hidden -translate-y-1/2 translate-x-4 rounded-full border border-stone-200 bg-white/95 p-2 text-[#302f2c] shadow-lg transition hover:bg-white sm:flex dark:border-zinc-700 dark:bg-zinc-800/95 dark:text-white dark:hover:bg-zinc-800"
-      >
-        <ArrowIcon direction="right" />
-      </button>
+      <div className="mt-4 flex items-center justify-center gap-3">
+        <button
+          type="button"
+          onClick={() => scroll(-1)}
+          disabled={atStart}
+          aria-label="Sebelumnya"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-[#302f2c] shadow-sm transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700 dark:disabled:hover:bg-zinc-800"
+        >
+          <ArrowIcon direction="left" />
+        </button>
+        <button
+          type="button"
+          onClick={() => scroll(1)}
+          disabled={atEnd}
+          aria-label="Berikutnya"
+          className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-[#302f2c] shadow-sm transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700 dark:disabled:hover:bg-zinc-800"
+        >
+          <ArrowIcon direction="right" />
+        </button>
+      </div>
     </div>
   );
 }

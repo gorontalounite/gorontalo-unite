@@ -11,7 +11,7 @@ import RelatedPosts, { type RelatedItem } from "@/components/ui/RelatedPosts";
 import ViewTracker        from "@/components/ui/ViewTracker";
 import CommentSection     from "@/components/ui/CommentSection";
 import ArticleHero        from "@/components/ui/ArticleHero";
-import Breadcrumbs, { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
+import { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
 import ReaderRevenueManager from "@/components/google/ReaderRevenueManager";
 import { blocksToText, type Block } from "@/components/editor/types";
 
@@ -228,10 +228,6 @@ export async function NewsDetailPage({ params }: Props) {
         />
 
       <div className="article-snap mx-auto max-w-5xl scroll-mt-14 px-4 pt-8 sm:px-6 sm:pt-10 lg:px-8">
-        <Breadcrumbs
-          items={breadcrumbItems}
-          className="mx-auto mb-6 max-w-3xl border-b border-stone-100 pb-4 text-[11px] text-stone-400 dark:border-zinc-800 dark:text-zinc-500"
-        />
         {/* Standfirst, set as a quote at the head of the story rather than over the photo. */}
 
         {/* Content */}
