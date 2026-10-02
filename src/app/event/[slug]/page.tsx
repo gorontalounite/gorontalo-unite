@@ -11,6 +11,8 @@ import {
 
 export const dynamic = "force-dynamic";
 
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
+
 const SELECT =
   "id, slug, title, category, organizer, venue, address, starts_at, ends_at, image_url, description, registration_url, maps_url, featured, listing_details";
 
@@ -28,10 +30,55 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const { slug } = await params;
   const event = await loadEvent(slug);
   if (!event) return { title: "Event" };
+  const description = event.description.slice(0, 160);
   return {
     title: event.title,
-    description: event.description.slice(0, 160),
+    description,
     alternates: { canonical: `/event/${event.slug}` },
+    // Placeholders are invented listings; they must never reach the index.
+    ...(event.isSample ? { robots: { index: false, follow: true } } : {}),
+    openGraph: {
+      title: event.title,
+      description,
+      url: `/event/${event.slug}`,
+      type: "website",
+      images: event.imageUrl ? [{ url: event.imageUrl, alt: event.title }] : undefined,
+    },
+  };
+}
+
+/** schema.org Event built only from fields the listing actually has. */
+function eventJsonLd(event: EventItem) {
+  return {
+    "@context": "https://schema.org",
+    "@type": "Event",
+    name: event.title,
+    description: event.description || undefined,
+    startDate: event.startsAt,
+    endDate: event.endsAt ?? undefined,
+    eventAttendanceMode: "https://schema.org/OfflineEventAttendanceMode",
+    eventStatus: "https://schema.org/EventScheduled",
+    image: event.imageUrl ? [event.imageUrl] : undefined,
+    location: {
+      "@type": "Place",
+      name: event.venue ?? event.city ?? "Gorontalo",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: event.address ?? undefined,
+        addressLocality: event.city ?? undefined,
+        addressRegion: "Gorontalo",
+        addressCountry: "ID",
+      },
+    },
+    organizer: event.organizer ? { "@type": "Organization", name: event.organizer } : undefined,
+    offers: event.priceFrom !== null ? {
+      "@type": "Offer",
+      price: event.priceFrom,
+      priceCurrency: "IDR",
+      availability: event.soldOut ? "https://schema.org/SoldOut" : "https://schema.org/InStock",
+      url: event.registrationUrl ?? `${BASE}/event/${event.slug}`,
+    } : undefined,
+    url: `${BASE}/event/${event.slug}`,
   };
 }
 
@@ -93,6 +140,12 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbItems)) }}
       />
+      {!event.isSample && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(eventJsonLd(event)) }}
+        />
+      )}
       {event.isSample && (
         <p className="bg-amber-100 px-4 py-2.5 text-center text-[13px] text-amber-900 dark:bg-amber-500/15 dark:text-amber-200">
           Sample view. The event, dates and prices on this page are not real.

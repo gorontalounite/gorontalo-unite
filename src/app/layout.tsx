@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { Inter, Instrument_Serif, Fira_Sans_Extra_Condensed } from "next/font/google";
 import "./globals.css";
 import Navbar                 from "@/components/layout/Navbar";
@@ -125,6 +126,21 @@ const organizationJsonLd = {
   ],
 };
 
+// Names the site in results ("Gorontalo Unite" rather than the bare domain).
+const websiteJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "Gorontalo Unite",
+  alternateName: ["Gorontalo Unite Mediahub", "gorontalounite.com"],
+  url: BASE,
+  inLanguage: "id-ID",
+  publisher: { "@type": "Organization", name: "Gorontalo Unite", url: BASE },
+};
+
+// GA4 loads only once a measurement ID is configured in Vercel, so preview
+// and local builds never report into the production property.
+const GA_ID = process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID;
+
 export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
@@ -143,6 +159,10 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd) }}
+        />
         <ThemeProvider>
           <Navbar />
           <MainContent>{children}</MainContent>
@@ -151,6 +171,14 @@ export default function RootLayout({
         </ThemeProvider>
         {/* PWA service worker registration */}
         <ServiceWorkerRegister />
+        {GA_ID && (
+          <>
+            <Script src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`} strategy="afterInteractive" />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config','${GA_ID}');`}
+            </Script>
+          </>
+        )}
       </body>
     </html>
   );

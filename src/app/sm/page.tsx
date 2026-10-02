@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ServicePage from "@/components/ServicePage";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/sm" },
   title: "Social Media Management",
   description: "Pengelolaan media sosial secara profesional: konten kreatif, jadwal posting, dan engagement.",
 };

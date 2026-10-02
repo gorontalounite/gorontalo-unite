@@ -1,5 +1,7 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { DEFAULT_COLOR } from "@/app/berita/categories";
 import CategoryArticleList, { type CategoryArticle } from "@/app/berita/[key]/CategoryArticleList";
@@ -11,21 +13,13 @@ interface Props {
   params: Promise<{ tag: string }>;
 }
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { tag } = await params;
-  const label = decodeURIComponent(tag);
-  const description = `Berita Gorontalo bertag ${label}.`;
-  return {
-    title: `#${label}`,
-    description,
-    alternates: { canonical: `/tag/${tag}` },
-    openGraph: { title: `#${label} | Gorontalo Unite`, description, url: `/tag/${tag}`, type: "website" },
-  };
-}
+/**
+ * Two in three tags hold a single story. A page that only repeats one card is
+ * thin content, so those stay crawlable for their links but out of the index.
+ */
+const MIN_INDEXABLE_STORIES = 3;
 
-export default async function TagArchivePage({ params }: Props) {
-  const { tag } = await params;
-  const label = decodeURIComponent(tag).toLowerCase();
+const loadTagArticles = cache(async (label: string): Promise<CategoryArticle[]> => {
   const admin = await createClient();
 
   const { data: raw } = await admin
@@ -39,7 +33,7 @@ export default async function TagArchivePage({ params }: Props) {
     ((article.tags as string[] | null) ?? []).some((t) => t.toLowerCase() === label),
   );
 
-  const articles: CategoryArticle[] = matching.map((a) => ({
+  return matching.map((a) => ({
     id:           a.id as string,
     title:        a.title as string,
     slug:         a.slug as string,
@@ -54,6 +48,30 @@ export default async function TagArchivePage({ params }: Props) {
     is_trending:  (a.is_trending as boolean) ?? false,
     view_count:   (a.view_count as number) ?? 0,
   }));
+});
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const { tag } = await params;
+  const label = decodeURIComponent(tag).toLowerCase();
+  // /tag/Gorontalo and /tag/gorontalo list the same stories; both point at
+  // the lowercase URL the article tag links already use.
+  const path = `/tag/${encodeURIComponent(label)}`;
+  const articles = await loadTagArticles(label);
+  const description = `Kumpulan berita dan cerita Gorontalo bertag ${label} — ${articles.length} artikel di Gorontalo Unite.`;
+  return {
+    title: `#${label}`,
+    description,
+    alternates: { canonical: path },
+    ...(articles.length < MIN_INDEXABLE_STORIES ? { robots: { index: false, follow: true } } : {}),
+    openGraph: { title: `#${label} | Gorontalo Unite`, description, url: path, type: "website" },
+  };
+}
+
+export default async function TagArchivePage({ params }: Props) {
+  const { tag } = await params;
+  const label = decodeURIComponent(tag).toLowerCase();
+  const articles = await loadTagArticles(label);
+  if (articles.length === 0) notFound();
 
   const breadcrumbItems = [{ label: "Home", href: "/" }, { label: `#${label}` }];
 

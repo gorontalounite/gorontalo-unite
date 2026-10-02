@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import ServicePage from "@/components/ServicePage";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/da" },
   title: "Data Analytics",
   description: "Analisis data bisnis untuk pengambilan keputusan yang lebih cerdas dan berbasis bukti.",
 };
