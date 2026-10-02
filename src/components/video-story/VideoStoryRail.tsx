@@ -42,12 +42,14 @@ export default function VideoStoryRail({ items }: { items: VideoStoryItem[] }) {
     <div className="relative">
       <div
         ref={rail}
-        className="no-scrollbar -mx-4 flex snap-x snap-mandatory scroll-pl-4 gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:gap-4 sm:scroll-pl-0 sm:px-0"
+        className="no-scrollbar relative -mx-4 flex snap-x snap-mandatory scroll-pl-4 gap-3 overflow-x-auto px-4 pb-1 sm:mx-0 sm:gap-4 sm:scroll-pl-0 sm:px-0"
       >
         {items.map((item, index) => (
           <article key={item.id} className="group w-[42vw] shrink-0 snap-start sm:w-[190px]">
             <button type="button" onClick={() => setOpen(index)}
                     className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFCC00]">
+              {/* sr-only is position:absolute; the `relative` on the scroller keeps
+                  it inside, or it escapes the overflow and widens the page. */}
               <span className="sr-only">Putar: </span>
               <div className="relative aspect-[9/16] overflow-hidden rounded-[4px] bg-zinc-800">
                 {item.thumbnail && (
