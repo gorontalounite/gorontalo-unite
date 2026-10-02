@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { cache } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, type CategoryRow } from "../categories";
@@ -43,8 +44,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const description = key === VIDEO_STORY.key
     ? "Video kolaborasi dan konten berdurasi dari Gorontalo Unite."
     : WEB_CATEGORY_DESCRIPTIONS[key] ?? `Berita terkini seputar ${cat.label} di Gorontalo.`;
+  // An empty section is a soft 404: keep it reachable from the nav but out of
+  // the index until it has stories of its own.
+  const empty = key !== VIDEO_STORY.key && (await loadSectionArticles(key, cat.label)).length === 0;
   return {
     title: cat.label,
+    ...(empty ? { robots: { index: false, follow: true } } : {}),
     description,
     alternates: { canonical: `/category/${key}` },
     openGraph: {
@@ -56,20 +61,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   };
 }
 
-export default async function BeritaCategoryPage({ params, searchParams }: Props) {
-  const { key }  = await params;
-  const cat = sectionFor(key);
-  if (!cat) return <NewsDetailPage params={Promise.resolve({ id: key })} />;
-
-  // Video Story is a video library, not an article archive, so it takes over
-  // the whole page rather than borrowing this one's banner and card list.
-  if (key === VIDEO_STORY.key) {
-    const { brand: merek, hal } = await searchParams as { brand?: string; hal?: string };
-    return <VideoStoryPage brand={merek?.trim() || null} page={Math.max(1, parseInt(hal ?? "1"))} />;
-  }
-
-  const colors = CAT_COLOR[cat.label] ?? DEFAULT_COLOR;
-  const admin  = await createClient();
+/**
+ * The archive's articles, shared by generateMetadata and the page so the
+ * empty-section check behind `noindex` costs no extra query.
+ */
+const loadSectionArticles = cache(async (key: string, label: string): Promise<Article[]> => {
+  const admin = await createClient();
 
   const [{ data: raw }, { data: categoryRows }] = await Promise.all([
     admin
@@ -90,7 +87,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
       title: article.title as string,
       excerpt: article.excerpt as string | null,
     }, key, deskMap);
-    return (article.categories as string[] | null)?.includes(cat.label) || article.category === cat.label;
+    return (article.categories as string[] | null)?.includes(label) || article.category === label;
   });
   const articles: Article[] = matching.map((a) => ({
     id:           a.id as string,
@@ -107,6 +104,24 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
     is_trending:  (a.is_trending as boolean) ?? false,
     view_count:   (a.view_count as number) ?? 0,
   }));
+
+  return articles;
+});
+
+export default async function BeritaCategoryPage({ params, searchParams }: Props) {
+  const { key }  = await params;
+  const cat = sectionFor(key);
+  if (!cat) return <NewsDetailPage params={Promise.resolve({ id: key })} />;
+
+  // Video Story is a video library, not an article archive, so it takes over
+  // the whole page rather than borrowing this one's banner and card list.
+  if (key === VIDEO_STORY.key) {
+    const { brand: merek, hal } = await searchParams as { brand?: string; hal?: string };
+    return <VideoStoryPage brand={merek?.trim() || null} page={Math.max(1, parseInt(hal ?? "1"))} />;
+  }
+
+  const colors = CAT_COLOR[cat.label] ?? DEFAULT_COLOR;
+  const articles = await loadSectionArticles(key, cat.label);
 
   const breadcrumbItems = [{ label: "Home", href: "/" }, { label: cat.label }];
 

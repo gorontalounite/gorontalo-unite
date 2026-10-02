@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import MediaKitPage from "./MediaKitPage";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/media-kit" },
   title: "Media Kit — @gorontalo.unite",
   description:
     "Instagram media kit resmi @gorontalo.unite. 63K+ followers, 112K monthly reach, 1,1M+ views/bulan. Rate card endorse otomatis berbasis insight akun.",

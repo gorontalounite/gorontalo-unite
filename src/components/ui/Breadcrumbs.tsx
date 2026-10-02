@@ -10,10 +10,14 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
 
 /** BreadcrumbList JSON-LD for the same trail a <Breadcrumbs> renders. */
 export function breadcrumbJsonLd(items: BreadcrumbItem[]) {
+  // Google rejects a ListItem without `item` anywhere but the last position,
+  // so an unlinked middle crumb (a City Guide category, say) is left out of
+  // the markup while still showing in the visible trail.
+  const linked = items.filter((item, index) => item.href || index === items.length - 1);
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
-    itemListElement: items.map((item, index) => ({
+    itemListElement: linked.map((item, index) => ({
       "@type": "ListItem",
       position: index + 1,
       name: item.label,

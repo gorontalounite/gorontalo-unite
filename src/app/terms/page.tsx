@@ -3,6 +3,7 @@ import Link from "next/link";
 import { PAGE_TITLE_CLASS, SUBHEAD_CLASS } from "@/components/ui/SectionHeading";
 
 export const metadata: Metadata = {
+  alternates: { canonical: "/terms" },
   title: "Syarat & Ketentuan",
 };
 

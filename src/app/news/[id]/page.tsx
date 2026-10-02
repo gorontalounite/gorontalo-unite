@@ -22,6 +22,8 @@ interface Props {
 export const dynamic = "force-dynamic";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
+/** Must match the title template in src/app/layout.tsx. */
+const TITLE_SUFFIX = " | Gorontalo Unite";
 
 const CAT_LABEL_TO_KEY: Record<string, string> = Object.fromEntries(
   CATEGORIES.map((category) => [category.label, category.key]),
@@ -36,7 +38,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const admin = await createClient();
   const { data } = await admin
     .from("articles")
-    .select("title, excerpt, seo_title, seo_description, image_url, published_at, category")
+    .select("title, excerpt, seo_title, seo_description, image_url, image_alt, published_at, updated_at, category")
     .eq("slug", slug)
     .eq("published", true)
     .neq("category", "Portfolio")
@@ -46,9 +48,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = data.seo_title || data.title;
   const desc  = data.seo_description || data.excerpt;
   const url   = `${BASE}/${slug}`;
+  // A results page shows ~60 characters. On a long headline the
+  // " | Gorontalo Unite" suffix would only push more of it into the ellipsis.
+  // Short titles keep the brand; the site name still shows via og:site_name.
+  const fitsWithBrand = title.length + TITLE_SUFFIX.length <= 60;
 
   return {
-    title,
+    title: fitsWithBrand ? title : { absolute: title },
     description: desc || undefined,
     alternates:  { canonical: url },
     openGraph: {
@@ -57,8 +63,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       url,
       type:        "article",
       publishedTime: data.published_at ?? undefined,
+      modifiedTime:  data.updated_at ?? undefined,
       section:     data.category,
-      images:      data.image_url ? [{ url: data.image_url, width: 1200, height: 630, alt: data.title }] : undefined,
+      images:      data.image_url ? [{ url: data.image_url, alt: data.image_alt || data.title }] : undefined,
     },
     twitter: {
       card:        "summary_large_image",
@@ -182,7 +189,7 @@ export async function NewsDetailPage({ params }: Props) {
     dateModified:  article.updated_at  ?? article.published_at ?? article.created_at,
     author:        { "@type": "Organization", name: "Gorontalo Unite", url: BASE },
     publisher:     { "@type": "Organization", name: "Gorontalo Unite", url: BASE,
-                     logo: { "@type": "ImageObject", url: `${BASE}/icons/icon-192.png` } },
+                     logo: { "@type": "ImageObject", url: `${BASE}/icons/icon-512.png`, width: 512, height: 512 } },
     mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
     keywords:      article.focus_keyword ?? article.category,
     articleSection: article.category,
@@ -244,7 +251,7 @@ export async function NewsDetailPage({ params }: Props) {
             <div className="grid grid-cols-2 gap-3">
               {article.extra_images.map((url: string, i: number) => (
                 <div key={i} className="aspect-video relative rounded-xl overflow-hidden">
-                  <Image src={url} alt={`Photo ${i + 1}`} fill className="object-cover" />
+                  <Image src={url} alt={`${article.title} — foto ${i + 1}`} fill sizes="(min-width: 768px) 384px, 50vw" className="object-cover" />
                 </div>
               ))}
             </div>

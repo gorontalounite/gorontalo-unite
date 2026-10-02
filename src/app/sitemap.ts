@@ -9,7 +9,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const staticPages: MetadataRoute.Sitemap = [
     { url: BASE,                     lastModified: new Date(), changeFrequency: "daily",   priority: 1.0 },
     { url: `${BASE}/city-guide`,     lastModified: new Date(), changeFrequency: "weekly",  priority: 0.9 },
-    ...WEB_CATEGORIES.map((category) => ({
+    // /category/news is a permanent redirect to the homepage (next.config.ts);
+    // a sitemap should list only the URL that answers 200.
+    ...WEB_CATEGORIES.filter((category) => category.key !== "news").map((category) => ({
       url: `${BASE}/category/${category.key}`,
       lastModified: new Date(),
       changeFrequency: "daily" as const,
