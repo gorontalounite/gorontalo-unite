@@ -5,7 +5,7 @@ import SectionHeading from "@/components/ui/SectionHeading";
 import VideoStoryRail from "@/components/video-story/VideoStoryRail";
 import { HOME_SLIDES, VIDEO_STORY_HREF, VIDEO_STORY_TITLE } from "@/components/video-story/data";
 import { getVideoStories } from "@/components/video-story/queries";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import LatestNewsGrid from "./LatestNewsGrid";
 import HeroCarousel from "./HeroCarousel";
 import SliderRow from "./SliderRow";
@@ -209,15 +209,17 @@ function EmptyDesk({ dark = false }: { dark?: boolean }) {
   );
 }
 
-export default async function BeritaPage({ searchParams }: { searchParams: Promise<{ section?: string; q?: string }> }) {
-  const params = await searchParams;
+export default async function BeritaPage({ searchParams }: { searchParams?: Promise<{ section?: string; q?: string }> }) {
+  // The homepage passes no searchParams so it can be cached (ISR); /search
+  // passes them and renders per request.
+  const params = searchParams ? await searchParams : {};
   const activeDesk = DESKS.find((desk) => desk.key === params.section);
   const search = (params.q ?? "").trim();
   let articles: Article[] = [];
   let deskMap: DeskMap = {};
 
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     let request = supabase
       .from("articles")
       .select(ARTICLE_FIELDS)
