@@ -103,7 +103,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
             <dl className="mt-6 grid gap-px overflow-hidden rounded-lg border border-[#e7e2d8] bg-[#e7e2d8] sm:grid-cols-2 dark:border-zinc-800 dark:bg-zinc-800">
               {borders.map(([side, value]) => (
                 <div key={side} className="bg-white px-4 py-3 dark:bg-zinc-900">
-                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#9b7513]">{side}</dt>
+                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#7a5c0d]">{side}</dt>
                   <dd className="mt-1 text-sm">{value}</dd>
                 </div>
               ))}
@@ -136,12 +136,12 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
               <dl className="mt-4 space-y-3">
                 {area.facts.map((fact) => (
                   <div key={fact.label} className="border-t border-[#eee9df] pt-3 first:border-0 first:pt-0 dark:border-zinc-800">
-                    <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#9b7513]">{fact.label}</dt>
+                    <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#7a5c0d]">{fact.label}</dt>
                     <dd className="mt-1 text-sm">{fact.value}</dd>
                   </div>
                 ))}
                 <div className="border-t border-[#eee9df] pt-3 dark:border-zinc-800">
-                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#9b7513]">In this guide</dt>
+                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#7a5c0d]">In this guide</dt>
                   <dd className="mt-1 text-sm">
                     {inArea.length} places — {byCategory("Atraksi & Wisata")} to see,{" "}
                     {byCategory("Kuliner")} to eat, {byCategory("Akomodasi")} to stay
@@ -172,7 +172,6 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
                         src={place.image_url}
                         alt=""
                         fill
-                        unoptimized
                         sizes="(max-width: 639px) 46vw, 31vw"
                         className="object-cover"
                       />

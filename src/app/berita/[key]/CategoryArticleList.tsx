@@ -62,9 +62,8 @@ export default function CategoryArticleList({ articles }: { articles: CategoryAr
                 {article.image_thumb_url ?? article.image_url ? (
                   <Image
                     src={(article.image_thumb_url ?? article.image_url) as string}
-                    alt=""
+                    alt={article.title}
                     fill
-                    unoptimized
                     className="object-cover transition duration-500 group-hover:scale-[1.03]"
                     sizes="(max-width: 639px) 124px, (max-width: 1023px) 208px, 190px"
                   />

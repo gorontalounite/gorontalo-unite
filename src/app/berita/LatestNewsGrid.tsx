@@ -36,9 +36,8 @@ function Thumbnail({ article }: { article: LatestArticle }) {
       {article.image_thumb_url ?? article.image_url ? (
         <Image
           src={(article.image_thumb_url ?? article.image_url) as string}
-          alt=""
+          alt={article.title}
           fill
-          unoptimized
           sizes="(max-width: 639px) 112px, 150px"
           className="object-cover transition duration-500 group-hover:scale-[1.035]"
         />

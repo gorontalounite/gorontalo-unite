@@ -113,7 +113,8 @@ export const metadata: Metadata = {
 
 const organizationJsonLd = {
   "@context": "https://schema.org",
-  "@type": "Organization",
+  "@type": "NewsMediaOrganization",
+  publishingPrinciples: `${BASE}/pedoman-media-siber`,
   name: "Gorontalo Unite",
   url: BASE,
   logo: `${BASE}/icons/icon-512.png`,

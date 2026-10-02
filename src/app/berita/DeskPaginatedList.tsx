@@ -28,7 +28,7 @@ function ArticleImage({ article, className, sizes }: { article: DeskArticle; cla
   return (
     <div className={`relative overflow-hidden rounded-[4px] bg-[#e8e4dc] dark:bg-zinc-800 ${className}`}>
       {src ? (
-        <Image src={src} alt="" fill unoptimized sizes={sizes} className="object-cover transition duration-700 ease-out group-hover:scale-[1.035]" />
+        <Image src={src} alt={article.title} fill sizes={sizes} className="object-cover transition duration-700 ease-out group-hover:scale-[1.035]" />
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(245,196,0,.55),transparent_28%),linear-gradient(135deg,#eee9df,#cfc9bb)]" />
       )}
@@ -39,7 +39,7 @@ function ArticleImage({ article, className, sizes }: { article: DeskArticle; cla
 function Eyebrow({ article, light = false, deskMap }: { article: DeskArticle; light?: boolean; deskMap: Readonly<Record<string, string>> }) {
   return (
     <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#77736b] dark:text-zinc-400"}`}>
-      <span className={light ? "text-[#f5c400]" : "text-[#9b7513] dark:text-amber-400"}>{resolveWebCategoryLabel(article, deskMap)}</span>
+      <span className={light ? "text-[#f5c400]" : "text-[#7a5c0d] dark:text-amber-400"}>{resolveWebCategoryLabel(article, deskMap)}</span>
       <span aria-hidden>•</span>
       <time dateTime={articleDate(article)}>{displayDate(articleDate(article))}</time>
     </div>

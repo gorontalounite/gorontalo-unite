@@ -1,4 +1,4 @@
-import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/app/news/[id]/page";
+import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/components/news/ArticleDetailPage";
 
 export const dynamic = "force-dynamic";
 

@@ -6,8 +6,8 @@ import { createClient } from "@/lib/supabase/server";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "gorontalounite — Author",
-  description: "Articles and editorial curation by gorontalounite.",
+  title: "Redaksi Gorontalo Unite",
+  description: "Profil redaksi Gorontalo Unite: tim lokal yang meliput dan mengkurasi berita, wisata, kuliner, budaya, dan cerita baik dari Provinsi Gorontalo.",
   alternates: { canonical: "/author/gorontalounite" },
 };
 
@@ -22,6 +22,24 @@ interface AuthorArticle {
   published_at: string | null;
   created_at: string;
 }
+
+const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
+
+const profileJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "ProfilePage",
+  url: `${BASE}/author/gorontalounite`,
+  mainEntity: {
+    "@type": "NewsMediaOrganization",
+    name: "Gorontalo Unite",
+    alternateName: "@gorontalounite",
+    url: BASE,
+    logo: `${BASE}/icons/icon-512.png`,
+    description: "Tim redaksi lokal yang meliput dan mengkurasi berita, informasi, dan cerita baik dari Gorontalo.",
+    areaServed: { "@type": "AdministrativeArea", name: "Provinsi Gorontalo" },
+    publishingPrinciples: `${BASE}/pedoman-media-siber`,
+  },
+};
 
 const CATEGORY_DOTS: Record<string, string> = {
   Politik: "bg-blue-500",
@@ -59,6 +77,10 @@ export default async function GorontaloUniteAuthorPage() {
 
   return (
     <div className="min-h-screen bg-[#f7f7f7] pb-20 text-[#101018] dark:bg-zinc-950 dark:text-white">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(profileJsonLd) }}
+      />
       <section className="relative overflow-hidden border-b border-stone-100 bg-white dark:border-zinc-800 dark:bg-zinc-950">
         <div
           aria-hidden="true"
@@ -81,19 +103,21 @@ export default async function GorontaloUniteAuthorPage() {
             />
           </div>
 
-          <p className="mt-6 text-[10px] font-bold uppercase tracking-[.2em] text-stone-400 dark:text-zinc-500">Author</p>
+          <p className="mt-6 text-[10px] font-bold uppercase tracking-[.2em] text-stone-400 dark:text-zinc-500">Redaksi</p>
           <h1 className="font-heading mt-2 text-3xl font-semibold tracking-[-.025em] sm:text-4xl">gorontalounite</h1>
           <p className="mt-1 text-[11px] font-medium text-stone-500 dark:text-zinc-400">@gorontalounite</p>
           <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-600 dark:text-zinc-300 sm:text-base">
-            Editorial team and curator of stories, information, and good news from Gorontalo.
+            Tim redaksi lokal yang meliput dan mengkurasi berita, informasi, dan cerita baik dari Gorontalo.
+            Pedoman kerja kami mengikuti{" "}
+            <Link href="/pedoman-media-siber" className="underline hover:text-brand">Pedoman Pemberitaan Media Siber</Link>.
           </p>
         </div>
       </section>
 
       <main className="mx-auto max-w-4xl px-4 sm:px-8">
         <div className="flex items-center justify-between py-7 text-xs text-stone-500 dark:text-zinc-400 sm:text-sm">
-          <Link href="/" className="font-semibold text-brand hover:underline">← All news</Link>
-          <span>{articles.length} articles</span>
+          <Link href="/" className="font-semibold text-brand hover:underline">← Semua berita</Link>
+          <span>{articles.length} artikel terbaru</span>
         </div>
 
         {articles.length > 0 ? (
@@ -113,7 +137,7 @@ export default async function GorontaloUniteAuthorPage() {
                     {article.image_thumb_url ?? article.image_url ? (
                       <Image
                         src={(article.image_thumb_url ?? article.image_url) as string}
-                        alt=""
+                        alt={article.title}
                         fill
                         className="object-cover transition duration-500 group-hover:scale-[1.03]"
                         sizes="(max-width: 639px) 124px, 208px"
@@ -141,7 +165,7 @@ export default async function GorontaloUniteAuthorPage() {
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-12 text-center text-sm text-stone-500 dark:border-zinc-700 dark:bg-zinc-900">
-            Stories are being prepared.
+            Berita sedang disiapkan.
           </div>
         )}
       </main>

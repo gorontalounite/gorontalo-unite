@@ -36,6 +36,15 @@ export const CATEGORIES = [
 
 export type CategoryKey = typeof CATEGORIES[number]["key"];
 
+/**
+ * The Regional desk keeps its internal key "news" — it is stored as desk_key in
+ * the categories table — but its public archive lives at /category/regional.
+ * /category/news permanently redirects there (next.config.ts).
+ */
+export const deskSlug = (key: string) => (key === "news" ? "regional" : key);
+export const deskKeyFromSlug = (slug: string) => (slug === "regional" ? "news" : slug);
+export const categoryHref = (key: string) => `/category/${deskSlug(key)}`;
+
 // Editorial channels intentionally remain separate from City Guide. Wisata
 // and Event have their own tables, public routes, and admin workspaces.
 export const WEB_CATEGORY_GROUPS: ReadonlyArray<{ title: string; categories: ReadonlyArray<{ key: string; label: string }> }> = [
@@ -60,6 +69,41 @@ export const WEB_CATEGORY_DESCRIPTIONS: Readonly<Record<string, string>> = {
   people: "Creator, entrepreneur, seniman, komunitas, dan sosok menarik dari Gorontalo.",
   life: "Kampus, karier, relationship, wellness, dan lifestyle anak muda Gorontalo.",
   news: "Pembangunan, kebijakan, dan kabar regional lain dari Gorontalo.",
+};
+
+/**
+ * Search snippet per desk. The desk names stay as branded on the page; the
+ * <title> pairs each with the Indonesian term readers actually search for.
+ */
+export const WEB_CATEGORY_SEO: Readonly<Record<string, { title: string; description: string }>> = {
+  news: {
+    title: "Regional: Berita Daerah Gorontalo",
+    description: "Berita regional Gorontalo terbaru: pembangunan, kebijakan pemerintah daerah, infrastruktur, ekonomi, dan kabar dari kota serta kabupaten se-Provinsi Gorontalo.",
+  },
+  "whats-on": {
+    title: "What’s On: Agenda & Event Gorontalo",
+    description: "Agenda terbaru di Gorontalo: konser, festival, bazaar, pameran, lomba, dan perayaan. Cek jadwal acara pilihan di Kota dan Kabupaten Gorontalo setiap pekan.",
+  },
+  travel: {
+    title: "Tourism: Wisata Gorontalo",
+    description: "Panduan wisata Gorontalo: pantai, pulau, diving, hotel, itinerary, dan hidden gems. Rekomendasi destinasi dan cara menjelajah Provinsi Gorontalo.",
+  },
+  culinary: {
+    title: "Culinary: Kuliner Gorontalo",
+    description: "Kuliner Gorontalo dari binte biluhuta sampai ilabulo: kafe, restoran, warung, UMKM makanan, dan rekomendasi tempat makan di Kota serta Kabupaten Gorontalo.",
+  },
+  culture: {
+    title: "Culture: Budaya Gorontalo",
+    description: "Budaya Gorontalo: kain karawo, adat dan tradisi, sejarah, seni, musik, bahasa Hulontalo, dan warisan budaya yang terus dijaga masyarakat Gorontalo.",
+  },
+  people: {
+    title: "People: Tokoh & Sosok Gorontalo",
+    description: "Profil sosok inspiratif Gorontalo: kreator, pengusaha, seniman, atlet, pemuda, dan komunitas yang membawa kabar baik dari Gorontalo ke Indonesia.",
+  },
+  life: {
+    title: "Lifestyle: Gaya Hidup Gorontalo",
+    description: "Gaya hidup anak muda Gorontalo: kampus, pendidikan, karier, kesehatan, wellness, dan cerita keseharian dari Kota Gorontalo dan sekitarnya.",
+  },
 };
 
 export const WEB_CATEGORY_TERMS: Readonly<Record<string, readonly string[]>> = {

@@ -11,7 +11,7 @@ const SHORTCUTS = [
   { href: "/",             label: "Beranda" },
   { href: "/city-guide",   label: "City Guide" },
   { href: "/event",        label: "Event" },
-  { href: "/category/news", label: "Berita Terbaru" },
+  { href: "/category/regional", label: "Regional" },
 ];
 
 export default function NotFound() {

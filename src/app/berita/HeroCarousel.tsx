@@ -41,7 +41,7 @@ function HeroImage({ article, className, priority = false, sizes }: { article: H
   return (
     <div className={`bg-[#e8e4dc] dark:bg-zinc-800 ${className}`}>
       {article.image_thumb_url ?? article.image_url ? (
-        <Image src={(article.image_thumb_url ?? article.image_url) as string} alt="" fill priority={priority} loading={priority ? "eager" : "lazy"} unoptimized sizes={sizes} className="object-cover" />
+        <Image src={(article.image_thumb_url ?? article.image_url) as string} alt={article.title} fill priority={priority} fetchPriority={priority ? "high" : undefined} loading={priority ? "eager" : "lazy"} sizes={sizes} className="object-cover" />
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_25%_20%,rgba(245,196,0,.55),transparent_28%),linear-gradient(135deg,#eee9df,#cfc9bb)]" />
       )}
@@ -106,7 +106,7 @@ export default function HeroCarousel({ pool, deskMap }: { pool: HeroArticleData[
           <Link href={`/${hero.slug}`} className="absolute inset-0 flex items-end p-6 sm:p-10">
             <div className="max-w-3xl text-white">
               <HeroEyebrow article={hero} deskMap={deskMap} />
-              <h1 className="font-heading mt-3 text-[30px] font-bold leading-[1.02] sm:text-[46px]">{hero.title}</h1>
+              <h2 className="font-heading mt-3 text-[30px] font-bold leading-[1.02] sm:text-[46px]">{hero.title}</h2>
               {hero.excerpt ? <p className="mt-3 line-clamp-2 max-w-2xl text-[13px] leading-relaxed text-white/75 sm:mt-4 sm:text-sm">{hero.excerpt}</p> : null}
             </div>
           </Link>

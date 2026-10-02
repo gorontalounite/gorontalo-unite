@@ -8,8 +8,8 @@ import CityGuideDirectory, {
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "City Guide",
-  description: "Directory of destinations and upcoming events in Gorontalo.",
+  title: "City Guide: Panduan Wisata Gorontalo",
+  description: "Panduan wisata Gorontalo: direktori pantai, kuliner, hotel, masjid bersejarah, dan atraksi di enam daerah, dari Kota Gorontalo sampai Pohuwato.",
   alternates: { canonical: "/city-guide" },
 };
 

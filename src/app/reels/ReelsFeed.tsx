@@ -342,6 +342,7 @@ export default function ReelsFeed({
             <div className="relative mx-auto flex h-full max-w-[1280px] flex-col items-center justify-center px-4 text-center text-white sm:px-6 lg:px-8">
               <h1 className="font-heading max-w-3xl text-[34px] leading-[1.08] sm:text-[52px] lg:text-[60px]">
                 Press play
+                {" "}
                 <br />
                 on Gorontalo
               </h1>

@@ -60,6 +60,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
                 and leaves "directory" stranded at every width tested. */}
             <h1 className="font-heading max-w-3xl text-[34px] leading-[1.08] sm:text-[52px] lg:text-[60px]">
               Six areas of Gorontalo,
+              {" "}
               <br />
               one directory
             </h1>
@@ -86,7 +87,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
             >
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Area</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
                   <path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11z" />
                   <circle cx="12" cy="10" r="2.5" />
                 </svg>
@@ -102,7 +103,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
 
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Looking for</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
                   <rect x="3" y="4" width="18" height="16" rx="2" />
                   <path d="M3 10h18" />
                 </svg>
@@ -117,7 +118,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
 
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Keyword</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
                   <circle cx="11" cy="11" r="7" />
                   <path d="M20 20l-3.5-3.5" />
                 </svg>
@@ -166,7 +167,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
                       listing inside it happened to sort first. */}
                   <Image
                     src={`/city-guide/areas/${area.slug}.webp`}
-                    alt=""
+                    alt={`Lanskap ${area.label}`}
                     fill
                     sizes="(max-width: 639px) 58vw, (max-width: 1023px) 30vw, 200px"
                     className="object-cover transition duration-500 group-hover:scale-105"
@@ -203,9 +204,8 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
                     {place.image_url && (
                       <Image
                         src={place.image_url}
-                        alt=""
+                        alt={place.name}
                         fill
-                        unoptimized
                         sizes="(max-width: 639px) 92vw, 400px"
                         className="object-cover transition duration-500 group-hover:scale-105"
                       />
@@ -238,7 +238,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
       {/* E — Full-bleed banner */}
       <section className="relative mt-10 h-[46vh] min-h-[300px] overflow-hidden bg-[#1b1a17] sm:mt-14 sm:h-[52vh] sm:max-h-[460px]">
         {banner?.image_url && (
-          <Image src={banner.image_url} alt="" fill unoptimized sizes="100vw" className="object-cover" />
+          <Image src={banner.image_url} alt="" fill sizes="100vw" className="object-cover" />
         )}
         <div className="absolute inset-0 bg-gradient-to-r from-black/70 via-black/40 to-transparent" />
         <div className="relative mx-auto flex h-full max-w-[1280px] flex-col justify-center px-4 text-white sm:px-6 lg:px-8">
@@ -295,7 +295,6 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
                     src={shot.image_url}
                     alt=""
                     fill
-                    unoptimized
                     sizes="(max-width: 1023px) 46vw, 300px"
                     className="object-cover transition duration-500 group-hover:scale-105"
                   />

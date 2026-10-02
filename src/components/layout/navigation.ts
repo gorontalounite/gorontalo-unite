@@ -5,8 +5,8 @@
  * never drift between them — the footer used to carry "Destinations" and
  * "City Guide" pointing at the same route, which also collided as React keys.
  *
- * Hrefs are final destinations, not redirects: /category/news and /services
- * both 308 elsewhere, so the targets are linked directly.
+ * Hrefs are final destinations, not redirects: /category/news 308s to
+ * /category/regional, so the target is linked directly.
  */
 
 export interface NavLink {
@@ -60,9 +60,7 @@ export const PANEL_TAGS: NavLink[] = KABAR_BAIK.map(({ href, label }) => ({ href
 
 export const ABOUT_LINKS: NavLink[] = [
   { href: "/about", label: "About us" },
-  { href: "/#layanan", label: "Services" },
   { href: "/about#kontak", label: "Contact" },
-  { href: "/media-kit", label: "Media Kit" },
 ];
 
 export const LEGAL_LINKS: NavLink[] = [
@@ -107,11 +105,5 @@ export const SOCIAL_LINKS: SocialLink[] = [
   },
 ];
 
-/**
- * Footer's Quick Link column: the header menu plus Services, which has no
- * place in the header. Kept apart from HEADER_NAV for that reason.
- */
-export const FOOTER_QUICK_LINKS: NavLink[] = [
-  ...HEADER_NAV,
-  { href: "/#layanan", label: "Services" },
-];
+/** Footer's Quick Link column. */
+export const FOOTER_QUICK_LINKS: NavLink[] = [...HEADER_NAV];
