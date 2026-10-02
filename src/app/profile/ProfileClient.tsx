@@ -64,7 +64,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
     <div className="max-w-lg mx-auto px-4 sm:px-6 py-10">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
-        <Link href="/" className="hover:text-brand dark:hover:text-[#FFCC00]">Beranda</Link>
+        <Link href="/" className="hover-brand">Beranda</Link>
         <span>/</span>
         <span className="text-gray-600 dark:text-gray-300">Profil Saya</span>
       </nav>
@@ -86,7 +86,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
           <p className="font-semibold text-gray-900 dark:text-white">{name || email}</p>
           <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">{email}</p>
           <span className={`inline-block text-xs font-medium px-2 py-0.5 rounded-full mt-1.5 ${
-            role === "admin"  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300" :
+            role === "admin"  ? "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-[#FFCC00]" :
             role === "editor" ? "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300" :
             "bg-gray-100 text-gray-600 dark:bg-zinc-800 dark:text-gray-400"
           }`}>
@@ -146,10 +146,10 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
       {/* Quick links for admin/editor */}
       {(role === "admin" || role === "editor") && (
         <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-100 dark:border-amber-800 px-4 py-3 mb-4">
-          <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-2">Akses Staf</p>
+          <p className="text-xs font-medium text-amber-700 dark:text-[#FFCC00] mb-2">Akses Staf</p>
           <Link
             href="/admin/news"
-            className="text-sm text-brand dark:text-[#FFCC00] font-medium hover:underline"
+            className="text-sm brand-label font-medium hover:underline"
           >
             → Buka Dashboard Admin
           </Link>

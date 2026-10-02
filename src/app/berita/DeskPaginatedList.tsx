@@ -39,7 +39,7 @@ function ArticleImage({ article, className, sizes }: { article: DeskArticle; cla
 function Eyebrow({ article, light = false, deskMap }: { article: DeskArticle; light?: boolean; deskMap: Readonly<Record<string, string>> }) {
   return (
     <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#67635b] dark:text-zinc-400"}`}>
-      <span className={light ? "text-[#FFCC00]" : "text-[#FFCC00] dark:text-[#FFCC00]"}>{resolveWebCategoryLabel(article, deskMap)}</span>
+      <span className={light ? "text-[#FFCC00]" : "brand-label"}>{resolveWebCategoryLabel(article, deskMap)}</span>
       <span aria-hidden>•</span>
       <time dateTime={articleDate(article)}>{displayDate(articleDate(article))}</time>
     </div>
@@ -68,7 +68,7 @@ function FeatureCard({ article, variant, deskMap }: { article: DeskArticle; vari
         <ArticleImage article={article} className="aspect-[16/10]" sizes="(max-width: 768px) 100vw, 55vw" />
         <div className="pt-4">
           <Eyebrow article={article} deskMap={deskMap} />
-          <h3 className="font-heading mt-2 text-[22px] font-bold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#FFCC00] sm:text-[30px]">{article.title}</h3>
+          <h3 className="font-heading mt-2 text-[22px] font-bold leading-[1.1] tracking-[-.025em] transition group-hover-brand sm:text-[30px]">{article.title}</h3>
           {article.excerpt ? <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{article.excerpt}</p> : null}
         </div>
       </Link>
@@ -82,7 +82,7 @@ function CompactStory({ article, deskMap }: { article: DeskArticle; deskMap: Rea
       <Link href={`/${article.slug}`} className="grid grid-cols-[1fr_108px] gap-4">
         <div>
           <Eyebrow article={article} deskMap={deskMap} />
-          <h3 className="font-heading mt-2 line-clamp-3 text-[15px] font-bold leading-[1.16] tracking-[-.015em] transition group-hover:text-[#FFCC00] sm:text-[17px]">{article.title}</h3>
+          <h3 className="font-heading mt-2 line-clamp-3 text-[15px] font-bold leading-[1.16] tracking-[-.015em] transition group-hover-brand sm:text-[17px]">{article.title}</h3>
         </div>
         <div className="relative">
           <ArticleImage article={article} className="aspect-square" sizes="108px" />

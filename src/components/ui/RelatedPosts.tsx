@@ -45,12 +45,12 @@ export default function RelatedPosts({ items, basePath }: Props) {
             </div>
 
             {/* Meta */}
-            <span className="text-[10px] font-semibold text-brand dark:text-[#FFCC00] uppercase tracking-wider mb-1">
+            <span className="text-[10px] font-semibold brand-label uppercase tracking-wider mb-1">
               {item.category}
             </span>
 
             {/* Title */}
-            <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover:text-brand dark:group-hover:text-[#FFCC00] transition-colors line-clamp-2 leading-snug">
+            <p className="text-sm font-semibold text-gray-900 dark:text-white group-hover-brand transition-colors line-clamp-2 leading-snug">
               {item.title}
             </p>
 

@@ -109,14 +109,14 @@ export default async function GorontaloUniteAuthorPage() {
           <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-600 dark:text-zinc-300 sm:text-base">
             Tim redaksi lokal yang meliput dan mengkurasi berita, informasi, dan cerita baik dari Gorontalo.
             Pedoman kerja kami mengikuti{" "}
-            <Link href="/pedoman-media-siber" className="underline hover:text-brand">Pedoman Pemberitaan Media Siber</Link>.
+            <Link href="/pedoman-media-siber" className="underline hover-brand">Pedoman Pemberitaan Media Siber</Link>.
           </p>
         </div>
       </section>
 
       <main className="mx-auto max-w-4xl px-4 sm:px-8">
         <div className="flex items-center justify-between py-7 text-xs text-stone-500 dark:text-zinc-400 sm:text-sm">
-          <Link href="/" className="font-semibold text-brand hover:underline">← Semua berita</Link>
+          <Link href="/" className="font-semibold brand-label hover:underline">← Semua berita</Link>
           <span>{articles.length} artikel terbaru</span>
         </div>
 
@@ -152,7 +152,7 @@ export default async function GorontaloUniteAuthorPage() {
                       <span className={`h-2.5 w-2.5 shrink-0 rounded-full ${dotColor}`} />
                       <span className="truncate">{category}</span>
                     </div>
-                    <h2 className="font-heading mt-3 line-clamp-3 text-sm font-semibold leading-snug tracking-[-.015em] text-[#101018] group-hover:text-brand dark:text-white sm:text-xl">
+                    <h2 className="font-heading mt-3 line-clamp-3 text-sm font-semibold leading-snug tracking-[-.015em] text-[#101018] group-hover-brand dark:text-white sm:text-xl">
                       {article.title}
                     </h2>
                     <time dateTime={publishedAt} className="mt-4 text-[10px] text-stone-400 dark:text-zinc-500 sm:text-xs">

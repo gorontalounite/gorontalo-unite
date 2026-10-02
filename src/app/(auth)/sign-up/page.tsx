@@ -41,8 +41,8 @@ export default function SignUpPage() {
             {loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" aria-label="Memuat" /> : <GoogleIcon />}
             {loading ? "Mengarahkan ke Google…" : "Daftar dengan Google"}
           </button>
-          <p className="text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400">Dengan melanjutkan, Anda menyetujui <Link href="/terms" className="text-brand hover:underline dark:text-[#FFCC00]">Syarat & Ketentuan</Link> dan <Link href="/privacy-policy" className="text-brand hover:underline dark:text-[#FFCC00]">Kebijakan Privasi</Link>.</p>
-          <p className="text-center text-xs text-gray-500 dark:text-gray-400">Sudah punya akun? <Link href="/sign-in" className="font-medium text-brand hover:underline dark:text-[#FFCC00]">Masuk dengan Google</Link></p>
+          <p className="text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400">Dengan melanjutkan, Anda menyetujui <Link href="/terms" className="brand-label hover:underline">Syarat & Ketentuan</Link> dan <Link href="/privacy-policy" className="brand-label hover:underline">Kebijakan Privasi</Link>.</p>
+          <p className="text-center text-xs text-gray-500 dark:text-gray-400">Sudah punya akun? <Link href="/sign-in" className="font-medium brand-label hover:underline">Masuk dengan Google</Link></p>
         </div>
         <p className="mt-4 text-center text-xs text-gray-400 dark:text-gray-500"><Link href="/" className="hover:text-gray-600 dark:hover:text-gray-300">← Kembali ke beranda</Link></p>
       </div>

@@ -141,7 +141,7 @@ function ArticleImage({ article, className, priority = false, sizes = "(max-widt
 function Eyebrow({ article, light = false, deskMap = {} }: { article: Article; light?: boolean; deskMap?: DeskMap }) {
   return (
     <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#67635b] dark:text-zinc-400"}`}>
-      <span className={light ? "text-[#FFCC00]" : "text-[#FFCC00] dark:text-[#FFCC00]"}>{deskLabel(article, deskMap)}</span>
+      <span className={light ? "text-[#FFCC00]" : "brand-label"}>{deskLabel(article, deskMap)}</span>
       <span aria-hidden>•</span>
       <time dateTime={articleDate(article)}>{displayDate(articleDate(article))}</time>
     </div>
@@ -165,7 +165,7 @@ function StoryCard({ article, large = false, deskMap = {} }: { article: Article;
         <ArticleImage article={article} className={large ? "aspect-[16/10]" : "aspect-[4/3]"} sizes={large ? "(max-width: 768px) 100vw, 55vw" : "(max-width: 768px) 82vw, 30vw"} />
         <div className="pt-4">
           <Eyebrow article={article} deskMap={deskMap} />
-          <h3 className={`font-heading mt-2 font-bold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#FFCC00] ${large ? "text-[22px] sm:text-[30px]" : "text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
+          <h3 className={`font-heading mt-2 font-bold leading-[1.1] tracking-[-.025em] transition group-hover-brand ${large ? "text-[22px] sm:text-[30px]" : "text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
           {article.excerpt ? <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{article.excerpt}</p> : null}
         </div>
       </Link>
@@ -186,8 +186,8 @@ function DeskNav() {
     <nav aria-label="Rubrik berita" className="border-y border-[#d7d1c6] dark:border-zinc-800">
       <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex min-w-0 gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {navDesks.map((desk) => <Link key={desk.key} href={categoryHref(desk.key)} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover:text-[#FFCC00]">{desk.label}</Link>)}
-          <a href="#latest" className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover:text-[#FFCC00]">Latest News</a>
+          {navDesks.map((desk) => <Link key={desk.key} href={categoryHref(desk.key)} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover-brand">{desk.label}</Link>)}
+          <a href="#latest" className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover-brand">Latest News</a>
         </div>
         <div className="hidden shrink-0 items-center gap-2 lg:flex">
           <span className="text-[10px] font-bold uppercase tracking-[.1em] text-[#a8a29e] dark:text-zinc-500">Quick Links</span>
@@ -251,7 +251,7 @@ export default async function BeritaPage({ searchParams }: { searchParams?: Prom
         <DeskNav />
         <main className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           <div className="mb-10 border-b border-[#302f2c] dark:border-zinc-100 pb-7">
-            <Link href="/category" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#FFCC00] dark:text-[#FFCC00]">← All categories</Link>
+            <Link href="/category" className="text-[10px] font-bold uppercase tracking-[.18em] brand-label">← All categories</Link>
             <h1 className="font-heading mt-4 text-[40px] font-bold tracking-[-.04em] sm:text-[56px]">{title}</h1>
             {description ? <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{description}</p> : null}
           </div>

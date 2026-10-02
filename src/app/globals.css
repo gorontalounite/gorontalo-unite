@@ -323,3 +323,27 @@ html { transition: background-color 0.2s ease, color 0.2s ease; }
   html:has(.article-snap) { scroll-snap-type: y proximity; }
   .article-snap { scroll-snap-align: start; }
 }
+
+/* ── Brand yellow on light backgrounds ─────────────────────────────────────
+   #FFCC00 text on white reads at about 1.5:1, so in light mode the text stays
+   dark and the yellow becomes an underline. On the dark theme the yellow is
+   legible and carries the text colour itself. Unlayered on purpose: these
+   must win over the Tailwind colour utilities sitting beside them.
+   - hover-brand        the element's own hover (nav links, inline links)
+   - group-hover-brand  hover on the surrounding .group (card headlines)
+   - brand-label        always-on accent text (section eyebrows, "← back") */
+.hover-brand:hover,
+.group:hover .group-hover-brand,
+.brand-label {
+  text-decoration-line: underline;
+  text-decoration-color: #FFCC00;
+  text-decoration-thickness: max(2px, 0.08em);
+  text-underline-offset: 0.2em;
+}
+.brand-label { color: #302f2c; }
+.dark .hover-brand:hover,
+.dark .group:hover .group-hover-brand,
+.dark .brand-label {
+  text-decoration-line: none;
+  color: #FFCC00;
+}

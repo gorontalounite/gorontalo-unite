@@ -159,7 +159,7 @@ export default function CityGuideDirectory({
               <button
                 type="button"
                 onClick={() => setQuery("")}
-                className="inline-flex min-h-8 items-center gap-2 rounded-md border border-[#302f2c] px-3 text-xs font-semibold dark:border-amber-300"
+                className="inline-flex min-h-8 items-center gap-2 rounded-md border border-[#302f2c] px-3 text-xs font-semibold dark:border-[#FFCC00]"
               >
                 {query}
                 <span aria-hidden="true">&times;</span>
@@ -203,7 +203,7 @@ export default function CityGuideDirectory({
           <div className="rounded border border-dashed border-[#d7d1c6] bg-white px-6 py-16 text-center dark:border-zinc-700 dark:bg-zinc-900">
             <h3 className="font-heading text-lg font-bold">No results for &ldquo;{query}&rdquo;</h3>
             <p className="mt-2 text-sm text-[#78716c] dark:text-zinc-400">Try another keyword, or reset the search.</p>
-            <button type="button" onClick={() => setQuery("")} className="mt-5 rounded bg-[#302f2c] px-5 py-2.5 text-sm font-bold text-white dark:bg-amber-300 dark:text-zinc-950">
+            <button type="button" onClick={() => setQuery("")} className="mt-5 rounded bg-[#302f2c] px-5 py-2.5 text-sm font-bold text-white dark:bg-[#FFCC00] dark:text-zinc-950">
               Reset search
             </button>
           </div>
@@ -247,10 +247,10 @@ function RegionChip({
       aria-pressed={active}
       className={`inline-flex min-h-9 items-center gap-1.5 rounded-md border px-3 text-xs font-medium transition ${
         active
-          ? "border-[#302f2c] bg-[#302f2c] text-white dark:border-amber-300 dark:bg-amber-300 dark:text-zinc-950"
+          ? "border-[#302f2c] bg-[#302f2c] text-white dark:border-[#FFCC00] dark:bg-[#FFCC00] dark:text-zinc-950"
           : disabled
             ? "cursor-not-allowed border-[#e7e2d8] text-[#b5aea2] dark:border-zinc-800 dark:text-zinc-600"
-            : "border-[#d7d1c6] text-[#555149] hover:border-[#FFCC00] hover:text-[#FFCC00] dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-amber-300 dark:hover:text-amber-300"
+            : "border-[#d7d1c6] text-[#555149] hover:border-[#FFCC00] hover:text-[#302f2c] dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-[#FFCC00] dark:hover:text-[#FFCC00]"
       }`}
     >
       {children}
@@ -269,7 +269,7 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
       role="tab"
       aria-selected={active}
       className={`shrink-0 min-h-11 border-b-2 py-2 text-[11px] font-bold uppercase tracking-[.1em] transition ${
-        active ? "border-[#FFCC00] text-[#302f2c] dark:border-amber-300 dark:text-white" : "border-transparent text-[#555149] hover:text-[#FFCC00] dark:text-zinc-400"
+        active ? "border-[#FFCC00] text-[#302f2c] dark:border-[#FFCC00] dark:text-white" : "border-transparent text-[#555149] hover:border-[#FFCC00] hover:text-[#302f2c] dark:text-zinc-400 dark:hover:text-white"
       }`}
     >
       {children}
@@ -366,7 +366,7 @@ function PageArrow({
       onClick={onClick}
       disabled={disabled}
       aria-label={label}
-      className="grid h-11 w-11 place-items-center rounded-full border border-[#d7d1c6] transition hover:border-[#302f2c] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-[#d7d1c6] dark:border-zinc-700 dark:hover:border-amber-300 dark:disabled:hover:border-zinc-700"
+      className="grid h-11 w-11 place-items-center rounded-full border border-[#d7d1c6] transition hover:border-[#302f2c] disabled:cursor-not-allowed disabled:opacity-35 disabled:hover:border-[#d7d1c6] dark:border-zinc-700 dark:hover:border-[#FFCC00] dark:disabled:hover:border-zinc-700"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-4 w-4" aria-hidden="true">
         <path d={direction === "prev" ? "M15 5l-7 7 7 7" : "M9 5l7 7-7 7"} />
@@ -402,7 +402,7 @@ function PlaceCard({ item, sectionKey }: { item: DirectoryItem; sectionKey: Sect
       {/* Everything sits inside the card now. The category and location used to
           ride on the photograph; here they read as one block with the name. */}
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#FFCC00] sm:text-base">
+        <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover-brand sm:text-base">
           {item.title}
         </h3>
 
@@ -425,7 +425,7 @@ function PlaceCard({ item, sectionKey }: { item: DirectoryItem; sectionKey: Sect
           )}
         </div>
 
-        <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[.08em] text-[#FFCC00] dark:text-amber-300">
+        <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[.08em] brand-label">
           Read more
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-3 w-3 transition group-hover:translate-x-0.5" aria-hidden="true">
             <path d="M5 12h13M13 6l6 6-6 6" />

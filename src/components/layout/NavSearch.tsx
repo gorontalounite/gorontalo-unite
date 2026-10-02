@@ -57,7 +57,7 @@ export default function NavSearch() {
             />
             <button
               type="submit"
-              className="min-h-11 shrink-0 rounded-xl bg-gray-900 px-5 text-sm font-semibold text-white hover:bg-gray-800 dark:bg-amber-300 dark:text-zinc-950 dark:hover:bg-amber-200"
+              className="min-h-11 shrink-0 rounded-xl bg-gray-900 px-5 text-sm font-semibold text-white hover:bg-gray-800 dark:bg-[#FFCC00] dark:text-zinc-950 dark:hover:bg-amber-200"
             >
               Search
             </button>
