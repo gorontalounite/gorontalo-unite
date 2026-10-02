@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { NextRequest, NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 
 const STATUSES = new Set(["draft", "published"]);
 const ORIENTATIONS = new Set(["portrait", "landscape"]);
@@ -177,6 +178,7 @@ export async function POST(req: NextRequest) {
       .select(LIST_COLUMNS)
       .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    revalidatePath("/");
     return NextResponse.json({ data });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Data tidak valid." }, { status: 400 });
@@ -205,6 +207,7 @@ export async function PATCH(req: NextRequest) {
       .select(LIST_COLUMNS)
       .single();
     if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    revalidatePath("/");
     return NextResponse.json({ data });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Data tidak valid." }, { status: 400 });
@@ -225,5 +228,6 @@ export async function DELETE(req: NextRequest) {
         .update({ deleted_at: new Date().toISOString(), status: "draft" })
         .eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  revalidatePath("/");
   return NextResponse.json({ success: true });
 }

@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 /**
- * Opens the article search that the homepage already serves through ?q=.
+ * Opens the article search served at /search?q=.
  * The query was live long before this control existed; it simply had no way in
  * from the header.
  */
@@ -23,7 +23,7 @@ export default function NavSearch() {
     const query = term.trim();
     if (!query) return;
     setOpen(false);
-    router.push(`/?q=${encodeURIComponent(query)}`);
+    router.push(`/search?q=${encodeURIComponent(query)}`);
   }
 
   return (

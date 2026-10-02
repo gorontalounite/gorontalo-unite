@@ -11,6 +11,12 @@ export async function updateSession(request: NextRequest) {
   // turn every route into a 500 merely because session refresh is unavailable.
   if (!url || !anonKey) return supabaseResponse;
 
+  // A visitor with no Supabase auth cookie has no session to refresh. Most
+  // traffic is anonymous readers, so skip building a client for them.
+  if (!request.cookies.getAll().some(({ name }) => name.startsWith("sb-"))) {
+    return supabaseResponse;
+  }
+
   const supabase = createServerClient(
     url,
     anonKey,

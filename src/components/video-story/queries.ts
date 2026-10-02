@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { headline, HOME_SLIDES, type VideoStoryItem } from "./data";
 
 /**
@@ -39,7 +39,7 @@ const toItem = (row: Row): VideoStoryItem => ({
  */
 export async function getVideoStories(limit = HOME_SLIDES): Promise<VideoStoryItem[]> {
   try {
-    const supabase = await createClient();
+    const supabase = createPublicClient();
     const { data } = await supabase
       .from("reels")
       .select(COLUMNS)
