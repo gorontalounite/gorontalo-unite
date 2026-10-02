@@ -20,7 +20,7 @@ function articleDate(article: DeskArticle) {
 }
 
 function displayDate(value: string) {
-  return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" }).format(new Date(value));
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" }).format(new Date(value));
 }
 
 function ArticleImage({ article, className, sizes }: { article: DeskArticle; className: string; sizes: string }) {
@@ -123,7 +123,7 @@ export default function DeskPaginatedList({ articles, deskMap, variant }: {
               key={index}
               type="button"
               onClick={() => setPage(index)}
-              aria-label={`Halaman ${index + 1}`}
+              aria-label={`Page ${index + 1}`}
               aria-current={index === page}
               className={`h-9 min-w-9 rounded-[4px] px-3 text-xs font-bold transition ${
                 index === page

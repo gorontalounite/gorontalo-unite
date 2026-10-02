@@ -119,7 +119,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
         <div className="flex items-center justify-between px-4 py-4 border-b border-gray-100 dark:border-zinc-800">
           <button
             onClick={onClose}
-            aria-label="Tutup menu"
+            aria-label="Close menu"
             className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">

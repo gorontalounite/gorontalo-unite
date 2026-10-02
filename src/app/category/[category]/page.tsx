@@ -1,24 +1,25 @@
 import BeritaCategoryPage, { generateMetadata as generateCategoryMetadata } from "@/app/berita/[key]/page";
 
-export const dynamic = "force-dynamic";
+// Cached and rebuilt at most every five minutes; admin writes revalidate it
+// at once. No params are prerendered at build: each page is generated on its
+// first visit and then served from cache.
+export const revalidate = 300;
+export const generateStaticParams = async () => [];
 
 interface Props {
   params: Promise<{ category: string }>;
-  searchParams: Promise<{ page?: string }>;
 }
 
-export function generateMetadata({ params, searchParams }: Props) {
+export function generateMetadata({ params }: Props) {
   return generateCategoryMetadata({
     params: params.then(({ category }) => ({ key: category })),
-    searchParams,
   });
 }
 
-export default function CategoryArchivePage({ params, searchParams }: Props) {
+export default function CategoryArchivePage({ params }: Props) {
   return (
     <BeritaCategoryPage
       params={params.then(({ category }) => ({ key: category }))}
-      searchParams={searchParams}
     />
   );
 }

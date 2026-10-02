@@ -9,11 +9,11 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Gorontalo Unite — Berbagi Kabar Baik dari Gorontalo",
-  description: "Cerita baik, budaya, wisata, kuliner, dan sosok inspiratif dari Gorontalo.",
+  description: "Berita dan cerita baik dari Gorontalo: kabar daerah terkini, wisata, kuliner, budaya, event, dan sosok inspiratif dari kota dan kabupaten se-Provinsi Gorontalo.",
   alternates: { canonical: "/" },
   openGraph: {
     title: "Gorontalo Unite — Berbagi Kabar Baik dari Gorontalo",
-    description: "Cerita baik, budaya, wisata, kuliner, dan sosok inspiratif dari Gorontalo.",
+    description: "Berita dan cerita baik dari Gorontalo: kabar daerah terkini, wisata, kuliner, budaya, event, dan sosok inspiratif dari kota dan kabupaten se-Provinsi Gorontalo.",
     url: "/",
     type: "website",
   },

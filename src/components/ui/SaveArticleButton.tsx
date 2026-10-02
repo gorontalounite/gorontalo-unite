@@ -21,7 +21,7 @@ export default function SaveArticleButton({ url }: { url: string }) {
       <svg viewBox="0 0 24 24" aria-hidden="true" className={`h-3.5 w-3.5 stroke-current ${saved ? "fill-current" : "fill-none"}`} strokeWidth="1.8">
         <path d="M6.5 4.5h11v16L12 17l-5.5 3.5z" strokeLinejoin="round" />
       </svg>
-      <span>{saved ? "Tersimpan" : "Simpan"}</span>
+      <span>{saved ? "Saved" : "Save"}</span>
     </button>
   );
 }

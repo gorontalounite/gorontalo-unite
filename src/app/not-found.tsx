@@ -3,12 +3,12 @@ import Link from "next/link";
 import { PAGE_TITLE_CLASS } from "@/components/ui/SectionHeading";
 
 export const metadata: Metadata = {
-  title: "Halaman Tidak Ditemukan",
+  title: "Page Not Found",
   robots: { index: false, follow: true },
 };
 
 const SHORTCUTS = [
-  { href: "/",             label: "Beranda" },
+  { href: "/",             label: "Home" },
   { href: "/city-guide",   label: "City Guide" },
   { href: "/event",        label: "Event" },
   { href: "/category/regional", label: "Regional" },
@@ -21,17 +21,17 @@ export default function NotFound() {
         404
       </span>
       <h1 className={`${PAGE_TITLE_CLASS} mt-4 text-gray-900 dark:text-white`}>
-        Halaman tidak ditemukan
+        Page not found
       </h1>
       <p className="mt-3 max-w-sm text-sm leading-relaxed text-gray-500 dark:text-gray-400">
-        Halaman yang kamu cari mungkin sudah dipindahkan, dihapus, atau alamatnya salah ketik.
+        The page you are looking for may have moved, been removed, or the address has a typo.
       </p>
 
       <Link
         href="/"
         className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#FFCC00] px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#FFCC00]"
       >
-        ← Kembali ke Beranda
+        ← Back to Home
       </Link>
 
       <div className="mt-10 flex flex-wrap items-center justify-center gap-x-4 gap-y-2">

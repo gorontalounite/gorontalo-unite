@@ -24,7 +24,7 @@ function articleDate(article: HeroArticleData) {
 }
 
 function displayDate(value: string) {
-  return new Intl.DateTimeFormat("id-ID", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" }).format(new Date(value));
+  return new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar" }).format(new Date(value));
 }
 
 function HeroEyebrow({ article, deskMap }: { article: HeroArticleData; deskMap: Readonly<Record<string, string>> }) {

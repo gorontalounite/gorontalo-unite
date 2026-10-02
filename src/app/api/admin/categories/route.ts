@@ -39,6 +39,6 @@ export async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-  revalidatePath("/");
+  revalidatePath("/", "layout");
   return NextResponse.json({ data });
 }

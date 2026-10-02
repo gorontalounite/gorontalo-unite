@@ -22,7 +22,7 @@ function articleDate(article: LatestArticle) {
 }
 
 function displayDate(value: string) {
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",

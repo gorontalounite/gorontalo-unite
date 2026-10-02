@@ -40,7 +40,7 @@ export default function PublicFooter() {
           <div className="col-span-2 lg:col-span-1">
             <Image src="/logo.png" alt="" width={120} height={32} className="h-9 w-auto object-contain" />
             <p className="mt-4 max-w-md text-[15px] font-semibold leading-relaxed text-gray-900 dark:text-white">
-              Jendela informasi bagi siapa saja yang ingin mengenal Gorontalo lebih dalam.
+              A window for anyone who wants to know Gorontalo more closely.
             </p>
             <p className="mt-3 max-w-md text-sm leading-relaxed text-gray-600 dark:text-gray-400">
               Gorontalo Unite hadir untuk menjadi jendela informasi bagi siapa saja yang ingin

@@ -1,8 +1,33 @@
+import { Fragment, type ReactNode } from "react";
+import Link from "next/link";
 import type { Block } from "@/components/editor/types";
+import type { AutoLink } from "@/components/news/autoLinks";
 
 interface Props {
   blocks: Block[];
   className?: string;
+  /** Character ranges to turn into links, per paragraph block id. */
+  links?: Record<string, AutoLink[]>;
+  /** Rendered right after the block with this id (a "Read also" line). */
+  insertAfter?: { blockId: string; node: ReactNode };
+}
+
+/** Plain paragraph text with the given ranges turned into internal links. */
+function linkify(text: string, ranges: AutoLink[]): ReactNode[] {
+  const out: ReactNode[] = [];
+  let cursor = 0;
+  for (const range of [...ranges].sort((a, b) => a.start - b.start)) {
+    if (range.start < cursor) continue;
+    out.push(text.slice(cursor, range.start));
+    out.push(
+      <Link key={range.start} href={range.href} className="underline decoration-[#FFCC00] decoration-2 underline-offset-[3px] hover:text-[#302f2c] dark:hover:text-[#FFCC00]">
+        {text.slice(range.start, range.end)}
+      </Link>,
+    );
+    cursor = range.end;
+  }
+  out.push(text.slice(cursor));
+  return out;
 }
 
 function getYouTubeId(url: string) {
@@ -10,7 +35,7 @@ function getYouTubeId(url: string) {
   return m?.[1] ?? null;
 }
 
-function RenderBlock({ block }: { block: Block }) {
+function RenderBlock({ block, links }: { block: Block; links?: AutoLink[] }) {
   switch (block.type) {
     /* ── Paragraph ────────────────────────────────── */
     case "paragraph": {
@@ -26,7 +51,7 @@ function RenderBlock({ block }: { block: Block }) {
       }
       return (
         <p className="text-gray-700 dark:text-gray-300 leading-relaxed mb-4">
-          {block.content}
+          {links?.length ? linkify(block.content ?? "", links) : block.content}
         </p>
       );
     }
@@ -193,12 +218,15 @@ function RenderBlock({ block }: { block: Block }) {
   }
 }
 
-export default function BlockRenderer({ blocks, className = "" }: Props) {
+export default function BlockRenderer({ blocks, className = "", links, insertAfter }: Props) {
   if (!blocks?.length) return null;
   return (
     <div className={className}>
       {blocks.map((block) => (
-        <RenderBlock key={block.id} block={block} />
+        <Fragment key={block.id}>
+          <RenderBlock block={block} links={links?.[block.id]} />
+          {insertAfter?.blockId === block.id ? insertAfter.node : null}
+        </Fragment>
       ))}
     </div>
   );

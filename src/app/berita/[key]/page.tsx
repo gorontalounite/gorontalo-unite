@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { cache } from "react";
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, deskKeyFromSlug, deskSlug, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, WEB_CATEGORY_SEO, type CategoryRow } from "../categories";
 import CategoryArticleList from "./CategoryArticleList";
 import Breadcrumbs, { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
@@ -34,7 +34,7 @@ interface Article {
 
 interface Props {
   params:       Promise<{ key: string }>;
-  searchParams: Promise<{ page?: string }>;
+  searchParams?: Promise<{ brand?: string; hal?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -67,7 +67,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
  * empty-section check behind `noindex` costs no extra query.
  */
 const loadSectionArticles = cache(async (key: string, label: string): Promise<Article[]> => {
-  const admin = await createClient();
+  const admin = createPublicClient();
 
   const [{ data: raw }, { data: categoryRows }] = await Promise.all([
     admin
@@ -117,7 +117,7 @@ export default async function BeritaCategoryPage({ params, searchParams }: Props
   // Video Story is a video library, not an article archive, so it takes over
   // the whole page rather than borrowing this one's banner and card list.
   if (key === VIDEO_STORY.key) {
-    const { brand: merek, hal } = await searchParams as { brand?: string; hal?: string };
+    const { brand: merek, hal } = (await searchParams) ?? {};
     return <VideoStoryPage brand={merek?.trim() || null} page={Math.max(1, parseInt(hal ?? "1"))} />;
   }
 

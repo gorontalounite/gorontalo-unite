@@ -56,7 +56,7 @@ const CATEGORY_DOTS: Record<string, string> = {
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",
@@ -103,12 +103,12 @@ export default async function GorontaloUniteAuthorPage() {
             />
           </div>
 
-          <p className="mt-6 text-[10px] font-bold uppercase tracking-[.2em] text-stone-400 dark:text-zinc-500">Redaksi</p>
+          <p className="mt-6 text-[10px] font-bold uppercase tracking-[.2em] text-stone-400 dark:text-zinc-500">Newsroom</p>
           <h1 className="font-heading mt-2 text-3xl font-semibold tracking-[-.025em] sm:text-4xl">gorontalounite</h1>
           <p className="mt-1 text-[11px] font-medium text-stone-500 dark:text-zinc-400">@gorontalounite</p>
           <p className="mt-5 max-w-2xl text-sm leading-7 text-stone-600 dark:text-zinc-300 sm:text-base">
-            Tim redaksi lokal yang meliput dan mengkurasi berita, informasi, dan cerita baik dari Gorontalo.
-            Pedoman kerja kami mengikuti{" "}
+            Local newsroom covering and curating news, information and good stories from Gorontalo.
+            Our reporting follows the{" "}
             <Link href="/pedoman-media-siber" className="underline hover-brand">Pedoman Pemberitaan Media Siber</Link>.
           </p>
         </div>
@@ -116,8 +116,8 @@ export default async function GorontaloUniteAuthorPage() {
 
       <main className="mx-auto max-w-4xl px-4 sm:px-8">
         <div className="flex items-center justify-between py-7 text-xs text-stone-500 dark:text-zinc-400 sm:text-sm">
-          <Link href="/" className="font-semibold brand-label hover:underline">← Semua berita</Link>
-          <span>{articles.length} artikel terbaru</span>
+          <Link href="/" className="font-semibold brand-label hover:underline">← All news</Link>
+          <span>{articles.length} latest stories</span>
         </div>
 
         {articles.length > 0 ? (
@@ -165,7 +165,7 @@ export default async function GorontaloUniteAuthorPage() {
           </div>
         ) : (
           <div className="rounded-2xl border border-dashed border-stone-300 bg-white p-12 text-center text-sm text-stone-500 dark:border-zinc-700 dark:bg-zinc-900">
-            Berita sedang disiapkan.
+            Stories are on the way.
           </div>
         )}
       </main>

@@ -64,7 +64,7 @@ export default function SliderRow({ children, itemClassName = "w-[78vw] sm:w-[ca
           type="button"
           onClick={() => scroll(-1)}
           disabled={atStart}
-          aria-label="Sebelumnya"
+          aria-label="Previous"
           className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-[#302f2c] shadow-sm transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700 dark:disabled:hover:bg-zinc-800"
         >
           <ArrowIcon direction="left" />
@@ -73,7 +73,7 @@ export default function SliderRow({ children, itemClassName = "w-[78vw] sm:w-[ca
           type="button"
           onClick={() => scroll(1)}
           disabled={atEnd}
-          aria-label="Berikutnya"
+          aria-label="Next"
           className="flex h-9 w-9 items-center justify-center rounded-full border border-stone-200 bg-white text-[#302f2c] shadow-sm transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-30 disabled:hover:bg-white dark:border-zinc-700 dark:bg-zinc-800 dark:text-white dark:hover:bg-zinc-700 dark:disabled:hover:bg-zinc-800"
         >
           <ArrowIcon direction="right" />

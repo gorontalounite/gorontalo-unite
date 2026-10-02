@@ -19,7 +19,7 @@ type Variant = "hero" | "feature" | "card" | "compact" | "list" | "channel";
 
 function displayDate(value: string | null) {
   if (!value) return "—";
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "numeric", month: "short", year: "numeric", timeZone: "Asia/Makassar",
   }).format(new Date(value));
 }
@@ -69,7 +69,7 @@ export default function NewsCard({ article, variant = "card" }: { article: NewsA
           <div className={isHero ? "p-5 sm:p-7" : "p-4"}>
             <h3 className={`font-display font-semibold leading-[1.08] text-stone-950 transition group-hover-brand dark:text-white dark:group-hover:text-yellow-300 ${isHero ? "text-2xl sm:text-4xl" : "text-base"}`}>{article.title}</h3>
             {isHero && article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">{article.excerpt}</p>}
-            {isHero && <span className="mt-4 inline-flex text-sm font-semibold brand-label">Baca selengkapnya <span className="ml-1" aria-hidden>→</span></span>}
+            {isHero && <span className="mt-4 inline-flex text-sm font-semibold brand-label">Read more <span className="ml-1" aria-hidden>→</span></span>}
           </div>
         </Link>
       </article>
@@ -87,7 +87,7 @@ export default function NewsCard({ article, variant = "card" }: { article: NewsA
         <NewsMeta article={article} />
         <h3 className={`mt-3 font-display font-semibold leading-[1.08] text-stone-950 transition group-hover-brand dark:text-white dark:group-hover:text-yellow-300 ${variant === "feature" ? "text-xl sm:text-2xl" : "text-xl"}`}>{article.title}</h3>
         {article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">{article.excerpt}</p>}
-        {variant === "list" && <span className="mt-4 inline-flex text-sm font-semibold brand-label transition group-hover:gap-2">Baca selengkapnya <span aria-hidden>→</span></span>}
+        {variant === "list" && <span className="mt-4 inline-flex text-sm font-semibold brand-label transition group-hover:gap-2">Read more <span aria-hidden>→</span></span>}
       </div>
     </>
   );
