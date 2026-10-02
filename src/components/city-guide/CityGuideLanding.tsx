@@ -87,7 +87,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
             >
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Area</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#FFCC00]">
                   <path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11z" />
                   <circle cx="12" cy="10" r="2.5" />
                 </svg>
@@ -103,7 +103,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
 
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Looking for</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#FFCC00]">
                   <rect x="3" y="4" width="18" height="16" rx="2" />
                   <path d="M3 10h18" />
                 </svg>
@@ -118,7 +118,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
 
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Keyword</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#FFCC00]">
                   <circle cx="11" cy="11" r="7" />
                   <path d="M20 20l-3.5-3.5" />
                 </svg>
@@ -132,7 +132,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
 
               <button
                 type="submit"
-                className="min-h-12 bg-[#302f2c] px-8 text-sm font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#9b7513] dark:bg-amber-300 dark:text-zinc-950 dark:hover:bg-amber-200"
+                className="min-h-12 bg-[#302f2c] px-8 text-sm font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#FFCC00] dark:bg-amber-300 dark:text-zinc-950 dark:hover:bg-amber-200"
               >
                 Search
               </button>
@@ -212,7 +212,7 @@ export default function CityGuideLanding({ places }: { places: CityGuidePlace[] 
                     )}
                   </div>
                   <div className="p-4">
-                    <h3 className="font-heading text-lg leading-snug transition group-hover:text-[#9b7513]">
+                    <h3 className="font-heading text-lg leading-snug transition group-hover:text-[#FFCC00]">
                       {place.name}
                     </h3>
                     {/* The reference puts a rating, a duration and a price here.

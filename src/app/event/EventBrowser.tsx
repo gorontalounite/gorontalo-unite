@@ -53,7 +53,7 @@ function RailCard({ event }: { event: EventItem }) {
       <div className="flex h-full flex-col overflow-hidden rounded-lg border border-[#e7e2d8] bg-white transition hover:shadow-[0_18px_36px_-24px_rgba(0,0,0,.45)] dark:border-zinc-800 dark:bg-zinc-900">
         <Poster event={event} className="aspect-[4/3]" />
         <div className="flex flex-1 flex-col p-4">
-          <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#9b7513] sm:text-base">
+          <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#FFCC00] sm:text-base">
             {event.title}
           </h3>
           {/* Two fixed lines, so the rule below lands on one baseline across a row. */}
@@ -84,7 +84,7 @@ function GridCard({ event }: { event: EventItem }) {
     >
       <Poster event={event} className="aspect-[4/3]" />
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#9b7513] sm:text-base">
+        <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#FFCC00] sm:text-base">
           {event.title}
         </h3>
         <p className="mt-1.5 line-clamp-2 min-h-10 text-xs leading-relaxed text-[#78716c] dark:text-zinc-400">
@@ -206,7 +206,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
             >
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Area</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#FFCC00]">
                   <path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11z" />
                   <circle cx="12" cy="10" r="2.5" />
                 </svg>
@@ -222,7 +222,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
 
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Category</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#FFCC00]">
                   <rect x="3" y="4" width="18" height="16" rx="2" />
                   <path d="M3 10h18" />
                 </svg>
@@ -238,7 +238,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
 
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Keyword</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#FFCC00]">
                   <circle cx="11" cy="11" r="7" />
                   <path d="M20 20l-3.5-3.5" />
                 </svg>
@@ -253,7 +253,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
 
               <button
                 type="submit"
-                className="min-h-12 bg-[#302f2c] px-8 text-sm font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#9b7513] dark:bg-amber-300 dark:text-zinc-950 dark:hover:bg-amber-200"
+                className="min-h-12 bg-[#302f2c] px-8 text-sm font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#FFCC00] dark:bg-amber-300 dark:text-zinc-950 dark:hover:bg-amber-200"
               >
                 Search
               </button>
@@ -299,9 +299,9 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
         <section className="mx-auto max-w-[1280px] px-4 pt-8 sm:px-6 lg:px-8">
           <div className="mb-4 flex flex-wrap items-center gap-3">
             <h2 className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
-              <span className="text-[#f5c400]" aria-hidden="true">/</span>
+              <span className="text-[#FFCC00]" aria-hidden="true">/</span>
               <span>{filtered.length} event{filtered.length === 1 ? "" : "s"}{category ? ` · ${category}` : ""}{needle ? ` · “${query.trim()}”` : ""}</span>
-              <span className="text-[#f5c400]" aria-hidden="true">/</span>
+              <span className="text-[#FFCC00]" aria-hidden="true">/</span>
             </h2>
             <button
               type="button"

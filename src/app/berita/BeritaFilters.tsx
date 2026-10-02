@@ -46,7 +46,7 @@ export default function BeritaFilters({ activeCategory, activeSearch, catCounts 
             searchTimer.current = setTimeout(() => update("q", event.target.value.trim()), 350);
           }}
           placeholder="Search articles…"
-          className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:focus:border-yellow-400 dark:focus:ring-yellow-400/30"
+          className="w-full rounded-xl border border-gray-200 bg-white py-2 pl-9 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-white dark:focus:border-[#FFCC00] dark:focus:ring-yellow-400/30"
         />
       </div>
 
@@ -55,7 +55,7 @@ export default function BeritaFilters({ activeCategory, activeSearch, catCounts 
         id="news-category"
         value={activeCategory}
         onChange={(event) => update("category", event.target.value)}
-        className="min-w-48 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-gray-200 dark:focus:border-yellow-400 dark:focus:ring-yellow-400/30"
+        className="min-w-48 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm text-gray-700 focus:border-brand focus:outline-none focus:ring-2 focus:ring-brand/30 dark:border-zinc-700 dark:bg-zinc-900 dark:text-gray-200 dark:focus:border-[#FFCC00] dark:focus:ring-yellow-400/30"
       >
         <option value="">Semua kategori</option>
         {WEB_CATEGORIES.filter((category) => catCounts[category.label]).map((category) => (

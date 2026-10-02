@@ -64,7 +64,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
     <div className="max-w-lg mx-auto px-4 sm:px-6 py-10">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
-        <Link href="/" className="hover:text-brand dark:hover:text-yellow-400">Beranda</Link>
+        <Link href="/" className="hover:text-brand dark:hover:text-[#FFCC00]">Beranda</Link>
         <span>/</span>
         <span className="text-gray-600 dark:text-gray-300">Profil Saya</span>
       </nav>
@@ -116,7 +116,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
               onChange={(e) => setName(e.target.value)}
               required
               placeholder="Nama kamu"
-              className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white outline-none focus:border-[#F5C400] dark:focus:border-yellow-500 focus:ring-2 focus:ring-[#F5C400]/20 transition-all"
+              className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white outline-none focus:border-[#FFCC00] dark:focus:border-yellow-500 focus:ring-2 focus:ring-[#FFCC00]/20 transition-all"
             />
           </div>
 
@@ -136,7 +136,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
           <button
             type="submit"
             disabled={saving}
-            className="w-full bg-[#F5C400] text-black text-sm font-medium py-2.5 rounded-xl hover:bg-[#c9a000] disabled:opacity-50 transition-colors"
+            className="w-full bg-[#FFCC00] text-black text-sm font-medium py-2.5 rounded-xl hover:bg-[#FFCC00] disabled:opacity-50 transition-colors"
           >
             {saving ? "Menyimpan…" : saved ? "✓ Tersimpan" : "Simpan Perubahan"}
           </button>
@@ -149,7 +149,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
           <p className="text-xs font-medium text-amber-700 dark:text-amber-300 mb-2">Akses Staf</p>
           <Link
             href="/admin/news"
-            className="text-sm text-brand dark:text-yellow-400 font-medium hover:underline"
+            className="text-sm text-brand dark:text-[#FFCC00] font-medium hover:underline"
           >
             → Buka Dashboard Admin
           </Link>

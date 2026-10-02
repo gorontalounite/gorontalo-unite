@@ -148,7 +148,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
                 >
                   <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-amber-200/40 transition group-hover:scale-125 dark:bg-amber-400/10" />
                   <div className="relative flex h-full flex-col justify-between">
-                    <span className="text-brand dark:text-yellow-400">{item.icon}</span>
+                    <span className="text-brand dark:text-[#FFCC00]">{item.icon}</span>
                     <div>
                       <p className="text-sm font-semibold">{item.label}</p>
                       <p className="mt-1 text-[11px] leading-snug text-gray-500 dark:text-zinc-400">{item.description}</p>
@@ -178,7 +178,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
                     {item.icon}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover:text-brand dark:group-hover:text-[#FFCC00] transition-colors">
                       {item.label}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">{item.desc}</p>
@@ -202,7 +202,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
                   key={channel.href}
                   href={channel.href}
                   onClick={onClose}
-                  className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-brand hover:text-brand dark:border-zinc-700 dark:text-gray-300 dark:hover:border-yellow-400 dark:hover:text-yellow-400"
+                  className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-brand hover:text-brand dark:border-zinc-700 dark:text-gray-300 dark:hover:border-[#FFCC00] dark:hover:text-[#FFCC00]"
                 >
                   {channel.label}
                 </Link>
@@ -228,7 +228,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover:text-brand dark:group-hover:text-[#FFCC00] transition-colors">
                   About Gorontalo Unite
                 </p>
                 <p className="text-xs text-gray-500 dark:text-zinc-400">Gorontalo hyperlocal media platform</p>

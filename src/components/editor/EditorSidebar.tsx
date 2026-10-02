@@ -249,32 +249,120 @@ function CategorySelector({ values, onChange }: { values: string[]; onChange: (c
 }
 
 /* ─── Tag input ─────────────────────────────────────────────── */
+interface TagStat { tag: string; count: number }
+
+/** Tags are stored hashtag-style: lowercase, no spaces, no leading "#". */
+const normalizeTag = (value: string) => value.trim().toLowerCase().replace(/^#+/, "").replace(/\s+/g, "");
+
+/**
+ * Suggests tags already in use while the writer types, so a story reuses
+ * "penasxvii" instead of minting "penas2026" and the archive stays curated.
+ * Retired spellings resolve to their canonical tag.
+ */
 function TagInput({ tags, onChange }: { tags: string[]; onChange: (t: string[]) => void }) {
   const [input, setInput] = useState("");
-  const add = () => {
-    const v = input.trim();
-    if (v && !tags.includes(v)) onChange([...tags, v]);
+  const [focused, setFocused] = useState(false);
+  const [active, setActive] = useState(0);
+  const [known, setKnown] = useState<TagStat[]>([]);
+  const [aliases, setAliases] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/tags")
+      .then((res) => (res.ok ? res.json() : null))
+      .then((json) => {
+        if (cancelled || !json) return;
+        setKnown(json.tags ?? []);
+        setAliases(json.aliases ?? {});
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const query = normalizeTag(input);
+  const alias = query ? aliases[query] : undefined;
+  const taken = new Set(tags.map(normalizeTag));
+  const suggestions = known
+    .filter(({ tag }) => !taken.has(tag) && (!query || tag.includes(query) || tag === alias))
+    .sort((a, b) => {
+      // The alias target first, then prefix matches, then by how often used.
+      const rank = (t: string) => (t === alias ? 0 : query && t.startsWith(query) ? 1 : 2);
+      return rank(a.tag) - rank(b.tag) || b.count - a.count;
+    })
+    .slice(0, 8);
+  const exact = known.some(({ tag }) => tag === query);
+
+  const add = (value: string) => {
+    const tag = aliases[normalizeTag(value)] ?? normalizeTag(value);
+    if (tag && !taken.has(tag)) onChange([...tags, tag]);
     setInput("");
+    setActive(0);
   };
+
+  const open = focused && (suggestions.length > 0 || Boolean(query));
+
   return (
     <div>
       <div className="flex flex-wrap gap-1 mb-1.5">
         {tags.map((t) => (
           <span key={t} className="inline-flex items-center gap-1 text-[11px] bg-gray-100 text-gray-700 px-2 py-0.5 rounded-full">
             {t}
-            <button type="button" onClick={() => onChange(tags.filter((x) => x !== t))} className="text-gray-400 hover:text-red-400">✕</button>
+            <button type="button" aria-label={`Hapus tag ${t}`} onClick={() => onChange(tags.filter((x) => x !== t))} className="text-gray-400 hover:text-red-400">✕</button>
           </span>
         ))}
       </div>
-      <div className="flex gap-1">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => { if (e.key === "Enter" || e.key === ",") { e.preventDefault(); add(); } }}
-          placeholder="Tambah tag, tekan Enter…"
-          className="flex-1 text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
-        />
-        <button type="button" onClick={add} className="text-[11px] bg-gray-100 text-gray-700 px-2 py-1.5 rounded-lg hover:bg-gray-200">+</button>
+      <div className="relative">
+        <div className="flex gap-1">
+          <input
+            value={input}
+            onChange={(e) => { setInput(e.target.value); setActive(0); }}
+            onFocus={() => setFocused(true)}
+            onBlur={() => setTimeout(() => setFocused(false), 120)}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") { e.preventDefault(); setActive((i) => Math.min(i + 1, suggestions.length - 1)); }
+              else if (e.key === "ArrowUp") { e.preventDefault(); setActive((i) => Math.max(i - 1, 0)); }
+              else if (e.key === "Enter" || e.key === ",") {
+                e.preventDefault();
+                if (!query) return;
+                // Enter takes the highlighted suggestion unless the typed tag already exists.
+                if (exact || alias || !suggestions[active]) add(input);
+                else add(suggestions[active].tag);
+              } else if (e.key === "Escape") setFocused(false);
+            }}
+            placeholder="Ketik tag, pilih dari saran…"
+            role="combobox"
+            aria-expanded={open}
+            aria-autocomplete="list"
+            className="flex-1 text-[11px] border border-gray-200 rounded-lg px-2.5 py-1.5 outline-none focus:border-[#F5C400]"
+          />
+          <button type="button" onClick={() => add(input)} className="text-[11px] bg-gray-100 text-gray-700 px-2 py-1.5 rounded-lg hover:bg-gray-200">+</button>
+        </div>
+        {open && (
+          <ul role="listbox" className="absolute left-0 right-0 z-20 mt-1 max-h-60 overflow-auto rounded-lg border border-gray-200 bg-white py-1 shadow-lg">
+            {!query && <li className="px-2.5 pb-1 pt-0.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">Tag populer</li>}
+            {alias && (
+              <li className="px-2.5 py-1 text-[10px] text-amber-700">“{query}” sudah digabung ke #{alias}</li>
+            )}
+            {suggestions.map(({ tag, count }, index) => (
+              <li key={tag} role="option" aria-selected={index === active}>
+                <button
+                  type="button"
+                  onMouseDown={(e) => { e.preventDefault(); add(tag); }}
+                  onMouseEnter={() => setActive(index)}
+                  className={`flex w-full items-center justify-between px-2.5 py-1 text-left text-[11px] ${index === active ? "bg-[#FFF7CC] text-gray-900" : "text-gray-700"}`}
+                >
+                  <span>#{tag}</span>
+                  <span className="text-[10px] text-gray-400">{count} artikel</span>
+                </button>
+              </li>
+            ))}
+            {query && !exact && !alias && (
+              <li className="px-2.5 py-1 text-[10px] text-gray-500">
+                Enter untuk tag baru <span className="font-semibold">#{query}</span>. Pakai tag yang sudah ada bila ada yang cocok.
+              </li>
+            )}
+          </ul>
+        )}
       </div>
     </div>
   );

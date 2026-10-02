@@ -50,7 +50,7 @@ const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
 
 export const viewport: Viewport = {
   themeColor:  [
-    { media: "(prefers-color-scheme: light)", color: "#F5C400" },
+    { media: "(prefers-color-scheme: light)", color: "#FFCC00" },
     { media: "(prefers-color-scheme: dark)",  color: "#111111" },
   ],
   colorScheme: "light dark",

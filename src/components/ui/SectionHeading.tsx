@@ -34,9 +34,9 @@ export default function SectionHeading({
 }) {
   const title = (
     <Tag id={id} className="font-heading flex items-center gap-2 text-[20px] font-bold tracking-[-.025em] sm:text-[24px]">
-      {slashes && <span className="text-[#f5c400]" aria-hidden="true">/</span>}
+      {slashes && <span className="text-[#FFCC00]" aria-hidden="true">/</span>}
       <span>{children}</span>
-      {slashes && <span className="text-[#f5c400]" aria-hidden="true">/</span>}
+      {slashes && <span className="text-[#FFCC00]" aria-hidden="true">/</span>}
     </Tag>
   );
 

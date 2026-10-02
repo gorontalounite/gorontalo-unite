@@ -22,7 +22,7 @@ export default function VideoStoryGrid({ items }: { items: VideoStoryItem[] }) {
             <button
               type="button"
               onClick={() => setOpen(index)}
-              className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]"
+              className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFCC00]"
             >
               <span className="sr-only">Putar: </span>
               <div className="relative aspect-[9/16] overflow-hidden rounded-xl bg-zinc-800">
@@ -41,7 +41,7 @@ export default function VideoStoryGrid({ items }: { items: VideoStoryItem[] }) {
                   </span>
                 )}
               </div>
-              <h2 className="mt-2.5 line-clamp-2 text-[14px] font-semibold leading-snug text-white group-hover:text-[#f5c400]">
+              <h2 className="mt-2.5 line-clamp-2 text-[14px] font-semibold leading-snug text-white group-hover:text-[#FFCC00]">
                 {item.title}
               </h2>
               <p className="mt-1 flex items-center gap-1 text-[12px] text-white/50">
