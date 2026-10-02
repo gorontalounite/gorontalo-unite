@@ -111,6 +111,9 @@ export const metadata: Metadata = {
   robots: { index: true, follow: true },
 };
 
+/** Google Business Profile (Maps place id 0xc2c29ab17eb155fb). */
+const GOOGLE_BUSINESS_PROFILE = "https://maps.google.com/?cid=14033949475965326843";
+
 const organizationJsonLd = {
   "@context": "https://schema.org",
   "@type": "NewsMediaOrganization",
@@ -124,7 +127,18 @@ const organizationJsonLd = {
     "https://www.threads.com/@gorontalo.unite",
     "https://www.tiktok.com/@gorontalounite",
     "https://www.youtube.com/gorontalounite",
+    GOOGLE_BUSINESS_PROFILE,
   ],
+  // From the Google Business Profile listing; ties the site and the Maps
+  // entry together as one organisation.
+  hasMap: GOOGLE_BUSINESS_PROFILE,
+  location: {
+    "@type": "Place",
+    name: "Gorontalo Unite",
+    geo: { "@type": "GeoCoordinates", latitude: 0.5548863, longitude: 123.0611338 },
+    address: { "@type": "PostalAddress", addressLocality: "Kota Gorontalo", addressRegion: "Gorontalo", addressCountry: "ID" },
+  },
+  areaServed: { "@type": "AdministrativeArea", name: "Provinsi Gorontalo" },
 };
 
 // Names the site in results ("Gorontalo Unite" rather than the bare domain).
