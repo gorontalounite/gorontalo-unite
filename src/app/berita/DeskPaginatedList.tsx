@@ -38,7 +38,7 @@ function ArticleImage({ article, className, sizes }: { article: DeskArticle; cla
 
 function Eyebrow({ article, light = false, deskMap }: { article: DeskArticle; light?: boolean; deskMap: Readonly<Record<string, string>> }) {
   return (
-    <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#77736b] dark:text-zinc-400"}`}>
+    <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#67635b] dark:text-zinc-400"}`}>
       <span className={light ? "text-[#f5c400]" : "text-[#7a5c0d] dark:text-amber-400"}>{resolveWebCategoryLabel(article, deskMap)}</span>
       <span aria-hidden>•</span>
       <time dateTime={articleDate(article)}>{displayDate(articleDate(article))}</time>

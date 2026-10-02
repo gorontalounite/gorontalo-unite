@@ -135,7 +135,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
 
           {/* ── CITY GUIDE ── */}
           <div className="px-4 pt-5 pb-3">
-            <p className="text-[11px] font-semibold tracking-widest text-gray-400 dark:text-zinc-500 uppercase mb-3">
+            <p className="text-[11px] font-semibold tracking-widest text-gray-500 dark:text-zinc-400 uppercase mb-3">
               City Guide
             </p>
             <div className="grid grid-cols-2 gap-2">
@@ -151,7 +151,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
                     <span className="text-brand dark:text-yellow-400">{item.icon}</span>
                     <div>
                       <p className="text-sm font-semibold">{item.label}</p>
-                      <p className="mt-1 text-[11px] leading-snug text-gray-400 dark:text-zinc-500">{item.description}</p>
+                      <p className="mt-1 text-[11px] leading-snug text-gray-500 dark:text-zinc-400">{item.description}</p>
                     </div>
                   </div>
                 </Link>
@@ -163,7 +163,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
 
           {/* ── KABAR BAIK ── */}
           <div className="px-4 pt-4 pb-3">
-            <p className="text-[11px] font-semibold tracking-widest text-gray-400 dark:text-zinc-500 uppercase mb-2">
+            <p className="text-[11px] font-semibold tracking-widest text-gray-500 dark:text-zinc-400 uppercase mb-2">
               Good News
             </p>
             <div className="space-y-0.5">
@@ -181,7 +181,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
                     <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
                       {item.label}
                     </p>
-                    <p className="text-xs text-gray-400 dark:text-zinc-500 truncate">{item.desc}</p>
+                    <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">{item.desc}</p>
                   </div>
                 </Link>
               ))}
@@ -193,7 +193,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
 
           {/* ── KANAL EDITORIAL ── */}
           <div className="px-4 pt-4">
-            <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-gray-400 dark:text-zinc-500">
+            <p className="mb-2 px-3 text-[11px] font-semibold uppercase tracking-widest text-gray-500 dark:text-zinc-400">
               Channels
             </p>
             <div className="flex flex-wrap gap-2 px-3">
@@ -214,7 +214,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
 
           {/* ── ABOUT US (direct link) ── */}
           <div className="px-4 pt-4">
-            <p className="text-[11px] font-semibold tracking-widest text-gray-400 dark:text-zinc-500 uppercase mb-2 px-3">
+            <p className="text-[11px] font-semibold tracking-widest text-gray-500 dark:text-zinc-400 uppercase mb-2 px-3">
               About Us
             </p>
             <Link
@@ -231,7 +231,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
                 <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover:text-brand dark:group-hover:text-yellow-400 transition-colors">
                   About Gorontalo Unite
                 </p>
-                <p className="text-xs text-gray-400 dark:text-zinc-500">Gorontalo hyperlocal media platform</p>
+                <p className="text-xs text-gray-500 dark:text-zinc-400">Gorontalo hyperlocal media platform</p>
               </div>
               <svg className="w-4 h-4 text-gray-300 dark:text-zinc-600 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -254,7 +254,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
               </div>
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-medium text-gray-800 dark:text-gray-100">Account</p>
-                <p className="text-xs text-gray-400 dark:text-zinc-500">Sign in or view profile</p>
+                <p className="text-xs text-gray-500 dark:text-zinc-400">Sign in or view profile</p>
               </div>
               <svg className="h-4 w-4 flex-shrink-0 text-gray-300 dark:text-zinc-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

@@ -140,7 +140,7 @@ function ArticleImage({ article, className, priority = false, sizes = "(max-widt
 
 function Eyebrow({ article, light = false, deskMap = {} }: { article: Article; light?: boolean; deskMap?: DeskMap }) {
   return (
-    <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#77736b] dark:text-zinc-400"}`}>
+    <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#67635b] dark:text-zinc-400"}`}>
       <span className={light ? "text-[#f5c400]" : "text-[#7a5c0d] dark:text-amber-400"}>{deskLabel(article, deskMap)}</span>
       <span aria-hidden>•</span>
       <time dateTime={articleDate(article)}>{displayDate(articleDate(article))}</time>
@@ -202,7 +202,7 @@ function DeskNav() {
 
 function EmptyDesk({ dark = false }: { dark?: boolean }) {
   return (
-    <div className={`border border-dashed px-6 py-14 text-center ${dark ? "border-white/25 bg-white dark:bg-zinc-950/[.03] text-white/65" : "border-[#bbb3a5] dark:border-zinc-700 bg-white dark:bg-zinc-950/20 text-[#77736b] dark:text-zinc-400"}`}>
+    <div className={`border border-dashed px-6 py-14 text-center ${dark ? "border-white/25 bg-white dark:bg-zinc-950/[.03] text-white/65" : "border-[#bbb3a5] dark:border-zinc-700 bg-white dark:bg-zinc-950/20 text-[#67635b] dark:text-zinc-400"}`}>
       <p className="text-[18px] font-bold">Cerita pilihan sedang disiapkan.</p>
       <p className="mt-2 text-xs">Rubrik ini akan diisi setelah lolos kurasi redaksi.</p>
     </div>
@@ -260,7 +260,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
           ) : (
             <div className="border border-dashed border-[#bbb3a5] dark:border-zinc-700 px-6 py-24 text-center">
               <p className="text-2xl font-bold">Belum ada cerita di rubrik ini.</p>
-              <p className="mt-2 text-sm text-[#77736b] dark:text-zinc-400">Redaksi sedang menyiapkan pilihan yang relevan untukmu.</p>
+              <p className="mt-2 text-sm text-[#67635b] dark:text-zinc-400">Redaksi sedang menyiapkan pilihan yang relevan untukmu.</p>
             </div>
           )}
         </main>
@@ -272,7 +272,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
     return (
       <div className="min-h-[70vh] bg-white dark:bg-zinc-950 px-4 pt-36 text-center text-[#302f2c] dark:text-zinc-50">
         <h1 className="font-heading text-4xl font-bold">Berita sedang disiapkan</h1>
-        <p className="mt-3 text-sm text-[#77736b] dark:text-zinc-400">Silakan kembali beberapa saat lagi.</p>
+        <p className="mt-3 text-sm text-[#67635b] dark:text-zinc-400">Silakan kembali beberapa saat lagi.</p>
       </div>
     );
   }
