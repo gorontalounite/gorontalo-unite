@@ -17,7 +17,7 @@ const PAGE_SIZE = 9;
 
 function formatDate(d: string | null) {
   if (!d) return "";
-  return new Date(d).toLocaleDateString("id-ID", {
+  return new Date(d).toLocaleDateString("en-GB", {
     day: "numeric",
     month: "long",
     year: "numeric",

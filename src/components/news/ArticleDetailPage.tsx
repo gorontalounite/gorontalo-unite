@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { createClient }      from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { CATEGORIES, categoryHref } from "@/app/berita/categories";
 import MarkdownContent    from "@/components/ui/MarkdownContent";
 import BlockRenderer      from "@/components/ui/BlockRenderer";
@@ -14,6 +14,7 @@ import ArticleHero        from "@/components/ui/ArticleHero";
 import { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
 import ReaderRevenueManager from "@/components/google/ReaderRevenueManager";
 import { blocksToText, type Block } from "@/components/editor/types";
+import { findTagLinks, pickReadAlso } from "@/components/news/autoLinks";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -33,7 +34,7 @@ function normalizedCopy(value: string) {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id: slug } = await params;
-  const admin = await createClient();
+  const admin = createPublicClient();
   const { data } = await admin
     .from("articles")
     .select("title, excerpt, seo_title, seo_description, image_url, image_alt, published_at, updated_at, category")
@@ -101,12 +102,10 @@ const CATEGORY_COLORS: Record<string, string> = {
 
 export async function NewsDetailPage({ params }: Props) {
   const { id: slug } = await params;
-  const admin        = await createClient();
+  const admin        = createPublicClient();
 
-  const [{ data: article }, { data: { user } }] = await Promise.all([
-    admin.from("articles").select("*").eq("slug", slug).eq("published", true).neq("category", "Portfolio").single(),
-    (await createClient()).auth.getUser(),
-  ]);
+  const { data: article } = await admin
+    .from("articles").select("*").eq("slug", slug).eq("published", true).neq("category", "Portfolio").single();
 
   if (!article) notFound();
 
@@ -120,8 +119,35 @@ export async function NewsDetailPage({ params }: Props) {
 
   const related: RelatedItem[] = relatedRaw ?? [];
 
+  // Every published story's tags: hub tags (three or more stories) become
+  // in-text links, and the story sharing the most tags becomes "Read also".
+  const { data: tagRows } = await admin
+    .from("articles")
+    .select("slug, title, tags, published_at")
+    .eq("published", true)
+    .neq("category", "Portfolio");
+  const tagCounts = new Map<string, number>();
+  for (const row of tagRows ?? []) {
+    for (const tag of (row.tags as string[] | null) ?? []) {
+      const k = tag.toLowerCase();
+      tagCounts.set(k, (tagCounts.get(k) ?? 0) + 1);
+    }
+  }
+  const hubTags = new Set([...tagCounts].filter(([, count]) => count >= 3).map(([tag]) => tag));
+
   const blocks: Block[] = Array.isArray(article.blocks) && article.blocks.length > 0
     ? (article.blocks as Block[]) : [];
+
+  const bodyLinks = findTagLinks(blocks, hubTags);
+  const readAlso = pickReadAlso(
+    slug,
+    (article.tags as string[] | null) ?? [],
+    (tagRows ?? []) as Array<{ slug: string; title: string; tags: string[] | null; published_at: string | null }>,
+    new Set(related.map((item) => item.slug)),
+  );
+  // After the second paragraph, and only in stories long enough to carry it.
+  const paragraphs = blocks.filter((block) => block.type === "paragraph");
+  const readAlsoAfter = paragraphs.length >= 5 ? paragraphs[1].id : null;
 
   // Imported stories carry only a date, stored as midnight UTC. Printing the
   // clock for those would invent a publishing time of 08.00 WITA.
@@ -130,10 +156,10 @@ export async function NewsDetailPage({ params }: Props) {
     && new Date(article.published_at).getUTCMinutes() === 0;
   const publishedDate = article.published_at
     ? dateOnly
-      ? new Intl.DateTimeFormat("id-ID", {
+      ? new Intl.DateTimeFormat("en-GB", {
           weekday: "long", day: "numeric", month: "long", year: "numeric", timeZone: "Asia/Makassar",
         }).format(new Date(article.published_at))
-      : `${new Intl.DateTimeFormat("id-ID", {
+      : `${new Intl.DateTimeFormat("en-GB", {
           weekday: "long", day: "numeric", month: "long", year: "numeric",
           hour: "2-digit", minute: "2-digit", timeZone: "Asia/Makassar",
         }).format(new Date(article.published_at))} WITA`
@@ -179,11 +205,6 @@ export async function NewsDetailPage({ params }: Props) {
     className: CATEGORY_COLORS[label] ?? "bg-gray-100 text-gray-700",
   }));
 
-  // User info for CommentSection
-  const authUser = user
-    ? { id: user.id, name: user.user_metadata?.full_name || user.email?.split("@")[0] || "Reader" }
-    : null;
-
   // ── Schema.org JSON-LD ──────────────────────────────────────
   const schemaType = (article.schema_type as string | null) ?? "NewsArticle";
   const jsonLd = {
@@ -194,7 +215,8 @@ export async function NewsDetailPage({ params }: Props) {
     image:         article.image_url ? [article.image_url] : undefined,
     datePublished: article.published_at ?? article.created_at,
     dateModified:  article.updated_at  ?? article.published_at ?? article.created_at,
-    author:        { "@type": "Organization", name: "Gorontalo Unite", url: BASE },
+    // The newsroom is the byline: no individual authors are published.
+    author:        { "@type": "NewsMediaOrganization", name: "Gorontalo Unite", url: `${BASE}/author/gorontalounite` },
     publisher:     { "@type": "Organization", name: "Gorontalo Unite", url: BASE,
                      logo: { "@type": "ImageObject", url: `${BASE}/icons/icon-512.png`, width: 512, height: 512 } },
     mainEntityOfPage: { "@type": "WebPage", "@id": canonicalUrl },
@@ -247,14 +269,26 @@ export async function NewsDetailPage({ params }: Props) {
         {/* Content */}
         <div className="article-body mx-auto max-w-3xl text-base leading-[1.75] sm:text-[17px] sm:leading-[1.8]">
           {blocks.length > 0
-            ? <BlockRenderer blocks={blocks} />
+            ? <BlockRenderer
+                blocks={blocks}
+                links={bodyLinks}
+                insertAfter={readAlso && readAlsoAfter ? {
+                  blockId: readAlsoAfter,
+                  node: (
+                    <p className="my-6 border-l-4 border-[#FFCC00] pl-4 text-[15px] font-semibold leading-snug text-[#302f2c] dark:text-zinc-100">
+                      <span className="mr-1.5 text-xs font-bold uppercase tracking-[.12em] text-[#67635b] dark:text-zinc-400">Read also</span>
+                      <Link href={`/${readAlso.slug}`} className="hover-brand">{readAlso.title}</Link>
+                    </p>
+                  ),
+                } : undefined}
+              />
             : article.content && <MarkdownContent content={article.content} />
           }
 
         {/* Extra images (legacy gallery) */}
         {Array.isArray(article.extra_images) && article.extra_images.length > 0 && (
           <div className="mt-8">
-            <h2 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-widest sm:text-sm">Galeri</h2>
+            <h2 className="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-3 uppercase tracking-widest sm:text-sm">Gallery</h2>
             <div className="grid grid-cols-2 gap-3">
               {article.extra_images.map((url: string, i: number) => (
                 <div key={i} className="aspect-video relative rounded-xl overflow-hidden">
@@ -268,7 +302,7 @@ export async function NewsDetailPage({ params }: Props) {
         {/* Source attribution */}
         {sourceUrl && (
           <div className="mt-6 text-[9px] text-gray-400 dark:text-gray-500 sm:text-xs">
-            Sumber:{" "}
+            Source:{" "}
             <a
               href={sourceUrl}
               target="_blank"
@@ -308,9 +342,9 @@ export async function NewsDetailPage({ params }: Props) {
       <section className="mx-auto mt-10 flex max-w-3xl items-center gap-3 border-y border-stone-200 py-5 dark:border-zinc-800 sm:gap-4">
         <Image src="/logo-gu.png" alt="Gorontalo Unite logo" width={52} height={52} className="h-11 w-11 shrink-0 rounded-full object-cover sm:h-13 sm:w-13" />
         <div>
-          <p className="text-[9px] font-bold uppercase tracking-[.15em] text-stone-500 sm:text-xs">Penulis</p>
+          <p className="text-[9px] font-bold uppercase tracking-[.15em] text-stone-500 sm:text-xs">Author</p>
           <Link href="/author/gorontalounite" className="mt-1 block text-xs font-semibold text-stone-900 hover-brand dark:text-white sm:text-base">@gorontalounite</Link>
-          <p className="mt-1 text-[10px] leading-relaxed text-stone-500 dark:text-zinc-400 sm:text-sm">Tim redaksi lokal yang meliput berita, informasi, dan cerita penting dari Gorontalo.</p>
+          <p className="mt-1 text-[10px] leading-relaxed text-stone-500 dark:text-zinc-400 sm:text-sm">Local newsroom covering news, information and stories that matter in Gorontalo.</p>
         </div>
       </section>
 
@@ -318,12 +352,12 @@ export async function NewsDetailPage({ params }: Props) {
       <RelatedPosts items={related} basePath="" />
 
       {/* Comments */}
-      <CommentSection slug={slug} allowComments={allowComments} user={authUser} />
+      <CommentSection slug={slug} allowComments={allowComments} />
 
       {/* Back navigation */}
       <div className="mt-10 flex gap-4 border-t border-stone-200 pt-6 dark:border-zinc-800">
         <Link href="/" className="text-sm brand-label font-medium hover:underline">
-          ← Semua berita
+          ← All news
         </Link>
       </div>
       </div>

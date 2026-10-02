@@ -3,12 +3,16 @@ import { cache } from "react";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import { TAG_ALIASES } from "./aliases";
-import { createClient } from "@/lib/supabase/server";
+import { createPublicClient } from "@/lib/supabase/public";
 import { DEFAULT_COLOR } from "@/app/berita/categories";
 import CategoryArticleList, { type CategoryArticle } from "@/app/berita/[key]/CategoryArticleList";
 import Breadcrumbs, { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
 
-export const dynamic = "force-dynamic";
+// Cached and rebuilt at most every five minutes; admin writes revalidate it
+// at once. No params are prerendered at build: each page is generated on its
+// first visit and then served from cache.
+export const revalidate = 300;
+export const generateStaticParams = async () => [];
 
 interface Props {
   params: Promise<{ tag: string }>;
@@ -21,7 +25,7 @@ interface Props {
 const MIN_INDEXABLE_STORIES = 3;
 
 const loadTagArticles = cache(async (label: string): Promise<CategoryArticle[]> => {
-  const admin = await createClient();
+  const admin = createPublicClient();
 
   const { data: raw } = await admin
     .from("articles")

@@ -64,12 +64,12 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
     <div className="max-w-lg mx-auto px-4 sm:px-6 py-10">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-2 text-xs text-gray-400 dark:text-gray-500 mb-6">
-        <Link href="/" className="hover-brand">Beranda</Link>
+        <Link href="/" className="hover-brand">Home</Link>
         <span>/</span>
-        <span className="text-gray-600 dark:text-gray-300">Profil Saya</span>
+        <span className="text-gray-600 dark:text-gray-300">My Profile</span>
       </nav>
 
-      <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-8">Profil Saya</h1>
+      <h1 className="text-xl font-bold text-gray-900 dark:text-white mb-8">My Profile</h1>
 
       {/* Avatar + role */}
       <div className="flex items-center gap-4 mb-8">
@@ -97,7 +97,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
 
       {/* Edit form */}
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-5 shadow-sm mb-4">
-        <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Edit Informasi</h2>
+        <h2 className="text-sm font-semibold text-gray-900 dark:text-white mb-4">Edit details</h2>
 
         {error && (
           <div className="bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-xs px-3 py-2 rounded-lg border border-red-100 dark:border-red-800 mb-4">
@@ -115,7 +115,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              placeholder="Nama kamu"
+              placeholder="Your name"
               className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-800 text-gray-900 dark:text-white outline-none focus:border-[#FFCC00] dark:focus:border-yellow-500 focus:ring-2 focus:ring-[#FFCC00]/20 transition-all"
             />
           </div>
@@ -130,7 +130,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
               disabled
               className="w-full text-sm border border-gray-100 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-gray-50 dark:bg-zinc-800/50 text-gray-400 dark:text-gray-500 cursor-not-allowed"
             />
-            <p className="text-[10px] text-gray-400 mt-1">Email tidak bisa diubah.</p>
+            <p className="text-[10px] text-gray-400 mt-1">Email cannot be changed.</p>
           </div>
 
           <button
@@ -138,7 +138,7 @@ export default function ProfileClient({ userId, email, fullName: initName, role,
             disabled={saving}
             className="w-full bg-[#FFCC00] text-black text-sm font-medium py-2.5 rounded-xl hover:bg-[#FFCC00] disabled:opacity-50 transition-colors"
           >
-            {saving ? "Menyimpan…" : saved ? "✓ Tersimpan" : "Simpan Perubahan"}
+            {saving ? "Menyimpan…" : saved ? "✓ Saved" : "Save changes"}
           </button>
         </form>
       </div>

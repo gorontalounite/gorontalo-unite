@@ -43,7 +43,7 @@ export default function InstagramEmbedGrid({ posts }: { posts: string[] }) {
       const url = permalink(post);
       return <div key={post} className="min-w-0 overflow-hidden rounded-xl bg-white shadow-sm ring-1 ring-black/5 dark:bg-zinc-900 dark:ring-white/10">
         <blockquote className="instagram-media !m-0 !min-w-0 !w-full" data-instgrm-captioned data-instgrm-permalink={url} data-instgrm-version="14">
-          <a href={url} target="_blank" rel="noreferrer" className="block p-5 text-sm font-medium text-amber-700 underline">Lihat post Instagram</a>
+          <a href={url} target="_blank" rel="noreferrer" className="block p-5 text-sm font-medium text-amber-700 underline">View Instagram post</a>
         </blockquote>
       </div>;
     })}

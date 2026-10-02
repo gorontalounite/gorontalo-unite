@@ -105,7 +105,7 @@ function articleDate(article: Article) {
 }
 
 function displayDate(value: string) {
-  return new Intl.DateTimeFormat("id-ID", {
+  return new Intl.DateTimeFormat("en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
@@ -183,7 +183,7 @@ const QUICK_LINKS = [
 function DeskNav() {
   const navDesks = NAV_ORDER.map((key) => DESKS.find((desk) => desk.key === key)).filter((desk): desk is (typeof DESKS)[number] => Boolean(desk));
   return (
-    <nav aria-label="Rubrik berita" className="border-y border-[#d7d1c6] dark:border-zinc-800">
+    <nav aria-label="News sections" className="border-y border-[#d7d1c6] dark:border-zinc-800">
       <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex min-w-0 gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           {navDesks.map((desk) => <Link key={desk.key} href={categoryHref(desk.key)} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover-brand">{desk.label}</Link>)}
@@ -203,8 +203,8 @@ function DeskNav() {
 function EmptyDesk({ dark = false }: { dark?: boolean }) {
   return (
     <div className={`border border-dashed px-6 py-14 text-center ${dark ? "border-white/25 bg-white dark:bg-zinc-950/[.03] text-white/65" : "border-[#bbb3a5] dark:border-zinc-700 bg-white dark:bg-zinc-950/20 text-[#67635b] dark:text-zinc-400"}`}>
-      <p className="text-[18px] font-bold">Cerita pilihan sedang disiapkan.</p>
-      <p className="mt-2 text-xs">Rubrik ini akan diisi setelah lolos kurasi redaksi.</p>
+      <p className="text-[18px] font-bold">Stories for this section are on the way.</p>
+      <p className="mt-2 text-xs">Our editors add them once they pass review.</p>
     </div>
   );
 }
@@ -244,8 +244,8 @@ export default async function BeritaPage({ searchParams }: { searchParams?: Prom
   const displayedArticles = activeDesk ? articles.filter((article) => belongsTo(article, activeDesk.key, deskMap)) : articles;
 
   if (activeDesk || search) {
-    const title = search ? `Hasil untuk “${search}”` : activeDesk?.label ?? "Berita";
-    const description = search ? `${displayedArticles.length} artikel ditemukan.` : activeDesk?.description;
+    const title = search ? `Results for “${search}”` : activeDesk?.label ?? "News";
+    const description = search ? `${displayedArticles.length} ${displayedArticles.length === 1 ? "story" : "stories"} found.` : activeDesk?.description;
     return (
       <div className="min-h-screen bg-white dark:bg-zinc-950 text-[#302f2c] dark:text-zinc-50">
         <DeskNav />
@@ -261,8 +261,8 @@ export default async function BeritaPage({ searchParams }: { searchParams?: Prom
             </div>
           ) : (
             <div className="border border-dashed border-[#bbb3a5] dark:border-zinc-700 px-6 py-24 text-center">
-              <p className="text-2xl font-bold">Belum ada cerita di rubrik ini.</p>
-              <p className="mt-2 text-sm text-[#67635b] dark:text-zinc-400">Redaksi sedang menyiapkan pilihan yang relevan untukmu.</p>
+              <p className="text-2xl font-bold">No stories in this section yet.</p>
+              <p className="mt-2 text-sm text-[#67635b] dark:text-zinc-400">Our editors are preparing a selection for you.</p>
             </div>
           )}
         </main>
@@ -273,8 +273,8 @@ export default async function BeritaPage({ searchParams }: { searchParams?: Prom
   if (!articles.length) {
     return (
       <div className="min-h-[70vh] bg-white dark:bg-zinc-950 px-4 pt-36 text-center text-[#302f2c] dark:text-zinc-50">
-        <h1 className="font-heading text-4xl font-bold">Berita sedang disiapkan</h1>
-        <p className="mt-3 text-sm text-[#67635b] dark:text-zinc-400">Silakan kembali beberapa saat lagi.</p>
+        <h1 className="font-heading text-4xl font-bold">Stories are on the way</h1>
+        <p className="mt-3 text-sm text-[#67635b] dark:text-zinc-400">Please check back shortly.</p>
       </div>
     );
   }

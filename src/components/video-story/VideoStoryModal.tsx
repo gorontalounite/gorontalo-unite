@@ -61,10 +61,10 @@ export default function VideoStoryModal({
 
   return (
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-3 pt-14 sm:p-6">
-      <button type="button" aria-label="Tutup" onClick={onClose}
+      <button type="button" aria-label="Close" onClick={onClose}
               className="absolute inset-0 h-full w-full cursor-default bg-black/80 backdrop-blur-sm" />
 
-      <button type="button" onClick={onClose} aria-label="Tutup"
+      <button type="button" onClick={onClose} aria-label="Close"
               className="absolute left-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/15 text-lg text-white backdrop-blur-sm transition hover:bg-white/30 sm:left-auto sm:right-6 sm:top-6 sm:h-9 sm:w-9">
         ✕
       </button>
@@ -95,7 +95,7 @@ export default function VideoStoryModal({
               className="h-[64vh] w-full border-0 sm:h-[70vh] md:h-[78vh]"
             />
           ) : (
-            <p className="p-10 text-center text-sm text-white/60">Video tidak dapat dimuat.</p>
+            <p className="p-10 text-center text-sm text-white/60">This video could not be loaded.</p>
           )}
         </div>
 
@@ -128,7 +128,7 @@ export default function VideoStoryModal({
             </a>
             <p className="mt-1.5 text-[11px] text-gray-400">
               {index! + 1} dari {items.length}
-              <span className="hidden sm:inline"> · gunakan ← → untuk berpindah</span>
+              <span className="hidden sm:inline"> · use ← → to move between videos</span>
             </p>
           </div>
         </div>
@@ -142,7 +142,7 @@ function Nav({ side, onClick }: { side: "left" | "right"; onClick: () => void })
     <button
       type="button"
       onClick={onClick}
-      aria-label={side === "left" ? "Video sebelumnya" : "Video berikutnya"}
+      aria-label={side === "left" ? "Previous video" : "Next video"}
       className={`absolute top-1/2 z-10 hidden h-11 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/10 text-xl text-white transition hover:bg-white/25 sm:flex ${
         side === "left" ? "left-3 sm:left-6" : "right-3 sm:right-6"
       }`}

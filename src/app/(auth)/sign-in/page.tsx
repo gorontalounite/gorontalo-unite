@@ -21,7 +21,7 @@ function SignInForm() {
   const requestedNext = searchParams.get("redirect") ?? "/";
   const next = requestedNext.startsWith("/") && !requestedNext.startsWith("//") ? requestedNext : "/";
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(searchParams.get("error") ? "Login dengan Google belum berhasil. Silakan coba lagi." : null);
+  const [error, setError] = useState<string | null>(searchParams.get("error") ? "Google sign-in did not go through. Please try again." : null);
 
   const handleGoogle = async () => {
     setLoading(true);
@@ -47,10 +47,10 @@ function SignInForm() {
         {loading ? "Mengarahkan ke Google…" : "Sign in with Google"}
       </button>
       <p className="text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400">
-        Belum memiliki akun? Akun akan dibuat otomatis saat pertama kali masuk dengan Google.
+        No account yet? One is created automatically the first time you sign in with Google.
       </p>
       <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-        <Link href="/sign-up" className="font-medium brand-label hover:underline">Daftar dengan Google</Link>
+        <Link href="/sign-up" className="font-medium brand-label hover:underline">Sign up with Google</Link>
       </p>
     </div>
   );
@@ -62,11 +62,11 @@ export default function SignInPage() {
       <div className="w-full max-w-sm">
         <header className="mb-8 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#FFCC00] to-[#111111]"><span className="text-sm font-bold text-white">GU</span></div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Masuk ke Gorontalo Unite</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Akses fitur AI, komentar, dan riwayat dengan akun Google Anda.</p>
+          <h1 className="text-xl font-bold text-gray-900 dark:text-white">Sign in to Gorontalo Unite</h1>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Comment on stories and save articles with your Google account.</p>
         </header>
         <Suspense fallback={<div className="rounded-2xl border border-gray-100 bg-white p-6 text-center text-sm text-gray-400 dark:border-zinc-800 dark:bg-zinc-900">Memuat…</div>}><SignInForm /></Suspense>
-        <p className="mt-4 text-center text-xs text-gray-400 dark:text-gray-500"><Link href="/" className="hover:text-gray-600 dark:hover:text-gray-300">← Kembali ke beranda</Link></p>
+        <p className="mt-4 text-center text-xs text-gray-400 dark:text-gray-500"><Link href="/" className="hover:text-gray-600 dark:hover:text-gray-300">← Back to Home</Link></p>
       </div>
     </div>
   );

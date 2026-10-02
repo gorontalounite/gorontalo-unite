@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 interface Comment {
   id:         string;
@@ -13,19 +14,33 @@ interface Comment {
 interface Props {
   slug:          string;
   allowComments: boolean;
-  /** Pass current authed user (server-fetched) so we avoid a client round-trip */
-  user: { id: string; name: string } | null;
 }
+
+type CommentUser = { id: string; name: string };
 
 function timeAgo(iso: string) {
   const diff = (Date.now() - new Date(iso).getTime()) / 1000;
-  if (diff < 60)    return "baru saja";
-  if (diff < 3600)  return `${Math.floor(diff / 60)} menit lalu`;
-  if (diff < 86400) return `${Math.floor(diff / 3600)} jam lalu`;
-  return new Date(iso).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" });
+  if (diff < 60)    return "just now";
+  if (diff < 3600)  return `${Math.floor(diff / 60)} min ago`;
+  if (diff < 86400) return `${Math.floor(diff / 3600)} h ago`;
+  return new Date(iso).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
 }
 
-export default function CommentSection({ slug, allowComments, user }: Props) {
+export default function CommentSection({ slug, allowComments }: Props) {
+  // Read in the browser, not on the server: the article page is cached (ISR)
+  // and must not depend on who is looking at it.
+  const [user, setUser] = useState<CommentUser | null>(null);
+
+  useEffect(() => {
+    createClient().auth.getUser().then(({ data: { user: authUser } }) => {
+      if (!authUser) return;
+      setUser({
+        id: authUser.id,
+        name: authUser.user_metadata?.full_name || authUser.email?.split("@")[0] || "Reader",
+      });
+    }).catch(() => {});
+  }, []);
+
   const [comments,  setComments]  = useState<Comment[]>([]);
   const [loading,   setLoading]   = useState(true);
   const [content,   setContent]   = useState("");
@@ -123,13 +138,13 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
       ) : !user ? (
         <div className="bg-gray-50 dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 px-4 py-4 text-sm text-center">
           <p className="text-gray-500 dark:text-gray-400 mb-3">
-            Masuk untuk meninggalkan komentar.
+            Sign in to leave a comment.
           </p>
           <Link
             href={`/sign-in?redirect=${encodeURIComponent(`/${slug}`)}`}
             className="inline-flex items-center gap-1.5 bg-[#FFCC00] text-black text-xs font-medium px-4 py-2 rounded-lg hover:bg-[#FFCC00] transition-colors"
           >
-            Masuk / Daftar
+            Sign in / Sign up
           </Link>
         </div>
       ) : (

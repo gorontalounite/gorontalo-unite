@@ -32,19 +32,19 @@ export default function SignUpPage() {
         <header className="mb-8 text-center">
           <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#FFCC00] to-[#111111]"><span className="text-sm font-bold text-white">GU</span></div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Buat akun Gorontalo Unite</h1>
-          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Daftar cepat dan aman dengan akun Google Anda.</p>
+          <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Sign up quickly and securely with your Google account.</p>
         </header>
         <div className="space-y-4 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900">
           {error && <p role="alert" className="rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-sm text-red-600 dark:border-red-900/50 dark:bg-red-950/30 dark:text-red-300">{error}</p>}
           <button type="button" onClick={handleGoogle} disabled={loading}
             className="flex w-full items-center justify-center gap-3 rounded-xl border border-gray-200 px-4 py-3 text-sm font-semibold text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-zinc-700 dark:text-gray-200 dark:hover:bg-zinc-800">
             {loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" aria-label="Memuat" /> : <GoogleIcon />}
-            {loading ? "Mengarahkan ke Google…" : "Daftar dengan Google"}
+            {loading ? "Mengarahkan ke Google…" : "Sign up with Google"}
           </button>
           <p className="text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400">Dengan melanjutkan, Anda menyetujui <Link href="/terms" className="brand-label hover:underline">Syarat & Ketentuan</Link> dan <Link href="/privacy-policy" className="brand-label hover:underline">Kebijakan Privasi</Link>.</p>
-          <p className="text-center text-xs text-gray-500 dark:text-gray-400">Sudah punya akun? <Link href="/sign-in" className="font-medium brand-label hover:underline">Masuk dengan Google</Link></p>
+          <p className="text-center text-xs text-gray-500 dark:text-gray-400">Sudah punya akun? <Link href="/sign-in" className="font-medium brand-label hover:underline">Sign in with Google</Link></p>
         </div>
-        <p className="mt-4 text-center text-xs text-gray-400 dark:text-gray-500"><Link href="/" className="hover:text-gray-600 dark:hover:text-gray-300">← Kembali ke beranda</Link></p>
+        <p className="mt-4 text-center text-xs text-gray-400 dark:text-gray-500"><Link href="/" className="hover:text-gray-600 dark:hover:text-gray-300">← Back to Home</Link></p>
       </div>
     </div>
   );

@@ -50,7 +50,7 @@ export default function VideoStoryRail({ items }: { items: VideoStoryItem[] }) {
                     className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFCC00]">
               {/* sr-only is position:absolute; the `relative` on the scroller keeps
                   it inside, or it escapes the overflow and widens the page. */}
-              <span className="sr-only">Putar: </span>
+              <span className="sr-only">Play: </span>
               <div className="relative aspect-[9/16] overflow-hidden rounded-[4px] bg-zinc-800">
                 {item.thumbnail && (
                   /* eslint-disable-next-line @next/next/no-img-element -- Supabase Storage and Instagram CDN, unoptimised here */
