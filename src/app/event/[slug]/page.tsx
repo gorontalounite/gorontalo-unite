@@ -157,7 +157,7 @@ export default async function EventDetail({ params }: { params: Promise<{ slug: 
         <div className="mx-auto grid max-w-6xl gap-6 px-4 py-6 sm:px-6 md:grid-cols-[300px_minmax(0,1fr)] md:py-8">
           <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-gradient-to-br from-[#f4e2c2] to-[#e3c9a8] md:aspect-[3/4]">
             {event.imageUrl ? (
-              <Image src={event.imageUrl} alt={event.title} fill priority unoptimized sizes="300px" className="object-cover" />
+              <Image src={event.imageUrl} alt={event.title} fill priority sizes="300px" className="object-cover" />
             ) : (
               <span aria-hidden="true" className="absolute inset-0 grid place-items-center text-5xl opacity-70">{icon}</span>
             )}

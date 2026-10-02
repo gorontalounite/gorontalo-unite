@@ -2,10 +2,10 @@ import type { Metadata } from "next";
 import { cache } from "react";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, type CategoryRow } from "../categories";
+import { articleBelongsToWebCategory, buildCategoryDeskMap, CATEGORIES, deskKeyFromSlug, deskSlug, CAT_COLOR, DEFAULT_COLOR, WEB_CATEGORY_DESCRIPTIONS, WEB_CATEGORY_SEO, type CategoryRow } from "../categories";
 import CategoryArticleList from "./CategoryArticleList";
 import Breadcrumbs, { breadcrumbJsonLd } from "@/components/ui/Breadcrumbs";
-import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/app/news/[id]/page";
+import NewsDetailPage, { generateMetadata as generateArticleMetadata } from "@/components/news/ArticleDetailPage";
 import VideoStoryPage from "@/components/video-story/VideoStoryPage";
 import { VIDEO_STORY_KEY, VIDEO_STORY_TITLE } from "@/components/video-story/data";
 
@@ -38,24 +38,25 @@ interface Props {
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const { key } = await params;
+  const key = deskKeyFromSlug((await params).key);
   const cat = sectionFor(key);
   if (!cat) return generateArticleMetadata({ params: Promise.resolve({ id: key }) });
   const description = key === VIDEO_STORY.key
     ? "Video kolaborasi dan konten berdurasi dari Gorontalo Unite."
-    : WEB_CATEGORY_DESCRIPTIONS[key] ?? `Berita terkini seputar ${cat.label} di Gorontalo.`;
+    : WEB_CATEGORY_SEO[key]?.description ?? `Berita terkini seputar ${cat.label} di Gorontalo.`;
+  const title = WEB_CATEGORY_SEO[key]?.title ?? cat.label;
   // An empty section is a soft 404: keep it reachable from the nav but out of
   // the index until it has stories of its own.
   const empty = key !== VIDEO_STORY.key && (await loadSectionArticles(key, cat.label)).length === 0;
   return {
-    title: cat.label,
+    title,
     ...(empty ? { robots: { index: false, follow: true } } : {}),
     description,
-    alternates: { canonical: `/category/${key}` },
+    alternates: { canonical: `/category/${deskSlug(key)}` },
     openGraph: {
-      title: `${cat.label} | Gorontalo Unite`,
+      title: `${title} | Gorontalo Unite`,
       description,
-      url: `/category/${key}`,
+      url: `/category/${deskSlug(key)}`,
       type: "website",
     },
   };
@@ -109,7 +110,7 @@ const loadSectionArticles = cache(async (key: string, label: string): Promise<Ar
 });
 
 export default async function BeritaCategoryPage({ params, searchParams }: Props) {
-  const { key }  = await params;
+  const key = deskKeyFromSlug((await params).key);
   const cat = sectionFor(key);
   if (!cat) return <NewsDetailPage params={Promise.resolve({ id: key })} />;
 

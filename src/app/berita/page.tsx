@@ -10,7 +10,7 @@ import LatestNewsGrid from "./LatestNewsGrid";
 import HeroCarousel from "./HeroCarousel";
 import SliderRow from "./SliderRow";
 import DeskPaginatedList from "./DeskPaginatedList";
-import { articleBelongsToWebCategory, resolveWebCategoryLabel, buildCategoryDeskMap, type CategoryRow } from "./categories";
+import { articleBelongsToWebCategory, resolveWebCategoryLabel, buildCategoryDeskMap, categoryHref, type CategoryRow } from "./categories";
 
 type DeskMap = Readonly<Record<string, string>>;
 
@@ -123,11 +123,11 @@ function ArticleImage({ article, className, priority = false, sizes = "(max-widt
       {article.image_thumb_url ?? article.image_url ? (
         <Image
           src={(article.image_thumb_url ?? article.image_url) as string}
-          alt=""
+          alt={article.title}
           fill
           priority={priority}
+          fetchPriority={priority ? "high" : undefined}
           loading={priority ? "eager" : "lazy"}
-          unoptimized
           sizes={sizes}
           className="object-cover transition duration-700 ease-out group-hover:scale-[1.035]"
         />
@@ -141,7 +141,7 @@ function ArticleImage({ article, className, priority = false, sizes = "(max-widt
 function Eyebrow({ article, light = false, deskMap = {} }: { article: Article; light?: boolean; deskMap?: DeskMap }) {
   return (
     <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#77736b] dark:text-zinc-400"}`}>
-      <span className={light ? "text-[#f5c400]" : "text-[#9b7513] dark:text-amber-400"}>{deskLabel(article, deskMap)}</span>
+      <span className={light ? "text-[#f5c400]" : "text-[#7a5c0d] dark:text-amber-400"}>{deskLabel(article, deskMap)}</span>
       <span aria-hidden>•</span>
       <time dateTime={articleDate(article)}>{displayDate(articleDate(article))}</time>
     </div>
@@ -151,7 +151,7 @@ function Eyebrow({ article, light = false, deskMap = {} }: { article: Article; l
 function SectionTitle({ id, title, dark = false, showViewAll = true }: { id: string; title: string; dark?: boolean; showViewAll?: boolean }) {
   return (
     <SectionHeading
-      action={showViewAll ? <Link href={`/category/${id}`} className={`inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold ${dark ? "text-white" : "text-[#302f2c] dark:text-zinc-50"}`}>View all <span aria-hidden>→</span></Link> : null}
+      action={showViewAll ? <Link href={categoryHref(id)} className={`inline-flex min-h-11 shrink-0 items-center gap-1 text-xs font-bold ${dark ? "text-white" : "text-[#302f2c] dark:text-zinc-50"}`}>View all <span aria-hidden>→</span></Link> : null}
     >
       {title}
     </SectionHeading>
@@ -186,7 +186,7 @@ function DeskNav() {
     <nav aria-label="Rubrik berita" className="border-y border-[#d7d1c6] dark:border-zinc-800">
       <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex min-w-0 gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {navDesks.map((desk) => <Link key={desk.key} href={`/category/${desk.key}`} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover:text-[#9b7513]">{desk.label}</Link>)}
+          {navDesks.map((desk) => <Link key={desk.key} href={categoryHref(desk.key)} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover:text-[#9b7513]">{desk.label}</Link>)}
           <a href="#latest" className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover:text-[#9b7513]">Latest News</a>
         </div>
         <div className="hidden shrink-0 items-center gap-2 lg:flex">
@@ -249,7 +249,7 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
         <DeskNav />
         <main className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           <div className="mb-10 border-b border-[#302f2c] dark:border-zinc-100 pb-7">
-            <Link href="/category" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#9b7513] dark:text-amber-400">← All categories</Link>
+            <Link href="/category" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#7a5c0d] dark:text-amber-400">← All categories</Link>
             <h1 className="font-heading mt-4 text-[40px] font-bold tracking-[-.04em] sm:text-[56px]">{title}</h1>
             {description ? <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{description}</p> : null}
           </div>
@@ -302,6 +302,9 @@ export default async function BeritaPage({ searchParams }: { searchParams: Promi
     <div className="min-h-screen bg-white dark:bg-zinc-950 text-[#302f2c] dark:text-zinc-50">
       <DeskNav />
       <main>
+        {/* The page's topic, for search engines and screen readers. The hero
+            headline rotates between stories, so it cannot be the page's H1. */}
+        <h1 className="sr-only">Gorontalo Unite: berita, wisata, kuliner, dan cerita baik dari Gorontalo</h1>
         <section className="mx-auto max-w-[1280px] px-4 pb-12 pt-6 sm:px-6 sm:pb-16 sm:pt-8 lg:px-8">
           <HeroCarousel pool={heroPool} deskMap={deskMap} />
         </section>

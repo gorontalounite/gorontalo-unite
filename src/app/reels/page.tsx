@@ -7,8 +7,8 @@ import {
 } from "./data";
 
 export const metadata: Metadata = {
-  title: "Reels",
-  description: "Reel pilihan Gorontalo Unite: Tourism, Culinary, Culture, Event, dan kolaborasi Sponsored.",
+  title: "Reels: Video Pendek dari Gorontalo",
+  description: "Video pendek pilihan Gorontalo Unite: wisata, kuliner, budaya, event, dan kolaborasi brand. Tonton cerita baik dari Gorontalo dalam format reel.",
   alternates: { canonical: "/reels" },
 };
 

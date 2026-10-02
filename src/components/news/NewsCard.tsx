@@ -47,7 +47,7 @@ export function NewsImage({ article, priority = false, className = "" }: { artic
   return (
     <div className={`relative overflow-hidden bg-stone-100 dark:bg-zinc-800 ${className}`}>
       {article.image_url ? (
-        <Image src={article.image_url} alt={article.title} fill priority={priority} unoptimized sizes="(max-width: 768px) 100vw, 66vw" className="object-cover transition duration-700 group-hover:scale-105" />
+        <Image src={article.image_url} alt={article.title} fill priority={priority} sizes="(max-width: 768px) 100vw, 66vw" className="object-cover transition duration-700 group-hover:scale-105" />
       ) : (
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_15%_20%,rgba(245,196,0,.25),transparent_30%),linear-gradient(135deg,#f8f5ed,#e7e1d3)] dark:bg-[linear-gradient(135deg,#27272a,#18181b)]" />
       )}

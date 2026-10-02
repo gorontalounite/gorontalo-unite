@@ -22,9 +22,9 @@ export default function VideoStoryGrid({ items }: { items: VideoStoryItem[] }) {
             <button
               type="button"
               onClick={() => setOpen(index)}
-              aria-label={`Putar: ${item.title}`}
               className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]"
             >
+              <span className="sr-only">Putar: </span>
               <div className="relative aspect-[9/16] overflow-hidden rounded-xl bg-zinc-800">
                 {item.thumbnail && (
                   /* eslint-disable-next-line @next/next/no-img-element -- Supabase Storage and Instagram CDN, unoptimised here */

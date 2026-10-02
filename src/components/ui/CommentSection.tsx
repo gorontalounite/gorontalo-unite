@@ -86,7 +86,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
           ))}
         </div>
       ) : comments.length === 0 ? (
-        <p className="text-sm text-gray-400 dark:text-gray-500 mb-6">
+        <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">
           No comments yet. Be the first.
         </p>
       ) : (

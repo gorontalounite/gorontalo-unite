@@ -9,8 +9,8 @@ const nextConfig: NextConfig = {
         destination: "https://gorontalounite.com/:path*",
         permanent: true,
       },
-      { source: "/berita/news", destination: "/", permanent: true },
-      { source: "/category/news", destination: "/", permanent: true },
+      { source: "/berita/news", destination: "/category/regional", permanent: true },
+      { source: "/category/news", destination: "/category/regional", permanent: true },
       { source: "/berita/food-drink", destination: "/category/culinary", permanent: true },
       { source: "/category/food-drink", destination: "/category/culinary", permanent: true },
       { source: "/berita/penulis/gorontalo-unite", destination: "/author/gorontalounite", permanent: true },
@@ -28,6 +28,9 @@ const nextConfig: NextConfig = {
     ];
   },
   images: {
+    // Story photos never change under the same URL, so keep each optimized
+    // variant for a month instead of re-transforming it every few hours.
+    minimumCacheTTL: 2678400,
     remotePatterns: [
       { protocol: "https", hostname: "**" },
     ],

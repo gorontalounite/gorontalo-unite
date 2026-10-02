@@ -387,7 +387,6 @@ function PlaceCard({ item, sectionKey }: { item: DirectoryItem; sectionKey: Sect
             src={item.imageUrl}
             alt={item.title}
             fill
-            unoptimized
             sizes="(max-width: 639px) 46vw, (max-width: 1279px) 31vw, 400px"
             className="object-cover transition duration-500 group-hover:scale-105"
           />
@@ -426,7 +425,7 @@ function PlaceCard({ item, sectionKey }: { item: DirectoryItem; sectionKey: Sect
           )}
         </div>
 
-        <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[.08em] text-[#9b7513] dark:text-amber-300">
+        <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[.08em] text-[#7a5c0d] dark:text-amber-300">
           Read more
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-3 w-3 transition group-hover:translate-x-0.5" aria-hidden="true">
             <path d="M5 12h13M13 6l6 6-6 6" />

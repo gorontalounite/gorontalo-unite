@@ -42,7 +42,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       description,
       url,
       type: "website",
-      images: place.image_url ? [{ url: place.image_url, width: 1200, height: 630, alt: place.name }] : undefined,
+      images: place.image_url ? [{ url: place.image_url, alt: place.name }] : undefined,
     },
   };
 }
@@ -115,6 +115,32 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
     { label: place.name },
   ];
 
+  // Built only from columns the listing has; rating appears only when it is
+  // backed by real reviews (see the tourism_places.rating column comment).
+  const placeType = place.category === "Kuliner" ? "Restaurant"
+    : place.category === "Akomodasi" ? "LodgingBusiness"
+    : "TouristAttraction";
+  const placeJsonLd = {
+    "@context": "https://schema.org",
+    "@type": placeType,
+    name: place.name,
+    description: paragraphs.join(" ").slice(0, 500) || undefined,
+    url: `${BASE}/city-guide/${slug}`,
+    image: gallery.length > 0 ? gallery.slice(0, 5) : undefined,
+    address: address ? {
+      "@type": "PostalAddress",
+      streetAddress: address,
+      addressRegion: "Gorontalo",
+      addressCountry: "ID",
+    } : undefined,
+    geo: hasCoords ? { "@type": "GeoCoordinates", latitude: place.latitude, longitude: place.longitude } : undefined,
+    hasMap: mapLink ?? undefined,
+    sameAs: socials.length > 0 ? socials.map((social) => social.url) : undefined,
+    aggregateRating: hasRating
+      ? { "@type": "AggregateRating", ratingValue: place.rating, reviewCount: place.review_count }
+      : undefined,
+  };
+
   const faqs: DetailItem[] = [
     place.price_range ? { label: `How much is admission to ${place.name}?`, value: place.price_range } : null,
     place.opening_hours ? { label: `What are ${place.name} opening hours?`, value: place.opening_hours } : null,
@@ -127,6 +153,10 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
       type="application/ld+json"
       dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd(breadcrumbItems)) }}
     />
+    <script
+      type="application/ld+json"
+      dangerouslySetInnerHTML={{ __html: JSON.stringify(placeJsonLd) }}
+    />
     <div className={styles.wrap}>
 
       {/* A — Hero gallery. Eat and Stay run a full-width 16:9 slider; Explore
@@ -138,7 +168,7 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
           <>
             <div className={styles.gallery}>
               {gallery.map((image, index) => <div key={image} className={styles.slide}>
-                <Image src={image} alt={index === 0 ? place.name : `${place.name} — photo ${index + 1}`} fill priority={index === 0} unoptimized sizes="(min-width: 768px) 50vw, 100vw" style={{ objectFit: "cover" }} />
+                <Image src={image} alt={index === 0 ? place.name : `${place.name} — photo ${index + 1}`} fill priority={index === 0} sizes="(min-width: 768px) 50vw, 100vw" style={{ objectFit: "cover" }} />
               </div>)}
             </div>
             {gallery.length > 1 && <p className={`${styles.galleryCount}${gallery.length > 5 ? "" : ` ${styles.mobileOnly}`}`}><Icon path={ICON.photo} />{gallery.length} Photos</p>}
@@ -276,7 +306,7 @@ export default async function TourismDetail({ params }: { params: Promise<{ slug
         <div className={styles.relatedRow}>
           {related.map((item) => <Link key={item.id} href={`/city-guide/${item.slug}`} className={styles.relatedCard}>
             <div className={styles.relatedThumb}>
-              {item.image_url && <Image src={item.image_url} alt={item.name} fill unoptimized sizes="(min-width: 640px) 18rem, 60vw" style={{ objectFit: "cover" }} />}
+              {item.image_url && <Image src={item.image_url} alt={item.name} fill sizes="(min-width: 640px) 18rem, 60vw" style={{ objectFit: "cover" }} />}
             </div>
             <div className={styles.relatedBody}>
               <p className={styles.relatedName}>{item.name}</p>

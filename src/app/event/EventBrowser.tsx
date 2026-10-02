@@ -16,7 +16,7 @@ function Poster({ event, className = "" }: { event: EventItem; className?: strin
   return (
     <div className={`relative overflow-hidden bg-gradient-to-br from-[#f4e2c2] via-[#efd3ad] to-[#e3c9a8] ${className}`}>
       {event.imageUrl ? (
-        <Image src={event.imageUrl} alt={event.title} fill unoptimized sizes="(min-width: 1024px) 300px, 45vw" className="object-cover" />
+        <Image src={event.imageUrl} alt={event.title} fill sizes="(min-width: 1024px) 300px, 45vw" className="object-cover" />
       ) : (
         <span aria-hidden="true" className="absolute inset-0 grid place-items-center text-[#a08a5c]">
           <CategoryIcon name={icon} className="h-9 w-9" />
@@ -179,6 +179,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
           <div className="relative mx-auto flex h-full max-w-[1280px] flex-col items-center justify-center px-4 text-center text-white sm:px-6 lg:px-8">
             <h1 className="font-heading max-w-3xl text-[34px] leading-[1.08] sm:text-[52px] lg:text-[60px]">
               Be there
+              {" "}
               <br />
               when it happens
             </h1>
@@ -205,7 +206,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
             >
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Area</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
                   <path d="M12 21s7-6.1 7-11a7 7 0 10-14 0c0 4.9 7 11 7 11z" />
                   <circle cx="12" cy="10" r="2.5" />
                 </svg>
@@ -221,7 +222,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
 
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Category</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
                   <rect x="3" y="4" width="18" height="16" rx="2" />
                   <path d="M3 10h18" />
                 </svg>
@@ -237,7 +238,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
 
               <label className="flex items-center gap-2 bg-white px-4 py-3 dark:bg-zinc-900">
                 <span className="sr-only">Keyword</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#9b7513]">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" className="h-4 w-4 shrink-0 text-[#7a5c0d]">
                   <circle cx="11" cy="11" r="7" />
                   <path d="M20 20l-3.5-3.5" />
                 </svg>

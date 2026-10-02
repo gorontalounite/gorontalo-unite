@@ -45,7 +45,6 @@ export default function GalleryCarousel({ images, name }: { images: string[]; na
               alt={position === 0 ? name : `${name} — foto ${position + 1}`}
               fill
               priority={position === 0}
-              unoptimized
               sizes="(min-width: 896px) 896px, 100vw"
               style={{ objectFit: "cover" }}
             />

@@ -1,39 +1,44 @@
 import type { MetadataRoute } from "next";
 import { createAdminClient } from "@/lib/supabase/admin";
-import { WEB_CATEGORIES } from "@/app/berita/categories";
+import { WEB_CATEGORIES, categoryHref } from "@/app/berita/categories";
 import { REGIONS } from "@/lib/city-guide/regions";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL ?? "https://gorontalounite.com";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: BASE,                     lastModified: new Date(), changeFrequency: "daily",   priority: 1.0 },
-    { url: `${BASE}/city-guide`,     lastModified: new Date(), changeFrequency: "weekly",  priority: 0.9 },
-    // /category/news is a permanent redirect to the homepage (next.config.ts);
-    // a sitemap should list only the URL that answers 200.
-    ...WEB_CATEGORIES.filter((category) => category.key !== "news").map((category) => ({
-      url: `${BASE}/category/${category.key}`,
-      lastModified: new Date(),
-      changeFrequency: "daily" as const,
-      priority: 0.8,
-    })),
-    ...REGIONS.map((region) => ({
-      url: `${BASE}/city-guide/area/${region.slug}`,
-      lastModified: new Date(),
-      changeFrequency: "monthly" as const,
-      priority: 0.6,
-    })),
-    { url: `${BASE}/reels`,          lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
-    { url: `${BASE}/event`,          lastModified: new Date(), changeFrequency: "weekly",  priority: 0.8 },
-    { url: `${BASE}/about`,          lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
-    { url: `${BASE}/privacy-policy`, lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
-    { url: `${BASE}/terms`,          lastModified: new Date(), changeFrequency: "yearly",  priority: 0.3 },
-  ];
+type Entry = MetadataRoute.Sitemap[number];
 
+/**
+ * Static routes. lastmod is left out unless real content dates are known:
+ * a timestamp that reads "now" on every fetch teaches crawlers to ignore it.
+ */
+function staticPages(latestStory?: Date, latestPlace?: Date): MetadataRoute.Sitemap {
+  const page = (path: string, changeFrequency: Entry["changeFrequency"], priority: number, lastModified?: Date): Entry => ({
+    url: `${BASE}${path}`,
+    ...(lastModified ? { lastModified } : {}),
+    changeFrequency,
+    priority,
+  });
+
+  return [
+    page("", "daily", 1.0, latestStory),
+    page("/city-guide", "weekly", 0.9, latestPlace),
+    ...WEB_CATEGORIES.map((category) => page(categoryHref(category.key), "daily", 0.8, latestStory)),
+    ...REGIONS.map((region) => page(`/city-guide/area/${region.slug}`, "monthly", 0.6, latestPlace)),
+    page("/reels", "weekly", 0.8),
+    page("/event", "weekly", 0.8),
+    page("/about", "monthly", 0.5),
+    page("/author/gorontalounite", "weekly", 0.5, latestStory),
+    page("/pedoman-media-siber", "yearly", 0.3),
+    page("/privacy-policy", "yearly", 0.3),
+    page("/terms", "yearly", 0.3),
+  ];
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // Preview builds may intentionally omit production secrets. Keep the
   // static sitemap available rather than failing the entire deployment.
   if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
-    return staticPages;
+    return staticPages();
   }
 
   const admin = createAdminClient();
@@ -77,5 +82,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority:     0.7,
   }));
 
-  return [...staticPages, ...newsSlugs, ...placeSlugs, ...eventSlugs];
+  const newest = (dates: Date[]) =>
+    dates.length > 0 ? new Date(Math.max(...dates.map((date) => date.getTime()))) : undefined;
+
+  return [
+    ...staticPages(newest(newsSlugs.map((n) => n.lastModified)), newest(placeSlugs.map((p) => p.lastModified))),
+    ...newsSlugs,
+    ...placeSlugs,
+    ...eventSlugs,
+  ];
 }
