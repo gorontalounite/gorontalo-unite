@@ -103,7 +103,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
             <dl className="mt-6 grid gap-px overflow-hidden rounded-lg border border-[#e7e2d8] bg-[#e7e2d8] sm:grid-cols-2 dark:border-zinc-800 dark:bg-zinc-800">
               {borders.map(([side, value]) => (
                 <div key={side} className="bg-white px-4 py-3 dark:bg-zinc-900">
-                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#FFCC00]">{side}</dt>
+                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] brand-label">{side}</dt>
                   <dd className="mt-1 text-sm">{value}</dd>
                 </div>
               ))}
@@ -121,7 +121,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
                 href={area.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline underline-offset-2 hover:text-[#FFCC00]"
+                className="underline underline-offset-2 hover-brand"
               >
                 {area.sourceTitle}
               </a>
@@ -136,12 +136,12 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
               <dl className="mt-4 space-y-3">
                 {area.facts.map((fact) => (
                   <div key={fact.label} className="border-t border-[#eee9df] pt-3 first:border-0 first:pt-0 dark:border-zinc-800">
-                    <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#FFCC00]">{fact.label}</dt>
+                    <dt className="text-[10px] font-bold uppercase tracking-[.12em] brand-label">{fact.label}</dt>
                     <dd className="mt-1 text-sm">{fact.value}</dd>
                   </div>
                 ))}
                 <div className="border-t border-[#eee9df] pt-3 dark:border-zinc-800">
-                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#FFCC00]">In this guide</dt>
+                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] brand-label">In this guide</dt>
                   <dd className="mt-1 text-sm">
                     {inArea.length} places — {byCategory("Atraksi & Wisata")} to see,{" "}
                     {byCategory("Kuliner")} to eat, {byCategory("Akomodasi")} to stay
@@ -151,7 +151,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
 
               <Link
                 href={`/city-guide?region=${slug}#browse`}
-                className="mt-5 flex min-h-11 items-center justify-center rounded-md bg-[#302f2c] px-5 text-xs font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#FFCC00] dark:bg-amber-300 dark:text-zinc-950"
+                className="mt-5 flex min-h-11 items-center justify-center rounded-md bg-[#302f2c] px-5 text-xs font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#FFCC00] dark:bg-[#FFCC00] dark:text-zinc-950"
               >
                 See all {inArea.length} places
               </Link>
@@ -177,7 +177,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
                       />
                     )}
                   </div>
-                  <h3 className="mt-3 text-[15px] font-bold leading-snug transition group-hover:text-[#FFCC00] sm:text-base">
+                  <h3 className="mt-3 text-[15px] font-bold leading-snug transition group-hover-brand sm:text-base">
                     {place.name}
                   </h3>
                 </Link>

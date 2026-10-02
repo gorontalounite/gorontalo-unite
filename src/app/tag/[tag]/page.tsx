@@ -96,7 +96,7 @@ export default async function TagArchivePage({ params }: Props) {
 
       <main className="mx-auto max-w-7xl px-4 sm:px-8">
         <div className="flex items-center justify-between gap-4 py-7 text-xs sm:text-sm">
-          <Link href="/" className="font-semibold text-brand hover:underline">← All news</Link>
+          <Link href="/" className="font-semibold brand-label hover:underline">← All news</Link>
           <Breadcrumbs items={breadcrumbItems} className="hidden text-stone-400 dark:text-zinc-500 sm:block" />
         </div>
 

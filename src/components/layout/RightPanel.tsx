@@ -38,7 +38,7 @@ const kabarBaikItems = [
     label: "Tourism",
     desc: "Where to go around Gorontalo",
     icon: (
-      <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-[#302f2c] dark:text-[#FFCC00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 18l5-7 4 5 3-4 6 6M8 7a2 2 0 100-4 2 2 0 000 4z" />
       </svg>
     ),
@@ -48,7 +48,7 @@ const kabarBaikItems = [
     label: "Culture",
     desc: "Traditions, craft, and heritage",
     icon: (
-      <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-[#302f2c] dark:text-[#FFCC00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 21h18M5 21V10l7-5 7 5v11M9 21v-6h6v6" />
       </svg>
     ),
@@ -58,7 +58,7 @@ const kabarBaikItems = [
     label: "Culinary",
     desc: "What to eat, and where",
     icon: (
-      <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <svg className="w-5 h-5 text-[#302f2c] dark:text-[#FFCC00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M6 3v7a2 2 0 002 2v9M6 3v7M10 3v9M18 3c-2 0-3 2-3 4v4h3v9" />
       </svg>
     ),
@@ -148,7 +148,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
                 >
                   <div className="absolute -right-4 -top-4 h-20 w-20 rounded-full bg-amber-200/40 transition group-hover:scale-125 dark:bg-amber-400/10" />
                   <div className="relative flex h-full flex-col justify-between">
-                    <span className="text-brand dark:text-[#FFCC00]">{item.icon}</span>
+                    <span className="text-[#302f2c] dark:text-[#FFCC00]">{item.icon}</span>
                     <div>
                       <p className="text-sm font-semibold">{item.label}</p>
                       <p className="mt-1 text-[11px] leading-snug text-gray-500 dark:text-zinc-400">{item.description}</p>
@@ -178,7 +178,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
                     {item.icon}
                   </div>
                   <div className="min-w-0">
-                    <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover:text-brand dark:group-hover:text-[#FFCC00] transition-colors">
+                    <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover-brand transition-colors">
                       {item.label}
                     </p>
                     <p className="text-xs text-gray-500 dark:text-zinc-400 truncate">{item.desc}</p>
@@ -202,7 +202,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
                   key={channel.href}
                   href={channel.href}
                   onClick={onClose}
-                  className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-brand hover:text-brand dark:border-zinc-700 dark:text-gray-300 dark:hover:border-[#FFCC00] dark:hover:text-[#FFCC00]"
+                  className="rounded-md border border-gray-200 px-3 py-1.5 text-xs font-medium text-gray-700 transition-colors hover:border-brand hover-brand dark:border-zinc-700 dark:text-gray-300 dark:hover:border-[#FFCC00]"
                 >
                   {channel.label}
                 </Link>
@@ -223,12 +223,12 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
               className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:hover:bg-zinc-900 transition-colors group"
             >
               <div className="w-9 h-9 flex-shrink-0 rounded-xl bg-yellow-50 dark:bg-yellow-950/40 flex items-center justify-center">
-                <svg className="w-5 h-5 text-brand" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-5 h-5 text-[#302f2c] dark:text-[#FFCC00]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover:text-brand dark:group-hover:text-[#FFCC00] transition-colors">
+                <p className="text-sm font-medium text-gray-800 dark:text-gray-100 group-hover-brand transition-colors">
                   About Gorontalo Unite
                 </p>
                 <p className="text-xs text-gray-500 dark:text-zinc-400">Gorontalo hyperlocal media platform</p>
@@ -248,7 +248,7 @@ export default function RightPanel({ open, onClose }: RightPanelProps) {
               className="flex items-center gap-3 rounded-xl px-3 py-3 transition-colors hover:bg-gray-50 dark:hover:bg-zinc-900"
             >
               <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-xl bg-yellow-50 dark:bg-yellow-950/40">
-                <svg className="h-5 w-5 text-brand" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
+                <svg className="h-5 w-5 text-[#302f2c] dark:text-[#FFCC00]" fill="none" stroke="currentColor" strokeWidth={1.5} viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14c-4 0-7 2-7 4.5V21h14v-2.5C19 16 16 14 12 14z" />
                 </svg>
               </div>

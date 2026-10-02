@@ -39,7 +39,7 @@ export default function NotFound() {
           <Link
             key={item.href}
             href={item.href}
-            className="text-xs font-medium text-gray-400 hover:text-brand dark:text-gray-500 dark:hover:text-[#FFCC00]"
+            className="text-xs font-medium text-gray-400 hover-brand dark:text-gray-500"
           >
             {item.label}
           </Link>

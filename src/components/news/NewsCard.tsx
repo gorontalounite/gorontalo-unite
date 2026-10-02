@@ -67,9 +67,9 @@ export default function NewsCard({ article, variant = "card" }: { article: NewsA
           </div>
           <NewsImage article={article} priority={isHero} className={isHero ? "mx-5 mt-4 aspect-[16/9] sm:mx-7" : "mx-4 mt-3 aspect-[16/9]"} />
           <div className={isHero ? "p-5 sm:p-7" : "p-4"}>
-            <h3 className={`font-display font-semibold leading-[1.08] text-stone-950 transition group-hover:text-brand dark:text-white dark:group-hover:text-yellow-300 ${isHero ? "text-2xl sm:text-4xl" : "text-base"}`}>{article.title}</h3>
+            <h3 className={`font-display font-semibold leading-[1.08] text-stone-950 transition group-hover-brand dark:text-white dark:group-hover:text-yellow-300 ${isHero ? "text-2xl sm:text-4xl" : "text-base"}`}>{article.title}</h3>
             {isHero && article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">{article.excerpt}</p>}
-            {isHero && <span className="mt-4 inline-flex text-sm font-semibold text-brand">Baca selengkapnya <span className="ml-1" aria-hidden>→</span></span>}
+            {isHero && <span className="mt-4 inline-flex text-sm font-semibold brand-label">Baca selengkapnya <span className="ml-1" aria-hidden>→</span></span>}
           </div>
         </Link>
       </article>
@@ -77,7 +77,7 @@ export default function NewsCard({ article, variant = "card" }: { article: NewsA
   }
 
   if (variant === "channel") {
-    return <article className="group overflow-hidden rounded-lg bg-stone-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl"><Link href={`/${article.slug}`} className="relative block aspect-[4/5] overflow-hidden"><NewsImage article={article} className="absolute inset-0 h-full w-full" /><div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 via-35% to-black/5" /><div className="absolute inset-x-0 bottom-0 p-4 text-white sm:p-5"><div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[9px] font-semibold uppercase tracking-[.14em] text-white/80"><span>{firstCategory(article)}</span><span className="h-1 w-1 rounded-full bg-white/70" /><span>Gorontalo Unite</span><span className="h-1 w-1 rounded-full bg-white/70" /><time dateTime={article.published_at ?? article.created_at}>{displayDate(article.published_at ?? article.created_at)}</time></div><h3 className="mt-3 line-clamp-3 font-display text-2xl font-semibold leading-[1.05] tracking-tight transition group-hover:text-amber-300 sm:text-3xl">{article.title}</h3>{article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-white/85">{article.excerpt}</p>}</div></Link></article>;
+    return <article className="group overflow-hidden rounded-lg bg-stone-900 shadow-sm transition hover:-translate-y-0.5 hover:shadow-xl"><Link href={`/${article.slug}`} className="relative block aspect-[4/5] overflow-hidden"><NewsImage article={article} className="absolute inset-0 h-full w-full" /><div className="absolute inset-0 bg-gradient-to-t from-black via-black/75 via-35% to-black/5" /><div className="absolute inset-x-0 bottom-0 p-4 text-white sm:p-5"><div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[9px] font-semibold uppercase tracking-[.14em] text-white/80"><span>{firstCategory(article)}</span><span className="h-1 w-1 rounded-full bg-white/70" /><span>Gorontalo Unite</span><span className="h-1 w-1 rounded-full bg-white/70" /><time dateTime={article.published_at ?? article.created_at}>{displayDate(article.published_at ?? article.created_at)}</time></div><h3 className="mt-3 line-clamp-3 font-display text-2xl font-semibold leading-[1.05] tracking-tight transition group-hover:text-[#FFCC00] sm:text-3xl">{article.title}</h3>{article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-white/85">{article.excerpt}</p>}</div></Link></article>;
   }
 
   const body = (
@@ -85,9 +85,9 @@ export default function NewsCard({ article, variant = "card" }: { article: NewsA
       <NewsImage article={article} className={variant === "list" ? "h-full min-h-52 sm:min-h-0" : "aspect-[16/10]"} />
       <div className={variant === "list" ? "p-5 sm:p-7" : "p-5"}>
         <NewsMeta article={article} />
-        <h3 className={`mt-3 font-display font-semibold leading-[1.08] text-stone-950 transition group-hover:text-brand dark:text-white dark:group-hover:text-yellow-300 ${variant === "feature" ? "text-xl sm:text-2xl" : "text-xl"}`}>{article.title}</h3>
+        <h3 className={`mt-3 font-display font-semibold leading-[1.08] text-stone-950 transition group-hover-brand dark:text-white dark:group-hover:text-yellow-300 ${variant === "feature" ? "text-xl sm:text-2xl" : "text-xl"}`}>{article.title}</h3>
         {article.excerpt && <p className="mt-3 line-clamp-3 text-sm leading-relaxed text-stone-500 dark:text-zinc-400">{article.excerpt}</p>}
-        {variant === "list" && <span className="mt-4 inline-flex text-sm font-semibold text-brand transition group-hover:gap-2">Baca selengkapnya <span aria-hidden>→</span></span>}
+        {variant === "list" && <span className="mt-4 inline-flex text-sm font-semibold brand-label transition group-hover:gap-2">Baca selengkapnya <span aria-hidden>→</span></span>}
       </div>
     </>
   );

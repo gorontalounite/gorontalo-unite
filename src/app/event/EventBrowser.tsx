@@ -53,7 +53,7 @@ function RailCard({ event }: { event: EventItem }) {
       <div className="flex h-full flex-col overflow-hidden rounded-lg border border-[#e7e2d8] bg-white transition hover:shadow-[0_18px_36px_-24px_rgba(0,0,0,.45)] dark:border-zinc-800 dark:bg-zinc-900">
         <Poster event={event} className="aspect-[4/3]" />
         <div className="flex flex-1 flex-col p-4">
-          <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#FFCC00] sm:text-base">
+          <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover-brand sm:text-base">
             {event.title}
           </h3>
           {/* Two fixed lines, so the rule below lands on one baseline across a row. */}
@@ -84,7 +84,7 @@ function GridCard({ event }: { event: EventItem }) {
     >
       <Poster event={event} className="aspect-[4/3]" />
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#FFCC00] sm:text-base">
+        <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover-brand sm:text-base">
           {event.title}
         </h3>
         <p className="mt-1.5 line-clamp-2 min-h-10 text-xs leading-relaxed text-[#78716c] dark:text-zinc-400">
@@ -189,7 +189,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
             </p>
             <a
               href="#browse"
-              className="mt-7 inline-flex min-h-11 items-center rounded-md bg-white px-7 text-sm font-bold text-[#302f2c] transition hover:bg-amber-300"
+              className="mt-7 inline-flex min-h-11 items-center rounded-md bg-white px-7 text-sm font-bold text-[#302f2c] transition hover:bg-[#FFCC00]"
             >
               Start planning
             </a>
@@ -253,7 +253,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
 
               <button
                 type="submit"
-                className="min-h-12 bg-[#302f2c] px-8 text-sm font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#FFCC00] dark:bg-amber-300 dark:text-zinc-950 dark:hover:bg-amber-200"
+                className="min-h-12 bg-[#302f2c] px-8 text-sm font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#FFCC00] dark:bg-[#FFCC00] dark:text-zinc-950 dark:hover:bg-amber-200"
               >
                 Search
               </button>
@@ -283,7 +283,7 @@ export default function EventBrowser({ events, showingSamples, nowIso }: { event
               >
                 <span className={`grid h-11 w-11 place-items-center rounded-full ring-1 transition ${
                   active
-                    ? "bg-[#302f2c] text-white ring-[#302f2c] dark:bg-amber-300 dark:text-zinc-950 dark:ring-amber-300"
+                    ? "bg-[#302f2c] text-white ring-[#302f2c] dark:bg-[#FFCC00] dark:text-zinc-950 dark:ring-[#FFCC00]"
                     : "bg-white text-[#302f2c] ring-neutral-200/70 dark:bg-zinc-800 dark:text-zinc-200 dark:ring-zinc-700"
                 }`}>
                   <CategoryIcon name={item.icon} className="h-[22px] w-[22px]" />

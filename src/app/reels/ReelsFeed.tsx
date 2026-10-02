@@ -220,7 +220,7 @@ function RailArrow({ direction, disabled, onClick }: { direction: "prev" | "next
       onClick={onClick}
       disabled={disabled}
       aria-label={direction === "prev" ? "Scroll left" : "Scroll right"}
-      className="grid h-9 w-9 place-items-center rounded-full border border-[#d7d1c6] text-[#302f2c] transition hover:border-[#302f2c] disabled:cursor-not-allowed disabled:opacity-35 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-amber-300"
+      className="grid h-9 w-9 place-items-center rounded-full border border-[#d7d1c6] text-[#302f2c] transition hover:border-[#302f2c] disabled:cursor-not-allowed disabled:opacity-35 dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-[#FFCC00]"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
         <path d={direction === "prev" ? "M15 18l-6-6 6-6" : "M9 6l6 6-6 6"} />
@@ -351,7 +351,7 @@ export default function ReelsFeed({
               </p>
               <a
                 href="#shelves"
-                className="mt-7 inline-flex min-h-11 items-center rounded-md bg-white px-7 text-sm font-bold text-[#302f2c] transition hover:bg-amber-300"
+                className="mt-7 inline-flex min-h-11 items-center rounded-md bg-white px-7 text-sm font-bold text-[#302f2c] transition hover:bg-[#FFCC00]"
               >
                 Start watching
               </a>
@@ -416,7 +416,7 @@ export default function ReelsFeed({
                 type="button"
                 onClick={() => go({ view: null })}
                 aria-label="Back to all shelves"
-                className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#d7d1c6] text-[#302f2c] transition hover:border-[#302f2c] dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-amber-300"
+                className="grid h-9 w-9 shrink-0 place-items-center rounded-full border border-[#d7d1c6] text-[#302f2c] transition hover:border-[#302f2c] dark:border-zinc-700 dark:text-zinc-200 dark:hover:border-[#FFCC00]"
               >
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
                   <path d="M15 18l-6-6 6-6" />

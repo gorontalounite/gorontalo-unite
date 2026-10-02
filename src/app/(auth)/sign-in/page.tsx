@@ -50,7 +50,7 @@ function SignInForm() {
         Belum memiliki akun? Akun akan dibuat otomatis saat pertama kali masuk dengan Google.
       </p>
       <p className="text-center text-xs text-gray-500 dark:text-gray-400">
-        <Link href="/sign-up" className="font-medium text-brand hover:underline dark:text-[#FFCC00]">Daftar dengan Google</Link>
+        <Link href="/sign-up" className="font-medium brand-label hover:underline">Daftar dengan Google</Link>
       </p>
     </div>
   );

@@ -38,7 +38,7 @@ export default function PrivacyPolicyPage() {
         </section>
         <section>
           <h2 className={`${SUBHEAD_CLASS} text-gray-800 mb-2`}>5. Kontak</h2>
-          <p>Untuk pertanyaan terkait privasi, silakan hubungi tim kami melalui halaman <Link href="/about" className="text-brand hover:underline">Tentang Kami</Link>.</p>
+          <p>Untuk pertanyaan terkait privasi, silakan hubungi tim kami melalui halaman <Link href="/about" className="brand-label hover:underline">Tentang Kami</Link>.</p>
         </section>
       </div>
     </div>

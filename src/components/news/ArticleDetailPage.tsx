@@ -83,7 +83,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   Bisnis:         "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
   Pendidikan:     "bg-teal-50 text-teal-700 dark:bg-teal-900/30 dark:text-teal-300",
   Sosial:         "bg-orange-50 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
-  Kemasyarakatan: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  Kemasyarakatan: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-[#FFCC00]",
   Kesehatan:      "bg-red-50 text-red-700 dark:bg-red-900/30 dark:text-red-300",
   Pertanian:      "bg-lime-50 text-lime-700 dark:bg-lime-900/30 dark:text-lime-300",
   Perikanan:      "bg-cyan-50 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-300",
@@ -273,7 +273,7 @@ export async function NewsDetailPage({ params }: Props) {
               href={sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-brand dark:hover:text-[#FFCC00] transition-colors"
+              className="underline hover-brand transition-colors"
             >
               {sourceLabel}
             </a>
@@ -309,7 +309,7 @@ export async function NewsDetailPage({ params }: Props) {
         <Image src="/logo-gu.png" alt="Gorontalo Unite logo" width={52} height={52} className="h-11 w-11 shrink-0 rounded-full object-cover sm:h-13 sm:w-13" />
         <div>
           <p className="text-[9px] font-bold uppercase tracking-[.15em] text-stone-500 sm:text-xs">Penulis</p>
-          <Link href="/author/gorontalounite" className="mt-1 block text-xs font-semibold text-stone-900 hover:text-brand dark:text-white sm:text-base">@gorontalounite</Link>
+          <Link href="/author/gorontalounite" className="mt-1 block text-xs font-semibold text-stone-900 hover-brand dark:text-white sm:text-base">@gorontalounite</Link>
           <p className="mt-1 text-[10px] leading-relaxed text-stone-500 dark:text-zinc-400 sm:text-sm">Tim redaksi lokal yang meliput berita, informasi, dan cerita penting dari Gorontalo.</p>
         </div>
       </section>
@@ -322,7 +322,7 @@ export async function NewsDetailPage({ params }: Props) {
 
       {/* Back navigation */}
       <div className="mt-10 flex gap-4 border-t border-stone-200 pt-6 dark:border-zinc-800">
-        <Link href="/" className="text-sm text-brand dark:text-[#FFCC00] font-medium hover:underline">
+        <Link href="/" className="text-sm brand-label font-medium hover:underline">
           ← Semua berita
         </Link>
       </div>
