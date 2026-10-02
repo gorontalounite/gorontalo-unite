@@ -47,6 +47,11 @@
 }
 
 html { color-scheme: light; }
+
+/* Nothing may widen the page sideways on a phone: one stray element past the
+   right edge lets iOS Safari pan and zoom the whole layout out. `clip`, unlike
+   `hidden`, does not create a scroll container, so position: sticky still works. */
+html, body { overflow-x: clip; }
 html.dark { color-scheme: dark; }
 
 body {
