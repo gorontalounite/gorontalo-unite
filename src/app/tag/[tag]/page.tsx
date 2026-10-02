@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { cache } from "react";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
+import { TAG_ALIASES } from "./aliases";
 import { createClient } from "@/lib/supabase/server";
 import { DEFAULT_COLOR } from "@/app/berita/categories";
 import CategoryArticleList, { type CategoryArticle } from "@/app/berita/[key]/CategoryArticleList";
@@ -71,7 +72,11 @@ export default async function TagArchivePage({ params }: Props) {
   const { tag } = await params;
   const label = decodeURIComponent(tag).toLowerCase();
   const articles = await loadTagArticles(label);
-  if (articles.length === 0) notFound();
+  if (articles.length === 0) {
+    const canonical = TAG_ALIASES[label];
+    if (canonical) permanentRedirect(`/tag/${encodeURIComponent(canonical)}`);
+    notFound();
+  }
 
   const breadcrumbItems = [{ label: "Home", href: "/" }, { label: `#${label}` }];
 
