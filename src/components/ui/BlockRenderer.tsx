@@ -120,7 +120,7 @@ function RenderBlock({ block }: { block: Block }) {
     case "quote": {
       const cite = block.attrs?.cite as string | undefined;
       return (
-        <blockquote className="my-7 border-l-4 border-[#F5C400] pl-4 text-stone-600 dark:border-yellow-500 dark:text-zinc-300 sm:pl-5">
+        <blockquote className="my-7 border-l-4 border-[#FFCC00] pl-4 text-stone-600 dark:border-yellow-500 dark:text-zinc-300 sm:pl-5">
           {/* The one place Instrument Serif still earns its keep: a quote is a
               change of voice, and it is set large enough for the face to hold. */}
           <p className="font-serif text-xl italic leading-[1.5] sm:text-2xl">{block.content}</p>
@@ -176,7 +176,7 @@ function RenderBlock({ block }: { block: Block }) {
             <div className="border border-gray-200 dark:border-zinc-700 rounded-xl p-4 text-sm text-gray-500">
               🔗{" "}
               <a href={url} target="_blank" rel="noopener noreferrer"
-                className="text-brand dark:text-yellow-400 underline underline-offset-2">
+                className="text-brand dark:text-[#FFCC00] underline underline-offset-2">
                 {url}
               </a>
             </div>

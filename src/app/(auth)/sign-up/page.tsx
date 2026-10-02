@@ -30,7 +30,7 @@ export default function SignUpPage() {
     <div className="flex flex-1 items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <header className="mb-8 text-center">
-          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#F5C400] to-[#111111]"><span className="text-sm font-bold text-white">GU</span></div>
+          <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br from-[#FFCC00] to-[#111111]"><span className="text-sm font-bold text-white">GU</span></div>
           <h1 className="text-xl font-bold text-gray-900 dark:text-white">Buat akun Gorontalo Unite</h1>
           <p className="mt-1 text-sm text-gray-500 dark:text-gray-400">Daftar cepat dan aman dengan akun Google Anda.</p>
         </header>
@@ -41,8 +41,8 @@ export default function SignUpPage() {
             {loading ? <span className="h-5 w-5 animate-spin rounded-full border-2 border-gray-300 border-t-gray-700" aria-label="Memuat" /> : <GoogleIcon />}
             {loading ? "Mengarahkan ke Google…" : "Daftar dengan Google"}
           </button>
-          <p className="text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400">Dengan melanjutkan, Anda menyetujui <Link href="/terms" className="text-brand hover:underline dark:text-yellow-400">Syarat & Ketentuan</Link> dan <Link href="/privacy-policy" className="text-brand hover:underline dark:text-yellow-400">Kebijakan Privasi</Link>.</p>
-          <p className="text-center text-xs text-gray-500 dark:text-gray-400">Sudah punya akun? <Link href="/sign-in" className="font-medium text-brand hover:underline dark:text-yellow-400">Masuk dengan Google</Link></p>
+          <p className="text-center text-xs leading-relaxed text-gray-500 dark:text-gray-400">Dengan melanjutkan, Anda menyetujui <Link href="/terms" className="text-brand hover:underline dark:text-[#FFCC00]">Syarat & Ketentuan</Link> dan <Link href="/privacy-policy" className="text-brand hover:underline dark:text-[#FFCC00]">Kebijakan Privasi</Link>.</p>
+          <p className="text-center text-xs text-gray-500 dark:text-gray-400">Sudah punya akun? <Link href="/sign-in" className="font-medium text-brand hover:underline dark:text-[#FFCC00]">Masuk dengan Google</Link></p>
         </div>
         <p className="mt-4 text-center text-xs text-gray-400 dark:text-gray-500"><Link href="/" className="hover:text-gray-600 dark:hover:text-gray-300">← Kembali ke beranda</Link></p>
       </div>

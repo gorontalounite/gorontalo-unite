@@ -17,7 +17,7 @@ const SHORTCUTS = [
 export default function NotFound() {
   return (
     <div className="flex min-h-[70vh] flex-col items-center justify-center px-4 py-20 text-center">
-      <span className="font-heading text-[80px] font-bold leading-none text-[#F5C400] dark:text-yellow-400 sm:text-[110px]">
+      <span className="font-heading text-[80px] font-bold leading-none text-[#FFCC00] dark:text-[#FFCC00] sm:text-[110px]">
         404
       </span>
       <h1 className={`${PAGE_TITLE_CLASS} mt-4 text-gray-900 dark:text-white`}>
@@ -29,7 +29,7 @@ export default function NotFound() {
 
       <Link
         href="/"
-        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#F5C400] px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#c9a000]"
+        className="mt-8 inline-flex items-center gap-2 rounded-xl bg-[#FFCC00] px-6 py-3 text-sm font-semibold text-black transition-colors hover:bg-[#FFCC00]"
       >
         ← Kembali ke Beranda
       </Link>
@@ -39,7 +39,7 @@ export default function NotFound() {
           <Link
             key={item.href}
             href={item.href}
-            className="text-xs font-medium text-gray-400 hover:text-brand dark:text-gray-500 dark:hover:text-yellow-400"
+            className="text-xs font-medium text-gray-400 hover:text-brand dark:text-gray-500 dark:hover:text-[#FFCC00]"
           >
             {item.label}
           </Link>

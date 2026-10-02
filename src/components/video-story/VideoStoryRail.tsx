@@ -47,7 +47,7 @@ export default function VideoStoryRail({ items }: { items: VideoStoryItem[] }) {
         {items.map((item, index) => (
           <article key={item.id} className="group w-[42vw] shrink-0 snap-start sm:w-[190px]">
             <button type="button" onClick={() => setOpen(index)}
-                    className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]">
+                    className="block w-full text-left focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFCC00]">
               <span className="sr-only">Putar: </span>
               <div className="relative aspect-[9/16] overflow-hidden rounded-[4px] bg-zinc-800">
                 {item.thumbnail && (
@@ -65,7 +65,7 @@ export default function VideoStoryRail({ items }: { items: VideoStoryItem[] }) {
                   </span>
                 )}
               </div>
-              <h3 className="mt-2 line-clamp-2 text-[13px] font-semibold leading-snug text-white transition group-hover:text-[#f5c400]">
+              <h3 className="mt-2 line-clamp-2 text-[13px] font-semibold leading-snug text-white transition group-hover:text-[#FFCC00]">
                 {item.title}
               </h3>
               <p className="mt-0.5 flex items-center gap-1 text-[11px] text-white/60">

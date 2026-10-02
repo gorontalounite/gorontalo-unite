@@ -273,7 +273,7 @@ export async function NewsDetailPage({ params }: Props) {
               href={sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="underline hover:text-brand dark:hover:text-yellow-400 transition-colors"
+              className="underline hover:text-brand dark:hover:text-[#FFCC00] transition-colors"
             >
               {sourceLabel}
             </a>
@@ -287,7 +287,7 @@ export async function NewsDetailPage({ params }: Props) {
               <Link
                 key={tag}
                 href={`/tag/${encodeURIComponent(tag.toLowerCase())}`}
-                className="rounded-full bg-gray-100 px-2 py-1 text-[9px] text-gray-600 transition-colors hover:bg-brand hover:text-black dark:bg-zinc-800 dark:text-gray-300 dark:hover:bg-yellow-400 sm:text-xs"
+                className="rounded-full bg-gray-100 px-2 py-1 text-[9px] text-gray-600 transition-colors hover:bg-brand hover:text-black dark:bg-zinc-800 dark:text-gray-300 dark:hover:bg-[#FFCC00] sm:text-xs"
               >
                 {tag}
               </Link>
@@ -322,7 +322,7 @@ export async function NewsDetailPage({ params }: Props) {
 
       {/* Back navigation */}
       <div className="mt-10 flex gap-4 border-t border-stone-200 pt-6 dark:border-zinc-800">
-        <Link href="/" className="text-sm text-brand dark:text-yellow-400 font-medium hover:underline">
+        <Link href="/" className="text-sm text-brand dark:text-[#FFCC00] font-medium hover:underline">
           ← Semua berita
         </Link>
       </div>

@@ -18,7 +18,7 @@ function FooterColumn({ title, links }: { title: string; links: NavLink[] }) {
           <li key={href}>
             <Link
               href={href}
-              className="text-[13px] font-semibold uppercase tracking-[.08em] text-gray-600 transition-colors hover:text-brand dark:text-gray-400 dark:hover:text-yellow-400"
+              className="text-[13px] font-semibold uppercase tracking-[.08em] text-gray-600 transition-colors hover:text-brand dark:text-gray-400 dark:hover:text-[#FFCC00]"
             >
               {label}
             </Link>
@@ -70,7 +70,7 @@ export default function PublicFooter() {
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={social.label}
-                    className="grid h-9 w-9 place-items-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 hover:text-brand dark:text-gray-300 dark:hover:bg-zinc-900 dark:hover:text-yellow-400"
+                    className="grid h-9 w-9 place-items-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 hover:text-brand dark:text-gray-300 dark:hover:bg-zinc-900 dark:hover:text-[#FFCC00]"
                   >
                     <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className="h-[18px] w-[18px]">
                       <path d={social.path} />
@@ -87,7 +87,7 @@ export default function PublicFooter() {
           <ul className="flex flex-wrap items-center gap-x-4 gap-y-1">
             {LEGAL_LINKS.map(({ label, href }) => (
               <li key={href}>
-                <Link href={href} className="font-semibold text-gray-700 transition-colors hover:text-brand dark:text-gray-300 dark:hover:text-yellow-400">
+                <Link href={href} className="font-semibold text-gray-700 transition-colors hover:text-brand dark:text-gray-300 dark:hover:text-[#FFCC00]">
                   {label}
                 </Link>
               </li>

@@ -141,7 +141,7 @@ function ArticleImage({ article, className, priority = false, sizes = "(max-widt
 function Eyebrow({ article, light = false, deskMap = {} }: { article: Article; light?: boolean; deskMap?: DeskMap }) {
   return (
     <div className={`flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] ${light ? "text-white/70" : "text-[#67635b] dark:text-zinc-400"}`}>
-      <span className={light ? "text-[#f5c400]" : "text-[#7a5c0d] dark:text-amber-400"}>{deskLabel(article, deskMap)}</span>
+      <span className={light ? "text-[#FFCC00]" : "text-[#FFCC00] dark:text-[#FFCC00]"}>{deskLabel(article, deskMap)}</span>
       <span aria-hidden>•</span>
       <time dateTime={articleDate(article)}>{displayDate(articleDate(article))}</time>
     </div>
@@ -165,7 +165,7 @@ function StoryCard({ article, large = false, deskMap = {} }: { article: Article;
         <ArticleImage article={article} className={large ? "aspect-[16/10]" : "aspect-[4/3]"} sizes={large ? "(max-width: 768px) 100vw, 55vw" : "(max-width: 768px) 82vw, 30vw"} />
         <div className="pt-4">
           <Eyebrow article={article} deskMap={deskMap} />
-          <h3 className={`font-heading mt-2 font-bold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#9b7513] ${large ? "text-[22px] sm:text-[30px]" : "text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
+          <h3 className={`font-heading mt-2 font-bold leading-[1.1] tracking-[-.025em] transition group-hover:text-[#FFCC00] ${large ? "text-[22px] sm:text-[30px]" : "text-[18px] sm:text-[21px]"}`}>{article.title}</h3>
           {article.excerpt ? <p className="mt-3 line-clamp-2 text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{article.excerpt}</p> : null}
         </div>
       </Link>
@@ -186,8 +186,8 @@ function DeskNav() {
     <nav aria-label="Rubrik berita" className="border-y border-[#d7d1c6] dark:border-zinc-800">
       <div className="mx-auto flex max-w-[1280px] items-center justify-between gap-6 px-4 py-3 sm:px-6 lg:px-8">
         <div className="flex min-w-0 gap-6 overflow-x-auto [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
-          {navDesks.map((desk) => <Link key={desk.key} href={categoryHref(desk.key)} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover:text-[#9b7513]">{desk.label}</Link>)}
-          <a href="#latest" className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover:text-[#9b7513]">Latest News</a>
+          {navDesks.map((desk) => <Link key={desk.key} href={categoryHref(desk.key)} className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover:text-[#FFCC00]">{desk.label}</Link>)}
+          <a href="#latest" className="shrink-0 text-[11px] font-bold uppercase tracking-[.12em] text-[#555149] dark:text-zinc-400 transition hover:text-[#FFCC00]">Latest News</a>
         </div>
         <div className="hidden shrink-0 items-center gap-2 lg:flex">
           <span className="text-[10px] font-bold uppercase tracking-[.1em] text-[#a8a29e] dark:text-zinc-500">Quick Links</span>
@@ -251,7 +251,7 @@ export default async function BeritaPage({ searchParams }: { searchParams?: Prom
         <DeskNav />
         <main className="mx-auto max-w-[1280px] px-4 py-12 sm:px-6 sm:py-16 lg:px-8">
           <div className="mb-10 border-b border-[#302f2c] dark:border-zinc-100 pb-7">
-            <Link href="/category" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#7a5c0d] dark:text-amber-400">← All categories</Link>
+            <Link href="/category" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#FFCC00] dark:text-[#FFCC00]">← All categories</Link>
             <h1 className="font-heading mt-4 text-[40px] font-bold tracking-[-.04em] sm:text-[56px]">{title}</h1>
             {description ? <p className="mt-4 max-w-2xl text-sm leading-relaxed text-[#6d6961] dark:text-zinc-400">{description}</p> : null}
           </div>
@@ -307,14 +307,14 @@ export default async function BeritaPage({ searchParams }: { searchParams?: Prom
         {/* The page's topic, for search engines and screen readers. The hero
             headline rotates between stories, so it cannot be the page's H1. */}
         <h1 className="sr-only">Gorontalo Unite: berita, wisata, kuliner, dan cerita baik dari Gorontalo</h1>
-        <section className="mx-auto max-w-[1280px] px-4 pb-12 pt-6 sm:px-6 sm:pb-16 sm:pt-8 lg:px-8">
+        <section className="mx-auto max-w-[1280px] px-4 pb-8 pt-6 sm:px-6 sm:pb-10 sm:pt-8 lg:px-8">
           <HeroCarousel pool={heroPool} deskMap={deskMap} />
         </section>
 
         {/* No reels means no band at all — an empty black stripe between the
             hero and Culture would read as a broken section. */}
         {videoStories.length > 0 && (
-          <section id="video-story" className="scroll-mt-24 bg-black py-12 sm:py-16">
+          <section id="video-story" className="scroll-mt-24 bg-black py-8 sm:py-10">
             <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
               <SectionHeading
                 id="video-story"
@@ -332,49 +332,49 @@ export default async function BeritaPage({ searchParams }: { searchParams?: Prom
           </section>
         )}
 
-        <section id="culture" className="scroll-mt-24 border-t border-[#d7d1c6] dark:border-zinc-800 bg-white dark:bg-zinc-950 py-12 sm:py-16">
+        <section id="culture" className="scroll-mt-24 border-t border-[#d7d1c6] dark:border-zinc-800 bg-white dark:bg-zinc-950 py-8 sm:py-10">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="culture" title="Culture" />
             {culture.length ? <SliderRow>{culture.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</SliderRow> : <EmptyDesk />}
           </div>
         </section>
 
-        <section id="travel" className="scroll-mt-24 py-12 sm:py-16">
+        <section id="travel" className="scroll-mt-24 py-8 sm:py-10">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="travel" title="Tourism" />
             {travel.length ? <DeskPaginatedList articles={travel} deskMap={deskMap} variant="dark" /> : <EmptyDesk />}
           </div>
         </section>
 
-        <section id="culinary" className="scroll-mt-24 border-y border-[#dedede] dark:border-zinc-800 bg-[#f6f6f6] dark:bg-zinc-900 py-12 sm:py-16">
+        <section id="culinary" className="scroll-mt-24 border-y border-[#dedede] dark:border-zinc-800 bg-[#f6f6f6] dark:bg-zinc-900 py-8 sm:py-10">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="culinary" title="Culinary" />
             {culinary.length ? <SliderRow>{culinary.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</SliderRow> : <EmptyDesk />}
           </div>
         </section>
 
-        <section id="life" className="scroll-mt-24 py-12 sm:py-16">
+        <section id="life" className="scroll-mt-24 py-8 sm:py-10">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="life" title="Lifestyle" />
             {life.length ? <DeskPaginatedList articles={life} deskMap={deskMap} variant="dark" /> : <EmptyDesk />}
           </div>
         </section>
 
-        <section id="people" className="scroll-mt-24 border-y border-[#dedede] dark:border-zinc-800 bg-[#f7f7f7] dark:bg-zinc-900 py-12 sm:py-16">
+        <section id="people" className="scroll-mt-24 border-y border-[#dedede] dark:border-zinc-800 bg-[#f7f7f7] dark:bg-zinc-900 py-8 sm:py-10">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="people" title="People" />
             {people.length ? <SliderRow itemClassName="w-[78vw] sm:w-[calc((100%-3.75rem)/4)]">{people.map((article) => <StoryCard key={article.id} article={article} deskMap={deskMap} />)}</SliderRow> : <EmptyDesk />}
           </div>
         </section>
 
-        <section id="news" className="scroll-mt-24 py-12 sm:py-16">
+        <section id="news" className="scroll-mt-24 py-8 sm:py-10">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="news" title="Regional" />
             {news.length ? <DeskPaginatedList articles={news} deskMap={deskMap} variant="light" /> : <EmptyDesk />}
           </div>
         </section>
 
-        <section id="latest" className="scroll-mt-24 py-12 sm:py-16">
+        <section id="latest" className="scroll-mt-24 py-8 sm:py-10">
           <div className="mx-auto max-w-[1280px] px-4 sm:px-6 lg:px-8">
             <SectionTitle id="latest" title="Latest News" showViewAll={false} />
             <LatestNewsGrid articles={articles} />

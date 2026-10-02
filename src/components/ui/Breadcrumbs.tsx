@@ -32,7 +32,7 @@ export default function Breadcrumbs({ items, className = "" }: { items: Breadcru
       {items.map((item, index) => (
         <span key={item.label}>
           {item.href ? (
-            <Link href={item.href} className="hover:text-brand dark:hover:text-yellow-400">{item.label}</Link>
+            <Link href={item.href} className="hover:text-brand dark:hover:text-[#FFCC00]">{item.label}</Link>
           ) : (
             <span aria-current="page">{item.label}</span>
           )}

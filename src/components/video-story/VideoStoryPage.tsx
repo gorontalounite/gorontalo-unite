@@ -80,7 +80,7 @@ export default async function VideoStoryPage({ brand, page }: { brand: string | 
   return (
     <div className="min-h-screen bg-black text-white">
       <main className="mx-auto max-w-[1280px] px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
-        <Link href="/" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#f5c400]">
+        <Link href="/" className="text-[10px] font-bold uppercase tracking-[.18em] text-[#FFCC00]">
           ← Back to Home
         </Link>
         <h1 className={`${PAGE_TITLE_CLASS} mt-3`}>{VIDEO_STORY_TITLE}</h1>

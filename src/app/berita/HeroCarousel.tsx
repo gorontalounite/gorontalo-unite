@@ -30,7 +30,7 @@ function displayDate(value: string) {
 function HeroEyebrow({ article, deskMap }: { article: HeroArticleData; deskMap: Readonly<Record<string, string>> }) {
   return (
     <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[.15em] text-white/70">
-      <span className="text-[#f5c400]">{resolveWebCategoryLabel(article, deskMap)}</span>
+      <span className="text-[#FFCC00]">{resolveWebCategoryLabel(article, deskMap)}</span>
       <span aria-hidden>•</span>
       <time dateTime={articleDate(article)}>{displayDate(articleDate(article))}</time>
     </div>
@@ -144,7 +144,7 @@ function CarouselArrow({ label, onClick, d }: { label: string; onClick: () => vo
       type="button"
       onClick={onClick}
       aria-label={label}
-      className="grid h-9 w-9 place-items-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber-400"
+      className="grid h-9 w-9 place-items-center rounded-full bg-black/45 text-white backdrop-blur-sm transition hover:bg-black/70 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#FFCC00]"
     >
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d={d} /></svg>
     </button>

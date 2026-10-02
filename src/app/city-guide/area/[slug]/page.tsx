@@ -89,13 +89,13 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
         <div className="lg:grid lg:grid-cols-[1fr_20rem] lg:gap-12">
           <div>
             <h2 className="font-heading text-[24px] sm:text-[28px]">About {region.short}</h2>
-            <span className="mt-3 block h-px w-12 bg-[#9b7513]" />
+            <span className="mt-3 block h-px w-12 bg-[#FFCC00]" />
             {area.about.map((p) => (
               <p key={p} className="mt-4 text-[15px] leading-relaxed text-[#57534e] dark:text-zinc-300">{p}</p>
             ))}
 
             <h2 className="font-heading mt-10 text-[24px] sm:text-[28px]">Geography</h2>
-            <span className="mt-3 block h-px w-12 bg-[#9b7513]" />
+            <span className="mt-3 block h-px w-12 bg-[#FFCC00]" />
             {area.geography.map((p) => (
               <p key={p} className="mt-4 text-[15px] leading-relaxed text-[#57534e] dark:text-zinc-300">{p}</p>
             ))}
@@ -103,14 +103,14 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
             <dl className="mt-6 grid gap-px overflow-hidden rounded-lg border border-[#e7e2d8] bg-[#e7e2d8] sm:grid-cols-2 dark:border-zinc-800 dark:bg-zinc-800">
               {borders.map(([side, value]) => (
                 <div key={side} className="bg-white px-4 py-3 dark:bg-zinc-900">
-                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#7a5c0d]">{side}</dt>
+                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#FFCC00]">{side}</dt>
                   <dd className="mt-1 text-sm">{value}</dd>
                 </div>
               ))}
             </dl>
 
             <h2 className="font-heading mt-10 text-[24px] sm:text-[28px]">History</h2>
-            <span className="mt-3 block h-px w-12 bg-[#9b7513]" />
+            <span className="mt-3 block h-px w-12 bg-[#FFCC00]" />
             {area.history.map((p) => (
               <p key={p} className="mt-4 text-[15px] leading-relaxed text-[#57534e] dark:text-zinc-300">{p}</p>
             ))}
@@ -121,7 +121,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
                 href={area.sourceUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="underline underline-offset-2 hover:text-[#9b7513]"
+                className="underline underline-offset-2 hover:text-[#FFCC00]"
               >
                 {area.sourceTitle}
               </a>
@@ -136,12 +136,12 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
               <dl className="mt-4 space-y-3">
                 {area.facts.map((fact) => (
                   <div key={fact.label} className="border-t border-[#eee9df] pt-3 first:border-0 first:pt-0 dark:border-zinc-800">
-                    <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#7a5c0d]">{fact.label}</dt>
+                    <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#FFCC00]">{fact.label}</dt>
                     <dd className="mt-1 text-sm">{fact.value}</dd>
                   </div>
                 ))}
                 <div className="border-t border-[#eee9df] pt-3 dark:border-zinc-800">
-                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#7a5c0d]">In this guide</dt>
+                  <dt className="text-[10px] font-bold uppercase tracking-[.12em] text-[#FFCC00]">In this guide</dt>
                   <dd className="mt-1 text-sm">
                     {inArea.length} places — {byCategory("Atraksi & Wisata")} to see,{" "}
                     {byCategory("Kuliner")} to eat, {byCategory("Akomodasi")} to stay
@@ -151,7 +151,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
 
               <Link
                 href={`/city-guide?region=${slug}#browse`}
-                className="mt-5 flex min-h-11 items-center justify-center rounded-md bg-[#302f2c] px-5 text-xs font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#9b7513] dark:bg-amber-300 dark:text-zinc-950"
+                className="mt-5 flex min-h-11 items-center justify-center rounded-md bg-[#302f2c] px-5 text-xs font-bold uppercase tracking-[.1em] text-white transition hover:bg-[#FFCC00] dark:bg-amber-300 dark:text-zinc-950"
               >
                 See all {inArea.length} places
               </Link>
@@ -162,7 +162,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
         {showcase.length > 0 && (
           <section className="mt-14">
             <h2 className="font-heading text-[24px] sm:text-[28px]">In {region.short}</h2>
-            <span className="mt-3 block h-px w-12 bg-[#9b7513]" />
+            <span className="mt-3 block h-px w-12 bg-[#FFCC00]" />
             <div className="mt-6 grid grid-cols-2 gap-x-5 gap-y-8 sm:grid-cols-3">
               {showcase.map((place) => (
                 <Link key={place.id} href={`/city-guide/${place.slug}`} className="group block">
@@ -177,7 +177,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
                       />
                     )}
                   </div>
-                  <h3 className="mt-3 text-[15px] font-bold leading-snug transition group-hover:text-[#9b7513] sm:text-base">
+                  <h3 className="mt-3 text-[15px] font-bold leading-snug transition group-hover:text-[#FFCC00] sm:text-base">
                     {place.name}
                   </h3>
                 </Link>
@@ -189,7 +189,7 @@ export default async function AreaPage({ params }: { params: Promise<{ slug: str
         {/* The other five */}
         <section className="mt-14 border-t border-[#e7e2d8] pt-10 dark:border-zinc-800">
           <h2 className="font-heading text-[24px] sm:text-[28px]">The other areas</h2>
-          <span className="mt-3 block h-px w-12 bg-[#9b7513]" />
+          <span className="mt-3 block h-px w-12 bg-[#FFCC00]" />
           <div className="-mx-4 mt-6 flex snap-x gap-4 overflow-x-auto px-4 pb-2 sm:mx-0 sm:grid sm:grid-cols-5 sm:px-0 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {REGIONS.filter((r) => r.slug !== slug).map((other) => (
               <Link key={other.slug} href={`/city-guide/area/${other.slug}`} className="group w-[48vw] shrink-0 snap-start sm:w-auto">

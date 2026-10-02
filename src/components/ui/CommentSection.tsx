@@ -127,7 +127,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
           </p>
           <Link
             href={`/sign-in?redirect=${encodeURIComponent(`/${slug}`)}`}
-            className="inline-flex items-center gap-1.5 bg-[#F5C400] text-black text-xs font-medium px-4 py-2 rounded-lg hover:bg-[#c9a000] transition-colors"
+            className="inline-flex items-center gap-1.5 bg-[#FFCC00] text-black text-xs font-medium px-4 py-2 rounded-lg hover:bg-[#FFCC00] transition-colors"
           >
             Masuk / Daftar
           </Link>
@@ -145,7 +145,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
                 placeholder="Write your comment…"
                 rows={3}
                 maxLength={2000}
-                className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white outline-none focus:border-[#F5C400] dark:focus:border-yellow-500 resize-none transition-colors"
+                className="w-full text-sm border border-gray-200 dark:border-zinc-700 rounded-xl px-3 py-2.5 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white outline-none focus:border-[#FFCC00] dark:focus:border-yellow-500 resize-none transition-colors"
               />
               <div className="flex items-center justify-between mt-2">
                 <span className="text-xs text-gray-400">{content.length}/2000</span>
@@ -153,7 +153,7 @@ export default function CommentSection({ slug, allowComments, user }: Props) {
                 <button
                   type="submit"
                   disabled={submitting || !content.trim()}
-                  className="text-xs bg-[#F5C400] text-black font-medium px-4 py-1.5 rounded-lg hover:bg-[#c9a000] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className="text-xs bg-[#FFCC00] text-black font-medium px-4 py-1.5 rounded-lg hover:bg-[#FFCC00] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                 >
                   {submitting ? "Sending…" : "Post Comment"}
                 </button>

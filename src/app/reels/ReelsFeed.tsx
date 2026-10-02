@@ -140,7 +140,7 @@ function ReelCard({ reel, shape = "tall" }: { reel: ReelItem; shape?: Shape }) {
       target="_blank"
       rel="noopener noreferrer"
       aria-label={`Open the ${reel.category} Reel by @${reel.username} on Instagram`}
-      className={`group block shrink-0 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400] ${
+      className={`group block shrink-0 snap-start focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFCC00] ${
         shape === "wide" ? "w-[78vw] sm:w-[420px]"
         : shape === "mixed" ? "w-[52vw] sm:w-[260px]"
         : "w-[42vw] sm:w-[200px]"
@@ -441,7 +441,7 @@ export default function ReelsFeed({
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label={`Open the ${reel.category} Reel by @${reel.username} on Instagram`}
-                    className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#f5c400]"
+                    className="group block focus:outline-none focus-visible:ring-2 focus-visible:ring-[#FFCC00]"
                   >
                     <Poster reel={reel} shape={gridShape} />
                     <span className="mt-2 block truncate text-xs text-neutral-600 dark:text-neutral-300">{reel.description}</span>

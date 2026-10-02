@@ -250,7 +250,7 @@ function RegionChip({
           ? "border-[#302f2c] bg-[#302f2c] text-white dark:border-amber-300 dark:bg-amber-300 dark:text-zinc-950"
           : disabled
             ? "cursor-not-allowed border-[#e7e2d8] text-[#b5aea2] dark:border-zinc-800 dark:text-zinc-600"
-            : "border-[#d7d1c6] text-[#555149] hover:border-[#9b7513] hover:text-[#9b7513] dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-amber-300 dark:hover:text-amber-300"
+            : "border-[#d7d1c6] text-[#555149] hover:border-[#FFCC00] hover:text-[#FFCC00] dark:border-zinc-700 dark:text-zinc-300 dark:hover:border-amber-300 dark:hover:text-amber-300"
       }`}
     >
       {children}
@@ -269,7 +269,7 @@ function TabButton({ active, onClick, children }: { active: boolean; onClick: ()
       role="tab"
       aria-selected={active}
       className={`shrink-0 min-h-11 border-b-2 py-2 text-[11px] font-bold uppercase tracking-[.1em] transition ${
-        active ? "border-[#9b7513] text-[#302f2c] dark:border-amber-300 dark:text-white" : "border-transparent text-[#555149] hover:text-[#9b7513] dark:text-zinc-400"
+        active ? "border-[#FFCC00] text-[#302f2c] dark:border-amber-300 dark:text-white" : "border-transparent text-[#555149] hover:text-[#FFCC00] dark:text-zinc-400"
       }`}
     >
       {children}
@@ -402,7 +402,7 @@ function PlaceCard({ item, sectionKey }: { item: DirectoryItem; sectionKey: Sect
       {/* Everything sits inside the card now. The category and location used to
           ride on the photograph; here they read as one block with the name. */}
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#9b7513] sm:text-base">
+        <h3 className="font-heading text-[15px] font-bold leading-snug transition group-hover:text-[#FFCC00] sm:text-base">
           {item.title}
         </h3>
 
@@ -425,7 +425,7 @@ function PlaceCard({ item, sectionKey }: { item: DirectoryItem; sectionKey: Sect
           )}
         </div>
 
-        <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[.08em] text-[#7a5c0d] dark:text-amber-300">
+        <span className="mt-3 inline-flex items-center gap-1 text-[11px] font-bold uppercase tracking-[.08em] text-[#FFCC00] dark:text-amber-300">
           Read more
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" className="h-3 w-3 transition group-hover:translate-x-0.5" aria-hidden="true">
             <path d="M5 12h13M13 6l6 6-6 6" />

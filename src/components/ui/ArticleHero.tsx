@@ -74,7 +74,7 @@ function Labels({ categories, isTrending, isSponsored, onPhoto }: Props & { onPh
           href={category.href}
           className={
             onPhoto
-              ? "text-[10px] font-bold uppercase tracking-[.12em] text-white underline decoration-amber-400 decoration-2 underline-offset-[5px] transition hover:decoration-white"
+              ? "text-[10px] font-bold uppercase tracking-[.12em] text-white underline decoration-[#FFCC00] decoration-2 underline-offset-[5px] transition hover:decoration-white"
               : `rounded px-2 py-0.5 text-[9px] font-bold uppercase tracking-[.12em] ${category.className}`
           }
         >

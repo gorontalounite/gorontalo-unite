@@ -39,7 +39,7 @@
   box-shadow:0 1px 6px rgba(15,23,42,.18);
 }
 .arrow:disabled{ opacity:0; pointer-events:none; }
-.arrow:focus-visible{ outline:2px solid var(--accent,#9b7513); outline-offset:2px; }
+.arrow:focus-visible{ outline:2px solid var(--accent,#FFCC00); outline-offset:2px; }
 .arrow svg{ width:1.15rem; height:1.15rem; }
 .prev{ left:.75rem; }
 .next{ right:.75rem; }
